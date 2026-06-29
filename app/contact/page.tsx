@@ -53,8 +53,8 @@ export default function ContactPage() {
               </a>
               <div className="text-xs text-fg-inv-dim">
                 Msg &amp; data rates may apply. Reply STOP to opt out. See our{" "}
-                <a href="/sms-terms" className="text-bolt hover:underline">
-                  SMS Terms
+                <a href="/terms" className="text-bolt hover:underline">
+                  Terms
                 </a>
                 .
               </div>

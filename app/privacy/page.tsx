@@ -56,8 +56,8 @@ export default function PrivacyPage() {
               Information sharing to subcontractors in support services, such as
               customer service, is permitted. Text-message originator opt-in data
               and consent are not shared with any third parties. See our{" "}
-              <a href="/sms-terms" className="text-bolt-deep hover:underline">
-                SMS Terms &amp; Conditions
+              <a href="/terms" className="text-bolt-deep hover:underline">
+                Terms &amp; Conditions
               </a>{" "}
               for details on the messaging program, including how to opt out
               (reply STOP) and get help (reply HELP).

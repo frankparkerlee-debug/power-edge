@@ -12,7 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/roof-check",
     "/storm-check",
     "/privacy",
-    "/sms-terms",
+    "/terms",
   ];
   const serviceRoutes = services.map((s) => `/${s.slug}`);
   const cityRoutes = cities.map((c) => `/service-areas/${c.slug}`);

@@ -101,8 +101,8 @@ export function Footer() {
               Privacy Policy
             </Link>{" "}
             ·{" "}
-            <Link href="/sms-terms" className="hover:text-bolt">
-              SMS Terms
+            <Link href="/terms" className="hover:text-bolt">
+              Terms
             </Link>
           </p>
           <p>

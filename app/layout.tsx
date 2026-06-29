@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Schema } from "@/components/Schema";
+import { TextFab } from "@/components/TextFab";
 import { site } from "@/lib/site";
 
 const archivo = Archivo({
@@ -47,6 +48,7 @@ export default function RootLayout({
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <TextFab />
       </body>
     </html>
   );

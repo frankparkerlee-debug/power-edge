@@ -4,6 +4,7 @@
 export const site = {
   name: "PowerEdge",
   legalName: "PowerEdge Electric & Roofing",
+  legalEntity: "PowerEdge LLC", // registered entity used in legal/SMS consent copy
   tagline: "Roofing and electrical, under one license you can actually verify.",
   // Primary + secondary lines pulled from the current live site.
   phone: "469-689-0614",
