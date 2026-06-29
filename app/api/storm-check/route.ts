@@ -24,6 +24,7 @@ type Nearby = {
   city: string;
   county: string;
   miles: number;
+  bearing: number; // degrees from the address (for the proximity map)
 };
 
 function haversineMi(
@@ -40,6 +41,17 @@ function haversineMi(
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/** Compass bearing in degrees from point 1 to point 2 (for the proximity map). */
+function bearing(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLon = toRad(lon2 - lon1);
+  const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+  const x =
+    Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+    Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
 }
 
 type Geo = { lat: number; lon: number; matched: string; approximate: boolean };
@@ -182,6 +194,7 @@ export async function POST(req: Request) {
           city: p.city || "",
           county: p.county || "",
           miles: Math.round(miles),
+          bearing: Math.round(bearing(geo.lat, geo.lon, lat, lon)),
         });
       }
     }
@@ -190,6 +203,7 @@ export async function POST(req: Request) {
     const bySize = [...nearby].sort((a, b) => b.size - a.size);
     const largest = bySize[0] || null;
     const mostRecent = nearby[0] || null;
+    const significantCount = nearby.filter((n) => n.size >= 1).length;
 
     return NextResponse.json({
       ok: true,
@@ -198,9 +212,16 @@ export async function POST(req: Request) {
       approximate: geo.approximate,
       radiusMi: RADIUS_MI,
       count: nearby.length,
+      significantCount,
       largest,
       mostRecent,
-      recent: nearby.slice(0, 5),
+      recent: nearby.slice(0, 6),
+      // a compact set for the proximity map (size + where it hit)
+      map: nearby.slice(0, 40).map((n) => ({
+        size: n.size,
+        miles: n.miles,
+        bearing: n.bearing,
+      })),
     });
   } catch {
     // Data source hiccup — still let the UI capture the lead.

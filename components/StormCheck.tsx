@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SmsConsent } from "./SmsConsent";
 import { leadContext } from "@/lib/leadContext";
 import { track } from "@/lib/analytics";
+import { StormReport, type StormData } from "./StormReport";
 
 /**
  * Storm/hail check lead magnet. Enter an address -> real reported hail activity
@@ -11,30 +12,14 @@ import { track } from "@/lib/analytics";
  * framing throughout: "reported near you," never "your roof is damaged."
  */
 
-type Result = {
+type Result = StormData & {
   ok: boolean;
   found?: boolean;
   soft?: boolean;
-  matched?: string | null;
-  approximate?: boolean;
-  radiusMi?: number;
-  count?: number;
-  largest?: { size: number; date: string; city: string; miles: number } | null;
-  mostRecent?: { size: number; date: string } | null;
 };
 
 type Phase = "input" | "result";
 type Sub = "idle" | "submitting" | "done" | "error";
-
-function fmtDate(iso: string) {
-  if (!iso) return "";
-  const d = new Date(iso);
-  return d.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
 export function StormCheck() {
   const [address, setAddress] = useState("");
@@ -124,7 +109,7 @@ export function StormCheck() {
             disabled={loading}
             className="w-full rounded-md bg-bolt px-6 py-4 font-display text-base font-bold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60"
           >
-            {loading ? "Checking storm data…" : "Check my address"}
+            {loading ? "Scanning NWS storm data…" : "Check my address"}
           </button>
         </form>
         <p className="mt-3 text-center text-xs text-fg-inv-dim">
@@ -143,37 +128,7 @@ export function StormCheck() {
       {sub !== "done" && (
         <>
           {found ? (
-            <>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-ember px-3 py-1 text-xs font-bold uppercase tracking-wider text-ember">
-                Hail reported near you
-              </div>
-              <h2 className="font-display text-2xl font-bold leading-tight text-fg-inv sm:text-3xl">
-                {result!.count} hail event{result!.count === 1 ? "" : "s"}{" "}
-                reported within {result!.radiusMi} miles.
-              </h2>
-              {result!.matched && (
-                <p className="mt-2 text-sm text-fg-inv-dim">
-                  {result!.approximate ? "Near " : ""}
-                  {result!.matched}
-                </p>
-              )}
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <Stat
-                  big={`${result!.largest?.size}"`}
-                  small={`Largest hail · ${fmtDate(result!.largest?.date || "")}`}
-                />
-                <Stat
-                  big={fmtDate(result!.mostRecent?.date || "")}
-                  small="Most recent hail report"
-                />
-              </div>
-              <p className="mt-5 text-sm leading-relaxed text-fg-inv-dim">
-                Hail this size can bruise, crack, or strip shingles — damage
-                that&apos;s often invisible from the ground and can still be
-                claimed on insurance. The only way to know if{" "}
-                <em>your</em> roof was hit is a free inspection.
-              </p>
-            </>
+            <StormReport data={result!} />
           ) : (
             <>
               <h2 className="font-display text-2xl font-bold leading-tight text-fg-inv sm:text-3xl">
@@ -246,15 +201,6 @@ export function StormCheck() {
           </p>
         </div>
       )}
-    </div>
-  );
-}
-
-function Stat({ big, small }: { big: string; small: string }) {
-  return (
-    <div className="rounded-md border border-line bg-ink p-4">
-      <div className="font-display text-2xl font-extrabold text-bolt">{big}</div>
-      <div className="mt-1 text-xs text-fg-inv-dim">{small}</div>
     </div>
   );
 }
