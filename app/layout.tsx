@@ -5,6 +5,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Schema } from "@/components/Schema";
 import { TextFab } from "@/components/TextFab";
+import { MobileCtaBar } from "@/components/MobileCtaBar";
+import { Analytics } from "@/components/Analytics";
 import { site } from "@/lib/site";
 
 const archivo = Archivo({
@@ -43,12 +45,14 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${archivo.variable} ${inter.variable}`}>
-      <body className="min-h-screen flex flex-col">
+      <body className="min-h-screen flex flex-col pb-14 lg:pb-0">
         <Schema />
+        <Analytics />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
         <TextFab />
+        <MobileCtaBar />
       </body>
     </html>
   );

@@ -29,6 +29,7 @@ export default function RoofingPage() {
         title="Roofing done right — and a company you can verify."
         intro="In Texas, anyone can call themselves a roofer. We're a licensed electrical contractor that also runs four roofing crews under a 20-year project manager. Free inspections, honest assessments, and replacements done fast."
         badge="Get a free roof inspection"
+        withForm
       />
 
       <ServiceTrustBar />

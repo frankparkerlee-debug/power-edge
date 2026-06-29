@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { SmsConsent } from "./SmsConsent";
+import { leadContext } from "@/lib/leadContext";
+import { track } from "@/lib/analytics";
 
 /**
  * Free "Is your roof still fully covered?" checker — the site's primary lead
@@ -140,9 +142,11 @@ export function CoverageCheck() {
           service: "Roof coverage check",
           message: `[Coverage Checker — risk: ${risk}] ${summary}`,
           company_website: fd.company_website,
+          ...leadContext({ tool: "coverage-check" }),
         }),
       });
       if (!res.ok) throw new Error();
+      track("lead_submit", { form: "coverage_check", risk });
       setSub("done");
       form.reset();
     } catch {

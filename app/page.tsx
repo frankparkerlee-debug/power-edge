@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button, Container, Kicker, SectionHeading, Stars } from "@/components/ui";
 import { LeadForm } from "@/components/LeadForm";
 import { Reviews } from "@/components/Reviews";
+import { Gallery } from "@/components/Gallery";
 import { site } from "@/lib/site";
 import { services, electricalMenu } from "@/lib/services";
 import { cities } from "@/lib/cities";
@@ -17,6 +18,7 @@ export default function Home() {
       <PricingTeaser />
       <StormBand />
       <Team />
+      <Gallery />
       <Reviews />
       <ServiceAreas />
       <FinalCTA />

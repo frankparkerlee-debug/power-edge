@@ -28,6 +28,7 @@ export default function CommercialPage() {
         title="One licensed partner for your roof and your electrical."
         intro="Property managers and business owners shouldn't juggle two contractors. PowerEdge covers commercial roofing and electrical under one accountable team — scheduled around your operation and documented for your records."
         badge="Request a commercial quote"
+        withForm
       />
 
       <ServiceTrustBar />

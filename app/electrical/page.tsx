@@ -31,6 +31,7 @@ export default function ElectricalPage() {
         title="Licensed electrical service with prices you can see."
         intro="Run under John Lott's 40-year Master Electrician license. Same-day service, honest flat-rate pricing, and no surprise invoices — the opposite of how most electrical work gets quoted."
         badge="Book a service call"
+        withForm
       />
 
       <ServiceTrustBar />

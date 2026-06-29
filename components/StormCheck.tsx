@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { SmsConsent } from "./SmsConsent";
+import { leadContext } from "@/lib/leadContext";
+import { track } from "@/lib/analytics";
 
 /**
  * Storm/hail check lead magnet. Enter an address -> real reported hail activity
@@ -82,9 +84,11 @@ export function StormCheck() {
           service: "Storm inspection (hail check)",
           message: `[Storm Check] address: ${result?.matched || address} — ${summary}`,
           company_website: fd.company_website,
+          ...leadContext({ tool: "storm-check" }),
         }),
       });
       if (!res.ok) throw new Error();
+      track("lead_submit", { form: "storm_check" });
       setSub("done");
       form.reset();
     } catch {

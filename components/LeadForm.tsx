@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { services } from "@/lib/services";
 import { SmsConsent } from "./SmsConsent";
+import { leadContext } from "@/lib/leadContext";
+import { track } from "@/lib/analytics";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -21,7 +23,10 @@ export function LeadForm({
     setStatus("submitting");
     setError("");
     const form = e.currentTarget;
-    const data = Object.fromEntries(new FormData(form).entries());
+    const data = {
+      ...Object.fromEntries(new FormData(form).entries()),
+      ...leadContext(),
+    };
 
     try {
       const res = await fetch("/api/lead", {
@@ -30,6 +35,7 @@ export function LeadForm({
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error((await res.json()).error || "Failed");
+      track("lead_submit", { form: "lead_form", service: String(data.service || "") });
       setStatus("success");
       form.reset();
     } catch (err) {

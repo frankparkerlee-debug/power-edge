@@ -29,6 +29,7 @@ export default function SolarPage() {
         title="Solar repair and replacement, done under a real electrical license."
         intro="Solar work is electrical work — and Texas law requires it to run under a licensed Master Electrician. We repair, replace, and re-energize existing systems. We don't sell new installs, so there's no sales pitch — just the fix."
         badge="Get a solar service quote"
+        withForm
       />
 
       <ServiceTrustBar />

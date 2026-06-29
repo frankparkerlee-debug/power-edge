@@ -47,8 +47,20 @@ export async function POST(req: Request) {
     zip: (body.zip || "").trim(),
     service: (body.service || "").trim(),
     message: (body.message || "").trim(),
+    // Attribution — so you know which page/campaign produced the lead.
+    page_path: (body.page_path || "").trim(),
+    referrer: (body.referrer || "").trim(),
+    utm_source: (body.utm_source || "").trim(),
+    utm_medium: (body.utm_medium || "").trim(),
+    utm_campaign: (body.utm_campaign || "").trim(),
+    gclid: (body.gclid || "").trim(),
     receivedAt: new Date().toISOString(),
   };
+
+  const sourceLine =
+    [lead.utm_source, lead.utm_medium, lead.utm_campaign].filter(Boolean).join(" / ") ||
+    lead.referrer ||
+    "direct";
 
   // --- 1. Email notification -------------------------------------------------
   const resendKey = process.env.RESEND_API_KEY;
@@ -73,6 +85,9 @@ export async function POST(req: Request) {
             <p><strong>ZIP:</strong> ${escapeHtml(lead.zip) || "—"}</p>
             <p><strong>Service:</strong> ${escapeHtml(lead.service) || "—"}</p>
             <p><strong>Message:</strong> ${escapeHtml(lead.message) || "—"}</p>
+            <hr/>
+            <p><strong>Source:</strong> ${escapeHtml(sourceLine)}</p>
+            <p><strong>Page:</strong> ${escapeHtml(lead.page_path) || "—"}</p>
             <p style="color:#888">Received ${lead.receivedAt}</p>
           `,
         }),

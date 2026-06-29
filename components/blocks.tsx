@@ -2,36 +2,62 @@ import { Button, Container, Kicker } from "./ui";
 import { LeadForm } from "./LeadForm";
 import { site } from "@/lib/site";
 
-/** Dark page hero used on interior pages. */
+/** Dark page hero used on interior pages. Pass `withForm` to render an
+ *  above-the-fold quote form (fast capture on service landing pages). */
 export function PageHero({
   kicker,
   title,
   intro,
   badge,
+  withForm = false,
 }: {
   kicker: string;
   title: string;
   intro: string;
   badge?: string;
+  withForm?: boolean;
 }) {
+  const left = (
+    <div>
+      <Kicker className="mb-5">{kicker}</Kicker>
+      <h1 className="max-w-3xl font-display text-4xl leading-[0.98] text-fg-inv sm:text-5xl md:text-6xl">
+        {title}
+      </h1>
+      <p className="mt-6 max-w-2xl text-lg leading-relaxed text-fg-inv-dim">
+        {intro}
+      </p>
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <Button href="#quote">{badge ?? "Get a free quote"}</Button>
+        <Button href={site.phoneHref} variant="ghost">
+          Call {site.phone}
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <section className="relative overflow-hidden bg-ink">
       <div className="absolute inset-0 grid-texture opacity-60" />
       <div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-bolt/15 blur-[120px]" />
       <Container className="relative py-16 sm:py-20">
-        <Kicker className="mb-5">{kicker}</Kicker>
-        <h1 className="max-w-3xl font-display text-4xl leading-[0.98] text-fg-inv sm:text-5xl md:text-6xl">
-          {title}
-        </h1>
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-fg-inv-dim">
-          {intro}
-        </p>
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button href="#quote">{badge ?? "Get a free quote"}</Button>
-          <Button href={site.phoneHref} variant="ghost">
-            Call {site.phone}
-          </Button>
-        </div>
+        {withForm ? (
+          <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+            {left}
+            <div className="rounded-card border border-line bg-ink-2 p-6 shadow-2xl sm:p-7">
+              <h2 className="font-display text-xl font-bold text-fg-inv">
+                Get your free quote
+              </h2>
+              <p className="mt-1 text-sm text-fg-inv-dim">
+                A real person calls you back fast — usually within the hour.
+              </p>
+              <div className="mt-5">
+                <LeadForm compact />
+              </div>
+            </div>
+          </div>
+        ) : (
+          left
+        )}
       </Container>
     </section>
   );
