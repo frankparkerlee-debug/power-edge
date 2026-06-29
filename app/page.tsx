@@ -393,7 +393,7 @@ function StormBand() {
             claim and a roof done right.
           </p>
         </div>
-        <Button href="#quote">Get a free storm inspection</Button>
+        <Button href="/storm-check">Check your address for hail →</Button>
       </Container>
     </section>
   );

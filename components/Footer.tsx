@@ -37,6 +37,16 @@ export function Footer() {
                 </Link>
               </li>
             ))}
+            <li className="pt-1">
+              <Link href="/storm-check" className="text-bolt hover:text-bolt-hi">
+                Free hail / storm check
+              </Link>
+            </li>
+            <li>
+              <Link href="/roof-check" className="text-bolt hover:text-bolt-hi">
+                Free roof coverage check
+              </Link>
+            </li>
           </ul>
         </div>
 
