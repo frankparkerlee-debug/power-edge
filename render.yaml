@@ -1,0 +1,28 @@
+# Render Blueprint for the PowerEdge site (Next.js 16 web service).
+# No database — just a Node web service that builds and serves the app.
+# Either commit this and use Render's "Blueprint" deploy, or mirror these
+# values in the dashboard when creating the Web Service manually.
+
+services:
+  - type: web
+    name: power-edge
+    runtime: node
+    region: oregon
+    plan: starter
+    branch: main
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      # Pin Node 22 (Next.js 16 needs a modern Node; matches your other sites).
+      - key: NODE_VERSION
+        value: 22.11.0
+      # Lead email delivery (set the real key in the dashboard — never commit it).
+      - key: RESEND_API_KEY
+        sync: false
+      - key: LEAD_TO_EMAIL
+        value: info@poweredgetx.com
+      # Optional: Jobber lead push (wire the mutation in app/api/lead/route.ts).
+      - key: JOBBER_API_TOKEN
+        sync: false

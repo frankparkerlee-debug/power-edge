@@ -1,26 +1,98 @@
 @import "tailwindcss";
 
+/* ============================================================
+   PowerEdge brand system
+   Industrial-premium: near-black charcoal + brand lime (from the logo).
+   Deliberately not the generic blue contractor look.
+   ============================================================ */
+
+@theme {
+  /* Surfaces */
+  --color-ink: #0b0e13; /* near-black base */
+  --color-ink-2: #11151c; /* raised panels */
+  --color-steel: #1a1f29; /* cards on dark */
+  --color-line: #283040; /* hairlines on dark */
+  --color-paper: #f6f7f9; /* light sections */
+  --color-paper-2: #eceef2;
+
+  /* Brand accents — PowerEdge lime + charcoal (from the logo) */
+  --color-bolt: #7ffbae; /* brand lime — primary accent on dark surfaces */
+  --color-bolt-hi: #6fe89a; /* hover / press */
+  --color-bolt-deep: #0c7a40; /* legible green for accent text on light bg */
+  --color-ember: #ff5a1f; /* storm / emergency accent only */
+
+  /* Text */
+  --color-fg: #0b0e13; /* on light */
+  --color-fg-dim: #51596a;
+  --color-fg-inv: #f6f7f9; /* on dark */
+  --color-fg-inv-dim: #98a2b3;
+
+  /* Type */
+  --font-display: var(--font-archivo), system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  /* Rhythm */
+  --radius-card: 14px;
+}
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0b0e13;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  /* Guard against horizontal scroll from off-screen decorative elements
+     (e.g. negatively-positioned blur accents). `clip` — not `hidden` — so it
+     does NOT create a scroll container and the sticky header keeps working. */
+  overflow-x: clip;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+/* Display headings: tight, condensed, confident. */
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 0.98;
+}
+
+/* Eyebrow / label kicker */
+.kicker {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+/* Subtle grid texture for dark hero sections */
+.grid-texture {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Animated "voltage" underline accent */
+.bolt-underline {
+  background-image: linear-gradient(var(--color-bolt), var(--color-bolt));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 0.14em;
+  padding-bottom: 0.04em;
+}
+
+/* Focus ring for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-bolt);
+  outline-offset: 2px;
 }

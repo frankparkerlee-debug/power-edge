@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PowerEdge — poweredgetx.com rebuild
 
-## Getting Started
+Licensed roofing + electrical contractor site for the DFW metroplex. Next.js 16
+(App Router) + Tailwind v4 + TypeScript. Built to **capture leads** and stand out
+on the **"we're the one contractor you can verify"** wedge.
 
-First, run the development server:
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev      # http://localhost:3000 (or: npm run dev -- --port 3007)
+npm run build    # production build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Strategy baked in
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **The wedge:** Roofing is unlicensed in Texas; electrical + solar legally require
+  a Master Electrician. The site leads with verifiable credentials (TECL #39773,
+  John Lott) and links to the public TDLR portal — something roofers can't fake.
+- **Pricing = land-grab:** transparent electrical flat-rate menu (priced to win
+  share now); roofing & storm stay free-inspection / quote-only.
+- **Solar = repair & replacement only** (no new installs), under the electrical license.
+- **Storm/insurance done by the book** — no deductible waiving, no acting as adjuster.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Where to edit (everything important is data-driven)
 
-## Learn More
+| File | What it controls |
+|------|------------------|
+| `lib/site.ts` | Phone, email, license #, rating/review count, team bios, capacity. **Start here.** |
+| `lib/services.ts` | Service copy + the **electrical flat-rate price menu** (prices are PLACEHOLDERS — set your real numbers). |
+| `lib/reviews.ts` | Featured review quotes (replace with real Google reviews). |
+| `lib/cities.ts` | Service-area city pages (add/remove cities → routes + sitemap update automatically). |
+| `app/globals.css` | Brand colors + fonts (`@theme` block). |
 
-To learn more about Next.js, take a look at the following resources:
+## TODOs before launch (search the code for `TODO(parker)`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Google reviews URL** + booking URL in `lib/site.ts`.
+2. **Real electrical prices** in `lib/services.ts` (current numbers are structural placeholders).
+3. **Lead delivery:** copy `.env.example` → `.env.local`, add `RESEND_API_KEY`
+   (email) and wire the Jobber GraphQL mutation in `app/api/lead/route.ts`.
+4. **Real photos** — swap the initials avatars / add roof + crew imagery.
+5. Point `poweredgetx.com` DNS at the host (Vercel or Render) once approved.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Lead flow
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Form → `POST /api/lead` → emails the team (Resend) **and** is wired to create a
+Jobber request (drop in the token + mutation). Includes a honeypot for spam.
