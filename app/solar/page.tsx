@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
 import { Container, SectionHeading } from "@/components/ui";
 import { PageHero, CtaBand, FeatureList } from "@/components/blocks";
+import {
+  ServiceTrustBar,
+  Process,
+  FaqSection,
+  RelatedServices,
+} from "@/components/service-blocks";
+import { Reviews } from "@/components/Reviews";
 import { getService } from "@/lib/services";
+import { getServiceContent } from "@/lib/serviceContent";
 import { site } from "@/lib/site";
 
 const service = getService("solar")!;
+const content = getServiceContent("solar")!;
 
 export const metadata: Metadata = {
   title: "Solar Panel Repair & Replacement in DFW",
@@ -21,6 +30,8 @@ export default function SolarPage() {
         intro="Solar work is electrical work — and Texas law requires it to run under a licensed Master Electrician. We repair, replace, and re-energize existing systems. We don't sell new installs, so there's no sales pitch — just the fix."
         badge="Get a solar service quote"
       />
+
+      <ServiceTrustBar />
 
       <section className="bg-paper py-20 sm:py-28">
         <Container>
@@ -59,6 +70,17 @@ export default function SolarPage() {
           </div>
         </Container>
       </section>
+
+      <Process
+        title="A licensed fix for the system you own."
+        steps={content.process}
+      />
+
+      <Reviews />
+
+      <FaqSection faqs={content.faqs} title="Solar questions, answered straight." />
+
+      <RelatedServices currentSlug="solar" />
 
       <CtaBand
         heading="Panels down or damaged?"

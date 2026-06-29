@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
 import { Container, SectionHeading } from "@/components/ui";
 import { PageHero, CtaBand, FeatureList } from "@/components/blocks";
+import {
+  ServiceTrustBar,
+  Process,
+  FaqSection,
+  RelatedServices,
+} from "@/components/service-blocks";
+import { Reviews } from "@/components/Reviews";
 import { getService } from "@/lib/services";
+import { getServiceContent } from "@/lib/serviceContent";
 import { site } from "@/lib/site";
 
 const service = getService("roofing")!;
+const content = getServiceContent("roofing")!;
 
 export const metadata: Metadata = {
   title: "Roofing Contractor in DFW — Repair, Replace & Storm Claims",
@@ -21,6 +30,8 @@ export default function RoofingPage() {
         intro="In Texas, anyone can call themselves a roofer. We're a licensed electrical contractor that also runs four roofing crews under a 20-year project manager. Free inspections, honest assessments, and replacements done fast."
         badge="Get a free roof inspection"
       />
+
+      <ServiceTrustBar />
 
       {/* Why roofing with us */}
       <section className="bg-paper py-20 sm:py-28">
@@ -100,6 +111,17 @@ export default function RoofingPage() {
           ))}
         </Container>
       </section>
+
+      <Process
+        title="From inspection to a roof you can trust."
+        steps={content.process}
+      />
+
+      <Reviews />
+
+      <FaqSection faqs={content.faqs} title="Roofing questions, answered straight." />
+
+      <RelatedServices currentSlug="roofing" />
 
       <CtaBand
         heading="Free roof inspection — no pressure."

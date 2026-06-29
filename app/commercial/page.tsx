@@ -1,9 +1,18 @@
 import type { Metadata } from "next";
 import { Container, SectionHeading } from "@/components/ui";
 import { PageHero, CtaBand, FeatureList } from "@/components/blocks";
+import {
+  ServiceTrustBar,
+  Process,
+  FaqSection,
+  RelatedServices,
+} from "@/components/service-blocks";
+import { Reviews } from "@/components/Reviews";
 import { getService } from "@/lib/services";
+import { getServiceContent } from "@/lib/serviceContent";
 
 const service = getService("commercial")!;
+const content = getServiceContent("commercial")!;
 
 export const metadata: Metadata = {
   title: "Commercial Roofing & Electrical in DFW",
@@ -20,6 +29,8 @@ export default function CommercialPage() {
         intro="Property managers and business owners shouldn't juggle two contractors. PowerEdge covers commercial roofing and electrical under one accountable team — scheduled around your operation and documented for your records."
         badge="Request a commercial quote"
       />
+
+      <ServiceTrustBar />
 
       <section className="bg-paper py-20 sm:py-28">
         <Container>
@@ -70,6 +81,20 @@ export default function CommercialPage() {
           </div>
         </Container>
       </section>
+
+      <Process
+        title="One partner, both trades, on your schedule."
+        steps={content.process}
+      />
+
+      <Reviews />
+
+      <FaqSection
+        faqs={content.faqs}
+        title="Commercial questions, answered straight."
+      />
+
+      <RelatedServices currentSlug="commercial" />
 
       <CtaBand
         heading="Let's scope your property."

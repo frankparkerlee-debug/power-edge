@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
 import { Container, SectionHeading } from "@/components/ui";
 import { PageHero, CtaBand } from "@/components/blocks";
+import {
+  ServiceTrustBar,
+  Process,
+  FaqSection,
+  RelatedServices,
+} from "@/components/service-blocks";
+import { Reviews } from "@/components/Reviews";
 import { electricalMenu, getService } from "@/lib/services";
+import { getServiceContent } from "@/lib/serviceContent";
 import { site } from "@/lib/site";
 
 const service = getService("electrical")!;
+const content = getServiceContent("electrical")!;
 
 export const metadata: Metadata = {
   title: "Electrician in DFW — Up-Front Pricing",
@@ -23,6 +32,8 @@ export default function ElectricalPage() {
         intro="Run under John Lott's 40-year Master Electrician license. Same-day service, honest flat-rate pricing, and no surprise invoices — the opposite of how most electrical work gets quoted."
         badge="Book a service call"
       />
+
+      <ServiceTrustBar />
 
       {/* Pricing menu */}
       <section className="bg-paper py-20 sm:py-28">
@@ -97,6 +108,20 @@ export default function ElectricalPage() {
           </div>
         </Container>
       </section>
+
+      <Process
+        title="Fast, licensed, and priced up front."
+        steps={content.process}
+      />
+
+      <Reviews />
+
+      <FaqSection
+        faqs={content.faqs}
+        title="Electrical questions, answered straight."
+      />
+
+      <RelatedServices currentSlug="electrical" />
 
       <CtaBand
         heading="Need an electrician today?"
