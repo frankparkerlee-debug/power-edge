@@ -43,6 +43,24 @@ export default function ContactPage() {
             </div>
             <div>
               <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
+                Text us
+              </div>
+              <a
+                href={site.textHref}
+                className="font-display text-3xl font-extrabold text-bolt hover:text-bolt-hi"
+              >
+                {site.textNumber}
+              </a>
+              <div className="text-xs text-fg-inv-dim">
+                Msg &amp; data rates may apply. Reply STOP to opt out. See our{" "}
+                <a href="/sms-terms" className="text-bolt hover:underline">
+                  SMS Terms
+                </a>
+                .
+              </div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
                 Email
               </div>
               <a

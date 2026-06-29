@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SmsConsent } from "./SmsConsent";
 
 /**
  * Storm/hail check lead magnet. Enter an address -> real reported hail activity
@@ -214,6 +215,7 @@ export function StormCheck() {
             >
               ← Check a different address
             </button>
+            <SmsConsent />
           </form>
         </>
       )}

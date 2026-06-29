@@ -38,12 +38,21 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-4 lg:flex">
           <a
             href={site.phoneHref}
             className="font-display text-sm font-bold text-fg-inv hover:text-bolt"
           >
             {site.phone}
+          </a>
+          <a
+            href={site.textHref}
+            className="inline-flex items-center gap-1.5 font-display text-sm font-bold text-fg-inv hover:text-bolt"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden>
+              <path d="M4 4h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H8l-4 4V5a1 1 0 0 1 1-1z" />
+            </svg>
+            Text us
           </a>
           <Link
             href="/contact"
@@ -86,17 +95,25 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
-            <div className="flex gap-3 pt-3">
-              <a
-                href={site.phoneHref}
-                className="flex-1 rounded-md border border-line px-4 py-3 text-center font-display font-bold text-fg-inv"
-              >
-                Call {site.phone}
-              </a>
+            <div className="space-y-3 pt-3">
+              <div className="flex gap-3">
+                <a
+                  href={site.phoneHref}
+                  className="flex-1 rounded-md border border-line px-4 py-3 text-center font-display font-bold text-fg-inv"
+                >
+                  Call
+                </a>
+                <a
+                  href={site.textHref}
+                  className="flex-1 rounded-md border border-line px-4 py-3 text-center font-display font-bold text-fg-inv"
+                >
+                  Text us
+                </a>
+              </div>
               <Link
                 href="/contact"
                 onClick={() => setOpen(false)}
-                className="flex-1 rounded-md bg-bolt px-4 py-3 text-center font-display font-bold text-ink"
+                className="block rounded-md bg-bolt px-4 py-3 text-center font-display font-bold text-ink"
               >
                 Free inspection
               </Link>

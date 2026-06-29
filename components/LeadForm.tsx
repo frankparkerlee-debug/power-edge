@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { services } from "@/lib/services";
+import { SmsConsent } from "./SmsConsent";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -140,6 +141,7 @@ export function LeadForm({
       <p className="text-center text-xs text-fg-inv-dim">
         No spam, no door-knock pressure. We respond fast.
       </p>
+      <SmsConsent />
     </form>
   );
 }

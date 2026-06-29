@@ -9,6 +9,9 @@ export const site = {
   phone: "469-689-0614",
   phoneSecondary: "469-402-0396",
   phoneHref: "tel:+14696890614",
+  // Dedicated CallRail text-message line (A2P 10DLC registered).
+  textNumber: "469-277-9594",
+  textHref: "sms:+14692779594",
   email: "info@poweredgetx.com", // TODO(parker): confirm the real inbox for web leads
   domain: "poweredgetx.com",
   url: "https://poweredgetx.com",

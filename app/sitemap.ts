@@ -5,7 +5,15 @@ import { cities } from "@/lib/cities";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = site.url;
-  const staticRoutes = ["", "/about", "/contact", "/roof-check", "/storm-check"];
+  const staticRoutes = [
+    "",
+    "/about",
+    "/contact",
+    "/roof-check",
+    "/storm-check",
+    "/privacy",
+    "/sms-terms",
+  ];
   const serviceRoutes = services.map((s) => `/${s.slug}`);
   const cityRoutes = cities.map((c) => `/service-areas/${c.slug}`);
 

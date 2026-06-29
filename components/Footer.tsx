@@ -96,7 +96,14 @@ export function Footer() {
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-5 py-5 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p>
             © {new Date().getFullYear()} {site.legalName}. Serving{" "}
-            {site.serviceArea}.
+            {site.serviceArea}.{" "}
+            <Link href="/privacy" className="hover:text-bolt">
+              Privacy Policy
+            </Link>{" "}
+            ·{" "}
+            <Link href="/sms-terms" className="hover:text-bolt">
+              SMS Terms
+            </Link>
           </p>
           <p>
             Texas electrical contractor TECL #{site.teclLicense}. Roofing is

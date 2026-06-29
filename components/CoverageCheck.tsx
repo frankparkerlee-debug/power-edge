@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SmsConsent } from "./SmsConsent";
 
 /**
  * Free "Is your roof still fully covered?" checker — the site's primary lead
@@ -247,6 +248,7 @@ export function CoverageCheck() {
               No spam, no pressure. This is a general guide, not insurance advice —
               we&apos;ll confirm everything on-site.
             </p>
+            <SmsConsent />
           </form>
         </>
       )}
