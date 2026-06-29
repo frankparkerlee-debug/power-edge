@@ -19,7 +19,7 @@ export default function PrivacyPage() {
         <div className="mt-10 space-y-8 text-fg-dim [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-fg [&_p]:mt-3 [&_p]:leading-relaxed [&_li]:mt-1">
           <div>
             <p>
-              {site.legalName} (&ldquo;we,&rdquo; &ldquo;us&rdquo;) respects your
+              {site.legalEntity} (&ldquo;we,&rdquo; &ldquo;us&rdquo;) respects your
               privacy. This policy explains what information we collect through{" "}
               {site.domain}, how we use it, and your choices.
             </p>
@@ -103,7 +103,7 @@ export default function PrivacyPage() {
           <div>
             <h2>Contact us</h2>
             <p>
-              {site.legalName} ·{" "}
+              {site.legalEntity} ·{" "}
               <a href={site.phoneHref} className="text-bolt-deep hover:underline">
                 {site.phone}
               </a>{" "}

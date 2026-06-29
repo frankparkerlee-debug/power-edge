@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { site } from "@/lib/site";
 
 /**
  * A2P 10DLC / TCPA consent disclosure. The first sentence is the exact,
@@ -11,8 +12,8 @@ export function SmsConsent({ light = true }: { light?: boolean }) {
   return (
     <p className={`text-center text-[11px] leading-relaxed ${dim}`}>
       By submitting your information, I am agreeing to receive transactional /
-      informational text messages from PowerEdge LLC. Message Frequency may vary.
-      Msg and data rates may apply. Reply STOP to opt out. See our{" "}
+      informational text messages from {site.legalEntity}. Message Frequency may
+      vary. Msg and data rates may apply. Reply STOP to opt out. See our{" "}
       <Link href="/privacy" className={link}>
         Privacy Policy
       </Link>{" "}
