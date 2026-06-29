@@ -4,7 +4,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Terms & Conditions",
-  description: `Terms and conditions for ${site.legalEntity}, including website use and text-messaging (SMS) program terms.`,
+  description: `Terms and conditions for Power Edge, LLC, including website use and text-messaging (SMS) program terms.`,
 };
 
 export default function TermsPage() {
@@ -20,7 +20,7 @@ export default function TermsPage() {
           <div>
             <p>
               These Terms &amp; Conditions govern your use of {site.domain} and
-              the services of {site.legalEntity} (&ldquo;{site.name},&rdquo;
+              the services of Power Edge, LLC (&ldquo;{site.name},&rdquo;
               &ldquo;we,&rdquo; &ldquo;us&rdquo;). By using this site or
               contacting us, you agree to these terms.
             </p>
@@ -32,8 +32,8 @@ export default function TermsPage() {
               Content on this site is provided for general information about our
               roofing, electrical, and solar services. Pricing shown is a
               starting estimate and is not a binding quote; final pricing is
-              provided in writing after an inspection or on-site assessment. Tools
-              such as our roof coverage check and storm/hail check are
+              provided in writing after an inspection or on-site assessment.
+              Tools such as our roof coverage check and storm/hail check are
               informational only and are not a substitute for a professional
               inspection or insurance advice.
             </p>
@@ -42,43 +42,53 @@ export default function TermsPage() {
           <div>
             <h2 id="sms">Text messaging (SMS) program</h2>
             <p>
-              By submitting your information, you agree to receive transactional /
-              informational text messages from {site.legalEntity} related to your
-              inquiry, scheduling, estimates, appointment reminders, project
-              updates, and customer service. Consent to receive texts is not a
-              condition of any purchase.
+              Power Edge, LLC sends text message updates and responses to
+              electronics customers about pricing and products offered at{" "}
+              {site.domain}.
             </p>
             <p>
-              <strong className="text-fg">How to opt in:</strong> provide your
-              mobile number through a form on this site, text us first at{" "}
-              {site.textNumber}, or give your number to our team and agree to be
-              contacted by text.
+              When you opt-in to the service, we may send you a message to
+              confirm your signup. Message and data rates may apply. Message
+              frequency varies. Text &ldquo;HELP&rdquo; for help. Text
+              &ldquo;STOP&rdquo; to cancel.
             </p>
             <p>
-              <strong className="text-fg">Message frequency</strong> may vary
-              based on your interaction with us.{" "}
-              <strong className="text-fg">Message and data rates may apply</strong>{" "}
-              depending on your mobile carrier&apos;s plan.
+              You can cancel this service at any time. Just text
+              &ldquo;STOP&rdquo; to {site.textNumber}. After you send the message
+              &ldquo;STOP&rdquo; to us, we will reply to confirm that you have
+              been unsubscribed. After this, you will no longer receive messages
+              from us. If you want to join again, just sign up as you did the
+              first time, and we will start sending you messages again.
             </p>
             <p>
-              <strong className="text-fg">Opt out:</strong> reply{" "}
-              <strong className="text-fg">STOP</strong> to any message to cancel.
-              For help, reply <strong className="text-fg">HELP</strong> or contact
-              us at{" "}
-              <a href={site.phoneHref} className="text-bolt-deep hover:underline">
-                {site.phone}
-              </a>
-              . Carriers are not liable for delayed or undelivered messages.
+              If at any time you forget what keywords are supported, just text
+              &ldquo;HELP&rdquo; to {site.textNumber}. After you send the message
+              &ldquo;HELP&rdquo; to us, we will respond with instructions on how
+              to use our service and how to unsubscribe.
             </p>
             <p>
-              No mobile information will be shared with third parties or
-              affiliates for marketing or promotional purposes. Text-message
-              opt-in data and consent are never shared with any third parties for
-              their own marketing. See our{" "}
+              Participating carriers: AT&amp;T, Verizon Wireless, Sprint,
+              T-Mobile, U.S. Cellular, Boost Mobile, MetroPCS, Virgin Mobile,
+              Alaska Communications Systems (ACS), Appalachian Wireless (EKN),
+              Bluegrass Cellular, Cellular One of East Central, IL (ECIT),
+              Cellular One of Northeast Pennsylvania, Cricket, Coral Wireless
+              (Mobi PCS), COX, Cross, Element Mobile (Flat Wireless), Epic Touch
+              (Elkhart Telephone), GCI, Golden State, Hawkeye (Chat Mobility),
+              Hawkeye (NW Missouri), Illinois Valley Cellular, Inland Cellular,
+              iWireless (Iowa Wireless), Keystone Wireless (Immix Wireless/PC
+              Man), Mosaic (Consolidated or CTC Telecom), Nex-Tech Wireless,
+              NTelos, Panhandle Communications, Pioneer, Plateau (Texas RSA 3
+              Ltd), Revol, RINA, Simmetry (TMP Corporation), Thumb Cellular,
+              Union Wireless, United Wireless, Viaero Wireless, and West Central
+              (WCC or 5 Star Wireless).
+            </p>
+            <p>Carriers are not liable for delayed or undelivered messages.</p>
+            <p>
+              If you have any questions regarding privacy, please read our{" "}
               <a href="/privacy" className="text-bolt-deep hover:underline">
                 Privacy Policy
-              </a>{" "}
-              for full details.
+              </a>
+              .
             </p>
           </div>
 
@@ -94,7 +104,7 @@ export default function TermsPage() {
           <div>
             <h2>Contact</h2>
             <p>
-              {site.legalEntity} ·{" "}
+              Power Edge, LLC ·{" "}
               <a href={site.phoneHref} className="text-bolt-deep hover:underline">
                 {site.phone}
               </a>{" "}
