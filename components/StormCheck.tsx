@@ -14,6 +14,7 @@ type Result = {
   found?: boolean;
   soft?: boolean;
   matched?: string | null;
+  approximate?: boolean;
   radiusMi?: number;
   count?: number;
   largest?: { size: number; date: string; city: string; miles: number } | null;
@@ -110,7 +111,7 @@ export function StormCheck() {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             required
-            placeholder="Street address, city, ZIP"
+            placeholder="Street address or ZIP code"
             className={inputBase}
             autoComplete="street-address"
           />
@@ -146,6 +147,12 @@ export function StormCheck() {
                 {result!.count} hail event{result!.count === 1 ? "" : "s"}{" "}
                 reported within {result!.radiusMi} miles.
               </h2>
+              {result!.matched && (
+                <p className="mt-2 text-sm text-fg-inv-dim">
+                  {result!.approximate ? "Near " : ""}
+                  {result!.matched}
+                </p>
+              )}
               <div className="mt-5 grid grid-cols-2 gap-3">
                 <Stat
                   big={`${result!.largest?.size}"`}

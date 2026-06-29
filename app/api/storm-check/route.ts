@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cities } from "@/lib/cities";
 
 /**
  * Storm check: given a street address, returns reported hail activity near it.
@@ -41,19 +42,76 @@ function haversineMi(
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-async function geocode(
-  address: string,
-): Promise<{ lat: number; lon: number; matched: string } | null> {
-  const url =
-    "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=" +
-    encodeURIComponent(address) +
-    "&benchmark=Public_AR_Current&format=json";
-  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-  if (!res.ok) throw new Error("geocode failed");
-  const data = await res.json();
-  const m = data?.result?.addressMatches?.[0];
-  if (!m) return null;
-  return { lat: m.coordinates.y, lon: m.coordinates.x, matched: m.matchedAddress };
+type Geo = { lat: number; lon: number; matched: string; approximate: boolean };
+
+/**
+ * Layered geocoding so the tool works whether someone types a full address, a
+ * bare ZIP, or just a city:
+ *   1. Census street geocoder — precise (and gives us the exact property).
+ *   2. ZIP centroid via Zippopotam (free, no key) — "near ZIP #####".
+ *   3. Known service-area city centroid — "near {City}, TX".
+ */
+async function geocode(address: string): Promise<Geo | null> {
+  // 1. Precise street address.
+  try {
+    const url =
+      "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=" +
+      encodeURIComponent(address) +
+      "&benchmark=Public_AR_Current&format=json";
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (res.ok) {
+      const data = await res.json();
+      const m = data?.result?.addressMatches?.[0];
+      if (m) {
+        return {
+          lat: m.coordinates.y,
+          lon: m.coordinates.x,
+          matched: m.matchedAddress,
+          approximate: false,
+        };
+      }
+    }
+  } catch {
+    /* fall through to ZIP / city */
+  }
+
+  // 2. ZIP centroid.
+  const zip = address.match(/\b(\d{5})\b/)?.[1];
+  if (zip) {
+    try {
+      const res = await fetch(`https://api.zippopotam.us/us/${zip}`, {
+        signal: AbortSignal.timeout(8000),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const p = data?.places?.[0];
+        if (p) {
+          return {
+            lat: parseFloat(p.latitude),
+            lon: parseFloat(p.longitude),
+            matched: `${p["place name"]}, ${p["state abbreviation"]} ${zip}`,
+            approximate: true,
+          };
+        }
+      }
+    } catch {
+      /* fall through to city */
+    }
+  }
+
+  // 3. Known service-area city by name.
+  const lower = address.toLowerCase();
+  const city = cities.find((c) => lower.includes(c.name.toLowerCase()));
+  if (city) {
+    return {
+      lat: city.lat,
+      lon: city.lon,
+      matched: `${city.name}, TX`,
+      approximate: true,
+    };
+  }
+
+  return null;
 }
 
 async function fetchHailReports() {
@@ -137,6 +195,7 @@ export async function POST(req: Request) {
       ok: true,
       found: true,
       matched: geo.matched,
+      approximate: geo.approximate,
       radiusMi: RADIUS_MI,
       count: nearby.length,
       largest,
