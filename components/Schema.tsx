@@ -1,19 +1,28 @@
 import { site } from "@/lib/site";
 import { cities } from "@/lib/cities";
+import { services } from "@/lib/services";
 
 /**
- * LocalBusiness structured data (JSON-LD) — helps Google understand the
- * business, surface the star rating, and rank in the local/map pack.
+ * LocalBusiness structured data (JSON-LD). Uses the precise schema.org subtypes
+ * (RoofingContractor + Electrician under HomeAndConstructionBusiness) carrying
+ * NAP, areaServed, rating, and a service catalog — the markup that aids normal
+ * SEO rich-result eligibility and gives engines clean entity data.
  * Rendered once in the root layout.
  */
 export function Schema() {
+  const logo = `${site.url}/brand/poweredge-icon.png`;
   const data = {
     "@context": "https://schema.org",
     "@type": ["RoofingContractor", "Electrician"],
+    "@id": `${site.url}/#business`,
     name: site.legalName,
+    legalName: site.legalEntity,
     url: site.url,
+    logo,
+    image: logo,
     telephone: site.phone,
     email: site.email,
+    priceRange: "$$",
     description:
       "Licensed Texas electrical contractor and roofing company serving the Dallas–Fort Worth metroplex.",
     areaServed: cities.map((c) => ({
@@ -32,6 +41,18 @@ export function Schema() {
       bestRating: "5",
     },
     hasCredential: `Texas Electrical Contractor License (TECL) #${site.teclLicense}`,
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Roofing, electrical & solar services",
+      itemListElement: services.map((s) => ({
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: s.title,
+          areaServed: site.serviceArea,
+        },
+      })),
+    },
     knowsAbout: [
       "Roof replacement",
       "Roof repair",
