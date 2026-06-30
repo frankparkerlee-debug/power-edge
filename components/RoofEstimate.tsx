@@ -366,7 +366,7 @@ export function RoofEstimate() {
           <p className="mb-4 mt-1 text-sm text-bolt">
             Inspections book up fast after storms — grab a spot this week.
           </p>
-          <form onSubmit={submitLead} className="space-y-3">
+          <form id="crf-roof" data-cr-capture onSubmit={submitLead} className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <input name="name" required placeholder="Full name" className={inputBase} autoComplete="name" />
               <input name="phone" required type="tel" placeholder="Phone" className={inputBase} autoComplete="tel" />

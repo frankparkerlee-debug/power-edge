@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { services } from "@/lib/services";
 import { SmsConsent } from "./SmsConsent";
 import { leadContext } from "@/lib/leadContext";
@@ -17,6 +17,7 @@ export function LeadForm({
 }) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  const formId = "crf-" + useId().replace(/[^a-zA-Z0-9]/g, "");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -67,7 +68,7 @@ export function LeadForm({
     "w-full rounded-md border border-line bg-ink-2 px-4 py-3 text-fg-inv placeholder:text-fg-inv-dim/60 focus:border-bolt focus:outline-none";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form id={formId} data-cr-capture onSubmit={handleSubmit} className="space-y-4">
       <div className={compact ? "" : "grid gap-4 sm:grid-cols-2"}>
         <input
           name="name"

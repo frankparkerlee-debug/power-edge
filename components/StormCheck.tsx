@@ -156,7 +156,7 @@ export function StormCheck() {
           <p className="mb-4 font-display text-lg font-bold text-fg-inv">
             Book your free storm inspection
           </p>
-          <form onSubmit={submit} className="space-y-3">
+          <form id="crf-storm" data-cr-capture onSubmit={submit} className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <input name="name" required placeholder="Full name" className={inputBase} autoComplete="name" />
               <input name="phone" required type="tel" placeholder="Phone" className={inputBase} autoComplete="tel" />
