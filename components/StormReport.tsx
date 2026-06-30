@@ -1,7 +1,8 @@
 // Rich storm-report visuals shown after an address check. All derived from the
 // free NWS data /api/storm-check already returns — no extra APIs.
+import { HailMap } from "./HailMap";
 
-type MapPt = { size: number; miles: number; bearing: number };
+type MapPt = { size: number; miles: number; bearing: number; lat: number; lon: number };
 type Event = {
   size: number;
   date: string;
@@ -21,6 +22,7 @@ export type StormData = {
   mostRecent?: { size: number; date: string } | null;
   recent?: Event[];
   map?: MapPt[];
+  home?: { lat: number; lon: number };
 };
 
 function fmtDate(iso: string) {
@@ -82,58 +84,6 @@ const REFS = [
   { in: 2.5, label: "Tennis ball" },
   { in: 2.75, label: "Baseball" },
 ];
-
-/** Concentric-ring scatter of where hail hit around the address. */
-function ProximityMap({ pts, radiusMi }: { pts: MapPt[]; radiusMi: number }) {
-  const C = 120;
-  const R = 100;
-  const ringMi = [5, 10, 15].filter((m) => m <= radiusMi);
-  return (
-    <svg viewBox="0 0 240 240" className="h-full w-full" role="img" aria-label="Map of hail reports near your address">
-      {ringMi.map((m) => (
-        <circle
-          key={m}
-          cx={C}
-          cy={C}
-          r={(m / radiusMi) * R}
-          fill="none"
-          stroke="var(--color-line)"
-          strokeWidth="1"
-        />
-      ))}
-      {ringMi.map((m) => (
-        <text
-          key={`l${m}`}
-          x={C + 3}
-          y={C - (m / radiusMi) * R + 11}
-          fill="#5b6472"
-          fontSize="8"
-        >
-          {m}mi
-        </text>
-      ))}
-      {pts.map((p, i) => {
-        const r = Math.min(p.miles / radiusMi, 1) * R;
-        const rad = (p.bearing * Math.PI) / 180;
-        const x = C + r * Math.sin(rad);
-        const y = C - r * Math.cos(rad);
-        return (
-          <circle
-            key={i}
-            cx={x}
-            cy={y}
-            r={p.size >= 1.5 ? 4 : p.size >= 1 ? 3 : 2}
-            fill={dotColor(p.size)}
-            opacity="0.85"
-          />
-        );
-      })}
-      {/* home */}
-      <circle cx={C} cy={C} r="5" fill="var(--color-fg-inv)" />
-      <circle cx={C} cy={C} r="9" fill="none" stroke="var(--color-fg-inv)" strokeWidth="1.5" opacity="0.5" />
-    </svg>
-  );
-}
 
 /** Horizontal hail-size scale with familiar reference objects. */
 function HailScale({ size }: { size: number }) {
@@ -200,23 +150,32 @@ export function StormReport({ data }: { data: StormData }) {
         </p>
       )}
 
-      {/* Map + headline stats */}
-      <div className="mt-5 grid gap-4 sm:grid-cols-[150px_1fr] sm:items-center">
-        <div className="mx-auto h-[150px] w-[150px] rounded-card border border-line bg-ink p-2">
-          {pts.length > 0 ? (
-            <ProximityMap pts={pts} radiusMi={radiusMi} />
-          ) : (
-            <div className="flex h-full items-center justify-center text-xs text-fg-inv-dim">
-              map
-            </div>
-          )}
+      {/* Real map of where hail hit around the address */}
+      {data.home && pts.length > 0 && (
+        <div className="mt-5 overflow-hidden rounded-card border border-line">
+          <div className="h-60">
+            <HailMap home={data.home} points={pts} radiusMi={radiusMi} />
+          </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line bg-ink px-4 py-2 text-[11px] text-fg-inv-dim">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#7ffbae" }} />
+              1″–1.5″
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#ff5a1f" }} />
+              1.5″+ (likely roof damage)
+            </span>
+            <span className="ml-auto">● your address</span>
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Stat big={`${largestSize}"`} small={`Largest hail · ${fmtDate(data.largest?.date || "")}`} />
-          <Stat big={`${data.significantCount ?? 0}`} small={'Events 1" or larger'} />
-          <Stat big={fmtDate(data.mostRecent?.date || "")} small="Most recent report" />
-          <Stat big={`${data.count}`} small={`Total within ${radiusMi} mi`} />
-        </div>
+      )}
+
+      {/* Headline stats */}
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat big={`${largestSize}"`} small={`Largest hail · ${fmtDate(data.largest?.date || "")}`} />
+        <Stat big={`${data.significantCount ?? 0}`} small={'Events 1" or larger'} />
+        <Stat big={fmtDate(data.mostRecent?.date || "")} small="Most recent report" />
+        <Stat big={`${data.count}`} small={`Total within ${radiusMi} mi`} />
       </div>
 
       {/* Damage interpretation + size scale */}
@@ -232,6 +191,18 @@ export function StormReport({ data }: { data: StormData }) {
         </div>
         <p className="mt-1.5 text-sm text-fg-inv-dim">{tier.note}</p>
         <HailScale size={largestSize} />
+      </div>
+
+      {/* Solar — hail damages panels too, and we're licensed for both */}
+      <div className="mt-4 rounded-card border border-line bg-ink p-4">
+        <p className="text-sm text-fg-inv">
+          <strong className="text-bolt">Got solar panels?</strong> The same hail
+          cracks panels and microinverters — and most roofers aren&apos;t
+          licensed to touch solar. We repair your{" "}
+          <strong className="text-fg-inv">roof and your solar</strong> under one
+          licensed crew (TECL #39773). Check the box below and we&apos;ll inspect
+          both.
+        </p>
       </div>
 
       {/* Claim-window urgency */}

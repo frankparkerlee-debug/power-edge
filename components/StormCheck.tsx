@@ -66,8 +66,10 @@ export function StormCheck() {
           phone: fd.phone,
           email: fd.email,
           zip: fd.zip,
-          service: "Storm inspection (hail check)",
-          message: `[Storm Check] address: ${result?.matched || address} — ${summary}`,
+          service: fd.solar
+            ? "Storm inspection (roof + solar)"
+            : "Storm inspection (hail check)",
+          message: `[Storm Check]${fd.solar ? " [HAS SOLAR]" : ""} address: ${result?.matched || address} — ${summary}`,
           company_website: fd.company_website,
           ...leadContext({ tool: "storm-check" }),
         }),
@@ -159,6 +161,15 @@ export function StormCheck() {
               <input name="zip" placeholder="ZIP code" className={inputBase} inputMode="numeric" autoComplete="postal-code" />
             </div>
             <input type="text" name="company_website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
+            <label className="flex cursor-pointer items-center gap-2.5 rounded-md border border-line bg-ink px-4 py-3 text-sm text-fg-inv">
+              <input
+                type="checkbox"
+                name="solar"
+                value="yes"
+                className="h-4 w-4 accent-bolt"
+              />
+              I have solar panels — check those for hail damage too
+            </label>
             <button
               type="submit"
               disabled={sub === "submitting"}

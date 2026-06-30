@@ -25,6 +25,8 @@ type Nearby = {
   county: string;
   miles: number;
   bearing: number; // degrees from the address (for the proximity map)
+  lat: number;
+  lon: number;
 };
 
 function haversineMi(
@@ -195,6 +197,8 @@ export async function POST(req: Request) {
           county: p.county || "",
           miles: Math.round(miles),
           bearing: Math.round(bearing(geo.lat, geo.lon, lat, lon)),
+          lat,
+          lon,
         });
       }
     }
@@ -216,11 +220,14 @@ export async function POST(req: Request) {
       largest,
       mostRecent,
       recent: nearby.slice(0, 6),
+      home: { lat: geo.lat, lon: geo.lon },
       // a compact set for the proximity map (size + where it hit)
-      map: nearby.slice(0, 40).map((n) => ({
+      map: nearby.slice(0, 60).map((n) => ({
         size: n.size,
         miles: n.miles,
         bearing: n.bearing,
+        lat: n.lat,
+        lon: n.lon,
       })),
     });
   } catch {
