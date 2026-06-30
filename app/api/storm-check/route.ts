@@ -113,7 +113,37 @@ async function geocode(address: string): Promise<Geo | null> {
     }
   }
 
-  // 3. Known service-area city by name.
+  // 3. Forgiving fallback — OpenStreetMap Nominatim handles partial, non-
+  //    standardized, or typo'd addresses (and cities) that the strict Census
+  //    geocoder rejects. Free, no key; requires a User-Agent.
+  try {
+    const q = /\bTX\b|texas/i.test(address) ? address : `${address}, TX`;
+    const nUrl =
+      "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&q=" +
+      encodeURIComponent(q);
+    const res = await fetch(nUrl, {
+      signal: AbortSignal.timeout(8000),
+      headers: {
+        "User-Agent": "poweredgetx.com-storm-check/1.0 (info@poweredgetx.com)",
+      },
+    });
+    if (res.ok) {
+      const arr = await res.json();
+      const m = arr?.[0];
+      if (m?.lat && m?.lon) {
+        return {
+          lat: parseFloat(m.lat),
+          lon: parseFloat(m.lon),
+          matched: address,
+          approximate: true,
+        };
+      }
+    }
+  } catch {
+    /* fall through to known-city */
+  }
+
+  // 4. Known service-area city by name.
   const lower = address.toLowerCase();
   const city = cities.find((c) => lower.includes(c.name.toLowerCase()));
   if (city) {

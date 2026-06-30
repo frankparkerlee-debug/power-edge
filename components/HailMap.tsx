@@ -59,7 +59,7 @@ export function HailMap({
         const map = L.map(ref.current, {
           scrollWheelZoom: false,
           zoomControl: true,
-        }).setView([home.lat, home.lon], 10);
+        }).setView([home.lat, home.lon], 11);
         mapRef.current = map;
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -100,15 +100,10 @@ export function HailMap({
         });
         L.marker([home.lat, home.lon], { icon: homeIcon })
           .addTo(map)
-          .bindPopup("Your address");
-
-        const all = [
-          [home.lat, home.lon],
-          ...points.map((p) => [p.lat, p.lon]),
-        ];
-        if (all.length > 1) {
-          map.fitBounds(all, { padding: [24, 24], maxZoom: 11 });
-        }
+          .bindPopup("Your address")
+          .openPopup();
+        // Stay centered/zoomed on the home (zoom 11) rather than fitting all
+        // points — fitting the full 15-mile spread reads as "way zoomed out".
       })
       .catch(() => {});
 
