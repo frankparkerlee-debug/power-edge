@@ -14,6 +14,7 @@ export default function Home() {
       <TrustBar />
       <Wedge />
       <ServicesGrid />
+      <RoofEstimateBand />
       <RoofCheckBand />
       <PricingTeaser />
       <StormBand />
@@ -271,6 +272,64 @@ function ServicesGrid() {
               </span>
             </Link>
           ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ---------------------------------------------------- ROOF ESTIMATE BAND */
+function RoofEstimateBand() {
+  return (
+    <section className="bg-ink py-20 sm:py-28">
+      <Container>
+        <div className="overflow-hidden rounded-card border border-bolt/30 bg-gradient-to-br from-ink-2 to-ink shadow-xl">
+          <div className="grid lg:grid-cols-2">
+            <div className="p-9 sm:p-12">
+              <Kicker className="mb-5">Instant roof estimate</Kicker>
+              <h2 className="font-display text-3xl font-bold leading-tight text-fg-inv sm:text-4xl">
+                What does a new roof actually cost? See it in seconds.
+              </h2>
+              <p className="mt-4 text-fg-inv-dim">
+                Most roofers won&apos;t tell you until a salesperson is in your
+                living room. Enter your address — we measure your roof from
+                aerial data and hand you an honest ballpark on the spot. If
+                it&apos;s a storm claim, you likely just pay your deductible.
+              </p>
+              <div className="mt-7">
+                <Button href="/roof-estimate">Estimate my roof →</Button>
+              </div>
+            </div>
+            <div className="relative hidden border-l border-line bg-ink-2 p-12 lg:flex lg:items-center">
+              <div className="w-full rounded-card border border-line bg-ink p-6">
+                <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
+                  123 Oak St, Plano TX
+                </div>
+                <div className="mt-2 font-display text-3xl font-extrabold text-fg-inv">
+                  Estimated:{" "}
+                  <span className="text-bolt">$13,500–$16,750</span>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="rounded-md border border-line p-3">
+                    <div className="font-display text-xl font-extrabold text-bolt">
+                      ~31–37
+                    </div>
+                    <div className="text-[11px] text-fg-inv-dim">
+                      Roofing squares
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-line p-3">
+                    <div className="font-display text-xl font-extrabold text-bolt">
+                      2,650 ft²
+                    </div>
+                    <div className="text-[11px] text-fg-inv-dim">
+                      Measured footprint
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </Container>
     </section>

@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/contact",
     "/roof-check",
     "/storm-check",
+    "/roof-estimate",
     "/privacy",
     "/terms",
   ];

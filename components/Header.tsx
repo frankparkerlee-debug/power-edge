@@ -10,8 +10,8 @@ const nav = [
   { href: "/electrical", label: "Electrical" },
   { href: "/solar", label: "Solar" },
   { href: "/commercial", label: "Commercial" },
+  { href: "/roof-estimate", label: "Roof Estimate", accent: true },
   { href: "/storm-check", label: "Storm Check", accent: true },
-  { href: "/about", label: "About" },
 ];
 
 export function Header() {
