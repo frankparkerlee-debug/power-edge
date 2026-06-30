@@ -41,6 +41,10 @@ export function RoofEstimate() {
   const [phase, setPhase] = useState<Phase>("input");
   const [est, setEst] = useState<Est | null>(null);
   const [sub, setSub] = useState<Sub>("idle");
+  const [intent, setIntent] = useState<"unknown" | "insurance" | "cash">(
+    "unknown",
+  );
+  const [deductible, setDeductible] = useState("");
 
   async function run(payload: Record<string, unknown>) {
     setLoading(true);
@@ -77,8 +81,11 @@ export function RoofEstimate() {
           phone: fd.phone,
           email: fd.email,
           zip: fd.zip,
-          service: "Roof replacement estimate",
-          message: `[Roof Estimate] ${est?.matched || address} — ~${est?.squaresLow}-${est?.squaresHigh} squares, est ${range} (${est?.source})`,
+          service:
+            intent === "insurance"
+              ? "Storm/insurance roof (deductible)"
+              : "Roof replacement estimate",
+          message: `[Roof Estimate] ${est?.matched || address} — ~${est?.squaresLow}-${est?.squaresHigh} squares (${est?.source})${intent === "insurance" ? ` — INSURANCE claim, deductible: ${deductible || "unknown"}` : `, est ${range}`}`,
           company_website: fd.company_website,
           ...leadContext({ tool: "roof-estimate" }),
         }),
@@ -194,10 +201,18 @@ export function RoofEstimate() {
                 : "Estimate"}
           </div>
           <h2 className="font-display text-2xl font-bold leading-tight text-fg-inv sm:text-3xl">
-            Estimated roof replacement:{" "}
-            <span className="text-bolt">
-              {usd(est.low)}–{usd(est.high)}
-            </span>
+            {intent === "cash" ? (
+              <>
+                Estimated roof replacement:{" "}
+                <span className="text-bolt">
+                  {usd(est.low)}–{usd(est.high)}
+                </span>
+              </>
+            ) : intent === "insurance" ? (
+              "You likely pay just your deductible."
+            ) : (
+              "We measured your roof."
+            )}
           </h2>
           {est.matched && (
             <p className="mt-2 text-sm text-fg-inv-dim">{est.matched}</p>
@@ -238,40 +253,123 @@ export function RoofEstimate() {
             />
           </div>
 
-          <p className="mt-4 text-sm leading-relaxed text-fg-inv-dim">
-            Based on architectural asphalt shingles at our standard rate. Steeper
-            pitch, premium materials, or extra tear-off can change it — your{" "}
-            <strong className="text-fg-inv">exact price is free and on-site.</strong>
-          </p>
+          {/* Choose path — changes what we show and what they'd actually pay */}
+          {intent === "unknown" && (
+            <div className="mt-5 rounded-card border border-line bg-ink p-5">
+              <p className="font-display text-lg font-bold text-fg-inv">
+                Is this storm or hail damage you might file on insurance?
+              </p>
+              <p className="mt-1 text-sm text-fg-inv-dim">
+                It changes what you&apos;d actually pay out of pocket.
+              </p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setIntent("insurance")}
+                  className="rounded-md bg-bolt px-5 py-4 font-display font-bold text-ink transition-colors hover:bg-bolt-hi"
+                >
+                  Yes — likely a claim
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIntent("cash")}
+                  className="rounded-md border border-line px-5 py-4 font-display font-bold text-fg-inv transition-colors hover:border-bolt hover:text-bolt"
+                >
+                  No — paying myself
+                </button>
+              </div>
+            </div>
+          )}
 
-          <details className="mt-3 text-sm text-fg-inv-dim">
-            <summary className="cursor-pointer font-semibold text-bolt">
-              How we calculated this
-            </summary>
-            <p className="mt-2 leading-relaxed">
-              {est.source === "satellite"
-                ? `We measured your roof's surface area (~${(est.roofSqft ?? 0).toLocaleString()} sq ft) from satellite imagery, divided by 100 to get roofing "squares," added ~10% for waste and cuts, and priced at $400–$450 per square installed.`
-                : est.source === "measured"
-                  ? `We measured your building footprint (~${(est.footprintSqft ?? 0).toLocaleString()} sq ft) from aerial map data, applied a typical roof pitch and ~10% waste to estimate ${est.squaresLow}–${est.squaresHigh} squares, and priced at $400–$450 per square installed.`
-                  : `We used the home size you entered to estimate a roof footprint, applied a typical pitch and ~10% waste to get ${est.squaresLow}–${est.squaresHigh} squares, and priced at $400–$450 per square installed.`}{" "}
-              A roofing &ldquo;square&rdquo; is 100 sq ft of roof. We confirm the
-              exact measurement and price for free, on-site.
-            </p>
-          </details>
+          {/* INSURANCE — no retail price; deductible + financing */}
+          {intent === "insurance" && (
+            <>
+              <div className="mt-5 rounded-card border border-bolt/40 bg-bolt/5 p-5">
+                <p className="text-sm leading-relaxed text-fg-inv">
+                  If your roof qualifies, your out-of-pocket is just your{" "}
+                  <strong className="text-bolt">deductible</strong> — insurance
+                  covers the rest of the replacement. We&apos;ve already measured
+                  your roof, so we know the scope when we work with your adjuster.
+                </p>
+                <label className="mt-4 block text-sm text-fg-inv-dim">
+                  Your wind/hail deductible (optional)
+                  <select
+                    value={deductible}
+                    onChange={(e) => setDeductible(e.target.value)}
+                    className={`mt-1 ${inputBase}`}
+                  >
+                    <option value="">Select…</option>
+                    <option value="$500">$500</option>
+                    <option value="$1,000">$1,000</option>
+                    <option value="$2,500">$2,500</option>
+                    <option value="$5,000">$5,000</option>
+                    <option value="1% of home value">1% of home value</option>
+                    <option value="unsure">Not sure</option>
+                  </select>
+                </label>
+                {deductible && deductible !== "unsure" && (
+                  <p className="mt-3 font-display text-lg font-bold text-fg-inv">
+                    Your estimated out-of-pocket:{" "}
+                    <span className="text-bolt">{deductible}</span>
+                  </p>
+                )}
+              </div>
 
-          <div className="mt-4 rounded-card border border-ember/50 bg-ember/10 p-4">
-            <p className="text-sm text-fg-inv">
-              <strong className="text-ember">Storm damage?</strong> If hail or
-              wind hit your roof, you likely pay only your{" "}
-              <strong className="text-fg-inv">deductible</strong> — not this full
-              price. We document the claim and handle it by the book.
-            </p>
-          </div>
+              <div className="mt-4 rounded-card border border-line bg-ink p-5">
+                <p className="text-sm leading-relaxed text-fg-inv">
+                  <strong className="text-bolt">
+                    Don&apos;t want to pay it up front?
+                  </strong>{" "}
+                  Ask about financing your deductible into low monthly payments —
+                  $0-down options available. (That&apos;s financing, not waiving —
+                  waiving a deductible is illegal in Texas.)
+                </p>
+              </div>
 
+              <p className="mt-4 text-sm leading-relaxed text-fg-inv-dim">
+                We document the damage, work directly with your adjuster, and
+                handle the entire claim by the book.
+              </p>
+            </>
+          )}
+
+          {/* CASH — show the retail estimate */}
+          {intent === "cash" && (
+            <>
+              <p className="mt-4 text-sm leading-relaxed text-fg-inv-dim">
+                Based on architectural asphalt shingles at our standard rate.
+                Steeper pitch, premium materials, or extra tear-off can change it
+                — your{" "}
+                <strong className="text-fg-inv">exact price is free and on-site.</strong>
+              </p>
+              <details className="mt-3 text-sm text-fg-inv-dim">
+                <summary className="cursor-pointer font-semibold text-bolt">
+                  How we calculated this
+                </summary>
+                <p className="mt-2 leading-relaxed">
+                  {est.source === "satellite"
+                    ? `We measured your roof's surface area (~${(est.roofSqft ?? 0).toLocaleString()} sq ft) from satellite imagery, divided by 100 to get roofing "squares," added ~10% for waste and cuts, and priced at $400–$450 per square installed.`
+                    : est.source === "measured"
+                      ? `We measured your building footprint (~${(est.footprintSqft ?? 0).toLocaleString()} sq ft) from aerial map data, applied a typical roof pitch and ~10% waste to estimate ${est.squaresLow}–${est.squaresHigh} squares, and priced at $400–$450 per square installed.`
+                      : `We used the home size you entered to estimate a roof footprint, applied a typical pitch and ~10% waste to get ${est.squaresLow}–${est.squaresHigh} squares, and priced at $400–$450 per square installed.`}{" "}
+                  A roofing &ldquo;square&rdquo; is 100 sq ft of roof. We confirm
+                  the exact measurement and price for free, on-site.
+                </p>
+              </details>
+              <p className="mt-4 text-sm text-fg-inv-dim">
+                Financing available — ask about low monthly payment options.
+              </p>
+            </>
+          )}
+
+          {intent !== "unknown" && (
+          <>
           <div className="my-6 h-px w-full bg-line" />
 
           <p className="font-display text-lg font-bold text-fg-inv">
-            Lock in your free exact quote
+            {intent === "insurance"
+              ? "Book your free storm inspection"
+              : "Lock in your free exact quote"}
           </p>
           <p className="mb-4 mt-1 text-sm text-bolt">
             Inspections book up fast after storms — grab a spot this week.
@@ -292,7 +390,11 @@ export function RoofEstimate() {
                 disabled={sub === "submitting"}
                 className="flex-1 rounded-md bg-bolt px-6 py-4 font-display text-base font-bold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60"
               >
-                {sub === "submitting" ? "Sending…" : "Get my FREE quote"}
+                {sub === "submitting"
+                  ? "Sending…"
+                  : intent === "insurance"
+                    ? "Book my free inspection"
+                    : "Get my FREE quote"}
               </button>
               <a
                 href={site.textHref}
@@ -309,6 +411,8 @@ export function RoofEstimate() {
             )}
             <SmsConsent />
           </form>
+          </>
+          )}
         </>
       )}
 
