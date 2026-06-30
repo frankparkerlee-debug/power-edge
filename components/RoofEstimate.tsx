@@ -270,8 +270,11 @@ export function RoofEstimate() {
 
           <div className="my-6 h-px w-full bg-line" />
 
-          <p className="mb-4 font-display text-lg font-bold text-fg-inv">
+          <p className="font-display text-lg font-bold text-fg-inv">
             Lock in your free exact quote
+          </p>
+          <p className="mb-4 mt-1 text-sm text-bolt">
+            Inspections book up fast after storms — grab a spot this week.
           </p>
           <form onSubmit={submitLead} className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-2">

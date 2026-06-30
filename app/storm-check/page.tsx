@@ -14,7 +14,7 @@ export default function StormCheckPage() {
     <section className="relative overflow-hidden bg-ink py-14 sm:py-20">
       <div className="absolute inset-0 grid-texture opacity-60" />
       <div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-ember/15 blur-[120px]" />
-      <Container className="relative grid items-start gap-12 lg:grid-cols-[1fr_0.95fr]">
+      <Container className="relative flex flex-col-reverse gap-10 lg:grid lg:grid-cols-[1fr_0.95fr] lg:items-start lg:gap-12">
         <div className="lg:pt-6">
           <Kicker className="mb-5">Free · Instant · NWS storm data</Kicker>
           <h1 className="font-display text-4xl leading-[0.98] text-fg-inv sm:text-5xl">

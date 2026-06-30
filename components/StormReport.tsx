@@ -150,6 +150,31 @@ export function StormReport({ data }: { data: StormData }) {
         </p>
       )}
 
+      {/* Claim-window urgency — the real clock, up top */}
+      {sigRecent &&
+        (() => {
+          const ago = Math.max(1, Math.round(monthsAgo(sigRecent.date)));
+          const left = Math.max(0, 12 - ago);
+          return (
+            <div className="mt-4 rounded-card border border-ember bg-ember/10 p-4">
+              <div className="flex items-center gap-2">
+                <svg viewBox="0 0 24 24" className="h-5 w-5 fill-ember" aria-hidden>
+                  <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 5h-2v6l5 3 1-1.7-4-2.3z" />
+                </svg>
+                <span className="font-display text-sm font-bold uppercase tracking-wider text-ember">
+                  {left > 0 ? `~${left} month${left === 1 ? "" : "s"} left to file` : "Your filing window may have closed"}
+                </span>
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-fg-inv">
+                A {sigRecent.size}&quot; hail event hit your area on{" "}
+                {fmtDate(sigRecent.date)} — about {ago} month{ago === 1 ? "" : "s"} ago.
+                Most Texas policies only give you ~12 months from the date of loss
+                to file. {left > 0 ? "Don't let the window close and end up paying for the roof yourself." : "It may not be too late — but get it inspected now."}
+              </p>
+            </div>
+          );
+        })()}
+
       {/* Real map of where hail hit around the address */}
       {data.home && pts.length > 0 && (
         <div className="mt-5 overflow-hidden rounded-card border border-line">
@@ -204,20 +229,6 @@ export function StormReport({ data }: { data: StormData }) {
           both.
         </p>
       </div>
-
-      {/* Claim-window urgency */}
-      {sigRecent && (
-        <div className="mt-4 rounded-card border border-ember/50 bg-ember/10 p-4">
-          <p className="text-sm text-fg-inv">
-            <strong className="text-ember">Don&apos;t wait:</strong> a{" "}
-            {sigRecent.size}&quot; hail event hit ~{Math.round(monthsAgo(sigRecent.date))}{" "}
-            month{Math.round(monthsAgo(sigRecent.date)) === 1 ? "" : "s"} ago
-            ({fmtDate(sigRecent.date)}). Many Texas policies require filing a hail
-            claim within a year of the date of loss — once that window closes, you
-            pay for the roof yourself.
-          </p>
-        </div>
-      )}
 
       {/* Recent timeline */}
       {(data.recent?.length ?? 0) > 0 && (
