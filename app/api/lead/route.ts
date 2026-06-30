@@ -159,6 +159,24 @@ export async function POST(req: Request) {
     // await createJobberRequest(lead);
   }
 
+  // --- 3. Lead webhook -------------------------------------------------------
+  // Fire the full lead to a webhook (e.g. a Zapier "Catch Hook") so it can
+  // trigger an INSTANT auto-text to the customer via CallRail (Message Flow /
+  // Messaging) or any other automation. Speed-to-lead by SMS beats email.
+  // Set LEAD_WEBHOOK_URL to a Zapier catch-hook (or Make/n8n) URL.
+  const webhook = process.env.LEAD_WEBHOOK_URL;
+  if (webhook) {
+    try {
+      await fetch(webhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(lead),
+      });
+    } catch (err) {
+      console.error("[lead] webhook failed", err);
+    }
+  }
+
   return NextResponse.json({ ok: true });
 }
 
