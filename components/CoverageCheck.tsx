@@ -232,7 +232,7 @@ export function CoverageCheck() {
               <input name="phone" required type="tel" placeholder="Phone" className={inputBase} autoComplete="tel" />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <input name="email" type="email" placeholder="Email (optional)" className={inputBase} autoComplete="email" />
+              <input name="email" type="email" placeholder="Email (we'll send your details)" className={inputBase} autoComplete="email" />
               <input name="zip" placeholder="ZIP code" className={inputBase} inputMode="numeric" autoComplete="postal-code" />
             </div>
             <input type="text" name="company_website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />

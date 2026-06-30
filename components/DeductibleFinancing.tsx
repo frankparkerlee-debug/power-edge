@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 /**
  * Deductible-financing selling point. COMPLIANT framing (verified against Texas
  * HB 2102 / Bus. & Comm. Code §27.02): financing a deductible is legal because
@@ -27,6 +29,12 @@ export function DeductibleFinancing({ className = "" }: { className?: string }) 
             deductible over time — we never waive it (that&apos;s illegal in
             Texas, and following the law protects you).
           </p>
+          <Link
+            href="/guides/roof-deductible-financing-texas"
+            className="mt-2 inline-block font-display text-sm font-bold text-bolt hover:text-bolt-hi"
+          >
+            See how deductible financing works →
+          </Link>
         </div>
       </div>
     </div>

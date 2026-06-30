@@ -237,6 +237,69 @@ export const guides: Guide[] = [
       sub: "Licensed Texas electrical contractor (TECL #39773) that also does your roof. Get a free, no-pressure inspection.",
     },
   },
+
+  {
+    slug: "roof-deductible-financing-texas",
+    title: "Can't Cover Your Roof Deductible? How Financing Works in Texas",
+    h1: "How roof deductible financing works in Texas",
+    description:
+      "If a storm damaged your roof, you pay your deductible and insurance covers the rest — and you can finance that deductible into monthly payments. Here's how it works, and why it's legal.",
+    category: "Insurance",
+    datePublished: "2026-06-30",
+    readMins: 4,
+    intro:
+      "A storm claim means you usually pay only your deductible. But if even that's tough to cover up front, you don't have to wait — here's how deductible financing lets you get your roof replaced now.",
+    sections: [
+      {
+        h: "Do I have to pay my deductible?",
+        p: [
+          "Yes. By Texas law you must pay your full insurance deductible on a roof claim — there's no legal way around it. Any contractor who offers to \"waive,\" \"eat,\" or \"cover\" your deductible is breaking the law (HB 2102) and putting you at risk. We don't do that.",
+        ],
+      },
+      {
+        h: "What is deductible financing?",
+        p: [
+          "Deductible financing is simply a payment plan for your deductible. Instead of paying the whole amount up front, you spread it into smaller monthly payments — but you still pay it in full. It's financing, not waiving, which is exactly why it's legal and legitimate.",
+        ],
+      },
+      {
+        h: "Why finance my deductible?",
+        p: [
+          "Two reasons. First, timing: storm damage gets worse with every rain, and Texas claims have filing deadlines — financing lets you get the roof done now instead of waiting until you've saved the full deductible. Second, cash flow: a new roof for low monthly payments (often with little or nothing down) is easier on your budget than a lump sum.",
+        ],
+      },
+      {
+        h: "Is deductible financing legal in Texas?",
+        p: [
+          "Yes. Texas HB 2102 prohibits contractors from waiving, paying, absorbing, or rebating your deductible — but it does not prohibit financing it. As long as you pay your full deductible (over time, through a payment plan), you and the contractor are fully compliant.",
+        ],
+      },
+      {
+        h: "How PowerEdge helps",
+        p: [
+          "We document your storm damage, work directly with your adjuster, handle the claim by the book, and can connect you with deductible financing so a tight month doesn't stand between you and a sound roof. You pay your full deductible — we never waive it.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: "Can a roofer pay or waive my deductible in Texas?",
+        a: "No — waiving, paying, absorbing, or rebating a deductible is illegal in Texas (HB 2102, a Class B misdemeanor). You must pay your full deductible. Financing it into payments is legal because you still pay it in full.",
+      },
+      {
+        q: "Is financing my roof deductible legal?",
+        a: "Yes. HB 2102 bans waiving the deductible, not financing it. A payment plan where you pay your full deductible over time is fully compliant.",
+      },
+      {
+        q: "Do I need money down to finance my deductible?",
+        a: "Often little or nothing down, depending on the program. You still pay your full deductible — just spread into monthly payments. Ask us about current options.",
+      },
+    ],
+    cta: {
+      heading: "Get your roof now — finance your deductible.",
+      sub: "Free inspection, claim handled by the book, and financing options so your deductible isn't a roadblock.",
+    },
+  },
 ];
 
 export function getGuide(slug: string) {

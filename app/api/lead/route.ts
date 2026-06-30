@@ -95,6 +95,57 @@ export async function POST(req: Request) {
     } catch (err) {
       console.error("[lead] email send failed", err);
     }
+
+    // 1b. Instant auto-response to the CUSTOMER (speed-to-lead — sets
+    // expectations, reduces re-shopping). Only when they gave an email.
+    if (lead.email) {
+      try {
+        await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${resendKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: `PowerEdge <hello@${site.domain}>`,
+            to: [lead.email],
+            replyTo: site.email,
+            subject: "We've got your request — PowerEdge",
+            html: `
+              <p>Hi ${escapeHtml(lead.name.split(" ")[0] || "there")},</p>
+              <p>Thanks for reaching out to ${site.legalName}. We've received your request${lead.service ? ` about <strong>${escapeHtml(lead.service)}</strong>` : ""} and a licensed member of our team will call you shortly — usually within the hour during business hours.</p>
+              <p>Need us sooner? Call or text <strong>${site.textNumber}</strong>.</p>
+              <p>— PowerEdge · Licensed TX electrical contractor (TECL #${site.teclLicense}) · ${site.serviceArea}</p>
+              <p style="color:#888;font-size:12px">You're receiving this because you requested contact at ${site.domain}.</p>
+            `,
+          }),
+        });
+      } catch (err) {
+        console.error("[lead] customer auto-response failed", err);
+      }
+
+      // 1c. Add the lead to the Resend audience for nurture campaigns.
+      const audienceId = process.env.RESEND_AUDIENCE_ID;
+      if (audienceId) {
+        try {
+          await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${resendKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: lead.email,
+              first_name: lead.name.split(" ")[0] || "",
+              last_name: lead.name.split(" ").slice(1).join(" ") || "",
+              unsubscribed: false,
+            }),
+          });
+        } catch (err) {
+          console.error("[lead] audience add failed", err);
+        }
+      }
+    }
   } else {
     console.log("[lead] (no RESEND_API_KEY — logging only)", lead);
   }

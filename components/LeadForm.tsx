@@ -89,7 +89,7 @@ export function LeadForm({
         <input
           name="email"
           type="email"
-          placeholder="Email (optional)"
+          placeholder="Email (we'll send your details)"
           className={inputBase}
           autoComplete="email"
         />
