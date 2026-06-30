@@ -7,10 +7,9 @@ export const site = {
   legalEntity: "Power Edge, LLC", // registered entity (formerly Solar Shield LLC) — used in legal/SMS copy
   tagline: "Roofing and electrical, under one license you can actually verify.",
   // Primary + secondary lines pulled from the current live site.
-  phone: "469-689-0614",
-  phoneSecondary: "469-402-0396",
-  phoneHref: "tel:+14696890614",
-  // Dedicated CallRail text-message line (A2P 10DLC registered).
+  phone: "469-277-9594",
+  phoneHref: "tel:+14692779594",
+  // Text line = the floating-bar pool number (per Parker).
   textNumber: "469-277-9594",
   textHref: "sms:+14692779594",
   email: "info@poweredgetx.com", // TODO(parker): confirm the real inbox for web leads

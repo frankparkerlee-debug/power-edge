@@ -9,11 +9,10 @@ import Script from "next/script";
  */
 export function Analytics() {
   const ga = process.env.NEXT_PUBLIC_GA_ID;
-  // CallRail dynamic number insertion (DNI) — public client script, safe to
-  // ship. Env var can override if the account/snippet ever changes.
-  const callrail =
-    process.env.NEXT_PUBLIC_CALLRAIL_SRC ||
-    "//cdn.callrail.com/companies/387742686/2f03333e58cf8b31a3b5/12/swap.js";
+  // CallRail swap script intentionally OFF: we use static per-page tracking
+  // numbers (placed per route) instead of session-level dynamic swapping.
+  // Set NEXT_PUBLIC_CALLRAIL_SRC to re-enable the swap method if ever needed.
+  const callrail = process.env.NEXT_PUBLIC_CALLRAIL_SRC;
 
   return (
     <>

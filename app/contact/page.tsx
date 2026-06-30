@@ -37,9 +37,6 @@ export default function ContactPage() {
               >
                 {site.phone}
               </a>
-              <div className="text-sm text-fg-inv-dim">
-                or {site.phoneSecondary}
-              </div>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
