@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SmsConsent } from "./SmsConsent";
 import { AddressAutocomplete } from "./AddressAutocomplete";
 import { RoofMap } from "./RoofMap";
+import { DeductibleFinancing } from "./DeductibleFinancing";
 import { leadContext } from "@/lib/leadContext";
 import { track } from "@/lib/analytics";
 import { site } from "@/lib/site";
@@ -315,16 +316,7 @@ export function RoofEstimate() {
                 )}
               </div>
 
-              <div className="mt-4 rounded-card border border-line bg-ink p-5">
-                <p className="text-sm leading-relaxed text-fg-inv">
-                  <strong className="text-bolt">
-                    Don&apos;t want to pay it up front?
-                  </strong>{" "}
-                  Ask about financing your deductible into low monthly payments —
-                  $0-down options available. (That&apos;s financing, not waiving —
-                  waiving a deductible is illegal in Texas.)
-                </p>
-              </div>
+              <DeductibleFinancing className="mt-4" />
 
               <p className="mt-4 text-sm leading-relaxed text-fg-inv-dim">
                 We document the damage, work directly with your adjuster, and

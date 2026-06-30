@@ -1,6 +1,7 @@
 // Rich storm-report visuals shown after an address check. All derived from the
 // free NWS data /api/storm-check already returns — no extra APIs.
 import { HailMap } from "./HailMap";
+import { DeductibleFinancing } from "./DeductibleFinancing";
 
 type MapPt = { size: number; miles: number; bearing: number; lat: number; lon: number };
 type Event = {
@@ -217,6 +218,9 @@ export function StormReport({ data }: { data: StormData }) {
         <p className="mt-1.5 text-sm text-fg-inv-dim">{tier.note}</p>
         <HailScale size={largestSize} />
       </div>
+
+      {/* Deductible financing — the selling feature (compliant framing) */}
+      <DeductibleFinancing className="mt-4" />
 
       {/* Solar — hail damages panels too, and we're licensed for both */}
       <div className="mt-4 rounded-card border border-line bg-ink p-4">
