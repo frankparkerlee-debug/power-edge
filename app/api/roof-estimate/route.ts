@@ -114,6 +114,35 @@ function estimateFromFootprint(footprint: number) {
   };
 }
 
+/** Google Solar API gives the ACTUAL roof surface area (pitch already baked in)
+ *  from aerial/satellite imagery — no footprint-to-roof guessing needed. */
+function estimateFromRoofSqft(roofSqft: number) {
+  const sq = (roofSqft / 100) * WASTE; // squares incl. waste/cuts
+  const round = (n: number) => Math.round(n / 250) * 250;
+  const s = Math.round(sq * 10) / 10;
+  return { squaresLow: s, squaresHigh: s, low: round(sq * RATE_LOW), high: round(sq * RATE_HIGH) };
+}
+
+async function measureSatellite(lat: number, lon: number): Promise<number | null> {
+  const key = process.env.GOOGLE_SOLAR_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
+  if (!key) return null;
+  try {
+    const url =
+      `https://solar.googleapis.com/v1/buildingInsights:findClosest?location.latitude=${lat}&location.longitude=${lon}&requiredQuality=LOW&key=${key}`;
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(9000),
+      next: { revalidate: 2592000 }, // 30d — roofs don't change; controls cost
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const m2 = data?.solarPotential?.wholeRoofStats?.areaMeters2;
+    if (!m2 || m2 < 30) return null;
+    return Math.round(m2 * 10.7639); // m² → ft²
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(req: Request) {
   let body: {
     address?: string;
@@ -151,6 +180,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, source: "need_manual", matched: null });
   }
 
+  // 1. Satellite measurement (Google Solar API) — most accurate; actual roof
+  //    surface area from aerial imagery. Used when GOOGLE_SOLAR_API_KEY is set.
+  const roofSqft = await measureSatellite(geo.lat, geo.lon);
+  if (roofSqft) {
+    return NextResponse.json({
+      ok: true,
+      source: "satellite",
+      matched: geo.matched,
+      approximate: geo.approximate,
+      home: { lat: geo.lat, lon: geo.lon },
+      roofSqft,
+      rate: { low: RATE_LOW, high: RATE_HIGH },
+      ...estimateFromRoofSqft(roofSqft),
+    });
+  }
+
+  // 2. Free fallback: OpenStreetMap building footprint × pitch.
   const looksLikeStreet = /\d{1,6}\s+\S+/.test(address);
   if (!geo.approximate || looksLikeStreet) {
     const footprint = await footprintSqft(geo.lat, geo.lon);

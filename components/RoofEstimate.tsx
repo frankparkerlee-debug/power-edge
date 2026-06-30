@@ -14,9 +14,10 @@ import { track } from "@/lib/analytics";
 
 type Est = {
   ok: boolean;
-  source?: "measured" | "manual" | "need_manual";
+  source?: "satellite" | "measured" | "manual" | "need_manual";
   matched?: string | null;
   footprintSqft?: number;
+  roofSqft?: number;
   squaresLow?: number;
   squaresHigh?: number;
   low?: number;
@@ -183,7 +184,11 @@ export function RoofEstimate() {
       {phase === "result" && est && sub !== "done" && (
         <>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-bolt px-3 py-1 text-xs font-bold uppercase tracking-wider text-bolt">
-            {est.source === "measured" ? "Measured from aerial data" : "Estimate"}
+            {est.source === "satellite"
+              ? "Measured from satellite imagery"
+              : est.source === "measured"
+                ? "Measured from aerial data"
+                : "Estimate"}
           </div>
           <h2 className="font-display text-2xl font-bold leading-tight text-fg-inv sm:text-3xl">
             Estimated roof replacement:{" "}
@@ -197,12 +202,22 @@ export function RoofEstimate() {
 
           <div className="mt-5 grid grid-cols-2 gap-3">
             <Stat
-              big={`~${est.squaresLow}–${est.squaresHigh}`}
+              big={
+                est.squaresLow === est.squaresHigh
+                  ? `~${est.squaresLow}`
+                  : `~${est.squaresLow}–${est.squaresHigh}`
+              }
               small="Roofing squares (est.)"
             />
             <Stat
-              big={`${est.footprintSqft?.toLocaleString()} ft²`}
-              small={est.source === "measured" ? "Measured footprint" : "Footprint (from size)"}
+              big={`${(est.roofSqft ?? est.footprintSqft)?.toLocaleString()} ft²`}
+              small={
+                est.source === "satellite"
+                  ? "Measured roof area"
+                  : est.source === "measured"
+                    ? "Measured footprint"
+                    : "Footprint (from size)"
+              }
             />
           </div>
 
