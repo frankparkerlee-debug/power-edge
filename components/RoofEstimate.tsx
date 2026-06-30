@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { SmsConsent } from "./SmsConsent";
 import { AddressAutocomplete } from "./AddressAutocomplete";
+import { RoofMap } from "./RoofMap";
 import { leadContext } from "@/lib/leadContext";
 import { track } from "@/lib/analytics";
+import { site } from "@/lib/site";
 
 /**
  * Instant roof estimate. Address → auto-measures the roof (OSM footprint) and
@@ -19,10 +21,12 @@ type Est = {
   matched?: string | null;
   footprintSqft?: number;
   roofSqft?: number;
+  pitchDeg?: number | null;
   squaresLow?: number;
   squaresHigh?: number;
   low?: number;
   high?: number;
+  home?: { lat: number; lon: number } | null;
 };
 
 type Phase = "input" | "manual" | "result";
@@ -199,6 +203,20 @@ export function RoofEstimate() {
             <p className="mt-2 text-sm text-fg-inv-dim">{est.matched}</p>
           )}
 
+          {est.home && (
+            <div className="mt-5 overflow-hidden rounded-card border border-line">
+              <div className="h-52">
+                <RoofMap home={est.home} />
+              </div>
+              <div className="bg-ink px-4 py-2 text-[11px] text-fg-inv-dim">
+                Your roof, from above
+                {est.source === "satellite" && est.pitchDeg
+                  ? ` · measured pitch ~${est.pitchDeg}°`
+                  : ""}
+              </div>
+            </div>
+          )}
+
           <div className="mt-5 grid grid-cols-2 gap-3">
             <Stat
               big={
@@ -265,13 +283,24 @@ export function RoofEstimate() {
               <input name="zip" placeholder="ZIP code" className={inputBase} inputMode="numeric" autoComplete="postal-code" />
             </div>
             <input type="text" name="company_website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
-            <button
-              type="submit"
-              disabled={sub === "submitting"}
-              className="w-full rounded-md bg-bolt px-6 py-4 font-display text-base font-bold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60"
-            >
-              {sub === "submitting" ? "Sending…" : "Get my free exact quote"}
-            </button>
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                disabled={sub === "submitting"}
+                className="flex-1 rounded-md bg-bolt px-6 py-4 font-display text-base font-bold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60"
+              >
+                {sub === "submitting" ? "Sending…" : "Get my FREE quote"}
+              </button>
+              <a
+                href={site.textHref}
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-line px-5 py-4 font-display text-base font-bold text-fg-inv transition-colors hover:border-bolt hover:text-bolt"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden>
+                  <path d="M4 4h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H8l-4 4V5a1 1 0 0 1 1-1z" />
+                </svg>
+                Text us
+              </a>
+            </div>
             {sub === "error" && (
               <p className="text-sm text-ember">Something went wrong — please call us.</p>
             )}

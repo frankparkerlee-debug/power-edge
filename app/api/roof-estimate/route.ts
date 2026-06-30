@@ -123,7 +123,10 @@ function estimateFromRoofSqft(roofSqft: number) {
   return { squaresLow: s, squaresHigh: s, low: round(sq * RATE_LOW), high: round(sq * RATE_HIGH) };
 }
 
-async function measureSatellite(lat: number, lon: number): Promise<number | null> {
+async function measureSatellite(
+  lat: number,
+  lon: number,
+): Promise<{ roofSqft: number; pitchDeg: number | null } | null> {
   const key = process.env.GOOGLE_SOLAR_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
   if (!key) return null;
   try {
@@ -135,9 +138,26 @@ async function measureSatellite(lat: number, lon: number): Promise<number | null
     });
     if (!res.ok) return null;
     const data = await res.json();
+    // wholeRoofStats.areaMeters2 is the actual 3-D roof surface — pitch already
+    // baked in, so no pitch assumption is needed for the estimate.
     const m2 = data?.solarPotential?.wholeRoofStats?.areaMeters2;
     if (!m2 || m2 < 30) return null;
-    return Math.round(m2 * 10.7639); // m² → ft²
+    // Area-weighted average pitch, just to show the homeowner.
+    const segs: Array<{ pitchDegrees?: number; stats?: { areaMeters2?: number } }> =
+      data?.solarPotential?.roofSegmentStats || [];
+    let wsum = 0,
+      asum = 0;
+    for (const s of segs) {
+      const a = s?.stats?.areaMeters2 || 0;
+      if (a && typeof s.pitchDegrees === "number") {
+        wsum += s.pitchDegrees * a;
+        asum += a;
+      }
+    }
+    return {
+      roofSqft: Math.round(m2 * 10.7639), // m² → ft²
+      pitchDeg: asum ? Math.round(wsum / asum) : null,
+    };
   } catch {
     return null;
   }
@@ -182,17 +202,18 @@ export async function POST(req: Request) {
 
   // 1. Satellite measurement (Google Solar API) — most accurate; actual roof
   //    surface area from aerial imagery. Used when GOOGLE_SOLAR_API_KEY is set.
-  const roofSqft = await measureSatellite(geo.lat, geo.lon);
-  if (roofSqft) {
+  const sat = await measureSatellite(geo.lat, geo.lon);
+  if (sat) {
     return NextResponse.json({
       ok: true,
       source: "satellite",
       matched: geo.matched,
       approximate: geo.approximate,
       home: { lat: geo.lat, lon: geo.lon },
-      roofSqft,
+      roofSqft: sat.roofSqft,
+      pitchDeg: sat.pitchDeg,
       rate: { low: RATE_LOW, high: RATE_HIGH },
-      ...estimateFromRoofSqft(roofSqft),
+      ...estimateFromRoofSqft(sat.roofSqft),
     });
   }
 
