@@ -159,41 +159,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Address required" }, { status: 422 });
   }
 
-  // Temporary diagnostic — surfaces why satellite measurement isn't firing,
-  // WITHOUT exposing the key. Remove after debugging.
-  if ((body as { debug?: boolean }).debug) {
-    const key =
-      process.env.GOOGLE_SOLAR_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
-    const geo = await geocode(address).catch(() => null);
-    let status: number | null = null;
-    let m2: number | null = null;
-    let err: string | null = null;
-    if (key && geo) {
-      try {
-        const url = `https://solar.googleapis.com/v1/buildingInsights:findClosest?location.latitude=${geo.lat}&location.longitude=${geo.lon}&requiredQuality=LOW&key=${key}`;
-        const res = await fetch(url, { signal: AbortSignal.timeout(9000) });
-        status = res.status;
-        const d = await res.json();
-        m2 = d?.solarPotential?.wholeRoofStats?.areaMeters2 ?? null;
-        err = d?.error?.message ?? null;
-      } catch (e) {
-        err = String(e);
-      }
-    }
-    return NextResponse.json({
-      keyPresent: !!key,
-      keyName: process.env.GOOGLE_SOLAR_API_KEY
-        ? "GOOGLE_SOLAR_API_KEY"
-        : process.env.GOOGLE_MAPS_API_KEY
-          ? "GOOGLE_MAPS_API_KEY"
-          : null,
-      geo: geo ? { lat: geo.lat, lon: geo.lon } : null,
-      solarStatus: status,
-      roofM2: m2,
-      solarError: err,
-    });
-  }
-
   // Manual path: caller supplied home square footage.
   if (body.manualSqft && body.manualSqft > 300) {
     const stories = body.stories && body.stories > 0 ? body.stories : 1;
