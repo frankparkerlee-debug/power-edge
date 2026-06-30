@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { SmsConsent } from "./SmsConsent";
+import { AddressAutocomplete } from "./AddressAutocomplete";
 import { leadContext } from "@/lib/leadContext";
 import { track } from "@/lib/analytics";
 
@@ -109,13 +110,11 @@ export function RoofEstimate() {
             }}
             className="mt-6 space-y-3"
           >
-            <input
+            <AddressAutocomplete
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              required
-              placeholder="Street address, city, ZIP"
+              onChange={setAddress}
+              onSelect={(v) => run({ address: v })}
               className={inputBase}
-              autoComplete="street-address"
             />
             <button
               type="submit"
@@ -226,6 +225,21 @@ export function RoofEstimate() {
             pitch, premium materials, or extra tear-off can change it — your{" "}
             <strong className="text-fg-inv">exact price is free and on-site.</strong>
           </p>
+
+          <details className="mt-3 text-sm text-fg-inv-dim">
+            <summary className="cursor-pointer font-semibold text-bolt">
+              How we calculated this
+            </summary>
+            <p className="mt-2 leading-relaxed">
+              {est.source === "satellite"
+                ? `We measured your roof's surface area (~${(est.roofSqft ?? 0).toLocaleString()} sq ft) from satellite imagery, divided by 100 to get roofing "squares," added ~10% for waste and cuts, and priced at $400–$450 per square installed.`
+                : est.source === "measured"
+                  ? `We measured your building footprint (~${(est.footprintSqft ?? 0).toLocaleString()} sq ft) from aerial map data, applied a typical roof pitch and ~10% waste to estimate ${est.squaresLow}–${est.squaresHigh} squares, and priced at $400–$450 per square installed.`
+                  : `We used the home size you entered to estimate a roof footprint, applied a typical pitch and ~10% waste to get ${est.squaresLow}–${est.squaresHigh} squares, and priced at $400–$450 per square installed.`}{" "}
+              A roofing &ldquo;square&rdquo; is 100 sq ft of roof. We confirm the
+              exact measurement and price for free, on-site.
+            </p>
+          </details>
 
           <div className="mt-4 rounded-card border border-ember/50 bg-ember/10 p-4">
             <p className="text-sm text-fg-inv">

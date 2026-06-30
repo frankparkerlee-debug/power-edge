@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { SmsConsent } from "./SmsConsent";
+import { AddressAutocomplete } from "./AddressAutocomplete";
 import { leadContext } from "@/lib/leadContext";
 import { track } from "@/lib/analytics";
 import { StormReport, type StormData } from "./StormReport";
@@ -28,15 +29,14 @@ export function StormCheck() {
   const [result, setResult] = useState<Result | null>(null);
   const [sub, setSub] = useState<Sub>("idle");
 
-  async function check(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!address.trim()) return;
+  async function runCheck(addr: string) {
+    if (!addr.trim()) return;
     setLoading(true);
     try {
       const res = await fetch("/api/storm-check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address }),
+        body: JSON.stringify({ address: addr }),
       });
       const data = (await res.json()) as Result;
       setResult(data);
@@ -97,14 +97,19 @@ export function StormCheck() {
           We&apos;ll pull reported hail activity near your home from National
           Weather Service storm data — free, instant, no obligation.
         </p>
-        <form onSubmit={check} className="mt-6 space-y-3">
-          <input
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            runCheck(address);
+          }}
+          className="mt-6 space-y-3"
+        >
+          <AddressAutocomplete
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            required
+            onChange={setAddress}
+            onSelect={(v) => runCheck(v)}
             placeholder="Street address or ZIP code"
             className={inputBase}
-            autoComplete="street-address"
           />
           <button
             type="submit"

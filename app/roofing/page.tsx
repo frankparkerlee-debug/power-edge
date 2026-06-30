@@ -8,6 +8,7 @@ import {
   RelatedServices,
 } from "@/components/service-blocks";
 import { Reviews } from "@/components/Reviews";
+import { RoofEstimate } from "@/components/RoofEstimate";
 import { getService } from "@/lib/services";
 import { getServiceContent } from "@/lib/serviceContent";
 import { site } from "@/lib/site";
@@ -45,6 +46,25 @@ export default function RoofingPage() {
           <div className="mt-10">
             <FeatureList items={service.bullets} />
           </div>
+        </Container>
+      </section>
+
+      {/* Instant roof estimate — right here on the roofing page */}
+      <section className="bg-ink py-20 sm:py-28">
+        <Container className="grid gap-12 lg:grid-cols-[1fr_0.95fr] lg:items-start">
+          <div>
+            <SectionHeading
+              dark
+              kicker="Instant estimate"
+              title="What will your roof cost? Find out right now."
+              intro="Most roofers won't tell you until a salesperson is in your living room. Enter your address — we measure your roof from satellite imagery and give you an honest ballpark on the spot. If it's a storm claim, you likely just pay your deductible."
+            />
+            <p className="mt-6 text-sm text-fg-inv-dim">
+              Ballpark only — your exact price comes from a free on-site
+              measurement.
+            </p>
+          </div>
+          <RoofEstimate />
         </Container>
       </section>
 
