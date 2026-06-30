@@ -24,6 +24,10 @@ export const site = {
   googleReviewCount: "48",
   // TODO(parker): paste the public Google review/maps URL here for the "read reviews" link.
   googleReviewsUrl: "#",
+  // TODO(parker): paste your Google "write a review" link here (GBP dashboard →
+  // "Ask for reviews" → copy link; looks like https://g.page/r/XXXXXXXX/review).
+  // Powers the /review short link your team texts to customers.
+  googleWriteReviewUrl: "#",
   // TODO(parker): paste the Jobber "Request work" / booking URL the current site uses.
   jobberBookingUrl: "#",
 
