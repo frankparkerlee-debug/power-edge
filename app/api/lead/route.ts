@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { site } from "@/lib/site";
+import { enqueueLeadSequence } from "@/lib/emails";
 
 /**
  * Lead handler.
@@ -108,33 +109,24 @@ export async function POST(req: Request) {
       console.error("[lead] email send failed", err);
     }
 
-    // 1b. Instant auto-response to the CUSTOMER (speed-to-lead — sets
-    // expectations, reduces re-shopping). Only when they gave an email.
+    // 1b. Kick off the CUSTOMER nurture funnel — a designed 5-touch sequence
+    // (instant confirmation + 4 follow-ups) enqueued via Resend scheduled
+    // sends. Speed-to-lead + nurture in one shot, no DB/cron. Only when they
+    // gave an email.
     if (lead.email) {
-      try {
-        await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${resendKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: `PowerEdge <hello@${site.domain}>`,
-            to: [lead.email],
-            replyTo: site.email,
-            subject: "We've got your request — PowerEdge",
-            html: `
-              <p>Hi ${escapeHtml(lead.name.split(" ")[0] || "there")},</p>
-              <p>Thanks for reaching out to ${site.legalName}. We've received your request${lead.service ? ` about <strong>${escapeHtml(lead.service)}</strong>` : ""} and a licensed member of our team will call you shortly — usually within the hour during business hours.</p>
-              <p>Need us sooner? Call or text <strong>${site.textNumber}</strong>.</p>
-              <p>— PowerEdge · Licensed TX electrical contractor (TECL #${site.teclLicense}) · ${site.serviceArea}</p>
-              <p style="color:#888;font-size:12px">You're receiving this because you requested contact at ${site.domain}.</p>
-            `,
-          }),
-        });
-      } catch (err) {
-        console.error("[lead] customer auto-response failed", err);
-      }
+      const financing = /financ|stuck|out-of-pocket|out of pocket/i.test(
+        lead.service,
+      );
+      await enqueueLeadSequence({
+        resendKey,
+        to: lead.email,
+        ctx: {
+          firstName: lead.name.split(" ")[0] || "there",
+          service: lead.service || undefined,
+          solar: lead.solar === "yes",
+          financing,
+        },
+      });
 
       // 1c. Add the lead to the Resend audience for nurture campaigns.
       const audienceId = process.env.RESEND_AUDIENCE_ID;
