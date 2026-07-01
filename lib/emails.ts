@@ -27,6 +27,7 @@ export type LeadEmailCtx = {
   service?: string;
   solar?: boolean;
   financing?: boolean;
+  existing?: boolean; // true = already-on-the-list backfill (re-intro opener)
 };
 
 // ---- Building blocks ------------------------------------------------------
@@ -173,32 +174,50 @@ export type SequenceEmail = {
 };
 
 export const leadSequence: SequenceEmail[] = [
-  // 0 — Instant confirmation
+  // 0 — Instant confirmation (or re-intro for existing subscribers)
   {
     key: "confirm",
     delayDays: 0,
-    subject: () => "We've got it — your free roof inspection with PowerEdge",
+    subject: (c) =>
+      c.existing
+        ? "A quick hello from PowerEdge (and why it matters this season)"
+        : "We've got it — your free roof inspection with PowerEdge",
     html: (c) =>
-      shell({
-        preheader:
-          "A licensed member of our team will call you shortly to schedule.",
-        body:
-          h1(`Thanks, ${c.firstName} — we're on it.`) +
-          p(
-            `We&rsquo;ve got your request${
-              c.service ? ` about <strong>${c.service}</strong>` : ""
-            }. A licensed member of our team will call you shortly — usually within the hour during business hours — to lock in your <strong>free inspection</strong>.`,
-          ) +
-          steps([
-            "We call you to schedule — fast.",
-            "We inspect &amp; document your roof, free.",
-            "You decide. No pressure, no games.",
-          ]) +
-          p(`Can&rsquo;t wait? Call or text us at <strong>${site.phone}</strong>.`) +
-          button(`Call ${site.phone}`, site.phoneHref) +
-          (c.solar ? solarBlock() : "") +
-          verifyChip(),
-      }),
+      c.existing
+        ? shell({
+            preheader:
+              "DFW's insurance-first storm roof team — here's the 2-minute version.",
+            body:
+              h1(`Hi ${c.firstName} — a quick refresher.`) +
+              p(
+                `You&rsquo;re on our list, so here&rsquo;s the short version of who we are: <strong>DFW&rsquo;s insurance-first storm roof team</strong>. When hail hits, you typically pay just your deductible — we document the damage, coordinate with your adjuster by the book, and can even handle your solar.`,
+              ) +
+              p(
+                `Over the next couple weeks we&rsquo;ll show you exactly how it works. Want to skip the line? See if your roof already has a claim:`,
+              ) +
+              button("Check if I have a claim", BOOK_URL) +
+              verifyChip(),
+          })
+        : shell({
+            preheader:
+              "A licensed member of our team will call you shortly to schedule.",
+            body:
+              h1(`Thanks, ${c.firstName} — we're on it.`) +
+              p(
+                `We&rsquo;ve got your request${
+                  c.service ? ` about <strong>${c.service}</strong>` : ""
+                }. A licensed member of our team will call you shortly — usually within the hour during business hours — to lock in your <strong>free inspection</strong>.`,
+              ) +
+              steps([
+                "We call you to schedule — fast.",
+                "We inspect &amp; document your roof, free.",
+                "You decide. No pressure, no games.",
+              ]) +
+              p(`Can&rsquo;t wait? Call or text us at <strong>${site.phone}</strong>.`) +
+              button(`Call ${site.phone}`, site.phoneHref) +
+              (c.solar ? solarBlock() : "") +
+              verifyChip(),
+          }),
   },
 
   // 1 — How a Texas storm claim works
@@ -270,10 +289,34 @@ export const leadSequence: SequenceEmail[] = [
       }),
   },
 
-  // 3 — Urgency + financing
+  // 4 — Deductible financing (the money objection)
+  {
+    key: "deductible-financing",
+    delayDays: 5,
+    subject: () => "The deductible isn't the wall you think it is",
+    html: () =>
+      shell({
+        preheader: "Finance it, $0 down, and get the roof done now.",
+        body:
+          h1("Short on the deductible? That's not a dead end.") +
+          p(
+            `Texas wind/hail deductibles run 1&ndash;2% of your home&rsquo;s value — often <strong>$5,000&ndash;$10,000</strong>. If that number is the only thing between you and a sound roof, here&rsquo;s the fix:`,
+          ) +
+          steps([
+            "<strong>Finance your deductible</strong> — $0 down, low monthly payments.",
+            "<strong>We schedule the work now</strong> — you don&rsquo;t wait to save up.",
+            "<strong>You still pay it in full</strong>, just over time. (Waiving it is illegal in Texas; financing is smart.)",
+          ]) +
+          p(`Already have an estimate from another roofer? Bring it — we can do the work and finance it.`) +
+          button("See my deductible financed", FINANCE_URL) +
+          verifyChip(),
+      }),
+  },
+
+  // 5 — Urgency: you can lose the claim
   {
     key: "claim-clock",
-    delayDays: 6,
+    delayDays: 8,
     subject: () => "Wait too long and you lose the claim entirely",
     html: (c) =>
       shell({
@@ -298,38 +341,90 @@ export const leadSequence: SequenceEmail[] = [
       }),
   },
 
-  // 4 — Soft last touch
+  // 6 — Witty re-engagement
   {
-    key: "still-thinking",
+    key: "did-we-lose-you",
     delayDays: 12,
-    subject: () => "Still thinking it over?",
+    subject: () => "Did we lose you?",
     html: (c) =>
       shell({
-        preheader: "No pressure — we're here when you're ready.",
+        preheader: "Your roof's still up there. We checked.",
         body:
-          h1(`No rush, ${c.firstName}.`) +
+          h1(`Did we lose you, ${c.firstName}?`) +
           p(
-            `If you&rsquo;re still weighing it, that&rsquo;s fair. When you&rsquo;re ready, we&rsquo;ll give you an honest, free inspection — and tell you straight if your roof is fine.`,
+            `We&rsquo;ve knocked on your inbox a few times and heard&hellip; crickets. Which means one of three things:`,
+          ) +
+          steps([
+            "Your roof is flawless — genuinely, congrats.",
+            "You&rsquo;re already handling it.",
+            "Life got loud and the hail slipped your mind.",
+          ]) +
+          p(
+            `If it&rsquo;s that last one, no judgment — but the storm clock keeps ticking. Sixty seconds tells you whether you&rsquo;ve still got a claim, and then we&rsquo;ll quiet down.`,
+          ) +
+          button("Check my roof — 60 seconds", BOOK_URL) +
+          verifyChip(),
+      }),
+  },
+
+  // 7 — Trust / objection (witty)
+  {
+    key: "storm-chaser",
+    delayDays: 17,
+    subject: () => "About the guy in the pickup with the clipboard",
+    html: (c) =>
+      shell({
+        preheader: "Texas doesn't license roofers. We're the one you can verify.",
+        body:
+          h1("Not every 'roofer' is a roofer.") +
+          p(
+            `After a storm your street fills with trucks and clipboards. The uncomfortable truth: <strong>Texas doesn&rsquo;t license roofers</strong> — a magnet sign and a ladder is the whole barrier to entry, and plenty vanish before the warranty ever matters.`,
           ) +
           p(
-            `You pay your deductible, we document and coordinate with your adjuster by the book, financing&rsquo;s there if you need it${
-              c.solar ? ", and we handle your solar too" : ""
-            }. That&rsquo;s it.`,
+            `We&rsquo;re the opposite kind of company: a licensed electrical contractor (TECL #${site.teclLicense}) you can look up on the state&rsquo;s site in ten seconds, ${site.googleRating}&#9733; across ${site.googleReviewCount} reviews, one accountable crew for your whole roof${
+              c.solar ? " — solar included" : ""
+            }. Verify us before you trust anyone knocking.`,
           ) +
-          button("Book my free inspection", BOOK_URL) +
+          button("Verify us, then book a free inspection", BOOK_URL) +
+          verifyChip(),
+      }),
+  },
+
+  // 8 — Witty last call
+  {
+    key: "last-call",
+    delayDays: 23,
+    subject: () => "Okay, we can take a hint",
+    html: (c) =>
+      shell({
+        preheader: "Last one — the offer stands whenever you're ready.",
+        body:
+          h1("We'll stop crowding your inbox.") +
           p(
-            `Or just call or text <strong>${site.phone}</strong> — a real person picks up.`,
+            `This is the part where we gracefully back off. No hard feelings — your roof&rsquo;s still up there, the free inspection still stands, and we&rsquo;re exactly one text away the day you want it.`,
           ) +
+          p(
+            `If a storm ever does a number on your roof, you know who to call: the licensed crew that <em>shows you the license</em>${
+              c.solar ? " and handles your solar too" : ""
+            }. Until then, ${c.firstName}, take care.`,
+          ) +
+          button("Actually, I'm ready — book it", BOOK_URL) +
+          p(`Or text <strong>${site.phone}</strong>. That&rsquo;s it. Promise.`) +
           verifyChip(),
       }),
   },
 ];
 
 // ---- Enqueue the sequence via Resend scheduled sends ----------------------
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 /**
- * Sends email 0 immediately and schedules 1..n via Resend `scheduled_at`.
- * Fully fire-and-forget; failures are logged, never thrown, so a lead is never
- * lost to an email hiccup. Requires RESEND_API_KEY.
+ * Enqueues the whole funnel for one recipient: email 0 sends now, 1..n are
+ * scheduled via Resend `scheduled_at` (day-offset from now, so the timer starts
+ * today). Sent SEQUENTIALLY with a throttle to stay under Resend's rate limit
+ * (free tier ~2 req/s). Failures are logged, never thrown. Intended to be
+ * fire-and-forget (don't block the response) — safe on Render's persistent
+ * Node server. Requires RESEND_API_KEY.
  */
 export async function enqueueLeadSequence(opts: {
   resendKey: string;
@@ -340,13 +435,13 @@ export async function enqueueLeadSequence(opts: {
   const from = `PowerEdge <hello@${site.domain}>`;
   const now = Date.now();
 
-  await Promise.allSettled(
-    leadSequence.map((email) => {
-      const scheduledAt =
-        email.delayDays > 0
-          ? new Date(now + email.delayDays * 86400000).toISOString()
-          : undefined;
-      return fetch("https://api.resend.com/emails", {
+  for (const email of leadSequence) {
+    const scheduledAt =
+      email.delayDays > 0
+        ? new Date(now + email.delayDays * 86400000).toISOString()
+        : undefined;
+    try {
+      await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${resendKey}`,
@@ -364,10 +459,10 @@ export async function enqueueLeadSequence(opts: {
           },
           tags: [{ name: "sequence", value: email.key }],
         }),
-      }).catch((err) => {
-        console.error(`[emails] failed to enqueue ${email.key}`, err);
-        return null;
       });
-    }),
-  );
+    } catch (err) {
+      console.error(`[emails] failed to enqueue ${email.key} for ${to}`, err);
+    }
+    await sleep(600); // ~1.6/s — under Resend's 2/s free-tier limit
+  }
 }

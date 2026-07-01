@@ -117,7 +117,9 @@ export async function POST(req: Request) {
       const financing = /financ|stuck|out-of-pocket|out of pocket/i.test(
         lead.service,
       );
-      await enqueueLeadSequence({
+      // Fire-and-forget: the throttled sequence runs in the background on
+      // Render's persistent server so the form returns immediately.
+      void enqueueLeadSequence({
         resendKey,
         to: lead.email,
         ctx: {
@@ -126,7 +128,7 @@ export async function POST(req: Request) {
           solar: lead.solar === "yes",
           financing,
         },
-      });
+      }).catch((err) => console.error("[lead] sequence failed", err));
 
       // 1c. Add the lead to the Resend audience for nurture campaigns.
       const audienceId = process.env.RESEND_AUDIENCE_ID;
