@@ -97,12 +97,12 @@ export const services: Service[] = [
     title: "Roofing repair & replacement",
     short: "Roofing",
     blurb:
-      "Residential and commercial roofs — repairs, full replacements, and storm/insurance claims handled by the book.",
+      "Residential and commercial roofs — repairs, full replacements, and storm/insurance claims documented by the book.",
     pricingMode: "quote",
     bullets: [
       "Free, no-pressure roof inspection with photo documentation",
       "Residential re-roofs and commercial systems",
-      "Storm & hail insurance claims handled to the letter of Texas law",
+      "Storm & hail insurance claims documented to the letter of Texas law",
       "4 crews — capacity for up to 100 roofs a month, so you're not waiting weeks",
     ],
   },

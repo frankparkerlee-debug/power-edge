@@ -12,6 +12,7 @@ const nav = [
   { href: "/commercial", label: "Commercial" },
   { href: "/roof-estimate", label: "Roof Estimate", accent: true },
   { href: "/storm-check", label: "Storm Check", accent: true },
+  { href: "/financing", label: "Financing", accent: true },
 ];
 
 export function Header() {

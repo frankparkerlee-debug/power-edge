@@ -47,6 +47,10 @@ export async function POST(req: Request) {
     zip: (body.zip || "").trim(),
     service: (body.service || "").trim(),
     message: (body.message || "").trim(),
+    // Solar flag — set by the "I have solar panels" qualifier on every form.
+    // Tells the team to scope detach & reset, document the panels, and add the
+    // claimable D&R supplement line (the ~$3–10k most roofers miss).
+    solar: body.solar === "yes" ? "yes" : "",
     // Attribution — so you know which page/campaign produced the lead.
     page_path: (body.page_path || "").trim(),
     referrer: (body.referrer || "").trim(),
@@ -76,14 +80,22 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           from: `PowerEdge Site <leads@${site.domain}>`,
           to: [to],
-          subject: `New lead: ${lead.name} — ${lead.service || "general"}`,
+          subject: `New lead: ${lead.name} — ${lead.service || "general"}${
+            lead.solar === "yes" ? " ☀️ SOLAR" : ""
+          }`,
           html: `
             <h2>New website lead</h2>
+            ${
+              lead.solar === "yes"
+                ? `<p style="background:#fff3cd;border:1px solid #ffe08a;border-radius:8px;padding:12px 14px;margin:0 0 12px"><strong>☀️ SOLAR HOME</strong> — scope the panel <strong>detach &amp; reset</strong>, photograph the array, and add the D&amp;R supplement line to the claim (the ~$3–10k most roofers miss).</p>`
+                : ""
+            }
             <p><strong>Name:</strong> ${escapeHtml(lead.name)}</p>
             <p><strong>Phone:</strong> ${escapeHtml(lead.phone)}</p>
             <p><strong>Email:</strong> ${escapeHtml(lead.email) || "—"}</p>
             <p><strong>ZIP:</strong> ${escapeHtml(lead.zip) || "—"}</p>
             <p><strong>Service:</strong> ${escapeHtml(lead.service) || "—"}</p>
+            <p><strong>Solar:</strong> ${lead.solar === "yes" ? "Yes — has panels" : "—"}</p>
             <p><strong>Message:</strong> ${escapeHtml(lead.message) || "—"}</p>
             <hr/>
             <p><strong>Source:</strong> ${escapeHtml(sourceLine)}</p>

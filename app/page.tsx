@@ -3,6 +3,8 @@ import { Button, Container, Kicker, SectionHeading, Stars } from "@/components/u
 import { LeadForm } from "@/components/LeadForm";
 import { Reviews } from "@/components/Reviews";
 import { Gallery } from "@/components/Gallery";
+import { DeductibleFinancing } from "@/components/DeductibleFinancing";
+import { FinancingCalculator } from "@/components/FinancingCalculator";
 import { site } from "@/lib/site";
 import { services, electricalMenu } from "@/lib/services";
 import { cities } from "@/lib/cities";
@@ -12,12 +14,14 @@ export default function Home() {
     <>
       <Hero />
       <TrustBar />
+      <StormRestoration />
+      <StuckBand />
       <Wedge />
-      <ServicesGrid />
-      <RoofEstimateBand />
+      <SolarReadyBand />
       <RoofCheckBand />
+      <RoofEstimateBand />
+      <ServicesGrid />
       <PricingTeaser />
-      <StormBand />
       <Team />
       <Gallery />
       <Reviews />
@@ -36,25 +40,27 @@ function Hero() {
       <Container className="relative grid items-center gap-14 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
         <div>
           <Kicker className="mb-6">
-            Roofing + Electrical · Dallas–Fort Worth
+            Storm &amp; hail roof restoration · Dallas–Fort Worth
           </Kicker>
           <h1 className="font-display text-[2.7rem] leading-[0.95] text-fg-inv sm:text-6xl md:text-[4.2rem]">
-            Two trades.
+            Hail hit your roof?
             <br />
-            <span className="bolt-underline">One license you can check.</span>
+            <span className="bolt-underline">You likely just pay your deductible.</span>
           </h1>
           <p className="mt-7 max-w-xl text-lg leading-relaxed text-fg-inv-dim">
-            Roofing and electrical from a single licensed Texas crew — so
-            there&apos;s no finger-pointing, and no wondering whether the people
-            on your roof are the real deal.
+            PowerEdge is DFW&apos;s insurance-first storm restoration team. We
+            document the damage, coordinate with your adjuster by the book, and
+            can{" "}
+            <strong className="text-fg-inv">finance your deductible</strong> — so
+            a sound new roof doesn&apos;t wait on cash up front.
           </p>
 
-          {/* Crossover pillars — make the two-trades-plus-solar scope explicit */}
+          {/* Conversion pillars — storm-first, financing, solar-ready */}
           <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4 border-t border-line pt-6">
             {[
-              { t: "Roofing", d: "Repair & replacement" },
-              { t: "Electrical", d: "Service & panels" },
-              { t: "Solar", d: "Repair & replacement" },
+              { t: "Free storm inspection", d: "Documented for your claim" },
+              { t: "Deductible financing", d: "$0 down to get started" },
+              { t: "Solar + roof, one license", d: "Most roofers can't" },
             ].map((p) => (
               <div key={p.t} className="flex items-start gap-2.5">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 bg-bolt" />
@@ -69,9 +75,9 @@ function Hero() {
           </div>
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Button href="#quote">Get a free inspection</Button>
-            <Button href={site.phoneHref} variant="ghost">
-              Call {site.phone}
+            <Button href="#quote">Book my free inspection</Button>
+            <Button href="/storm-check" variant="ghost">
+              Check your address for hail →
             </Button>
           </div>
 
@@ -102,14 +108,14 @@ function Hero() {
         <div id="quote" className="scroll-mt-24">
           <div className="rounded-card border border-line bg-ink-2 p-7 shadow-2xl">
             <h2 className="font-display text-2xl font-bold text-fg-inv">
-              Get your free quote
+              Book your free storm inspection
             </h2>
             <p className="mt-1.5 text-sm text-fg-inv-dim">
-              Free roof inspections. Up-front electrical pricing. A real person
-              calls you back fast.
+              Hail or wind damage? We&apos;ll inspect it free, document it for
+              your claim, and give you a straight answer — fast.
             </p>
             <div className="mt-6">
-              <LeadForm compact />
+              <LeadForm compact defaultService="Storm / insurance claim" />
             </div>
           </div>
         </div>
@@ -436,25 +442,173 @@ function PricingTeaser() {
   );
 }
 
-/* ----------------------------------------------------------- STORM BAND */
-function StormBand() {
+/* ------------------------------------------------- STORM RESTORATION */
+function StormRestoration() {
+  const steps = [
+    {
+      h: "We inspect and document — free",
+      p: "Photos, measurements, and a written damage assessment, so your claim is built on evidence, not guesswork.",
+    },
+    {
+      h: "You file; we coordinate with your adjuster",
+      p: "We meet your adjuster on-site and document the full scope so nothing legitimate gets missed. We don't act as your public adjuster — that's the law, and it protects you.",
+    },
+    {
+      h: "You pay your deductible — we handle the roof",
+      p: "On a covered claim you typically pay only your deductible. Short on it up front? Finance it into low monthly payments and start now.",
+    },
+  ];
   return (
-    <section className="relative overflow-hidden bg-ink py-16">
+    <section className="relative overflow-hidden bg-ink py-20 sm:py-28">
       <div className="absolute inset-y-0 left-0 w-1.5 bg-ember" />
-      <Container className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
-        <div className="max-w-2xl">
-          <p className="kicker text-ember">Storm & hail damage</p>
+      <Container className="grid gap-12 lg:grid-cols-2 lg:items-start">
+        <div>
+          <p className="kicker text-ember">Storm &amp; hail damage</p>
           <h2 className="mt-4 font-display text-3xl font-bold text-fg-inv sm:text-4xl">
-            Hail hit? We handle Texas insurance claims by the book.
+            Hail damage? We make the insurance claim simple — and by the book.
           </h2>
           <p className="mt-4 text-fg-inv-dim">
-            We document the damage, work directly with your adjuster, and never
-            play the games that get homeowners in trouble — no waiving your
-            deductible, no pretending to be your public adjuster. Just an honest
-            claim and a roof done right.
+            A storm claim is where homeowners get burned by fly-by-night roofers.
+            Here&apos;s how we do it differently: no waiving your deductible, no
+            posing as your adjuster — just an honest claim and a roof done right.
           </p>
+          <ol className="mt-8 space-y-5">
+            {steps.map((s, i) => (
+              <li key={s.h} className="flex gap-4">
+                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bolt font-display text-sm font-extrabold text-ink">
+                  {i + 1}
+                </span>
+                <div>
+                  <h3 className="font-display text-lg font-bold text-fg-inv">
+                    {s.h}
+                  </h3>
+                  <p className="mt-0.5 text-sm leading-relaxed text-fg-inv-dim">
+                    {s.p}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-8">
+            <Button href="/storm-check">Check your address for hail →</Button>
+          </div>
         </div>
-        <Button href="/storm-check">Check your address for hail →</Button>
+
+        <div className="lg:sticky lg:top-24">
+          <DeductibleFinancing />
+          <div className="mt-6 rounded-card border border-line bg-ink-2 p-6">
+            <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
+              What a storm claim usually looks like
+            </div>
+            <div className="mt-4 space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-fg-inv-dim">New roof (retail)</span>
+                <span className="font-display font-bold text-fg-inv-dim line-through">
+                  ~$15,000
+                </span>
+              </div>
+              <div className="flex items-center justify-between border-t border-line pt-3">
+                <span className="text-fg-inv">Your out of pocket</span>
+                <span className="font-display text-2xl font-extrabold text-bolt">
+                  Just your deductible
+                </span>
+              </div>
+              <p className="pt-1 text-xs leading-relaxed text-fg-inv-dim">
+                On a covered claim with replacement-cost coverage. Your deductible
+                depends on your policy — and you can finance it.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------- STUCK / FINANCING */
+function StuckBand() {
+  const cases = [
+    "Deductible too high to front (Texas deductibles run 1–2% of home value)",
+    "Insurance check came in low — older roof on actual-cash-value coverage",
+    "No claim — paying out of pocket",
+    "Solar detach & reset not covered on the claim",
+  ];
+  return (
+    <section className="bg-paper py-20 sm:py-28">
+      <Container className="grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div>
+          <SectionHeading
+            kicker="Stuck on the out-of-pocket?"
+            title="Approved for a roof but can't cover the deductible? You're not stuck."
+            intro="In Texas, a wind/hail deductible is often 1–2% of your home's value — $5,000–$10,000 out of pocket before work even starts. If that's the wall between you and a sound roof, we finance it: $0 down, low monthly payments, and we get the job scheduled now. Already have an estimate from another roofer? Bring it — we'll do the work and finance it."
+          />
+          <ul className="mt-6 space-y-2.5">
+            {cases.map((x) => (
+              <li key={x} className="flex gap-2.5 text-fg-dim">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-bolt-deep" />
+                <span>{x}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-7">
+            <Button href="/financing">See financing options →</Button>
+          </div>
+        </div>
+        <FinancingCalculator ctaHref="#quote" />
+      </Container>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------- SOLAR-READY BAND */
+function SolarReadyBand() {
+  return (
+    <section className="bg-paper py-16 sm:py-20">
+      <Container>
+        <div className="overflow-hidden rounded-card border-2 border-bolt/40 bg-ink shadow-xl">
+          <div className="grid items-center gap-8 p-9 sm:p-12 lg:grid-cols-[1.2fr_0.8fr]">
+            <div>
+              <Kicker className="mb-4">Got solar panels?</Kicker>
+              <h2 className="font-display text-3xl font-bold leading-tight text-fg-inv sm:text-4xl">
+                Solar on your roof? We&apos;re one of the few who can legally do
+                the whole job.
+              </h2>
+              <p className="mt-4 text-fg-inv-dim">
+                Replacing a roof with solar means the panels have to come off and
+                go back on — and in Texas that&apos;s electrical work most roofers
+                can&apos;t legally touch. They sub it out, and you&apos;re left
+                juggling two companies with your roof sitting exposed. We detach,
+                re-roof, and reset your panels in-house, on one schedule, under
+                one license — and the detach &amp; reset is usually a covered line
+                item on your claim.
+              </p>
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <Button href="#quote">Book my free inspection</Button>
+                <Button href="/solar" variant="ghost">
+                  How solar + roof works →
+                </Button>
+              </div>
+            </div>
+            <div className="rounded-card border border-line bg-ink-2 p-7 text-center">
+              <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
+                One licensed team
+              </div>
+              <div className="mt-2 font-display text-3xl font-extrabold text-bolt">
+                Roof + Solar
+              </div>
+              <div className="mt-3 text-sm leading-relaxed text-fg-inv-dim">
+                Detach · re-roof · reset · re-energize — no finger-pointing, one
+                warranty.
+              </div>
+              <div className="mt-4 border-t border-line pt-4 text-sm text-fg-inv-dim">
+                Performed under{" "}
+                <span className="font-bold text-fg-inv">
+                  TECL #{site.teclLicense}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </Container>
     </section>
   );

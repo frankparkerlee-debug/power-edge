@@ -141,7 +141,7 @@ export const guides: Guide[] = [
         ],
       },
       {
-        h: "How PowerEdge handles a claim",
+        h: "How a claim works with PowerEdge",
         p: [
           "We document the damage with photos and measurements, work directly with your adjuster, and do it all by the book — no deductible games, no posing as your adjuster. Just an honest claim and a roof done right, backed by a licensed contractor you can verify.",
         ],
@@ -167,7 +167,7 @@ export const guides: Guide[] = [
     ],
     cta: {
       heading: "Think hail hit your roof?",
-      sub: "Check your address for reported hail free, then book a no-pressure inspection. We handle the claim by the book.",
+      sub: "Check your address for reported hail free, then book a no-pressure inspection. We document your damage by the book.",
     },
   },
 
@@ -277,7 +277,7 @@ export const guides: Guide[] = [
       {
         h: "How PowerEdge helps",
         p: [
-          "We document your storm damage, work directly with your adjuster, handle the claim by the book, and can connect you with deductible financing so a tight month doesn't stand between you and a sound roof. You pay your full deductible — we never waive it.",
+          "We document your storm damage, coordinate with your adjuster by the book, and can connect you with deductible financing so a tight month doesn't stand between you and a sound roof. You pay your full deductible — we never waive it.",
         ],
       },
     ],
@@ -297,7 +297,7 @@ export const guides: Guide[] = [
     ],
     cta: {
       heading: "Get your roof now — finance your deductible.",
-      sub: "Free inspection, claim handled by the book, and financing options so your deductible isn't a roadblock.",
+      sub: "Free inspection, damage documented by the book, and financing options so your deductible isn't a roadblock.",
     },
   },
 ];

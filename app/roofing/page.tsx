@@ -19,7 +19,7 @@ const content = getServiceContent("roofing")!;
 export const metadata: Metadata = {
   title: "Roofing Contractor in DFW — Repair, Replace & Storm Claims",
   description:
-    "Residential and commercial roofing across Dallas–Fort Worth. Free inspections, fast replacements, and hail/insurance claims handled by the book. Backed by a licensed electrical contractor.",
+    "Residential and commercial roofing across Dallas–Fort Worth. Free inspections, fast replacements, and hail/insurance claims documented by the book. Backed by a licensed electrical contractor.",
 };
 
 export default function RoofingPage() {

@@ -97,7 +97,7 @@ export default async function CityPage({
               items={[
                 `Free roof inspections across ${c.name}`,
                 "Up-front, published electrical pricing",
-                `Storm & hail insurance claims handled by the book`,
+                `Storm & hail insurance claims documented by the book`,
                 `Rated ${site.googleRating}★ by North Texas homeowners`,
               ]}
             />

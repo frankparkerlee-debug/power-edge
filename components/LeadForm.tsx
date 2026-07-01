@@ -17,6 +17,7 @@ export function LeadForm({
 }) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  const [solar, setSolar] = useState(false);
   const formId = "crf-" + useId().replace(/[^a-zA-Z0-9]/g, "");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -36,7 +37,11 @@ export function LeadForm({
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error((await res.json()).error || "Failed");
-      track("lead_submit", { form: "lead_form", service: String(data.service || "") });
+      track("lead_submit", {
+        form: "lead_form",
+        service: String(data.service || ""),
+        solar: data.solar === "yes" ? "yes" : "no",
+      });
       setStatus("success");
       form.reset();
     } catch (err) {
@@ -112,6 +117,9 @@ export function LeadForm({
           </option>
         ))}
         <option value="Storm / insurance claim">Storm / insurance claim</option>
+        <option value="Financing / stuck on out-of-pocket">
+          Financing — stuck on the out-of-pocket
+        </option>
         <option value="Emergency">Emergency — need someone now</option>
         <option value="Other">Something else</option>
       </select>
@@ -121,6 +129,32 @@ export function LeadForm({
         placeholder="Briefly, what's going on? (optional)"
         className={inputBase}
       />
+
+      {/* Solar qualifier — tags the lead so the team scopes detach & reset and
+          documents the panels (the claimable line most roofers miss). */}
+      <label
+        className={`flex cursor-pointer items-start gap-3 rounded-md border px-4 py-3 text-sm transition-colors ${
+          solar
+            ? "border-bolt bg-bolt/10 text-fg-inv"
+            : "border-line bg-ink-2 text-fg-inv-dim"
+        }`}
+      >
+        <input
+          type="checkbox"
+          name="solar"
+          value="yes"
+          checked={solar}
+          onChange={(e) => setSolar(e.target.checked)}
+          className="mt-0.5 h-4 w-4 accent-bolt"
+        />
+        <span>I have solar panels on my roof</span>
+      </label>
+      {solar && (
+        <p className="rounded-md border border-bolt/30 bg-bolt/10 px-4 py-3 text-sm leading-relaxed text-fg-inv">
+          Good — we detach &amp; reset your panels in-house (most roofers
+          can&apos;t), and it&apos;s usually a covered line item on your claim.
+        </p>
+      )}
 
       {/* Honeypot — hidden from humans, bots fill it */}
       <input

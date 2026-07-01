@@ -46,6 +46,7 @@ export function RoofEstimate() {
     "unknown",
   );
   const [deductible, setDeductible] = useState("");
+  const [solar, setSolar] = useState(false);
 
   async function run(payload: Record<string, unknown>) {
     setLoading(true);
@@ -86,13 +87,14 @@ export function RoofEstimate() {
             intent === "insurance"
               ? "Storm/insurance roof (deductible)"
               : "Roof replacement estimate",
-          message: `[Roof Estimate] ${est?.matched || address} — ~${est?.squaresLow}-${est?.squaresHigh} squares (${est?.source})${intent === "insurance" ? ` — INSURANCE claim, deductible: ${deductible || "unknown"}` : `, est ${range}`}`,
+          solar: solar ? "yes" : "",
+          message: `[Roof Estimate]${solar ? " [HAS SOLAR]" : ""} ${est?.matched || address} — ~${est?.squaresLow}-${est?.squaresHigh} squares (${est?.source})${intent === "insurance" ? ` — INSURANCE claim, deductible: ${deductible || "unknown"}` : `, est ${range}`}`,
           company_website: fd.company_website,
           ...leadContext({ tool: "roof-estimate" }),
         }),
       });
       if (!res.ok) throw new Error();
-      track("lead_submit", { form: "roof_estimate" });
+      track("lead_submit", { form: "roof_estimate", solar: solar ? "yes" : "no" });
       setSub("done");
       form.reset();
     } catch {
@@ -318,9 +320,33 @@ export function RoofEstimate() {
 
               <DeductibleFinancing className="mt-4" />
 
+              {/* Solar qualifier — tags the lead so we scope the detach & reset */}
+              <label
+                className={`mt-4 flex cursor-pointer items-start gap-3 rounded-md border px-4 py-3 text-sm transition-colors ${
+                  solar
+                    ? "border-bolt bg-bolt/10 text-fg-inv"
+                    : "border-line bg-ink text-fg-inv-dim"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={solar}
+                  onChange={(e) => setSolar(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-bolt"
+                />
+                <span>I have solar panels on my roof</span>
+              </label>
+              {solar && (
+                <p className="mt-2 rounded-md border border-bolt/30 bg-bolt/10 px-4 py-3 text-sm leading-relaxed text-fg-inv">
+                  Good — we detach &amp; reset your panels in-house (most roofers
+                  can&apos;t), and it&apos;s usually a covered line item on your
+                  claim.
+                </p>
+              )}
+
               <p className="mt-4 text-sm leading-relaxed text-fg-inv-dim">
-                We document the damage, work directly with your adjuster, and
-                handle the entire claim by the book.
+                We document the damage and coordinate with your adjuster, by the
+                book.
               </p>
             </>
           )}

@@ -69,13 +69,14 @@ export function StormCheck() {
           service: fd.solar
             ? "Storm inspection (roof + solar)"
             : "Storm inspection (hail check)",
-          message: `[Storm Check]${fd.solar ? " [HAS SOLAR]" : ""} address: ${result?.matched || address} — ${summary}`,
+          solar: fd.solar ? "yes" : "",
+          message: `[Storm Check] address: ${result?.matched || address} — ${summary}`,
           company_website: fd.company_website,
           ...leadContext({ tool: "storm-check" }),
         }),
       });
       if (!res.ok) throw new Error();
-      track("lead_submit", { form: "storm_check" });
+      track("lead_submit", { form: "storm_check", solar: fd.solar ? "yes" : "no" });
       setSub("done");
       form.reset();
     } catch {
