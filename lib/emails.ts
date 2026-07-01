@@ -49,6 +49,21 @@ function button(label: string, href: string) {
   </table>`;
 }
 
+function steps(items: string[]) {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 18px;">
+    ${items
+      .map(
+        (step, i) => `<tr>
+          <td width="36" valign="top" style="padding:7px 0;">
+            <span style="display:inline-block;width:26px;height:26px;background:${LIME};color:${INK};border-radius:13px;text-align:center;line-height:26px;font-weight:800;font-size:14px;font-family:${FONT};">${i + 1}</span>
+          </td>
+          <td valign="top" style="padding:9px 0;font-family:${FONT};font-size:15px;line-height:1.5;color:${TEXT};">${step}</td>
+        </tr>`,
+      )
+      .join("")}
+  </table>`;
+}
+
 function stars() {
   const s = "★★★★★";
   return `<span style="color:${LIME_DEEP};font-size:15px;letter-spacing:2px;">${s}</span>
@@ -174,14 +189,11 @@ export const leadSequence: SequenceEmail[] = [
               c.service ? ` about <strong>${c.service}</strong>` : ""
             }. A licensed member of our team will call you shortly — usually within the hour during business hours — to lock in your <strong>free inspection</strong>.`,
           ) +
-          `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 20px;">
-            ${["We call you to schedule — fast.", "We inspect &amp; document your roof, free.", "You decide. No pressure, no games."]
-              .map(
-                (step, i) => `<tr><td style="padding:7px 0;font-family:${FONT};font-size:15px;color:${TEXT};">
-                  <span style="display:inline-block;width:24px;height:24px;background:${LIME};color:${INK};border-radius:12px;text-align:center;line-height:24px;font-weight:800;font-size:13px;margin-right:10px;">${i + 1}</span>${step}</td></tr>`,
-              )
-              .join("")}
-          </table>` +
+          steps([
+            "We call you to schedule — fast.",
+            "We inspect &amp; document your roof, free.",
+            "You decide. No pressure, no games.",
+          ]) +
           p(`Can&rsquo;t wait? Call or text us at <strong>${site.phone}</strong>.`) +
           button(`Call ${site.phone}`, site.phoneHref) +
           (c.solar ? solarBlock() : "") +
@@ -193,25 +205,24 @@ export const leadSequence: SequenceEmail[] = [
   {
     key: "how-claims-work",
     delayDays: 1,
-    subject: () => "How a Texas hail claim actually works (the honest version)",
+    subject: () => "Your hail claim, in 4 simple steps",
     html: (c) =>
       shell({
         preheader: "You pay your deductible. We document the rest. No games.",
         body:
-          h1("Here's how your claim works — plainly.") +
+          h1("How your claim works — 4 steps.") +
+          p("No mystery. Here&rsquo;s exactly how a Texas storm claim goes:") +
+          steps([
+            "<strong>Free inspection.</strong> We photograph and document the damage.",
+            "<strong>You file.</strong> We meet your adjuster on-site and document the full scope.",
+            "<strong>Insurance covers the replacement.</strong> You pay only your deductible.",
+            "<strong>We install.</strong> On replacement-cost policies the balance comes once work begins.",
+          ]) +
           p(
-            `A storm claim is where homeowners get burned by fly-by-night roofers, so here&rsquo;s the straight version:`,
-          ) +
-          p(
-            `On a <strong>covered claim</strong>, you typically pay only your <strong>deductible</strong> — insurance covers the rest of the replacement. We <strong>document the damage and coordinate with your adjuster</strong>, by the book. We never waive your deductible and never pose as your adjuster — both are illegal in Texas, and following the law protects you.`,
-          ) +
-          p(
-            `Replacement-cost claims usually pay in two checks — an initial amount, then the balance once work begins. We walk you through exactly what to expect.`,
+            `We never waive your deductible or pose as your adjuster — both are illegal in Texas, and doing it right protects you.`,
           ) +
           (c.financing
-            ? p(
-                `And if the deductible is the thing standing in your way — <strong>we can finance it</strong>, $0 down. You still pay it in full, just over time.`,
-              )
+            ? p(`Deductible in the way? We can finance it — $0 down, paid in full over time.`)
             : "") +
           button("Book my free inspection", BOOK_URL) +
           verifyChip(),
@@ -263,22 +274,25 @@ export const leadSequence: SequenceEmail[] = [
   {
     key: "claim-clock",
     delayDays: 6,
-    subject: () => "Your roof claim has a clock on it",
+    subject: () => "Wait too long and you lose the claim entirely",
     html: (c) =>
       shell({
         preheader:
-          "Texas claims have deadlines, and damage worsens with every rain.",
+          "Texas claims expire — then the whole roof comes out of your pocket.",
         body:
-          h1("Don't let the window close.") +
+          h1("Don't lose your claim to the clock.") +
           p(
-            `Two clocks are running. First, many Texas policies require you to file within about <strong>a year of the storm</strong> — miss it and the roof&rsquo;s on you. Second, hail damage gets worse with every rain until it&rsquo;s a leak.`,
+            `Here&rsquo;s the part no one warns you about: Texas policies give you a limited window to file — <strong>often about a year from the date of the storm</strong>. Miss it, and the claim is gone for good. At that point the <strong>entire roof</strong> comes out of your pocket — not just your deductible.`,
           ) +
           p(
-            `The good news: on a covered claim you pay only your deductible — and if that&rsquo;s the roadblock, <strong>you can finance it, $0 down</strong>. A tight month shouldn&rsquo;t cost you a sound roof.`,
+            `And the damage doesn&rsquo;t wait for you. Every rain turns a small bruise into a bigger leak — and an aging roof can quietly slip from full-replacement to depreciated coverage, paying you thousands less.`,
           ) +
-          button("See what my deductible looks like financed", FINANCE_URL) +
+          p(
+            `If you think a storm hit your roof, don&rsquo;t sit on it. Check whether you still qualify — it takes about a minute.`,
+          ) +
+          button("Check if I still have a claim", BOOK_URL) +
           small(
-            `Prefer to just get it inspected? <a href="${BOOK_URL}" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;">Book your free inspection &rarr;</a>`,
+            `Deductible the holdup? <a href="${FINANCE_URL}" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;">See it financed, $0 down &rarr;</a>`,
           ) +
           verifyChip(),
       }),
