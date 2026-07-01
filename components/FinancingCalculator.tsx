@@ -5,28 +5,23 @@ import Link from "next/link";
 import { track } from "@/lib/analytics";
 
 /**
- * Deductible / project financing calculator.
+ * Deductible / project financing calculator — reflects PowerEdge's two IN-HOUSE
+ * (self-funded) payment plans:
+ *   • Pay-in-4  — 4 monthly payments, 0% interest
+ *   • 12-month  — 12 monthly payments, 12.99% APR
  *
- * COMPLIANCE: this shows an ILLUSTRATIVE monthly-payment RANGE only — never a
- * financing offer or a guaranteed rate. The APR band below is representative of
- * typical home-improvement financing, NOT a quoted rate; swap in the real
- * lender's terms once a program is in place (see NOTE(parker) in
- * DeductibleFinancing). The homeowner always pays their full deductible over
- * time — we never waive it (illegal in Texas, HB 2102 / §27.02).
+ * COMPLIANCE: illustrative estimate only, NOT a financing offer. The homeowner
+ * always pays their full deductible over time — we never waive it (illegal in
+ * Texas, HB 2102 / §27.02). The 12-month interest-bearing plan is consumer
+ * credit: final terms + TILA disclosures are provided in writing before signing,
+ * and the program itself requires counsel/licensing review before it runs.
  */
 
-// Representative APR band for illustration only — replace with lender terms.
-const APR_LOW = 0.0999;
-const APR_HIGH = 0.1799;
+const RATE_12 = 0.1299; // 12-month plan APR
 
 const PRESETS = [1000, 2500, 5000, 8000, 10000, 15000];
-const TERMS = [
-  { months: 36, label: "3 yr" },
-  { months: 60, label: "5 yr" },
-  { months: 120, label: "10 yr" },
-];
 
-function monthly(principal: number, annualRate: number, n: number) {
+function amortized(principal: number, annualRate: number, n: number) {
   const r = annualRate / 12;
   if (r === 0) return principal / n;
   return (principal * r) / (1 - Math.pow(1 + r, -n));
@@ -47,10 +42,9 @@ export function FinancingCalculator({
   className?: string;
 }) {
   const [amount, setAmount] = useState(8000);
-  const [term, setTerm] = useState(60);
 
-  const low = amount > 0 ? monthly(amount, APR_LOW, term) : 0;
-  const high = amount > 0 ? monthly(amount, APR_HIGH, term) : 0;
+  const pay4 = amount > 0 ? amount / 4 : 0;
+  const pay12 = amount > 0 ? amortized(amount, RATE_12, 12) : 0;
 
   return (
     <div
@@ -89,46 +83,38 @@ export function FinancingCalculator({
         />
       </label>
 
-      <div className="mt-4">
-        <div className="text-sm text-fg-inv-dim">Spread it over</div>
-        <div className="mt-1 flex gap-2">
-          {TERMS.map((t) => (
-            <button
-              key={t.months}
-              type="button"
-              onClick={() => setTerm(t.months)}
-              className={`flex-1 rounded-md border px-3 py-2 text-sm font-semibold transition-colors ${
-                term === t.months
-                  ? "border-bolt bg-bolt/10 text-bolt"
-                  : "border-line text-fg-inv-dim hover:border-bolt"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+      {/* Two in-house plans, side by side */}
+      <div className="mt-6 grid grid-cols-2 gap-3">
+        <div className="rounded-md border border-line bg-ink p-4 text-center">
+          <div className="text-xs font-semibold uppercase tracking-wider text-fg-inv-dim">
+            Pay in 4
+          </div>
+          <div className="mt-1 font-display text-2xl font-extrabold text-fg-inv sm:text-3xl">
+            {usd(pay4)}
+            <span className="text-sm font-bold text-fg-inv-dim">/mo</span>
+          </div>
+          <div className="mt-1 text-xs text-fg-inv-dim">
+            4 payments · <span className="text-bolt">0% interest</span>
+          </div>
         </div>
-      </div>
-
-      <div className="mt-6 rounded-md border border-bolt/40 bg-bolt/5 p-5 text-center">
-        <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
-          Estimated monthly payment
-        </div>
-        <div className="mt-1 font-display text-4xl font-extrabold text-bolt">
-          {usd(low)}–{usd(high)}
-          <span className="text-lg font-bold text-fg-inv-dim">/mo</span>
-        </div>
-        <div className="mt-1 text-sm text-fg-inv-dim">
-          on {usd(amount)} over {term / 12} years
+        <div className="rounded-md border border-bolt/40 bg-bolt/5 p-4 text-center">
+          <div className="text-xs font-semibold uppercase tracking-wider text-fg-inv-dim">
+            12-month plan
+          </div>
+          <div className="mt-1 font-display text-2xl font-extrabold text-bolt sm:text-3xl">
+            {usd(pay12)}
+            <span className="text-sm font-bold text-fg-inv-dim">/mo</span>
+          </div>
+          <div className="mt-1 text-xs text-fg-inv-dim">
+            12 payments · 12.99% APR
+          </div>
         </div>
       </div>
 
       <Link
         href={ctaHref}
         onClick={() =>
-          track("financing_calc_cta", {
-            amount: String(amount),
-            term: String(term),
-          })
+          track("financing_calc_cta", { amount: String(amount) })
         }
         className="mt-4 block w-full rounded-md bg-bolt px-6 py-4 text-center font-display text-base font-bold text-ink transition-colors hover:bg-bolt-hi"
       >
@@ -136,10 +122,10 @@ export function FinancingCalculator({
       </Link>
 
       <p className="mt-3 text-xs leading-relaxed text-fg-inv-dim">
-        Illustrative example only — not a financing offer or a guarantee of
-        terms. Your actual rate, term, and payment depend on the lender and your
-        credit approval. You pay your full deductible over time; we never waive
-        it (that&apos;s illegal in Texas).
+        Illustrative estimate only — not a financing offer. Plans are in-house
+        and subject to approval; final terms and required disclosures are
+        provided in writing before you sign. You pay your full deductible over
+        time; we never waive it (that&apos;s illegal in Texas).
       </p>
     </div>
   );

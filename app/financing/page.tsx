@@ -21,8 +21,12 @@ const faqs = [
     a: "Most Texas policies use a percentage wind/hail deductible — often 1–2% of your home's insured value. On a $400,000–$500,000 home that's $4,000–$10,000 out of pocket before work starts. That's exactly the gap financing is built to bridge.",
   },
   {
+    q: "What payment plans do you offer?",
+    a: "Two in-house plans, subject to approval: a 4-month plan at 0% interest, or a 12-month plan at 12.99% APR to keep the monthly payment lower. Final terms and required disclosures are provided in writing before you sign.",
+  },
+  {
     q: "Do I need money down?",
-    a: "Often little or nothing down, depending on the program and your credit approval. You spread your deductible (or the full project, if you're paying out of pocket) into monthly payments and we schedule the work now.",
+    a: "Often little or nothing down, depending on the plan and your credit approval. You spread your deductible (or the full project, if you're paying out of pocket) into monthly payments and we schedule the work now.",
   },
   {
     q: "Can you finance the whole roof, not just the deductible?",
@@ -63,8 +67,8 @@ export default function FinancingPage() {
             />
             <p className="mt-4 text-sm text-fg-dim">
               This is an illustrative estimate, not a financing offer — your
-              actual rate and payment depend on the lender and your credit
-              approval. We&apos;ll walk you through the real options on your free
+              actual payment depends on the plan you choose and credit approval.
+              We&apos;ll walk you through the real options on your free
               inspection.
             </p>
           </div>
