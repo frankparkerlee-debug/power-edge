@@ -41,15 +41,15 @@ function Hero() {
             Storm &amp; hail roof restoration · Dallas–Fort Worth
           </Kicker>
           <h1 className="font-display text-[2.7rem] leading-[0.95] text-fg-inv sm:text-6xl md:text-[4.2rem]">
-            Hail damage today.
+            Storm-damaged roof?
             <br />
-            <span className="bolt-underline">New roof, just your deductible.</span>
+            <span className="bolt-underline">You likely pay just your deductible.</span>
           </h1>
           <p className="mt-7 max-w-xl text-lg leading-relaxed text-fg-inv-dim">
-            PowerEdge is DFW&apos;s insurance-first storm restoration team. We
-            document the damage, coordinate with your adjuster, and{" "}
-            <strong className="text-fg-inv">finance the out-of-pocket</strong> so
-            nothing waits.
+            PowerEdge is DFW&apos;s insurance-first storm roof team. We document
+            the damage, coordinate with your adjuster, and{" "}
+            <strong className="text-fg-inv">finance the out-of-pocket</strong> —
+            so nothing stands between you and a sound roof.
           </p>
 
           {/* Conversion pillars — storm-first, financing, solar-ready */}
@@ -71,11 +71,35 @@ function Hero() {
             ))}
           </div>
 
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Button href="#quote">Book my free inspection</Button>
-            <Button href="/roof-claim-check" variant="ghost">
-              Check if I have a claim →
-            </Button>
+          <div className="mt-9 grid gap-3 sm:grid-cols-2">
+            <a
+              href="/free-inspection"
+              className="group rounded-card border border-line bg-ink-2 p-5 transition-colors hover:border-bolt"
+            >
+              <div className="font-display text-lg font-bold text-fg-inv">
+                Book a free inspection
+              </div>
+              <div className="mt-0.5 text-sm text-fg-inv-dim">
+                Documented for your claim — no cost, no pressure.
+              </div>
+              <div className="mt-2 font-display text-sm font-bold text-bolt">
+                Get started →
+              </div>
+            </a>
+            <a
+              href="/roof-claim-check"
+              className="group rounded-card border border-line bg-ink-2 p-5 transition-colors hover:border-bolt"
+            >
+              <div className="font-display text-lg font-bold text-fg-inv">
+                Do I have a claim?
+              </div>
+              <div className="mt-0.5 text-sm text-fg-inv-dim">
+                Free 60-second eligibility check.
+              </div>
+              <div className="mt-2 font-display text-sm font-bold text-bolt">
+                Check my roof →
+              </div>
+            </a>
           </div>
 
           <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-3 text-sm text-fg-inv-dim">

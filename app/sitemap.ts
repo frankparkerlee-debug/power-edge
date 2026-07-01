@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/about",
     "/contact",
     "/roof-claim-check",
+    "/free-inspection",
     "/roof-check",
     "/financing",
     "/privacy",

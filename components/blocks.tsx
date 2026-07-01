@@ -9,12 +9,14 @@ export function PageHero({
   title,
   intro,
   badge,
+  badgeHref = "#quote",
   withForm = false,
 }: {
   kicker: string;
   title: string;
   intro: string;
   badge?: string;
+  badgeHref?: string;
   withForm?: boolean;
 }) {
   const left = (
@@ -27,7 +29,7 @@ export function PageHero({
         {intro}
       </p>
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <Button href="#quote">{badge ?? "Get a free quote"}</Button>
+        <Button href={badgeHref}>{badge ?? "Get a free quote"}</Button>
         <Button href={site.phoneHref} variant="ghost">
           Call {site.phone}
         </Button>

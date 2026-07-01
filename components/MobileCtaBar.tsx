@@ -29,13 +29,13 @@ export function MobileCtaBar() {
         <span className="text-xs font-bold">Text</span>
       </a>
       <Link
-        href="/contact"
+        href="/free-inspection"
         className="flex flex-col items-center justify-center gap-0.5 bg-bolt py-2.5 text-ink"
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden>
           <path d="M9 16.2l-3.5-3.5L4 14.2 9 19.2l11-11-1.4-1.4z" />
         </svg>
-        <span className="text-xs font-extrabold">Free Quote</span>
+        <span className="text-xs font-extrabold">Free Inspection</span>
       </Link>
     </div>
   );

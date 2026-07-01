@@ -6,11 +6,11 @@ import { Logo } from "./Logo";
 import { site } from "@/lib/site";
 
 const nav = [
+  { href: "/roof-claim-check", label: "Claim Check", accent: true },
+  { href: "/financing", label: "Financing", accent: true },
   { href: "/roofing", label: "Roofing" },
   { href: "/solar", label: "Solar" },
   { href: "/commercial", label: "Commercial" },
-  { href: "/roof-claim-check", label: "Free Claim Check", accent: true },
-  { href: "/financing", label: "Financing", accent: true },
 ];
 
 export function Header() {

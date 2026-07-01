@@ -3,6 +3,7 @@ import { Container, SectionHeading } from "@/components/ui";
 import { PageHero, CtaBand, FeatureList } from "@/components/blocks";
 import { FaqSection } from "@/components/service-blocks";
 import { FinancingCalculator } from "@/components/FinancingCalculator";
+import { FinancingPrequal } from "@/components/FinancingPrequal";
 import { Reviews } from "@/components/Reviews";
 
 export const metadata: Metadata = {
@@ -52,27 +53,28 @@ export default function FinancingPage() {
         kicker="Roof & deductible financing · Dallas–Fort Worth"
         title="Can't cover the out-of-pocket? Finance it — and get your roof done now."
         intro="A high deductible or a low insurance check shouldn't stand between you and a sound roof. We finance your deductible — or your whole project — with $0 down and low monthly payments, so we can schedule the work now instead of when you've saved up. You always pay your full deductible over time; we never waive it (that's illegal in Texas, and following the law protects you)."
-        badge="Get financed & scheduled"
-        withForm
+        badge="Pre-qualify — no credit impact"
+        badgeHref="#prequal"
       />
 
-      {/* Calculator */}
+      {/* Calculator + pre-qualify */}
       <section className="bg-paper py-20 sm:py-28">
-        <Container className="grid gap-12 lg:grid-cols-2 lg:items-center">
-          <div>
-            <SectionHeading
-              kicker="See your payment"
-              title="Turn a $8,000 wall into a monthly payment."
-              intro="Enter your deductible (or your out-of-pocket) and see roughly what it looks like spread over time. The moment a lump sum becomes a manageable monthly number, you're no longer stuck."
-            />
-            <p className="mt-4 text-sm text-fg-dim">
-              This is an illustrative estimate, not a financing offer — your
-              actual payment depends on the plan you choose and credit approval.
-              We&apos;ll walk you through the real options on your free
-              inspection.
-            </p>
+        <Container>
+          <SectionHeading
+            kicker="See it, then pre-qualify"
+            title="Turn a $8,000 wall into a monthly payment."
+            intro="Check what your deductible looks like spread over time — then pre-qualify with a soft check that won't touch your credit score."
+          />
+          <div className="mt-10 grid gap-6 lg:grid-cols-2 lg:items-start">
+            <FinancingCalculator ctaHref="#prequal" />
+            <div id="prequal" className="scroll-mt-24">
+              <FinancingPrequal />
+            </div>
           </div>
-          <FinancingCalculator ctaHref="#quote" />
+          <p className="mt-6 text-center text-sm text-fg-dim">
+            Illustrative estimate, not a financing offer — your actual payment
+            depends on the plan you choose and credit approval.
+          </p>
         </Container>
       </section>
 
