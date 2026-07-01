@@ -7,7 +7,6 @@ import { site } from "@/lib/site";
 
 const nav = [
   { href: "/roofing", label: "Roofing" },
-  { href: "/electrical", label: "Electrical" },
   { href: "/solar", label: "Solar" },
   { href: "/commercial", label: "Commercial" },
   { href: "/roof-estimate", label: "Roof Estimate", accent: true },

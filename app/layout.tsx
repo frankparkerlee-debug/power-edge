@@ -26,15 +26,15 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.legalName} | Licensed Roofing & Electrical in DFW`,
+    default: `${site.legalName} | Storm Roof Restoration in DFW`,
     template: `%s | ${site.name}`,
   },
   description:
-    `Licensed Texas electrical contractor and roofing company serving Dallas–Fort Worth. Up-front electrical pricing, free roof inspections, storm/insurance claims by the book. TECL #${site.teclLicense}.`,
+    `Insurance-first storm & hail roof restoration across Dallas–Fort Worth. Free inspections, deductible financing, and one licensed team that can handle your solar too. Verify us — TECL #${site.teclLicense}.`,
   openGraph: {
-    title: `${site.legalName} | Roofing & Electrical, Verified`,
+    title: `${site.legalName} | Storm Roof Restoration, Verified`,
     description:
-      "The licensed Texas crew that does your roof and your wiring — and hands you the license number to check.",
+      "The insurance-first DFW roof team you can actually verify — free inspections, deductible financing, and licensed to handle your solar too.",
     url: site.url,
     siteName: site.name,
     type: "website",

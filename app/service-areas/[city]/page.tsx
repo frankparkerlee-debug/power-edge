@@ -96,7 +96,7 @@ export default async function CityPage({
             <FeatureList
               items={[
                 `Free roof inspections across ${c.name}`,
-                "Up-front, published electrical pricing",
+                "Deductible financing so the out-of-pocket isn't a roadblock",
                 `Storm & hail insurance claims documented by the book`,
                 `Rated ${site.googleRating}★ by North Texas homeowners`,
               ]}

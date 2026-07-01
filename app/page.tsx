@@ -6,7 +6,7 @@ import { Gallery } from "@/components/Gallery";
 import { DeductibleFinancing } from "@/components/DeductibleFinancing";
 import { FinancingCalculator } from "@/components/FinancingCalculator";
 import { site } from "@/lib/site";
-import { services, electricalMenu } from "@/lib/services";
+import { services } from "@/lib/services";
 import { cities } from "@/lib/cities";
 
 export default function Home() {
@@ -21,7 +21,6 @@ export default function Home() {
       <RoofCheckBand />
       <RoofEstimateBand />
       <ServicesGrid />
-      <PricingTeaser />
       <Team />
       <Gallery />
       <Reviews />
@@ -127,12 +126,15 @@ function Hero() {
 /* ------------------------------------------------------------- TRUST BAR */
 function TrustBar() {
   const items = [
-    { big: `#${site.teclLicense}`, small: "TX electrical license (TECL)" },
+    { big: `#${site.teclLicense}`, small: "TX license you can verify (TECL)" },
     {
       big: `${site.capacity.crews} crews`,
       small: `~${site.capacity.roofsPerMonth} roofs / month capacity`,
     },
-    { big: `${site.capacity.electricians}`, small: "electricians on staff" },
+    {
+      big: `${site.googleRating}★`,
+      small: `${site.googleReviewCount} Google reviews`,
+    },
     { big: "1-yr", small: "workmanship guarantee" },
   ];
   return (
@@ -238,8 +240,8 @@ function ServicesGrid() {
         <SectionHeading
           dark
           kicker="What we do"
-          title="Two trades. One license. No runaround."
-          intro="Residential and commercial. Transparent pricing where it makes sense, free inspections where it counts."
+          title="Roofing, solar, and commercial — one licensed team."
+          intro="Storm restoration and roof replacement for homes, solar detach & reset under our electrical license, and full roofing + electrical for commercial properties. Free inspections, no runaround."
         />
         <div className="mt-12 grid gap-5 sm:grid-cols-2">
           {services.map((s) => (
@@ -399,43 +401,6 @@ function RoofCheckBand() {
               </div>
             </div>
           </div>
-        </div>
-      </Container>
-    </section>
-  );
-}
-
-/* -------------------------------------------------------- PRICING TEASER */
-function PricingTeaser() {
-  const sample = electricalMenu[0].items
-    .concat(electricalMenu[1].items.slice(1, 2))
-    .slice(0, 4);
-  return (
-    <section className="bg-paper py-20 sm:py-28">
-      <Container>
-        <SectionHeading
-          kicker="Pricing you can see"
-          title="We publish our electrical prices. Most won't."
-          intro="No mystery invoices. Common electrical jobs are priced up front so you can compare before anyone steps inside. Roofing stays free-inspection because honest roof pricing depends on what we actually find up there."
-        />
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {sample.map((item) => (
-            <div
-              key={item.job}
-              className="rounded-card border border-paper-2 bg-white p-6 shadow-sm"
-            >
-              <div className="font-display text-2xl font-extrabold text-fg">
-                {item.price}
-              </div>
-              <div className="mt-2 font-semibold text-fg">{item.job}</div>
-              <p className="mt-1 text-sm text-fg-dim">{item.detail}</p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-10">
-          <Button href="/electrical" variant="dark">
-            See the full electrical price list
-          </Button>
         </div>
       </Container>
     </section>

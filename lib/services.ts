@@ -107,20 +107,6 @@ export const services: Service[] = [
     ],
   },
   {
-    slug: "electrical",
-    title: "Electrical service & panels",
-    short: "Electrical",
-    blurb:
-      "Same-day service, repairs, panel upgrades, and installs — run under a 40-year Master Electrician's license, with prices published up front.",
-    pricingMode: "transparent",
-    bullets: [
-      "Same-day diagnostics and repairs",
-      "Panel swaps and 200A service upgrades",
-      "EV chargers, surge protection, fixtures, and circuits",
-      "Up-front flat-rate pricing — no surprise invoices",
-    ],
-  },
-  {
     slug: "solar",
     title: "Solar repair & replacement",
     short: "Solar",

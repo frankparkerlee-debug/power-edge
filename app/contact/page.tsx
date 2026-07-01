@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "Call PowerEdge at " +
     site.phone +
-    " or request a free roofing/electrical quote online. Serving Dallas–Fort Worth.",
+    " or book a free storm roof inspection online. Serving Dallas–Fort Worth.",
 };
 
 export default function ContactPage() {
