@@ -18,8 +18,7 @@ export default function Home() {
       <StuckBand />
       <Wedge />
       <SolarReadyBand />
-      <RoofCheckBand />
-      <RoofEstimateBand />
+      <ClaimCheckBand />
       <ServicesGrid />
       <Team />
       <Gallery />
@@ -42,16 +41,15 @@ function Hero() {
             Storm &amp; hail roof restoration · Dallas–Fort Worth
           </Kicker>
           <h1 className="font-display text-[2.7rem] leading-[0.95] text-fg-inv sm:text-6xl md:text-[4.2rem]">
-            Hail hit your roof?
+            Hail damage today.
             <br />
-            <span className="bolt-underline">You likely just pay your deductible.</span>
+            <span className="bolt-underline">New roof, just your deductible.</span>
           </h1>
           <p className="mt-7 max-w-xl text-lg leading-relaxed text-fg-inv-dim">
             PowerEdge is DFW&apos;s insurance-first storm restoration team. We
-            document the damage, coordinate with your adjuster by the book, and
-            can{" "}
-            <strong className="text-fg-inv">finance your deductible</strong> — so
-            a sound new roof doesn&apos;t wait on cash up front.
+            document the damage, coordinate with your adjuster, and{" "}
+            <strong className="text-fg-inv">finance the out-of-pocket</strong> so
+            nothing waits.
           </p>
 
           {/* Conversion pillars — storm-first, financing, solar-ready */}
@@ -75,8 +73,8 @@ function Hero() {
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Button href="#quote">Book my free inspection</Button>
-            <Button href="/storm-check" variant="ghost">
-              Check your address for hail →
+            <Button href="/roof-claim-check" variant="ghost">
+              Check if I have a claim →
             </Button>
           </div>
 
@@ -286,117 +284,46 @@ function ServicesGrid() {
   );
 }
 
-/* ---------------------------------------------------- ROOF ESTIMATE BAND */
-function RoofEstimateBand() {
+/* ---------------------------------------------------- CLAIM CHECK BAND */
+function ClaimCheckBand() {
   return (
     <section className="bg-ink py-20 sm:py-28">
       <Container>
         <div className="overflow-hidden rounded-card border border-bolt/30 bg-gradient-to-br from-ink-2 to-ink shadow-xl">
           <div className="grid lg:grid-cols-2">
             <div className="p-9 sm:p-12">
-              <Kicker className="mb-5">Instant roof estimate</Kicker>
+              <Kicker className="mb-5">Free 60-second claim check</Kicker>
               <h2 className="font-display text-3xl font-bold leading-tight text-fg-inv sm:text-4xl">
-                What does a new roof actually cost? See it in seconds.
+                Do you have a roof claim? Find out before you call anyone.
               </h2>
               <p className="mt-4 text-fg-inv-dim">
-                Most roofers won&apos;t tell you until a salesperson is in your
-                living room. Enter your address — we measure your roof from
-                aerial data and hand you an honest ballpark on the spot. If
-                it&apos;s a storm claim, you likely just pay your deductible.
+                Enter your address and answer three quick questions. We check
+                reported hail near your home and give you a straight read on
+                whether it&apos;s likely worth filing — no salesperson, no
+                obligation. On a covered claim, you typically pay just your
+                deductible.
               </p>
               <div className="mt-7">
-                <Button href="/roof-estimate">Estimate my roof →</Button>
+                <Button href="/roof-claim-check">Check if I have a claim →</Button>
               </div>
             </div>
             <div className="relative hidden border-l border-line bg-ink-2 p-12 lg:flex lg:items-center">
-              <div className="w-full rounded-card border border-line bg-ink p-6">
-                <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
-                  123 Oak St, Plano TX
+              <div className="w-full rounded-card border-2 border-bolt bg-bolt/10 p-6">
+                <div className="text-xs font-bold uppercase tracking-wider text-bolt">
+                  Good news
                 </div>
-                <div className="mt-2 font-display text-3xl font-extrabold text-fg-inv">
-                  Estimated:{" "}
-                  <span className="text-bolt">$13,500–$16,750</span>
+                <div className="mt-2 font-display text-2xl font-extrabold leading-tight text-fg-inv">
+                  You likely qualify for a roof insurance claim.
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-md border border-line p-3">
-                    <div className="font-display text-xl font-extrabold text-bolt">
-                      ~31–37
-                    </div>
-                    <div className="text-[11px] text-fg-inv-dim">
-                      Roofing squares
-                    </div>
-                  </div>
-                  <div className="rounded-md border border-line p-3">
-                    <div className="font-display text-xl font-extrabold text-bolt">
-                      2,650 ft²
-                    </div>
-                    <div className="text-[11px] text-fg-inv-dim">
-                      Measured footprint
-                    </div>
-                  </div>
+                <div className="mt-4 rounded-md border border-line bg-ink p-3 text-sm text-fg-inv-dim">
+                  3 hail reports within 15 mi · largest 2″ · ~7 months left to
+                  file
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Container>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------- ROOF CHECK BAND */
-function RoofCheckBand() {
-  return (
-    <section className="bg-paper py-20 sm:py-28">
-      <Container>
-        <div className="overflow-hidden rounded-card border border-paper-2 bg-ink shadow-xl">
-          <div className="grid lg:grid-cols-2">
-            <div className="p-9 sm:p-12">
-              <Kicker className="mb-5">Free 60-second check</Kicker>
-              <h2 className="font-display text-3xl font-bold leading-tight text-fg-inv sm:text-4xl">
-                Is your roof still on full replacement coverage?
-              </h2>
-              <p className="mt-4 text-fg-inv-dim">
-                Texas insurers quietly downgrade aging roofs to
-                actual-cash-value — so a claim can pay thousands less than a new
-                roof actually costs. Find out where you stand in five quick
-                questions. No phone call required.
-              </p>
-              <div className="mt-7">
-                <Button href="/roof-check">Take the free roof check →</Button>
-              </div>
-              <p className="mt-4 text-xs text-fg-inv-dim">
-                Honest read, no pressure. We&apos;ll tell you straight if
-                you&apos;re fine.
-              </p>
-            </div>
-
-            {/* Mini interaction preview */}
-            <div className="relative hidden border-l border-line bg-ink-2 p-12 lg:flex lg:items-center">
-              <div className="w-full rounded-card border border-line bg-ink p-6">
-                <div className="kicker text-bolt">Step 1 of 5</div>
-                <div className="mt-3 h-1 w-full rounded-full bg-line">
-                  <div className="h-1 w-1/5 rounded-full bg-bolt" />
-                </div>
-                <p className="mt-5 font-display text-xl font-bold text-fg-inv">
-                  How old is your roof?
-                </p>
-                <div className="mt-4 space-y-2.5">
-                  {["0–9 years", "10–15 years", "16–20 years", "20+ years"].map(
-                    (o, idx) => (
-                      <div
-                        key={o}
-                        className={`flex items-center justify-between rounded-md border px-4 py-3 text-sm ${
-                          idx === 2
-                            ? "border-bolt bg-bolt/10 text-fg-inv"
-                            : "border-line text-fg-inv-dim"
-                        }`}
-                      >
-                        {o}
-                        {idx === 2 && <span className="text-bolt">→</span>}
-                      </div>
-                    ),
-                  )}
+                <div className="mt-3 flex items-center justify-between rounded-md border border-line bg-ink p-3">
+                  <span className="text-sm text-fg-inv-dim">Your out of pocket</span>
+                  <span className="font-display text-lg font-extrabold text-bolt">
+                    Just your deductible
+                  </span>
                 </div>
               </div>
             </div>
@@ -455,7 +382,7 @@ function StormRestoration() {
             ))}
           </ol>
           <div className="mt-8">
-            <Button href="/storm-check">Check your address for hail →</Button>
+            <Button href="/roof-claim-check">Check if I have a claim →</Button>
           </div>
         </div>
 

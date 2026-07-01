@@ -19,16 +19,16 @@ type Card = {
 
 const CARDS: Card[] = [
   {
-    label: "Storm / Hail Check",
-    pitch: "“Scan to see if hail hit YOUR roof — free, 60 seconds.”",
-    path: "/storm-check",
-    campaign: "storm",
+    label: "Free Roof Claim Check",
+    pitch: "“Scan to see if YOUR roof likely qualifies for a claim — free, 60 seconds.”",
+    path: "/roof-claim-check",
+    campaign: "claim",
   },
   {
-    label: "Instant Roof Estimate",
-    pitch: "“Scan for an instant roof price — measured from your address.”",
-    path: "/roof-estimate",
-    campaign: "roof",
+    label: "Deductible Financing",
+    pitch: "“Scan to see your deductible financed — $0 down, low monthly.”",
+    path: "/financing",
+    campaign: "financing",
   },
   {
     label: "PowerEdge Home",

@@ -38,13 +38,13 @@ export function Footer() {
               </li>
             ))}
             <li className="pt-1">
-              <Link href="/roof-estimate" className="text-bolt hover:text-bolt-hi">
-                Instant roof estimate
+              <Link href="/roof-claim-check" className="text-bolt hover:text-bolt-hi">
+                Free roof claim check
               </Link>
             </li>
             <li>
-              <Link href="/storm-check" className="text-bolt hover:text-bolt-hi">
-                Free hail / storm check
+              <Link href="/financing" className="text-bolt hover:text-bolt-hi">
+                Deductible financing
               </Link>
             </li>
             <li>

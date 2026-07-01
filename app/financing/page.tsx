@@ -76,11 +76,59 @@ export default function FinancingPage() {
         </Container>
       </section>
 
-      {/* How it works */}
-      <section className="bg-ink py-20 sm:py-28">
+      {/* Who it's for */}
+      <section className="bg-ink py-16 sm:py-20">
         <Container>
           <SectionHeading
             dark
+            kicker="Who this is for"
+            title="If any of these is you, don't wait to save up."
+          />
+          <div className="mt-10 grid gap-4 sm:grid-cols-2">
+            {[
+              {
+                h: "Approved, but the deductible's too steep",
+                p: "Texas deductibles run 1–2% of home value — $5,000–$10,000 before work starts. Finance it and start now.",
+              },
+              {
+                h: "Your insurance check came in low",
+                p: "Older roofs get put on actual-cash-value — a depreciated check that doesn't cover the job. We finance the gap.",
+              },
+              {
+                h: "No claim — you're paying out of pocket",
+                p: "No storm claim? We can finance the full project so a new roof isn't a lump-sum decision.",
+              },
+              {
+                h: "You've got solar in the mix",
+                p: "If the detach & reset isn't fully covered, that cost doesn't have to stop you either.",
+              },
+            ].map((c) => (
+              <div
+                key={c.h}
+                className="rounded-card border border-line bg-ink-2 p-6"
+              >
+                <h3 className="font-display text-lg font-bold text-fg-inv">
+                  {c.h}
+                </h3>
+                <p className="mt-1 text-sm leading-relaxed text-fg-inv-dim">
+                  {c.p}
+                </p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-8 flex items-center justify-center gap-2 text-center text-sm text-fg-inv-dim">
+            <span aria-hidden>⏳</span>
+            Storm damage worsens with every rain and Texas claims have filing
+            deadlines — financing lets you get the roof done now, not months from
+            now.
+          </p>
+        </Container>
+      </section>
+
+      {/* How it works */}
+      <section className="bg-paper py-20 sm:py-28">
+        <Container>
+          <SectionHeading
             kicker="How it works"
             title="Four steps, no lump sum."
           />

@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
       // Residential electrical retired as a standalone service — electrical now
       // lives inside the commercial offering.
       { source: "/electrical", destination: "/commercial", permanent: true },
+      // Storm check + roof estimate merged into one binary eligibility tool.
+      { source: "/storm-check", destination: "/roof-claim-check", permanent: true },
+      { source: "/roof-estimate", destination: "/roof-claim-check", permanent: true },
     ];
   },
 };
