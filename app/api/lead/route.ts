@@ -26,45 +26,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  // Temporary diagnostic — reports why lead emails aren't arriving, without
-  // exposing the key. Remove after debugging.
-  if (body.debug) {
-    const key = process.env.RESEND_API_KEY;
-    const toAddr = process.env.LEAD_TO_EMAIL || site.email;
-    let status: number | null = null;
-    let respBody: string | null = null;
-    if (key) {
-      try {
-        const r = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${key}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: `PowerEdge Site <leads@${site.domain}>`,
-            to: [toAddr],
-            subject: "PowerEdge lead-email diagnostic",
-            html: "<p>Diagnostic test send.</p>",
-          }),
-        });
-        status = r.status;
-        respBody = (await r.text()).slice(0, 300);
-      } catch (e) {
-        respBody = String(e);
-      }
-    }
-    return NextResponse.json({
-      resendKeyPresent: !!key,
-      leadToEmail: toAddr,
-      fromDomain: site.domain,
-      audienceIdPresent: !!process.env.RESEND_AUDIENCE_ID,
-      webhookPresent: !!process.env.LEAD_WEBHOOK_URL,
-      resendStatus: status,
-      resendResponse: respBody,
-    });
-  }
-
   // Honeypot: if the hidden field is filled, silently accept and drop.
   if (body.company_website) {
     return NextResponse.json({ ok: true });
