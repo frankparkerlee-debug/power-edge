@@ -46,9 +46,7 @@ export function Reviews() {
                 <span className="font-display font-bold text-fg">
                   {r.author}
                 </span>
-                <span className="block text-sm text-fg-dim">
-                  {r.location} · {r.service}
-                </span>
+                <span className="block text-sm text-fg-dim">{r.detail}</span>
               </figcaption>
             </figure>
           ))}

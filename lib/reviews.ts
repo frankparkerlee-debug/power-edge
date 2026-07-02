@@ -1,35 +1,42 @@
-// Featured reviews shown on the site.
-// TODO(parker): replace these with real quotes pulled from your Google profile.
-// Keep 3–6 of your strongest, most specific recent ones (recency matters for
-// trust after the year-end service dip — favor the freshest 5-star reviews).
+// Featured reviews — REAL, verbatim (lightly trimmed with ellipses) from the
+// company's Google profile. Names shown as first name + last initial. Do not
+// fabricate quotes, names, locations, or services.
 
 export type Review = {
   quote: string;
   author: string;
-  location: string;
-  service: string;
+  detail: string; // honest attribution (service where stated + "Google review")
 };
 
 export const reviews: Review[] = [
   {
     quote:
-      "Showed up same day, found the breaker that kept tripping in ten minutes, and the price was exactly what they quoted. No upsell, no nonsense.",
-    author: "Marcus T.",
-    location: "Plano, TX",
-    service: "Electrical service",
+      "They were courteous, took time to explain what they were doing and gave me status updates. Happy with the quality. It's good to see that there are still contractors out there that do a good job and are good folks.",
+    author: "Abi E.",
+    detail: "Verified Google review",
   },
   {
     quote:
-      "After the hail storm they walked the roof with me, took photos, and handled the whole insurance claim straight. New roof on in two days.",
-    author: "Danielle R.",
-    location: "Fort Worth, TX",
-    service: "Storm / insurance roof",
+      "They were able to make it out the same day I called, diagnosed the issue and made the repair… the price was extremely reasonable. I would definitely recommend them to anyone.",
+    author: "Jon S.",
+    detail: "Same-day service · Google review",
   },
   {
     quote:
-      "Had three other companies out for a panel upgrade. PowerEdge was the only one who showed me their license number and explained the actual work. Easy call.",
-    author: "Steve K.",
-    location: "Dallas, TX",
-    service: "200A service upgrade",
+      "Hands down the best electricians in Dallas. From the people, to the service and most importantly the quality of work.",
+    author: "Matthew B.",
+    detail: "Verified Google review",
+  },
+  {
+    quote:
+      "He handled everything and was very honest and hardworking. I would highly recommend him… Pricing was reasonable and feasible for our breaker box problem.",
+    author: "Shawn W.",
+    detail: "Verified Google review",
+  },
+  {
+    quote:
+      "He did the best he could to be as fast as possible while still giving the best service and doing the job right. I would definitely recommend to friends and family!",
+    author: "Leanne G.",
+    detail: "Verified Google review",
   },
 ];

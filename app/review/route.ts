@@ -12,11 +12,13 @@ import { site } from "@/lib/site";
  * dead end.
  */
 export function GET() {
+  const write = site.googleWriteReviewUrl as string;
+  const profile = site.googleReviewsUrl as string;
   const target =
-    site.googleWriteReviewUrl && site.googleWriteReviewUrl !== "#"
-      ? site.googleWriteReviewUrl
-      : site.googleReviewsUrl && site.googleReviewsUrl !== "#"
-        ? site.googleReviewsUrl
+    write && write !== "#"
+      ? write
+      : profile && profile !== "#"
+        ? profile
         : `https://www.google.com/search?q=${encodeURIComponent(
             site.legalName + " Dallas Fort Worth reviews",
           )}`;

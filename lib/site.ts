@@ -23,7 +23,7 @@ export const site = {
   googleRating: "4.7",
   googleReviewCount: "48",
   // TODO(parker): paste the public Google review/maps URL here for the "read reviews" link.
-  googleReviewsUrl: "#",
+  googleReviewsUrl: "https://share.google/Yfo6Ynfmzp3dzVnD6",
   // TODO(parker): paste your Google "write a review" link here (GBP dashboard →
   // "Ask for reviews" → copy link; looks like https://g.page/r/XXXXXXXX/review).
   // Powers the /review short link your team texts to customers.
