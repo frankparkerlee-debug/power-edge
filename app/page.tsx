@@ -5,6 +5,7 @@ import { Reviews } from "@/components/Reviews";
 import { Gallery } from "@/components/Gallery";
 import { DeductibleFinancing } from "@/components/DeductibleFinancing";
 import { FinancingCalculator } from "@/components/FinancingCalculator";
+import { CountUp } from "@/components/CountUp";
 import { site } from "@/lib/site";
 import { services } from "@/lib/services";
 import { cities } from "@/lib/cities";
@@ -132,11 +133,11 @@ function Hero() {
               Book your free storm inspection
             </h2>
             <p className="mt-1.5 text-sm text-fg-inv-dim">
-              Hail or wind damage? We&apos;ll inspect it free, document it for
-              your claim, and give you a straight answer — fast.
+              Just your name and number — a licensed pro calls you back fast,
+              usually within the hour.
             </p>
             <div className="mt-6">
-              <LeadForm compact defaultService="Storm / insurance claim" />
+              <LeadForm compact lean defaultService="Storm / insurance claim" />
             </div>
           </div>
         </div>
@@ -148,13 +149,20 @@ function Hero() {
 /* ------------------------------------------------------------- TRUST BAR */
 function TrustBar() {
   const items = [
-    { big: `#${site.teclLicense}`, small: "TX license you can verify (TECL)" },
     {
-      big: `${site.capacity.crews} crews`,
+      big: <CountUp to={Number(site.teclLicense)} prefix="#" duration={1500} />,
+      small: "TX license you can verify (TECL)",
+    },
+    {
+      big: <CountUp to={site.capacity.crews} suffix=" crews" />,
       small: `~${site.capacity.roofsPerMonth} roofs / month capacity`,
     },
     {
-      big: `${site.googleRating}★`,
+      big: (
+        <>
+          <CountUp to={Number(site.googleRating)} decimals={1} />★
+        </>
+      ),
       small: `${site.googleReviewCount} Google reviews`,
     },
     { big: "1-yr", small: "workmanship guarantee" },

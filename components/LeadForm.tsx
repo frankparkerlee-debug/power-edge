@@ -11,9 +11,14 @@ type Status = "idle" | "submitting" | "success" | "error";
 export function LeadForm({
   defaultService = "",
   compact = false,
+  lean = false,
 }: {
   defaultService?: string;
   compact?: boolean;
+  /** Minimal top-of-funnel variant: name + phone + optional email only.
+   *  Fewer fields = higher completion on cold hero traffic; the team gets the
+   *  rest on the callback. Service is passed through hidden. */
+  lean?: boolean;
 }) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
@@ -91,69 +96,84 @@ export function LeadForm({
           autoComplete="tel"
         />
       </div>
-      <div className={compact ? "" : "grid gap-4 sm:grid-cols-2"}>
-        <input
-          name="email"
-          type="email"
-          placeholder="Email (we'll send your details)"
-          className={inputBase}
-          autoComplete="email"
-        />
-        <input
-          name="zip"
-          placeholder="ZIP code"
-          className={inputBase}
-          autoComplete="postal-code"
-          inputMode="numeric"
-        />
-      </div>
-      <select name="service" defaultValue={defaultService} className={inputBase} required>
-        <option value="" disabled>
-          What do you need?
-        </option>
-        {services.map((s) => (
-          <option key={s.slug} value={s.short}>
-            {s.title}
-          </option>
-        ))}
-        <option value="Storm / insurance claim">Storm / insurance claim</option>
-        <option value="Financing / stuck on out-of-pocket">
-          Financing — stuck on the out-of-pocket
-        </option>
-        <option value="Emergency">Emergency — need someone now</option>
-        <option value="Other">Something else</option>
-      </select>
-      <textarea
-        name="message"
-        rows={compact ? 2 : 3}
-        placeholder="Briefly, what's going on? (optional)"
-        className={inputBase}
-      />
+      {lean ? (
+        <>
+          <input
+            name="email"
+            type="email"
+            placeholder="Email (optional)"
+            className={inputBase}
+            autoComplete="email"
+          />
+          <input type="hidden" name="service" value={defaultService} />
+        </>
+      ) : (
+        <>
+          <div className={compact ? "" : "grid gap-4 sm:grid-cols-2"}>
+            <input
+              name="email"
+              type="email"
+              placeholder="Email (we'll send your details)"
+              className={inputBase}
+              autoComplete="email"
+            />
+            <input
+              name="zip"
+              placeholder="ZIP code"
+              className={inputBase}
+              autoComplete="postal-code"
+              inputMode="numeric"
+            />
+          </div>
+          <select name="service" defaultValue={defaultService} className={inputBase} required>
+            <option value="" disabled>
+              What do you need?
+            </option>
+            {services.map((s) => (
+              <option key={s.slug} value={s.short}>
+                {s.title}
+              </option>
+            ))}
+            <option value="Storm / insurance claim">Storm / insurance claim</option>
+            <option value="Financing / stuck on out-of-pocket">
+              Financing — stuck on the out-of-pocket
+            </option>
+            <option value="Emergency">Emergency — need someone now</option>
+            <option value="Other">Something else</option>
+          </select>
+          <textarea
+            name="message"
+            rows={compact ? 2 : 3}
+            placeholder="Briefly, what's going on? (optional)"
+            className={inputBase}
+          />
 
-      {/* Solar qualifier — tags the lead so the team scopes detach & reset and
-          documents the panels (the claimable line most roofers miss). */}
-      <label
-        className={`flex cursor-pointer items-start gap-3 rounded-md border px-4 py-3 text-sm transition-colors ${
-          solar
-            ? "border-bolt bg-bolt/10 text-fg-inv"
-            : "border-line bg-ink-2 text-fg-inv-dim"
-        }`}
-      >
-        <input
-          type="checkbox"
-          name="solar"
-          value="yes"
-          checked={solar}
-          onChange={(e) => setSolar(e.target.checked)}
-          className="mt-0.5 h-4 w-4 accent-bolt"
-        />
-        <span>I have solar panels on my roof</span>
-      </label>
-      {solar && (
-        <p className="rounded-md border border-bolt/30 bg-bolt/10 px-4 py-3 text-sm leading-relaxed text-fg-inv">
-          Good — we detach &amp; reset your panels in-house (most roofers
-          can&apos;t), and it&apos;s usually a covered line item on your claim.
-        </p>
+          {/* Solar qualifier — tags the lead so the team scopes detach & reset
+              and documents the panels (the claimable line most roofers miss). */}
+          <label
+            className={`flex cursor-pointer items-start gap-3 rounded-md border px-4 py-3 text-sm transition-colors ${
+              solar
+                ? "border-bolt bg-bolt/10 text-fg-inv"
+                : "border-line bg-ink-2 text-fg-inv-dim"
+            }`}
+          >
+            <input
+              type="checkbox"
+              name="solar"
+              value="yes"
+              checked={solar}
+              onChange={(e) => setSolar(e.target.checked)}
+              className="mt-0.5 h-4 w-4 accent-bolt"
+            />
+            <span>I have solar panels on my roof</span>
+          </label>
+          {solar && (
+            <p className="rounded-md border border-bolt/30 bg-bolt/10 px-4 py-3 text-sm leading-relaxed text-fg-inv">
+              Good — we detach &amp; reset your panels in-house (most roofers
+              can&apos;t), and it&apos;s usually a covered line item on your claim.
+            </p>
+          )}
+        </>
       )}
 
       {/* Honeypot — hidden from humans, bots fill it */}
