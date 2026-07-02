@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { plaid, plaidConfig } from "@/lib/plaid";
 import { enqueueLeadSequence } from "@/lib/emails";
+import { insertLead } from "@/lib/db";
 import { site } from "@/lib/site";
 
 // Phase 1 underwrite: exchange the Link public_token, pull identity + balances +
@@ -89,6 +90,19 @@ export async function POST(req: Request) {
       nameMatch &&
       totalAvailable >= Math.max(requested / 4, 250);
     const decision = approved ? "approved" : "review";
+
+    // Durable capture (no-op until SUPABASE_* set).
+    await insertLead({
+      name: body.name,
+      phone: body.phone,
+      email: body.email,
+      zip: body.zip,
+      service: `Financing pre-qualification (Plaid — ${decision})`,
+      message: `[Plaid Prequal ${decision}] amount: $${requested.toLocaleString()}; available: $${totalAvailable.toLocaleString()}; name match: ${
+        nameMatch ? "yes" : "no"
+      }; property: ${body.address || "—"}`,
+      source: "financing-prequal-plaid",
+    });
 
     // --- Team intel email (account numbers masked) ------------------------
     const resendKey = process.env.RESEND_API_KEY;

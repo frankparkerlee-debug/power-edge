@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { site } from "@/lib/site";
 import { enqueueLeadSequence } from "@/lib/emails";
+import { insertLead } from "@/lib/db";
 
 /**
  * Lead handler.
@@ -66,6 +67,25 @@ export async function POST(req: Request) {
     [lead.utm_source, lead.utm_medium, lead.utm_campaign].filter(Boolean).join(" / ") ||
     lead.referrer ||
     "direct";
+
+  // --- 0. Durable capture (Supabase) — first, so no lead is lost to an email
+  // hiccup. No-ops until SUPABASE_* env is set. Best-effort (never throws).
+  await insertLead({
+    name: lead.name,
+    phone: lead.phone,
+    email: lead.email,
+    zip: lead.zip,
+    service: lead.service,
+    message: lead.message,
+    solar: lead.solar === "yes",
+    source: sourceLine,
+    page_path: lead.page_path,
+    referrer: lead.referrer,
+    utm_source: lead.utm_source,
+    utm_medium: lead.utm_medium,
+    utm_campaign: lead.utm_campaign,
+    gclid: lead.gclid,
+  });
 
   // --- 1. Email notification -------------------------------------------------
   const resendKey = process.env.RESEND_API_KEY;
