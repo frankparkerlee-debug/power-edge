@@ -67,13 +67,18 @@ export async function insertLead(lead: LeadInsert) {
 }
 
 export type ClaimIntake = {
+  id?: string;
   name?: string;
   phone?: string;
   email?: string;
   address?: string;
+  cause?: string;
+  damage_signs?: string;
+  roof_age?: string;
   carrier?: string;
   policy_number?: string;
   deductible?: string;
+  coverage_type?: string;
   date_of_loss?: string;
   filed?: boolean;
   claim_number?: string;
@@ -81,22 +86,63 @@ export type ClaimIntake = {
   concerns?: string;
   best_times?: string;
   solar?: boolean;
+  stage?: number;
+  completed?: boolean;
+  updated_at?: string;
+  nurtured_stage?: number;
 };
 
-/** Best-effort insert of a homeowner's claim-prep intake. Never throws. */
-export async function insertClaimIntake(intake: ClaimIntake) {
+/** Upsert a claim-prep intake by id (progressive save — one row per homeowner,
+ *  updated as they advance through the wizard). Best-effort; never throws. */
+export async function upsertClaimIntake(intake: ClaimIntake) {
   if (!dbEnabled()) return;
   try {
     const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/claim_intakes`, {
       method: "POST",
-      headers: { ...authHeaders(), Prefer: "return=minimal" },
+      headers: {
+        ...authHeaders(),
+        Prefer: "resolution=merge-duplicates,return=minimal",
+      },
       body: JSON.stringify(intake),
     });
     if (!res.ok) {
-      console.error("[db] insertClaimIntake non-2xx", res.status, await res.text());
+      console.error("[db] upsertClaimIntake non-2xx", res.status, await res.text());
     }
   } catch (err) {
-    console.error("[db] insertClaimIntake failed", err);
+    console.error("[db] upsertClaimIntake failed", err);
+  }
+}
+
+/** Incomplete intakes last touched before `beforeIso` — for drop-off nurture. */
+export async function listIncompleteIntakes(beforeIso: string): Promise<ClaimIntake[]> {
+  if (!dbEnabled()) return [];
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/claim_intakes?select=*&completed=eq.false&updated_at=lt.${beforeIso}&order=updated_at.asc&limit=300`,
+      { headers: authHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    return (await res.json()) as ClaimIntake[];
+  } catch (err) {
+    console.error("[db] listIncompleteIntakes failed", err);
+    return [];
+  }
+}
+
+/** Mark which nurture stage has been sent, so we don't re-send. */
+export async function markIntakeNurtured(id: string, stage: number) {
+  if (!dbEnabled()) return;
+  try {
+    await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/claim_intakes?id=eq.${id}`,
+      {
+        method: "PATCH",
+        headers: { ...authHeaders(), Prefer: "return=minimal" },
+        body: JSON.stringify({ nurtured_stage: stage }),
+      },
+    );
+  } catch (err) {
+    console.error("[db] markIntakeNurtured failed", err);
   }
 }
 

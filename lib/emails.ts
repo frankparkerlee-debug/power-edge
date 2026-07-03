@@ -419,6 +419,122 @@ export const leadSequence: SequenceEmail[] = [
   },
 ];
 
+// ---- Claim-prep intake emails (completion + drop-off nurture) -------------
+type IntakeLite = {
+  id?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+};
+
+async function sendEmail(
+  resendKey: string,
+  to: string,
+  subject: string,
+  html: string,
+) {
+  return fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: `PowerEdge <hello@${site.domain}>`,
+      to: [to],
+      replyTo: site.email,
+      subject,
+      html,
+      headers: {
+        "List-Unsubscribe": `<mailto:${site.email}?subject=Unsubscribe>`,
+      },
+    }),
+  });
+}
+
+function prepResumeUrl(i: IntakeLite) {
+  const q = new URLSearchParams({
+    resume: i.id || "",
+    name: i.name || "",
+    phone: i.phone || "",
+    email: i.email || "",
+    address: i.address || "",
+  });
+  return `${CLAIM_PREP_URL}?${q.toString()}`;
+}
+
+/** Sent when a homeowner finishes claim prep. */
+export async function sendClaimComplete(
+  resendKey: string,
+  to: string,
+  name: string,
+) {
+  const first = (name || "there").split(" ")[0];
+  return sendEmail(
+    resendKey,
+    to,
+    "Your claim details are in — we'll call you right away",
+    shell({
+      preheader: "We've got everything to move fast on-site.",
+      body:
+        h1(`You're all set, ${first}.`) +
+        p(
+          `We&rsquo;ve got your claim details, and a licensed member of our team will call you <strong>right away</strong> to lock in your inspection. When we arrive we go straight to documenting the roof — no paperwork on the doorstep.`,
+        ) +
+        p(`Need us sooner? Call or text <strong>${site.phone}</strong>.`) +
+        button(`Call ${site.phone}`, site.phoneHref) +
+        verifyChip(),
+    }),
+  );
+}
+
+/** Drop-off nurture. stage 1 = started only; stage 2 = did insurance step. */
+export async function sendClaimNurture(
+  resendKey: string,
+  intake: IntakeLite,
+  stage: number,
+) {
+  if (!intake.email) return;
+  const first = (intake.name || "there").split(" ")[0];
+  const url = prepResumeUrl(intake);
+  if (stage >= 2) {
+    return sendEmail(
+      resendKey,
+      intake.email,
+      "You're almost there — finish your claim in a minute",
+      shell({
+        preheader: "A couple more details and your crew arrives ready.",
+        body:
+          h1(`Almost done, ${first}.`) +
+          p(
+            `You&rsquo;ve done the hard part — just a couple more details and your inspection is fully prepped, so our crew gets right on the roof instead of doing paperwork. Takes about a minute.`,
+          ) +
+          button("Finish my claim →", url) +
+          verifyChip(),
+      }),
+    );
+  }
+  return sendEmail(
+    resendKey,
+    intake.email,
+    "Your roof claim, made easy",
+    shell({
+      preheader: "Storm damage doesn't wait — let's get ahead of it.",
+      body:
+        h1(`Let's get your claim rolling, ${first}.`) +
+        p(
+          `You started your claim prep — smart move. Filing a hail claim <em>sounds</em> like a hassle, but we make it simple: you add a few details, we document the damage and coordinate with your adjuster, and on a covered claim you pay just your deductible.`,
+        ) +
+        p(
+          `<strong>Storm damage only gets worse, and your filing window won&rsquo;t stay open.</strong> Pick up right where you left off:`,
+        ) +
+        button("Finish my claim →", url) +
+        verifyChip(),
+    }),
+  );
+}
+
 // ---- Enqueue the sequence via Resend scheduled sends ----------------------
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

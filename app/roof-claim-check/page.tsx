@@ -138,6 +138,30 @@ export default function RoofClaimCheckPage() {
 
       <FaqSection faqs={faqs} title="Roof-claim questions, answered straight." />
 
+      {/* Start-your-claim funnel entry (progressive intake) */}
+      <section className="bg-ink py-16 sm:py-20">
+        <Container className="text-center">
+          <h2 className="font-display text-3xl font-bold text-fg-inv sm:text-4xl">
+            Start your claim now — we&apos;ll do the heavy lifting.
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-fg-inv-dim">
+            Add a few details and we arrive ready to inspect, document, and get
+            you moving — not do paperwork on your doorstep. Takes about two
+            minutes; your deductible can be financed from $250 down.
+          </p>
+          <a
+            href="/claim-prep"
+            className="mt-7 inline-block rounded-md bg-bolt px-7 py-4 font-display text-base font-extrabold text-ink transition-colors hover:bg-bolt-hi"
+          >
+            Start my claim →
+          </a>
+          <p className="mt-3 text-xs text-fg-inv-dim">
+            Licensed contractor, not a public adjuster — we document &amp;
+            coordinate; you file with your insurer.
+          </p>
+        </Container>
+      </section>
+
       <CtaBand
         heading="Don't wait for the leak to prove the damage."
         sub="Free inspection, documented for your claim, deductible financing from $250 down — and we move before your filing window closes. On a covered claim you pay just your deductible."

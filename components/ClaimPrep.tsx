@@ -1,208 +1,308 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AddressAutocomplete } from "./AddressAutocomplete";
 import { track } from "@/lib/analytics";
+import { site } from "@/lib/site";
 
 /**
- * Claim-prep intake. The homeowner fills their own claim details online so the
- * crew arrives ready to inspect, photograph, and close — not do paperwork.
- * Prefills contact from ?name=&phone=&email=&address= (handed off from booking).
- * Framing is efficiency/prep only — we don't file or negotiate the claim.
+ * Staged "start your claim" wizard. Order per claim research (maximizes
+ * completion): Stage 1 = easy hook (address/storm/what-you-see/contact),
+ * Stage 2 = damage + BOOK the inspection (the conversion), Stage 3 = OPTIONAL
+ * policy details (carrier/policy#/deductible) — kept last + optional because
+ * making people dig out the declarations page is the #1 abandon point.
+ *
+ * Progressive save: each step upserts one row (by id) so partial progress
+ * persists and the drop-off nurture can reach people who don't finish.
+ *
+ * COMPLIANCE (TX Ins. Code Ch. 4102 / Stonewater): policy # optional, no SSN,
+ * we "document & coordinate," never file/negotiate — see the disclaimer.
  */
 
+const CAUSES = ["Hail", "Wind", "Not sure"];
+const SIGNS = [
+  "Missing / curling shingles",
+  "Leak or ceiling stain",
+  "Dented gutters or downspouts",
+  "Granules in the gutters",
+  "No visible damage — just concerned",
+];
+const AGES = ["0–9 yrs", "10–15 yrs", "16–20 yrs", "20+ / not sure"];
 const DEDUCTIBLES = ["$500", "$1,000", "$2,500", "$5,000", "1% of home value", "Not sure"];
-type Sub = "idle" | "submitting" | "done" | "error";
+const COVERAGE = ["Replacement cost", "Actual cash value", "Not sure"];
+
+type Step = "1" | "2" | "booked" | "3" | "done";
+type Data = {
+  name: string; phone: string; email: string; address: string;
+  date_of_loss: string; cause: string; damage_signs: string[];
+  roof_age: string; concerns: string; mortgage_company: string;
+  best_times: string; solar: boolean;
+  carrier: string; policy_number: string; deductible: string; coverage_type: string;
+};
 
 const inputBase =
   "w-full rounded-md border border-line bg-ink px-4 py-3 text-fg-inv placeholder:text-fg-inv-dim/60 focus:border-bolt focus:outline-none";
-const label = "block text-sm font-semibold text-fg-inv";
+const lbl = "block text-sm font-semibold text-fg-inv";
+const chip = (on: boolean) =>
+  `rounded-md border px-3 py-2 text-sm font-semibold transition-colors ${
+    on ? "border-bolt bg-bolt/10 text-bolt" : "border-line text-fg-inv-dim hover:border-bolt"
+  }`;
+
+const empty: Data = {
+  name: "", phone: "", email: "", address: "", date_of_loss: "", cause: "",
+  damage_signs: [], roof_age: "", concerns: "", mortgage_company: "", best_times: "",
+  solar: false, carrier: "", policy_number: "", deductible: "", coverage_type: "",
+};
 
 export function ClaimPrep() {
-  const [filed, setFiled] = useState(false);
-  const [solar, setSolar] = useState(false);
-  const [deductible, setDeductible] = useState("");
-  const [sub, setSub] = useState<Sub>("idle");
-  const [prefill, setPrefill] = useState({ name: "", phone: "", email: "", address: "" });
+  const [id, setId] = useState("");
+  const [step, setStep] = useState<Step>("1");
+  const [saving, setSaving] = useState(false);
+  const [d, setD] = useState<Data>(empty);
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
-    setPrefill({
-      name: q.get("name") || "",
-      phone: q.get("phone") || "",
-      email: q.get("email") || "",
-      address: q.get("address") || q.get("a") || "",
-    });
+    const resume = q.get("resume");
+    const existing = resume || localStorage.getItem("pe_claim_id") || crypto.randomUUID();
+    localStorage.setItem("pe_claim_id", existing);
+    setId(existing);
+    setD((p) => ({
+      ...p,
+      name: q.get("name") || p.name,
+      phone: q.get("phone") || p.phone,
+      email: q.get("email") || p.email,
+      address: q.get("address") || q.get("a") || p.address,
+    }));
   }, []);
 
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setSub("submitting");
-    const fd = Object.fromEntries(new FormData(e.currentTarget).entries()) as Record<string, string>;
+  const set = <K extends keyof Data>(k: K, v: Data[K]) => setD((p) => ({ ...p, [k]: v }));
+  const toggleSign = (s: string) =>
+    setD((p) => ({
+      ...p,
+      damage_signs: p.damage_signs.includes(s)
+        ? p.damage_signs.filter((x) => x !== s)
+        : [...p.damage_signs, s],
+    }));
+
+  async function save(stage: number, completed: boolean) {
+    if (!id) return;
+    setSaving(true);
     try {
-      const res = await fetch("/api/claim-intake", {
+      await fetch("/api/claim-intake", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...fd, filed, solar, deductible }),
+        body: JSON.stringify({ ...d, damage_signs: d.damage_signs.join(", "), id, stage, completed }),
       });
-      if (!res.ok) throw new Error();
-      track("claim_intake_submit", {});
-      setSub("done");
     } catch {
-      setSub("error");
+      /* best-effort; progressive save */
     }
+    setSaving(false);
   }
 
-  if (sub === "done") {
+  const Disclaimer = () => (
+    <p className="mt-4 text-center text-xs leading-relaxed text-fg-inv-dim">
+      PowerEdge is a licensed roofing contractor (TECL #{site.teclLicense}), not a
+      public insurance adjuster. We document damage and coordinate our inspection
+      with your adjuster; you file and manage your claim with your insurer.
+    </p>
+  );
+
+  const Progress = ({ n }: { n: number }) => (
+    <div className="mb-5">
+      <div className="flex justify-between text-xs font-semibold uppercase tracking-wider text-fg-inv-dim">
+        <span>Step {n} of 3</span>
+        <span>{n === 1 ? "Your home & the storm" : n === 2 ? "Damage & scheduling" : "Policy details (optional)"}</span>
+      </div>
+      <div className="mt-2 h-1 w-full rounded-full bg-line">
+        <div className="h-1 rounded-full bg-bolt transition-all" style={{ width: `${(n / 3) * 100}%` }} />
+      </div>
+    </div>
+  );
+
+  // ---- DONE ---------------------------------------------------------------
+  if (step === "done") {
     return (
-      <div className="rounded-card border border-bolt/40 bg-bolt/10 p-8 text-center">
+      <div className="py-4 text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-bolt">
-          <svg viewBox="0 0 24 24" className="h-6 w-6 fill-ink">
-            <path d="M9 16.2l-3.5-3.5L4 14.2 9 19.2l11-11-1.4-1.4z" />
-          </svg>
+          <svg viewBox="0 0 24 24" className="h-6 w-6 fill-ink"><path d="M9 16.2l-3.5-3.5L4 14.2 9 19.2l11-11-1.4-1.4z" /></svg>
         </div>
-        <h3 className="font-display text-2xl font-bold text-fg-inv">
-          You&apos;re ahead of the game.
-        </h3>
+        <h3 className="font-display text-2xl font-bold text-fg-inv">You&apos;re all set.</h3>
         <p className="mt-2 text-fg-inv-dim">
-          Thanks — your crew will show up already knowing the scope, so the visit
-          is about the roof, not paperwork. We&apos;ll call to confirm your time.
+          A licensed member of our team will call you <strong className="text-fg-inv">right away</strong> to
+          lock in your inspection — and we&apos;ll arrive ready to get on the roof, not do paperwork.
         </p>
+        <p className="mt-3 text-sm text-fg-inv-dim">Need us now? Call or text {site.phone}.</p>
       </div>
     );
   }
 
-  return (
-    <form onSubmit={submit} className="space-y-6">
-      {/* Contact */}
-      <div className="space-y-3">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <label className={label}>Full name</label>
-            <input name="name" required defaultValue={prefill.name} className={`mt-1 ${inputBase}`} autoComplete="name" />
-          </div>
-          <div>
-            <label className={label}>Phone</label>
-            <input name="phone" required type="tel" defaultValue={prefill.phone} className={`mt-1 ${inputBase}`} autoComplete="tel" />
-          </div>
+  // ---- BOOKED (interstitial after stage 2) --------------------------------
+  if (step === "booked") {
+    return (
+      <div className="py-2 text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-bolt">
+          <svg viewBox="0 0 24 24" className="h-6 w-6 fill-ink"><path d="M9 16.2l-3.5-3.5L4 14.2 9 19.2l11-11-1.4-1.4z" /></svg>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <label className={label}>Email</label>
-            <input name="email" type="email" defaultValue={prefill.email} className={`mt-1 ${inputBase}`} autoComplete="email" />
-          </div>
-          <div>
-            <label className={label}>Property address</label>
-            <input name="address" defaultValue={prefill.address} className={`mt-1 ${inputBase}`} autoComplete="street-address" />
-          </div>
+        <h3 className="font-display text-2xl font-bold text-fg-inv">You&apos;re booked in.</h3>
+        <p className="mt-2 text-fg-inv-dim">
+          We&apos;ll call you <strong className="text-fg-inv">right away</strong> to confirm your time.
+        </p>
+        <div className="mt-6 rounded-card border border-line bg-ink p-5 text-left">
+          <p className="font-display text-base font-bold text-fg-inv">
+            Want us in and out even faster?
+          </p>
+          <p className="mt-1 text-sm text-fg-inv-dim">
+            Add your policy details (2 optional fields) so we arrive ready to open the claim on-site.
+          </p>
+          <button
+            onClick={() => setStep("3")}
+            className="mt-4 w-full rounded-md bg-bolt px-6 py-3 font-display font-bold text-ink transition-colors hover:bg-bolt-hi"
+          >
+            Add policy details →
+          </button>
+          <button
+            onClick={() => setStep("done")}
+            className="mt-2 w-full text-center text-xs text-fg-inv-dim hover:text-fg-inv"
+          >
+            Skip — I&apos;ll bring them to the visit
+          </button>
         </div>
+        <Disclaimer />
       </div>
+    );
+  }
 
-      {/* Insurance */}
-      <div className="rounded-card border border-line bg-ink p-5">
-        <div className="text-xs font-bold uppercase tracking-wider text-bolt">
-          Your insurance
+  // ---- STEP 3 — optional policy -------------------------------------------
+  if (step === "3") {
+    return (
+      <form
+        onSubmit={async (e) => { e.preventDefault(); await save(3, true); track("claim_step", { step: "3" }); setStep("done"); }}
+        className="space-y-4"
+      >
+        <Progress n={3} />
+        <p className="text-sm text-fg-inv-dim">
+          All optional — it just speeds up the on-site claim. No policy number handy? Bring it to the visit.
+        </p>
+        <div>
+          <label className={lbl}>Insurance carrier</label>
+          <input value={d.carrier} onChange={(e) => set("carrier", e.target.value)} placeholder="State Farm, Allstate…" className={`mt-1 ${inputBase}`} />
         </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <div>
-            <label className={label}>Insurance carrier</label>
-            <input name="carrier" placeholder="State Farm, Allstate…" className={`mt-1 ${inputBase}`} />
-          </div>
-          <div>
-            <label className={label}>Policy number</label>
-            <input name="policy_number" placeholder="Optional" className={`mt-1 ${inputBase}`} />
-          </div>
+        <div>
+          <label className={lbl}>Policy number <span className="font-normal text-fg-inv-dim">(optional)</span></label>
+          <input value={d.policy_number} onChange={(e) => set("policy_number", e.target.value)} placeholder="Or bring it to the visit" className={`mt-1 ${inputBase}`} />
         </div>
-        <div className="mt-3">
-          <label className={label}>Wind/hail deductible</label>
+        <div>
+          <label className={lbl}>Wind/hail deductible <span className="font-normal text-fg-inv-dim">(for planning)</span></label>
           <div className="mt-2 flex flex-wrap gap-2">
-            {DEDUCTIBLES.map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => setDeductible(d)}
-                className={`rounded-md border px-3 py-1.5 text-sm font-semibold transition-colors ${
-                  deductible === d
-                    ? "border-bolt bg-bolt/10 text-bolt"
-                    : "border-line text-fg-inv-dim hover:border-bolt"
-                }`}
-              >
-                {d}
-              </button>
+            {DEDUCTIBLES.map((x) => (
+              <button type="button" key={x} onClick={() => set("deductible", x)} className={chip(d.deductible === x)}>{x}</button>
             ))}
           </div>
         </div>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <div>
-            <label className={label}>Date of the storm (if known)</label>
-            <input name="date_of_loss" type="date" className={`mt-1 ${inputBase}`} />
-          </div>
-          <div>
-            <label className={label}>Mortgage company (optional)</label>
-            <input name="mortgage_company" placeholder="Often listed on the claim check" className={`mt-1 ${inputBase}`} />
+        <div>
+          <label className={lbl}>Coverage type</label>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {COVERAGE.map((x) => (
+              <button type="button" key={x} onClick={() => set("coverage_type", x)} className={chip(d.coverage_type === x)}>{x}</button>
+            ))}
           </div>
         </div>
-        <div className="mt-4">
-          <div className="text-sm text-fg-inv-dim">Have you filed a claim yet?</div>
-          <div className="mt-2 flex gap-2">
-            <button
-              type="button"
-              onClick={() => setFiled(false)}
-              className={`flex-1 rounded-md border px-4 py-2.5 text-sm font-semibold transition-colors ${
-                !filed ? "border-bolt bg-bolt/10 text-bolt" : "border-line text-fg-inv-dim"
-              }`}
-            >
-              Not yet
-            </button>
-            <button
-              type="button"
-              onClick={() => setFiled(true)}
-              className={`flex-1 rounded-md border px-4 py-2.5 text-sm font-semibold transition-colors ${
-                filed ? "border-bolt bg-bolt/10 text-bolt" : "border-line text-fg-inv-dim"
-              }`}
-            >
-              Yes, I filed
-            </button>
-          </div>
-          {filed && (
-            <input name="claim_number" placeholder="Claim number (if you have it)" className={`mt-2 ${inputBase}`} />
-          )}
-        </div>
-      </div>
+        <button type="submit" disabled={saving} className="w-full rounded-md bg-bolt px-6 py-4 font-display text-base font-extrabold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60">
+          {saving ? "Saving…" : "Save & finish →"}
+        </button>
+        <button type="button" onClick={() => setStep("done")} className="w-full text-center text-xs text-fg-inv-dim hover:text-fg-inv">
+          Skip — I&apos;ll bring them to the visit
+        </button>
+        <Disclaimer />
+      </form>
+    );
+  }
 
-      {/* Roof */}
-      <div className="space-y-3">
+  // ---- STEP 2 — damage + book ---------------------------------------------
+  if (step === "2") {
+    return (
+      <form
+        onSubmit={async (e) => { e.preventDefault(); await save(2, true); track("claim_step", { step: "2_booked" }); setStep("booked"); }}
+        className="space-y-4"
+      >
+        <Progress n={2} />
         <div>
-          <label className={label}>What are you seeing? (leaks, missing shingles, rooms affected…)</label>
-          <textarea name="concerns" rows={3} className={`mt-1 ${inputBase}`} placeholder="Anything you've noticed — helps us focus the inspection." />
+          <label className={lbl}>About how old is your roof?</label>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {AGES.map((x) => (
+              <button type="button" key={x} onClick={() => set("roof_age", x)} className={chip(d.roof_age === x)}>{x}</button>
+            ))}
+          </div>
         </div>
         <div>
-          <label className={label}>Best times for the inspection</label>
-          <input name="best_times" placeholder="e.g. weekday mornings, after 5pm…" className={`mt-1 ${inputBase}`} />
+          <label className={lbl}>Anything else you&apos;re seeing? <span className="font-normal text-fg-inv-dim">(rooms affected, when it started…)</span></label>
+          <textarea value={d.concerns} onChange={(e) => set("concerns", e.target.value)} rows={2} className={`mt-1 ${inputBase}`} placeholder="Helps us focus the inspection." />
         </div>
-        <label
-          className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm transition-colors ${
-            solar ? "border-bolt bg-bolt/10 text-fg-inv" : "border-line bg-ink text-fg-inv-dim"
-          }`}
-        >
-          <input type="checkbox" checked={solar} onChange={(e) => setSolar(e.target.checked)} className="h-4 w-4 accent-bolt" />
+        <div>
+          <label className={lbl}>Mortgage company <span className="font-normal text-fg-inv-dim">(optional)</span></label>
+          <input value={d.mortgage_company} onChange={(e) => set("mortgage_company", e.target.value)} placeholder="Often listed on the claim check" className={`mt-1 ${inputBase}`} />
+        </div>
+        <div>
+          <label className={lbl}>Best times for the inspection</label>
+          <input value={d.best_times} onChange={(e) => set("best_times", e.target.value)} placeholder="e.g. weekday mornings, after 5pm…" className={`mt-1 ${inputBase}`} />
+        </div>
+        <label className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm ${d.solar ? "border-bolt bg-bolt/10 text-fg-inv" : "border-line bg-ink text-fg-inv-dim"}`}>
+          <input type="checkbox" checked={d.solar} onChange={(e) => set("solar", e.target.checked)} className="h-4 w-4 accent-bolt" />
           I have solar panels (we handle those too)
         </label>
-      </div>
+        <p className="rounded-md border border-line bg-ink px-4 py-3 text-xs leading-relaxed text-fg-inv-dim">
+          📸 Got photos of the damage? Text them to <strong className="text-fg-inv">{site.textNumber}</strong> — it speeds up your claim.
+        </p>
+        <button type="submit" disabled={saving} className="w-full rounded-md bg-bolt px-6 py-4 font-display text-base font-extrabold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60">
+          {saving ? "Saving…" : "Book my free inspection →"}
+        </button>
+        <button type="button" onClick={() => setStep("1")} className="w-full text-center text-xs text-fg-inv-dim hover:text-fg-inv">← Back</button>
+      </form>
+    );
+  }
 
-      <button
-        type="submit"
-        disabled={sub === "submitting"}
-        className="w-full rounded-md bg-bolt px-6 py-4 font-display text-base font-extrabold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60"
-      >
-        {sub === "submitting" ? "Saving…" : "Send my claim details →"}
+  // ---- STEP 1 — the hook --------------------------------------------------
+  return (
+    <form
+      onSubmit={async (e) => { e.preventDefault(); await save(1, false); track("claim_step", { step: "1" }); setStep("2"); }}
+      className="space-y-4"
+    >
+      <Progress n={1} />
+      <div>
+        <label className={lbl}>Property address</label>
+        <AddressAutocomplete value={d.address} onChange={(v) => set("address", v)} onSelect={(v) => set("address", v)} placeholder="Street address" className={`mt-1 ${inputBase}`} />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={lbl}>When did the storm hit? <span className="font-normal text-fg-inv-dim">(if known)</span></label>
+          <input type="date" value={d.date_of_loss} onChange={(e) => set("date_of_loss", e.target.value)} className={`mt-1 ${inputBase}`} />
+        </div>
+        <div>
+          <label className={lbl}>What caused it?</label>
+          <div className="mt-1 flex gap-2">
+            {CAUSES.map((x) => (
+              <button type="button" key={x} onClick={() => set("cause", x)} className={`flex-1 ${chip(d.cause === x)}`}>{x}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div>
+        <label className={lbl}>What are you seeing?</label>
+        <div className="mt-2 grid gap-2">
+          {SIGNS.map((x) => (
+            <button type="button" key={x} onClick={() => toggleSign(x)} className={`text-left ${chip(d.damage_signs.includes(x))}`}>{x}</button>
+          ))}
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <input required value={d.name} onChange={(e) => set("name", e.target.value)} placeholder="Full name" className={inputBase} autoComplete="name" />
+        <input required type="tel" value={d.phone} onChange={(e) => set("phone", e.target.value)} placeholder="Phone" className={inputBase} autoComplete="tel" />
+      </div>
+      <input type="email" value={d.email} onChange={(e) => set("email", e.target.value)} placeholder="Email (so we can send your details)" className={inputBase} autoComplete="email" />
+      <button type="submit" disabled={saving || !id} className="w-full rounded-md bg-bolt px-6 py-4 font-display text-base font-extrabold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60">
+        {saving ? "Saving…" : "Continue →"}
       </button>
-      {sub === "error" && (
-        <p className="text-sm text-ember">Something went wrong — please call us instead.</p>
-      )}
-      <p className="text-center text-xs text-fg-inv-dim">
-        We use these details to move fast on-site — we document and coordinate
-        with your adjuster, and never file or negotiate the claim for you.
-      </p>
+      <Disclaimer />
     </form>
   );
 }
