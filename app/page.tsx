@@ -42,24 +42,25 @@ function Hero() {
       <Container className="relative grid items-center gap-14 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
         <div>
           <Kicker className="mb-6">
-            Storm &amp; hail roof restoration · Dallas–Fort Worth
+            Roofing &amp; storm restoration · Dallas–Fort Worth
           </Kicker>
           <h1 className="font-display text-[2.7rem] leading-[0.95] text-fg-inv sm:text-6xl md:text-[4.2rem]">
-            Storm-damaged roof?
+            Roof damage?
             <br />
-            <span className="bolt-underline">You likely pay just your deductible.</span>
+            <span className="bolt-underline">Find out if insurance should pay.</span>
           </h1>
           <p className="mt-7 max-w-xl text-lg leading-relaxed text-fg-inv-dim">
-            PowerEdge is DFW&apos;s insurance-first storm roof team. We document
-            the damage, coordinate with your adjuster, and{" "}
-            <strong className="text-fg-inv">finance the out-of-pocket</strong> —
-            so nothing stands between you and a sound roof.
+            Leak, missing shingles, or hail — PowerEdge inspects it free and
+            tells you straight. If it&apos;s a covered storm claim, you likely
+            pay just your{" "}
+            <strong className="text-fg-inv">deductible</strong> (and we can
+            finance that). Paying out of pocket? An honest price, no games.
           </p>
 
           {/* Conversion pillars — storm-first, financing, solar-ready */}
           <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4 border-t border-line pt-6">
             {[
-              { t: "Free storm inspection", d: "Documented for your claim" },
+              { t: "Free roof inspection", d: "Storm claim or cash — honest read" },
               { t: "Deductible financing", d: "As little as $250 down" },
               { t: "Solar + roof, one license", d: "Most roofers can't" },
             ].map((p) => (
@@ -133,7 +134,7 @@ function Hero() {
         <div id="quote" className="scroll-mt-24">
           <div className="rounded-card border border-line bg-ink-2 p-7 shadow-2xl">
             <h2 className="font-display text-2xl font-bold text-fg-inv">
-              Book your free storm inspection
+              Book your free roof inspection
             </h2>
             <p className="mt-1.5 text-sm text-fg-inv-dim">
               Just your name and number — a licensed pro calls you back fast,
