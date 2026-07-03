@@ -8,9 +8,27 @@ import { NextResponse } from "next/server";
  */
 
 const WFO = "FWD"; // Fort Worth / Dallas weather office
+// The FWD office covers far more than the metroplex, so filter to a radius
+// around the DFW center — otherwise rural towns dominate the "DFW" stats.
+const DFW = { lat: 32.9, lon: -97.04 };
+const METRO_MI = 55;
 
-function titleCase(s: string) {
-  return s
+function haversineMi(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 3958.8;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function cleanCity(raw: string) {
+  // LSR names look like "10 NNE STEPHENVILLE" / "3 SSW PARIS" — strip the
+  // distance/direction prefix, then title-case.
+  return raw
+    .replace(/^\s*\d+\s+[NSEW]{1,4}\s+/i, "")
     .toLowerCase()
     .replace(/\b\w/g, (c) => c.toUpperCase())
     .trim();
@@ -38,6 +56,7 @@ export async function GET() {
         city?: string;
         valid?: string;
       };
+      geometry?: { coordinates?: [number, number] };
     }>;
 
     let count = 0;
@@ -49,9 +68,13 @@ export async function GET() {
       const p = f.properties;
       const size = p.magf ?? 0;
       if (!/HAIL/i.test(p.typetext || "") || !size) continue;
+      const coords = f.geometry?.coordinates;
+      if (!coords) continue;
+      const [lon, lat] = coords;
+      if (haversineMi(DFW.lat, DFW.lon, lat, lon) > METRO_MI) continue; // metro only
       count++;
       if (size > largest) largest = size;
-      const city = titleCase(p.city || "");
+      const city = cleanCity(p.city || "");
       if (city) cityCounts.set(city, (cityCounts.get(city) || 0) + 1);
       events.push({ city, size, date: p.valid || "" });
     }
