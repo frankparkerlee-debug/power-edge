@@ -21,7 +21,7 @@ export function DeductibleFinancing({ className = "" }: { className?: string }) 
         </span>
         <div>
           <p className="font-display text-lg font-bold text-fg-inv">
-            Finance your deductible — $0 down.
+            Finance your deductible — from $500 down.
           </p>
           <p className="mt-1 text-sm leading-relaxed text-fg-inv-dim">
             Short on cash for your deductible? Spread it into low monthly

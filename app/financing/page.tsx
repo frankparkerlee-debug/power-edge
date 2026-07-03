@@ -7,9 +7,9 @@ import { FinancingPrequal } from "@/components/FinancingPrequal";
 import { Reviews } from "@/components/Reviews";
 
 export const metadata: Metadata = {
-  title: "Roof & Deductible Financing in DFW — $0 Down | PowerEdge",
+  title: "Roof & Deductible Financing in DFW — From $500 Down | PowerEdge",
   description:
-    "Can't cover your roof deductible or out-of-pocket? Finance it — $0 down, low monthly payments, and we schedule the work now. Serving Dallas–Fort Worth. You pay your full deductible over time; we never waive it.",
+    "Can't cover your roof deductible or out-of-pocket? Finance it — start for as little as $500 down, low monthly payments, and we schedule the work now. Serving Dallas–Fort Worth. You pay your full deductible over time; we never waive it.",
 };
 
 const faqs = [
@@ -42,7 +42,7 @@ const faqs = [
 const steps = [
   "Free inspection — we document the damage for your claim",
   "You choose: finance your deductible, or the full project",
-  "$0-down options with low monthly payments (subject to approval)",
+  "Start for as little as $500 down, with low monthly payments (subject to approval)",
   "We schedule the work now — you don't wait to save up",
 ];
 
@@ -52,7 +52,7 @@ export default function FinancingPage() {
       <PageHero
         kicker="Roof & deductible financing · Dallas–Fort Worth"
         title="Can't cover the out-of-pocket? Finance it — and get your roof done now."
-        intro="A high deductible or a low insurance check shouldn't stand between you and a sound roof. We finance your deductible — or your whole project — with $0 down and low monthly payments, so we can schedule the work now instead of when you've saved up. You always pay your full deductible over time; we never waive it (that's illegal in Texas, and following the law protects you)."
+        intro="A high deductible or a low insurance check shouldn't stand between you and a sound roof. We finance your deductible — or your whole project — with as little as $500 down and low monthly payments, so we can schedule the work now instead of when you've saved up. You always pay your full deductible over time; we never waive it (that's illegal in Texas, and following the law protects you)."
         badge="Pre-qualify — no credit impact"
         badgeHref="#prequal"
       />
@@ -146,7 +146,7 @@ export default function FinancingPage() {
 
       <CtaBand
         heading="Stuck on the out-of-pocket? Let's fix that."
-        sub="Free inspection, $0-down financing options, and we schedule the work now — you pay your full deductible over time, never waived."
+        sub="Free inspection, financing from as little as $500 down, and we schedule the work now — you pay your full deductible over time, never waived."
       />
     </>
   );

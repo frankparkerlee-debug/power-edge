@@ -34,6 +34,7 @@ export default function RoofClaimCheckPage() {
             {[
               "A straight yes/no read on whether it's worth filing",
               "On a covered claim, you typically pay only your deductible",
+              "Can't cover it up front? Start for as little as $500 down",
               "Got solar? We handle the panels too — most roofers can't",
               "Free inspection, documented honestly and by the book",
             ].map((b) => (

@@ -241,7 +241,7 @@ export const leadSequence: SequenceEmail[] = [
             `We never waive your deductible or pose as your adjuster — both are illegal in Texas, and doing it right protects you.`,
           ) +
           (c.financing
-            ? p(`Deductible in the way? We can finance it — $0 down, paid in full over time.`)
+            ? p(`Deductible in the way? We can finance it — from as little as $500 down, paid in full over time.`)
             : "") +
           button("Book my free inspection", BOOK_URL) +
           verifyChip(),
@@ -296,14 +296,14 @@ export const leadSequence: SequenceEmail[] = [
     subject: () => "The deductible isn't the wall you think it is",
     html: () =>
       shell({
-        preheader: "Finance it, $0 down, and get the roof done now.",
+        preheader: "Finance it from $500 down, and get the roof done now.",
         body:
           h1("Short on the deductible? That's not a dead end.") +
           p(
             `Texas wind/hail deductibles run 1&ndash;2% of your home&rsquo;s value — often <strong>$5,000&ndash;$10,000</strong>. If that number is the only thing between you and a sound roof, here&rsquo;s the fix:`,
           ) +
           steps([
-            "<strong>Finance your deductible</strong> — $0 down, low monthly payments.",
+            "<strong>Finance your deductible</strong> — from as little as $500 down, low monthly payments.",
             "<strong>We schedule the work now</strong> — you don&rsquo;t wait to save up.",
             "<strong>You still pay it in full</strong>, just over time. (Waiving it is illegal in Texas; financing is smart.)",
           ]) +
@@ -335,7 +335,7 @@ export const leadSequence: SequenceEmail[] = [
           ) +
           button("Check if I still have a claim", BOOK_URL) +
           small(
-            `Deductible the holdup? <a href="${FINANCE_URL}" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;">See it financed, $0 down &rarr;</a>`,
+            `Deductible the holdup? <a href="${FINANCE_URL}" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;">See it financed, from $500 down &rarr;</a>`,
           ) +
           verifyChip(),
       }),

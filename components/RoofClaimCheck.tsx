@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SmsConsent } from "./SmsConsent";
 import { AddressAutocomplete } from "./AddressAutocomplete";
 import { HailMap } from "./HailMap";
@@ -48,6 +48,16 @@ export function RoofClaimCheck() {
   const [signs, setSigns] = useState<string[]>([]);
   const [solar, setSolar] = useState(false);
   const [sub, setSub] = useState<Sub>("idle");
+
+  // Handoff from the homepage band: /roof-claim-check?a=<address> auto-runs.
+  useEffect(() => {
+    const a = new URLSearchParams(window.location.search).get("a");
+    if (a) {
+      setAddress(a);
+      runCheck(a);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function runCheck(addr: string) {
     if (!addr.trim()) return;
