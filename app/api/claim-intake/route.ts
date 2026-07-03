@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { upsertClaimIntake } from "@/lib/db";
+import { upsertClaimIntake, type ClaimIntake } from "@/lib/db";
 import { sendClaimComplete } from "@/lib/emails";
 import { site } from "@/lib/site";
 
@@ -23,6 +23,7 @@ export async function POST(req: Request) {
   const completed = body.completed === true || body.completed === "true";
   const stage = Number(body.stage) || 1;
 
+  // Full view (defaults) — used for the notification emails.
   const intake = {
     id,
     name: s("name"),
@@ -48,7 +49,28 @@ export async function POST(req: Request) {
     updated_at: new Date().toISOString(),
   };
 
-  await upsertClaimIntake(intake);
+  // Sparse upsert — omit empty strings so a partial resend (e.g. resume from a
+  // nurture email, where only contact is prefilled) never clobbers earlier
+  // progressive-save answers. Booleans only when the client actually sent them.
+  const payload: Record<string, unknown> = {
+    id,
+    stage,
+    completed,
+    updated_at: intake.updated_at,
+  };
+  const strKeys = [
+    "name", "phone", "email", "address", "cause", "damage_signs", "roof_age",
+    "carrier", "policy_number", "deductible", "coverage_type", "date_of_loss",
+    "claim_number", "mortgage_company", "concerns", "best_times",
+  ] as const;
+  for (const k of strKeys) {
+    const v = intake[k];
+    if (v) payload[k] = v;
+  }
+  if ("filed" in body) payload.filed = intake.filed;
+  if ("solar" in body) payload.solar = intake.solar;
+
+  await upsertClaimIntake(payload as ClaimIntake);
 
   // Notify only at the booking step (stage 2) — the optional policy step
   // (stage 3) upserts silently so we don't double-email.
