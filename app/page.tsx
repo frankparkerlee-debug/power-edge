@@ -45,16 +45,15 @@ function Hero() {
             Roofing &amp; storm restoration · Dallas–Fort Worth
           </Kicker>
           <h1 className="font-display text-[2.7rem] leading-[0.95] text-fg-inv sm:text-6xl md:text-[4.2rem]">
-            Roof damage?
+            Storm damage?
             <br />
-            <span className="bolt-underline">Find out if insurance should pay.</span>
+            <span className="bolt-underline">We can help with that.</span>
           </h1>
           <p className="mt-7 max-w-xl text-lg leading-relaxed text-fg-inv-dim">
-            Leak, missing shingles, or hail — PowerEdge inspects it free and
-            tells you straight. If it&apos;s a covered storm claim, you likely
-            pay just your{" "}
-            <strong className="text-fg-inv">deductible</strong> (and we can
-            finance that). Paying out of pocket? An honest price, no games.
+            Leak, missing shingles, hail — we inspect it free and tell you
+            straight. If it&apos;s a covered storm claim, you likely pay just
+            your <strong className="text-fg-inv">deductible</strong>, and we can
+            finance that. Not a storm? We&apos;ll still get you an honest price.
           </p>
 
           {/* Conversion pillars — storm-first, financing, solar-ready */}
