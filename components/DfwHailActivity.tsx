@@ -13,6 +13,9 @@ import { CountUp } from "./CountUp";
 
 type Data = {
   ok: boolean;
+  scope?: "local" | "metro";
+  city?: string | null;
+  radiusMi?: number;
   count: number;
   largest?: number;
   topCities: { city: string; count: number }[];
@@ -47,6 +50,7 @@ export function DfwHailActivity() {
   }, []);
 
   const hasData = !!data && data.ok && data.count > 0;
+  const near = hasData && data!.scope === "local" && !!data!.city;
 
   return (
     <section className="relative overflow-hidden bg-ink py-20 sm:py-28">
@@ -60,12 +64,18 @@ export function DfwHailActivity() {
               <h2 className="font-display text-4xl font-extrabold leading-[1.05] text-fg-inv sm:text-5xl">
                 <CountUp to={data!.count} className="text-bolt" duration={1600} />+
                 <br />
-                hail reports across Dallas–Fort Worth
+                hail reports {near ? `near ${data!.city}` : "across Dallas–Fort Worth"}
               </h2>
+              {near && (
+                <p className="mt-2 text-sm font-semibold uppercase tracking-wider text-fg-inv-dim">
+                  {data!.city} · Dallas–Fort Worth · last 12 months
+                </p>
+              )}
               <p className="mt-4 max-w-md text-fg-inv-dim">
                 Reported to the National Weather Service in the last 12 months
+                {near ? ` within ~${data!.radiusMi} miles of you` : ""}
                 {data!.largest
-                  ? ` — the largest ${data!.largest}″ across the metro`
+                  ? ` — the largest ${data!.largest}″${near ? " nearby" : " across the metro"}`
                   : ""}
                 . Damage is easy to miss from the ground, and Texas claims have
                 deadlines.
@@ -109,7 +119,7 @@ export function DfwHailActivity() {
           ) : hasData ? (
             <>
               <div className="text-xs font-bold uppercase tracking-wider text-fg-inv-dim">
-                Hardest-hit areas (12 mo)
+                {near ? "Hardest-hit areas near you (12 mo)" : "Hardest-hit areas (12 mo)"}
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {data.topCities.map((c) => (
