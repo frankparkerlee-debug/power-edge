@@ -164,6 +164,7 @@ const small = (t: string) =>
 
 const BOOK_URL = `${site.url}/roof-claim-check`;
 const FINANCE_URL = `${site.url}/financing`;
+const CLAIM_PREP_URL = `${site.url}/claim-prep`;
 
 // ---- The sequence ---------------------------------------------------------
 export type SequenceEmail = {
@@ -215,6 +216,9 @@ export const leadSequence: SequenceEmail[] = [
               ]) +
               p(`Can&rsquo;t wait? Call or text us at <strong>${site.phone}</strong>.`) +
               button(`Call ${site.phone}`, site.phoneHref) +
+              p(
+                `<strong>Want us in and out fast?</strong> <a href="${CLAIM_PREP_URL}" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;">Prep your claim in 2 minutes &rarr;</a> — add your carrier and deductible so we can inspect and close on-site.`,
+              ) +
               (c.solar ? solarBlock() : "") +
               verifyChip(),
           }),

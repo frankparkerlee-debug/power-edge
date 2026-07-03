@@ -6,6 +6,7 @@ import { Footer } from "./Footer";
 import { TextFab } from "./TextFab";
 import { MobileCtaBar } from "./MobileCtaBar";
 import { CallRailFormCapture } from "./CallRailFormCapture";
+import { Analytics } from "./Analytics";
 
 /**
  * Renders the marketing chrome (header, footer, CTAs) on public pages, but NOT
@@ -22,6 +23,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <Analytics />
       <CallRailFormCapture />
       <Header />
       <main className="flex-1">{children}</main>

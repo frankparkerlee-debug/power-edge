@@ -32,6 +32,7 @@ export function RoofClaimCheck() {
   const [result, setResult] = useState<Result | null>(null);
   const [solar, setSolar] = useState(false);
   const [sub, setSub] = useState<Sub>("idle");
+  const [booked, setBooked] = useState({ name: "", phone: "", email: "" });
 
   // Handoff from the homepage band: /roof-claim-check?a=<address> auto-runs.
   useEffect(() => {
@@ -105,6 +106,7 @@ export function RoofClaimCheck() {
         qualifies: qualifies ? "yes" : "no",
         solar: solar ? "yes" : "no",
       });
+      setBooked({ name: fd.name || "", phone: fd.phone || "", email: fd.email || "" });
       setSub("done");
       form.reset();
     } catch {
@@ -171,6 +173,20 @@ export function RoofClaimCheck() {
             We&apos;ll call you fast to lock in your free inspection.
           </p>
         </div>
+        <a
+          href={`/claim-prep?name=${encodeURIComponent(booked.name)}&phone=${encodeURIComponent(booked.phone)}&email=${encodeURIComponent(booked.email)}&address=${encodeURIComponent(result?.matched || address)}`}
+          className="mt-2 flex items-center justify-between rounded-card border-2 border-bolt/50 bg-bolt/10 p-5 transition-colors hover:border-bolt"
+        >
+          <div>
+            <div className="font-display text-base font-bold text-fg-inv">
+              Want us in and out fast? Prep your claim (2 min).
+            </div>
+            <div className="mt-0.5 text-sm text-fg-inv-dim">
+              Add your carrier + deductible so we inspect and close on-site.
+            </div>
+          </div>
+          <span className="font-display font-bold text-bolt">→</span>
+        </a>
       </div>
     );
   }

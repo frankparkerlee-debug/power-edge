@@ -66,6 +66,40 @@ export async function insertLead(lead: LeadInsert) {
   }
 }
 
+export type ClaimIntake = {
+  name?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  carrier?: string;
+  policy_number?: string;
+  deductible?: string;
+  date_of_loss?: string;
+  filed?: boolean;
+  claim_number?: string;
+  mortgage_company?: string;
+  concerns?: string;
+  best_times?: string;
+  solar?: boolean;
+};
+
+/** Best-effort insert of a homeowner's claim-prep intake. Never throws. */
+export async function insertClaimIntake(intake: ClaimIntake) {
+  if (!dbEnabled()) return;
+  try {
+    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/claim_intakes`, {
+      method: "POST",
+      headers: { ...authHeaders(), Prefer: "return=minimal" },
+      body: JSON.stringify(intake),
+    });
+    if (!res.ok) {
+      console.error("[db] insertClaimIntake non-2xx", res.status, await res.text());
+    }
+  } catch (err) {
+    console.error("[db] insertClaimIntake failed", err);
+  }
+}
+
 export async function listLeads(limit = 300): Promise<LeadRow[]> {
   if (!dbEnabled()) return [];
   try {

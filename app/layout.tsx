@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Archivo, Inter } from "next/font/google";
 import "./globals.css";
 import { Schema } from "@/components/Schema";
-import { Analytics } from "@/components/Analytics";
 import { SiteChrome } from "@/components/SiteChrome";
 import { site } from "@/lib/site";
 
@@ -44,7 +43,6 @@ export default function RootLayout({
     <html lang="en" className={`${archivo.variable} ${inter.variable}`}>
       <body className="min-h-screen flex flex-col pb-14 lg:pb-0">
         <Schema />
-        <Analytics />
         <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
