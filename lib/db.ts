@@ -24,6 +24,7 @@ export type LeadInsert = {
   name?: string;
   phone?: string;
   email?: string;
+  address?: string;
   zip?: string;
   service?: string;
   message?: string;
@@ -42,14 +43,23 @@ export type LeadRow = LeadInsert & { id: string; created_at: string };
 /** Best-effort insert — never throws, so a DB hiccup can't drop a lead's email. */
 export async function insertLead(lead: LeadInsert) {
   if (!dbEnabled()) return;
-  try {
-    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/leads`, {
+  const post = (payload: LeadInsert) =>
+    fetch(`${process.env.SUPABASE_URL}/rest/v1/leads`, {
       method: "POST",
       headers: { ...authHeaders(), Prefer: "return=minimal" },
-      body: JSON.stringify(lead),
+      body: JSON.stringify(payload),
     });
+  try {
+    let res = await post(lead);
     if (!res.ok) {
-      console.error("[db] insertLead non-2xx", res.status, await res.text());
+      // If the `address` column hasn't been added yet, PostgREST rejects the
+      // whole row — retry without it so we never drop a lead over one column.
+      const { address: _address, ...rest } = lead;
+      void _address;
+      res = await post(rest);
+      if (!res.ok) {
+        console.error("[db] insertLead non-2xx", res.status, await res.text());
+      }
     }
   } catch (err) {
     console.error("[db] insertLead failed", err);

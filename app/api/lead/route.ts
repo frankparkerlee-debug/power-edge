@@ -46,9 +46,13 @@ export async function POST(req: Request) {
     name,
     phone,
     email: (body.email || "").trim(),
+    address: (body.address || "").trim(),
     zip: (body.zip || "").trim(),
     service: (body.service || "").trim(),
     message: (body.message || "").trim(),
+    // Which on-site form/tool produced this (e.g. roof-claim-check). From
+    // leadContext({tool}); shown in the dashboard so you know where they signed up.
+    tool: (body.tool || "").trim(),
     // Solar flag — set by the "I have solar panels" qualifier on every form.
     // Tells the team to scope detach & reset, document the panels, and add the
     // claimable D&R supplement line (the ~$3–10k most roofers miss).
@@ -63,10 +67,19 @@ export async function POST(req: Request) {
     receivedAt: new Date().toISOString(),
   };
 
-  const sourceLine =
+  // Marketing acquisition source (how they reached the site).
+  const marketing =
     [lead.utm_source, lead.utm_medium, lead.utm_campaign].filter(Boolean).join(" / ") ||
     lead.referrer ||
     "direct";
+  // Where on the SITE they signed up — the form/tool or page path. This is what
+  // the team wants to see; marketing source is appended only when it's not direct.
+  const origin = lead.tool || lead.page_path || "";
+  const sourceLine = origin
+    ? marketing === "direct"
+      ? origin
+      : `${origin} · ${marketing}`
+    : marketing;
 
   // --- 0. Durable capture (Supabase) — first, so no lead is lost to an email
   // hiccup. No-ops until SUPABASE_* env is set. Best-effort (never throws).
@@ -74,6 +87,7 @@ export async function POST(req: Request) {
     name: lead.name,
     phone: lead.phone,
     email: lead.email,
+    address: lead.address,
     zip: lead.zip,
     service: lead.service,
     message: lead.message,
@@ -114,7 +128,7 @@ export async function POST(req: Request) {
             <p><strong>Name:</strong> ${escapeHtml(lead.name)}</p>
             <p><strong>Phone:</strong> ${escapeHtml(lead.phone)}</p>
             <p><strong>Email:</strong> ${escapeHtml(lead.email) || "—"}</p>
-            <p><strong>ZIP:</strong> ${escapeHtml(lead.zip) || "—"}</p>
+            <p><strong>Address:</strong> ${escapeHtml(lead.address) || "—"}</p>
             <p><strong>Service:</strong> ${escapeHtml(lead.service) || "—"}</p>
             <p><strong>Solar:</strong> ${lead.solar === "yes" ? "Yes — has panels" : "—"}</p>
             <p><strong>Message:</strong> ${escapeHtml(lead.message) || "—"}</p>

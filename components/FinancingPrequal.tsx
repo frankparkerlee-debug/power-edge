@@ -125,11 +125,10 @@ export function FinancingPrequal() {
           name: fd.name,
           phone: fd.phone,
           email: fd.email,
+          address: fd.address,
           zip: fd.zip,
           service: "Financing pre-qualification",
-          message: `[Financing Prequal] amount: ${amount}; property: ${
-            fd.address || "—"
-          }`,
+          message: `[Financing Prequal] amount: ${amount}`,
           company_website: fd.company_website,
           ...leadContext({ tool: "financing-prequal" }),
         }),

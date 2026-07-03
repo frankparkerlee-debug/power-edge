@@ -103,9 +103,10 @@ export default async function AdminLeadsPage({
                   <th className="py-2 pr-4">Name</th>
                   <th className="py-2 pr-4">Phone</th>
                   <th className="py-2 pr-4">Email</th>
+                  <th className="py-2 pr-4">Address</th>
                   <th className="py-2 pr-4">Service</th>
                   <th className="py-2 pr-4">Solar</th>
-                  <th className="py-2 pr-4">Source</th>
+                  <th className="py-2 pr-4">Signed up on</th>
                   <th className="py-2 pr-4">Message</th>
                 </tr>
               </thead>
@@ -126,6 +127,7 @@ export default async function AdminLeadsPage({
                       )}
                     </td>
                     <td className="py-2.5 pr-4">{l.email || "—"}</td>
+                    <td className="py-2.5 pr-4">{l.address || "—"}</td>
                     <td className="py-2.5 pr-4">{l.service || "—"}</td>
                     <td className="py-2.5 pr-4">{l.solar ? "☀️" : ""}</td>
                     <td className="py-2.5 pr-4 text-gray-500">{l.source || "—"}</td>

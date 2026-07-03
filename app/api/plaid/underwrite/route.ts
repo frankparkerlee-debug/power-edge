@@ -96,6 +96,7 @@ export async function POST(req: Request) {
       name: body.name,
       phone: body.phone,
       email: body.email,
+      address: body.address,
       zip: body.zip,
       service: `Financing pre-qualification (Plaid — ${decision})`,
       message: `[Plaid Prequal ${decision}] amount: $${requested.toLocaleString()}; available: $${totalAvailable.toLocaleString()}; name match: ${

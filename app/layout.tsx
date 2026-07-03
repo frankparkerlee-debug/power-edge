@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
 import { Archivo, Inter } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Schema } from "@/components/Schema";
-import { TextFab } from "@/components/TextFab";
-import { MobileCtaBar } from "@/components/MobileCtaBar";
 import { Analytics } from "@/components/Analytics";
-import { CallRailFormCapture } from "@/components/CallRailFormCapture";
+import { SiteChrome } from "@/components/SiteChrome";
 import { site } from "@/lib/site";
 
 const archivo = Archivo({
@@ -49,12 +45,7 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col pb-14 lg:pb-0">
         <Schema />
         <Analytics />
-        <CallRailFormCapture />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <TextFab />
-        <MobileCtaBar />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );

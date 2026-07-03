@@ -87,7 +87,7 @@ export function RoofClaimCheck() {
           name: fd.name,
           phone: fd.phone,
           email: fd.email,
-          zip: fd.zip,
+          address: result?.matched || address,
           service: qualifies
             ? "Roof claim check (LIKELY QUALIFIES)"
             : "Roof claim check (worth a look)",
@@ -228,7 +228,6 @@ export function RoofClaimCheck() {
             <input name="phone" required type="tel" placeholder="Phone" className={inputBase} autoComplete="tel" />
           </div>
           <input name="email" type="email" placeholder="Email (optional)" className={inputBase} autoComplete="email" />
-          <input type="hidden" name="zip" value={result?.matched || address} />
           <label
             className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm transition-colors ${
               solar
