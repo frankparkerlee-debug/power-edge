@@ -7,6 +7,7 @@ import { DeductibleFinancing } from "@/components/DeductibleFinancing";
 import { FinancingCalculator } from "@/components/FinancingCalculator";
 import { CountUp } from "@/components/CountUp";
 import { ClaimCheckInline } from "@/components/ClaimCheckInline";
+import { DfwHailActivity } from "@/components/DfwHailActivity";
 import { site } from "@/lib/site";
 import { services } from "@/lib/services";
 import { cities } from "@/lib/cities";
@@ -20,6 +21,7 @@ export default function Home() {
       <StuckBand />
       <Wedge />
       <SolarReadyBand />
+      <DfwHailActivity />
       <ClaimCheckBand />
       <ServicesGrid />
       <Team />
