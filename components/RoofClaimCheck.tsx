@@ -4,28 +4,23 @@ import { useEffect, useState } from "react";
 import { SmsConsent } from "./SmsConsent";
 import { AddressAutocomplete } from "./AddressAutocomplete";
 import { HailMap } from "./HailMap";
-import { DeductibleFinancing } from "./DeductibleFinancing";
 import { leadContext } from "@/lib/leadContext";
 import { track } from "@/lib/analytics";
 import type { StormData } from "./StormReport";
 
 /**
- * Roof-claim eligibility check, tuned for paid traffic: address → instant
- * verdict WITH the booking form right there (no question gauntlet). Leans hard
- * into the stakes of waiting + surfaces deductible financing BEFORE the form so
- * cost fear doesn't kill the booking. Honest framing: never "your roof is
- * damaged" / "you have a claim" — only "you likely qualify… an inspection
- * confirms." Not an insurance determination.
+ * Roof-claim eligibility check, tuned for paid/mobile traffic.
+ * FORM-FORWARD: address → compact verdict + one urgency line → the booking form
+ * right there (so there's always somewhere to submit without endless scroll);
+ * stakes + evidence + financing detail live BELOW the form as reinforcement.
+ * Urgency is imminent-threat ("before the next storm makes it worse"), not a
+ * reassuring deadline countdown. Honest framing: never "your roof is damaged" /
+ * "you have a claim" — only "you likely qualify… an inspection confirms."
  */
 
 type Result = StormData & { ok?: boolean; found?: boolean; soft?: boolean };
 type Phase = "input" | "result";
 type Sub = "idle" | "submitting" | "done" | "error";
-
-function monthsAgo(iso?: string) {
-  if (!iso) return Infinity;
-  return (Date.now() - new Date(iso).getTime()) / 86400000 / 30.44;
-}
 
 const inputBase =
   "w-full rounded-md border border-line bg-ink px-4 py-3 text-fg-inv placeholder:text-fg-inv-dim/60 focus:border-bolt focus:outline-none";
@@ -66,18 +61,10 @@ export function RoofClaimCheck() {
     }
   }
 
-  // ---- Verdict (from hail data alone — the inspection confirms specifics) --
   const hailCount = result?.count ?? 0;
   const largest = result?.largest?.size ?? 0;
   const hailHit = !!result?.found && hailCount > 0;
   const qualifies = hailHit && (largest >= 1 || hailCount >= 3);
-
-  const recentIso = result?.mostRecent?.date || result?.largest?.date;
-  const monthsLeft = Math.round(12 - monthsAgo(recentIso));
-  const windowLine =
-    hailHit && monthsLeft > 0 && monthsLeft < 13
-      ? `You may have only ~${monthsLeft} month${monthsLeft === 1 ? "" : "s"} left to file on the most recent storm.`
-      : "Texas policies typically give you about a year from the storm to file.";
   const hailSummary = hailHit
     ? `${hailCount} hail report${hailCount === 1 ? "" : "s"} within ${result?.radiusMi ?? 15} mi${
         largest ? `, largest ${largest}″` : ""
@@ -188,137 +175,134 @@ export function RoofClaimCheck() {
     );
   }
 
-  // ---- RESULT + CAPTURE (one screen) --------------------------------------
+  // ---- RESULT + CAPTURE (form-forward) ------------------------------------
   return (
     <div className="rounded-card border border-line bg-ink-2 p-6 shadow-2xl sm:p-8">
-      {/* Verdict */}
+      {/* Compact verdict */}
       {qualifies ? (
-        <div className="rounded-card border-2 border-bolt bg-bolt/10 p-5">
+        <div className="rounded-card border-2 border-bolt bg-bolt/10 p-4 sm:p-5">
           <div className="text-xs font-bold uppercase tracking-wider text-bolt">
             Good news — you likely qualify
           </div>
-          <p className="mt-1 font-display text-2xl font-bold leading-tight text-fg-inv sm:text-3xl">
+          <p className="mt-1 font-display text-2xl font-bold leading-tight text-fg-inv">
             {largest ? `${largest}″ hail hit near you.` : "Hail hit near you."}{" "}
             Your roof may already be damaged.
           </p>
-          <p className="mt-2 text-sm leading-relaxed text-fg-inv-dim">
-            {hailSummary} — enough to file. On a covered claim you pay only your
-            deductible; we document the damage the right way and coordinate with
-            your adjuster. But every week you wait works against you:
+          <p className="mt-1.5 text-sm text-fg-inv-dim">
+            {hailSummary} — enough to file. Book your free inspection now, before
+            it gets worse.
           </p>
         </div>
       ) : (
-        <div className="rounded-card border border-line bg-ink p-5">
+        <div className="rounded-card border border-line bg-ink p-4 sm:p-5">
           <div className="text-xs font-bold uppercase tracking-wider text-fg-inv-dim">
             Worth a free look
           </div>
-          <p className="mt-1 font-display text-2xl font-bold leading-tight text-fg-inv sm:text-3xl">
-            Damage hides. Deadlines don&apos;t wait.
+          <p className="mt-1 font-display text-2xl font-bold leading-tight text-fg-inv">
+            Damage hides — until it&apos;s a leak.
           </p>
-          <p className="mt-2 text-sm leading-relaxed text-fg-inv-dim">
-            The auto-data isn&apos;t conclusive ({hailSummary}), but North Texas
-            gets pounded and hail damage is nearly invisible from the ground. A
-            free inspection is the only way to know before a deadline passes or a
-            small problem turns into a big one:
+          <p className="mt-1.5 text-sm text-fg-inv-dim">
+            North Texas gets pounded and hail damage is nearly invisible from the
+            ground. A free inspection is the only way to know for sure.
           </p>
         </div>
       )}
 
-      {/* Why act now — the stakes */}
-      <div className="mt-4 rounded-card border border-ember/40 bg-ember/5 p-5">
+      {/* One imminent-threat urgency line */}
+      <div className="mt-3 flex items-start gap-2 rounded-md border border-ember/40 bg-ember/10 px-4 py-3 text-sm font-semibold text-fg-inv">
+        <span aria-hidden>⚡</span>
+        <span>
+          Act before the next storm makes it worse — every round of hail and rain
+          deepens the damage and makes it harder to claim.
+        </span>
+      </div>
+
+      {/* THE FORM — right here, no endless scroll */}
+      <div className="mt-5">
+        <p className="font-display text-lg font-bold text-fg-inv">
+          Lock in your free inspection
+        </p>
+        <form id="crf-claim" data-cr-capture onSubmit={submit} className="mt-3 space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <input name="name" required placeholder="Full name" className={inputBase} autoComplete="name" />
+            <input name="phone" required type="tel" placeholder="Phone" className={inputBase} autoComplete="tel" />
+          </div>
+          <input name="email" type="email" placeholder="Email (optional)" className={inputBase} autoComplete="email" />
+          <input type="hidden" name="zip" value={result?.matched || address} />
+          <label
+            className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm transition-colors ${
+              solar
+                ? "border-bolt bg-bolt/10 text-fg-inv"
+                : "border-line bg-ink text-fg-inv-dim"
+            }`}
+          >
+            <input
+              type="checkbox"
+              checked={solar}
+              onChange={(e) => setSolar(e.target.checked)}
+              className="h-4 w-4 accent-bolt"
+            />
+            I have solar panels (we handle those too)
+          </label>
+          <input type="text" name="company_website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
+          <button
+            type="submit"
+            disabled={sub === "submitting"}
+            className="w-full rounded-md bg-bolt px-6 py-4 font-display text-base font-extrabold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60"
+          >
+            {sub === "submitting" ? "Sending…" : "Lock in my free inspection →"}
+          </button>
+          {sub === "error" && (
+            <p className="text-sm text-ember">
+              Something went wrong — please call us instead.
+            </p>
+          )}
+          {/* Financing reassurance, right at the point of action */}
+          <p className="text-center text-xs text-fg-inv-dim">
+            Deductible tight? <strong className="text-bolt">Finance it from $250 down</strong> — paid in full over time, never waived.
+          </p>
+          <SmsConsent />
+        </form>
+      </div>
+
+      {/* Reinforcement BELOW the form (for scrollers) */}
+      <div className="mt-6 border-t border-line pt-5">
         <div className="text-xs font-bold uppercase tracking-wider text-ember">
           Why waiting costs you
         </div>
-        <ul className="mt-3 space-y-2.5 text-sm text-fg-inv">
+        <ul className="mt-3 space-y-2.5 text-sm text-fg-inv-dim">
           <li className="flex gap-2.5">
             <span className="text-ember" aria-hidden>→</span>
             <span>
-              <strong>The damage compounds.</strong> A small bruise becomes a
-              leak, then rot — and a claim that&apos;s far harder to prove.
+              <strong className="text-fg-inv">The next storm makes it worse.</strong>{" "}
+              Each round of hail and rain deepens the damage — and muddies which
+              storm caused it.
             </span>
           </li>
           <li className="flex gap-2.5">
             <span className="text-ember" aria-hidden>→</span>
             <span>
-              <strong>Your window closes.</strong> {windowLine} Miss it and the
-              entire roof is on you — not just your deductible.
+              <strong className="text-fg-inv">A cheap fix becomes a claim fight.</strong>{" "}
+              What&apos;s minor now turns into leaks, rot, and interior damage
+              insurers push back on.
             </span>
           </li>
           <li className="flex gap-2.5">
             <span className="text-ember" aria-hidden>→</span>
             <span>
-              <strong>Older roofs get downgraded.</strong> Insurers quietly move
-              aging roofs to actual-cash-value — wait, and they pay you a
-              fraction of a new roof.
+              <strong className="text-fg-inv">The window won&apos;t stay open.</strong>{" "}
+              Let the filing deadline pass and the whole roof is on you — not just
+              your deductible.
             </span>
           </li>
         </ul>
       </div>
 
-      {/* Financing — surfaced BEFORE the form so the deductible isn't a barrier */}
-      <div className="mt-4">
-        <DeductibleFinancing />
-      </div>
-
-      {/* Evidence map */}
       {hailHit && result?.home && result?.map && result.map.length > 0 && (
-        <div className="mt-4 overflow-hidden rounded-md border border-line">
+        <div className="mt-5 overflow-hidden rounded-md border border-line">
           <HailMap home={result.home} points={result.map} />
         </div>
       )}
-
-      {/* Booking */}
-      <div className="my-6 h-px w-full bg-line" />
-      <p className="font-display text-xl font-bold text-fg-inv">
-        Get your roof documented — free.
-      </p>
-      <p className="mb-4 mt-1 text-sm font-semibold text-ember">
-        ⏳ Inspection slots fill fast after a storm, and your filing window is
-        ticking. Lock yours in.
-      </p>
-      <form id="crf-claim" data-cr-capture onSubmit={submit} className="space-y-3">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <input name="name" required placeholder="Full name" className={inputBase} autoComplete="name" />
-          <input name="phone" required type="tel" placeholder="Phone" className={inputBase} autoComplete="tel" />
-        </div>
-        <input name="email" type="email" placeholder="Email (optional)" className={inputBase} autoComplete="email" />
-        <input type="hidden" name="zip" value={result?.matched || address} />
-        <label
-          className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm transition-colors ${
-            solar
-              ? "border-bolt bg-bolt/10 text-fg-inv"
-              : "border-line bg-ink text-fg-inv-dim"
-          }`}
-        >
-          <input
-            type="checkbox"
-            checked={solar}
-            onChange={(e) => setSolar(e.target.checked)}
-            className="h-4 w-4 accent-bolt"
-          />
-          I have solar panels (we handle those too)
-        </label>
-        {solar && (
-          <p className="rounded-md border border-bolt/30 bg-bolt/10 px-4 py-2.5 text-xs leading-relaxed text-fg-inv">
-            Most roofers can&apos;t touch solar — we detach &amp; reset it
-            in-house, usually a covered line item on your claim.
-          </p>
-        )}
-        <input type="text" name="company_website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
-        <button
-          type="submit"
-          disabled={sub === "submitting"}
-          className="w-full rounded-md bg-bolt px-6 py-4 font-display text-base font-extrabold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60"
-        >
-          {sub === "submitting" ? "Sending…" : "Lock in my free inspection →"}
-        </button>
-        {sub === "error" && (
-          <p className="text-sm text-ember">
-            Something went wrong — please call us instead.
-          </p>
-        )}
-        <SmsConsent />
-      </form>
 
       <button
         type="button"
