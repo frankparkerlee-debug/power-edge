@@ -35,6 +35,7 @@ export function CountUp({
       setVal(to);
       return;
     }
+    let backstop: ReturnType<typeof setTimeout>;
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -49,13 +50,19 @@ export function CountUp({
               else setVal(to);
             };
             requestAnimationFrame(step);
+            // Backstop: if rAF is throttled (e.g. a backgrounded tab), guarantee
+            // the final value still lands. setTimeout fires even when rAF is paused.
+            backstop = setTimeout(() => setVal(to), duration + 600);
           }
         }
       },
-      { threshold: 0.4 },
+      { threshold: 0.25 },
     );
     io.observe(el);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      clearTimeout(backstop);
+    };
   }, [to, duration]);
 
   return (
