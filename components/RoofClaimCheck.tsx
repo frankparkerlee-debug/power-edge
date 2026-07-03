@@ -11,10 +11,11 @@ import type { StormData } from "./StormReport";
 
 /**
  * Roof-claim eligibility check, tuned for paid traffic: address → instant
- * verdict WITH the booking form right there (no question gauntlet). Solar is a
- * single optional checkbox on the form; the team qualifies the rest on the
- * callback. Honest framing: never "your roof is damaged" — only "you likely
- * qualify… an inspection confirms." Not an insurance determination.
+ * verdict WITH the booking form right there (no question gauntlet). Leans hard
+ * into the stakes of waiting + surfaces deductible financing BEFORE the form so
+ * cost fear doesn't kill the booking. Honest framing: never "your roof is
+ * damaged" / "you have a claim" — only "you likely qualify… an inspection
+ * confirms." Not an insurance determination.
  */
 
 type Result = StormData & { ok?: boolean; found?: boolean; soft?: boolean };
@@ -73,6 +74,10 @@ export function RoofClaimCheck() {
 
   const recentIso = result?.mostRecent?.date || result?.largest?.date;
   const monthsLeft = Math.round(12 - monthsAgo(recentIso));
+  const windowLine =
+    hailHit && monthsLeft > 0 && monthsLeft < 13
+      ? `You may have only ~${monthsLeft} month${monthsLeft === 1 ? "" : "s"} left to file on the most recent storm.`
+      : "Texas policies typically give you about a year from the storm to file.";
   const hailSummary = hailHit
     ? `${hailCount} hail report${hailCount === 1 ? "" : "s"} within ${result?.radiusMi ?? 15} mi${
         largest ? `, largest ${largest}″` : ""
@@ -176,7 +181,7 @@ export function RoofClaimCheck() {
             You&apos;re booked in.
           </h2>
           <p className="mt-2 text-fg-inv-dim">
-            We&apos;ll call you fast to schedule your free inspection.
+            We&apos;ll call you fast to lock in your free inspection.
           </p>
         </div>
       </div>
@@ -190,15 +195,16 @@ export function RoofClaimCheck() {
       {qualifies ? (
         <div className="rounded-card border-2 border-bolt bg-bolt/10 p-5">
           <div className="text-xs font-bold uppercase tracking-wider text-bolt">
-            Good news
+            Good news — you likely qualify
           </div>
           <p className="mt-1 font-display text-2xl font-bold leading-tight text-fg-inv sm:text-3xl">
-            You likely qualify for a roof insurance claim.
+            {largest ? `${largest}″ hail hit near you.` : "Hail hit near you."}{" "}
+            Your roof may already be damaged.
           </p>
           <p className="mt-2 text-sm leading-relaxed text-fg-inv-dim">
-            Based on {hailSummary}, it&apos;s worth filing. Book the free
-            inspection below — we document the damage, and on a covered claim you
-            typically pay only your deductible.
+            {hailSummary} — enough to file. On a covered claim you pay only your
+            deductible; we document the damage the right way and coordinate with
+            your adjuster. But every week you wait works against you:
           </p>
         </div>
       ) : (
@@ -207,43 +213,68 @@ export function RoofClaimCheck() {
             Worth a free look
           </div>
           <p className="mt-1 font-display text-2xl font-bold leading-tight text-fg-inv sm:text-3xl">
-            Let&apos;s get eyes on your roof.
+            Damage hides. Deadlines don&apos;t wait.
           </p>
           <p className="mt-2 text-sm leading-relaxed text-fg-inv-dim">
             The auto-data isn&apos;t conclusive ({hailSummary}), but North Texas
-            gets hit often and damage is easy to miss from the ground. Book a
-            free inspection — it&apos;s the only way to know for sure.
+            gets pounded and hail damage is nearly invisible from the ground. A
+            free inspection is the only way to know before a deadline passes or a
+            small problem turns into a big one:
           </p>
         </div>
       )}
 
-      {hailHit && monthsLeft > 0 && monthsLeft < 13 && (
-        <div className="mt-3 flex items-start gap-2 rounded-md border border-ember/40 bg-ember/10 px-4 py-3 text-sm text-fg-inv">
-          <span aria-hidden>⏳</span>
-          <span>
-            Many Texas policies give you about a year from the storm to file —
-            roughly{" "}
-            <strong>
-              {monthsLeft} month{monthsLeft === 1 ? "" : "s"} left
-            </strong>{" "}
-            on the most recent event. Don&apos;t sit on it.
-          </span>
+      {/* Why act now — the stakes */}
+      <div className="mt-4 rounded-card border border-ember/40 bg-ember/5 p-5">
+        <div className="text-xs font-bold uppercase tracking-wider text-ember">
+          Why waiting costs you
         </div>
-      )}
+        <ul className="mt-3 space-y-2.5 text-sm text-fg-inv">
+          <li className="flex gap-2.5">
+            <span className="text-ember" aria-hidden>→</span>
+            <span>
+              <strong>The damage compounds.</strong> A small bruise becomes a
+              leak, then rot — and a claim that&apos;s far harder to prove.
+            </span>
+          </li>
+          <li className="flex gap-2.5">
+            <span className="text-ember" aria-hidden>→</span>
+            <span>
+              <strong>Your window closes.</strong> {windowLine} Miss it and the
+              entire roof is on you — not just your deductible.
+            </span>
+          </li>
+          <li className="flex gap-2.5">
+            <span className="text-ember" aria-hidden>→</span>
+            <span>
+              <strong>Older roofs get downgraded.</strong> Insurers quietly move
+              aging roofs to actual-cash-value — wait, and they pay you a
+              fraction of a new roof.
+            </span>
+          </li>
+        </ul>
+      </div>
 
+      {/* Financing — surfaced BEFORE the form so the deductible isn't a barrier */}
+      <div className="mt-4">
+        <DeductibleFinancing />
+      </div>
+
+      {/* Evidence map */}
       {hailHit && result?.home && result?.map && result.map.length > 0 && (
         <div className="mt-4 overflow-hidden rounded-md border border-line">
           <HailMap home={result.home} points={result.map} />
         </div>
       )}
 
-      {/* Booking form — right here, no extra steps */}
+      {/* Booking */}
       <div className="my-6 h-px w-full bg-line" />
-      <p className="font-display text-lg font-bold text-fg-inv">
-        Book your free inspection
+      <p className="font-display text-xl font-bold text-fg-inv">
+        Get your roof documented — free.
       </p>
-      <p className="mb-4 mt-1 text-sm text-bolt">
-        Inspections book up fast after storms — grab a spot this week.
+      <p className="mb-4 mt-1 text-sm font-semibold text-ember">
+        ⏳ Inspection slots fill fast after a storm, and your filing window is
+        ticking. Lock yours in.
       </p>
       <form id="crf-claim" data-cr-capture onSubmit={submit} className="space-y-3">
         <div className="grid gap-3 sm:grid-cols-2">
@@ -277,9 +308,9 @@ export function RoofClaimCheck() {
         <button
           type="submit"
           disabled={sub === "submitting"}
-          className="w-full rounded-md bg-bolt px-6 py-4 font-display text-base font-bold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60"
+          className="w-full rounded-md bg-bolt px-6 py-4 font-display text-base font-extrabold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60"
         >
-          {sub === "submitting" ? "Sending…" : "Book my free inspection"}
+          {sub === "submitting" ? "Sending…" : "Lock in my free inspection →"}
         </button>
         {sub === "error" && (
           <p className="text-sm text-ember">
@@ -288,10 +319,6 @@ export function RoofClaimCheck() {
         )}
         <SmsConsent />
       </form>
-
-      <div className="mt-4">
-        <DeductibleFinancing />
-      </div>
 
       <button
         type="button"

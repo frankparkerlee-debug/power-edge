@@ -69,8 +69,9 @@ export default function RoofClaimCheckPage() {
               Enter your address — we check reported hail near your home against
               National Weather Service data (the same kind of record an adjuster
               uses) and tell you on the spot if it&apos;s likely worth filing.
-              Damage is easy to miss from the ground, and Texas claims have
-              deadlines.
+              Hail damage is nearly invisible from the ground — and once your
+              policy&apos;s filing window closes, the whole roof comes out of
+              your pocket, not your deductible.
             </p>
 
             <ul className="mt-8 space-y-3 text-fg-inv-dim">
@@ -138,8 +139,8 @@ export default function RoofClaimCheckPage() {
       <FaqSection faqs={faqs} title="Roof-claim questions, answered straight." />
 
       <CtaBand
-        heading="Check your address — then let's get eyes on your roof."
-        sub="Free, honest, and documented for your claim. On a covered claim you pay just your deductible, financing from $250 down."
+        heading="Don't wait for the leak to prove the damage."
+        sub="Free inspection, documented for your claim, deductible financing from $250 down — and we move before your filing window closes. On a covered claim you pay just your deductible."
       />
     </>
   );
