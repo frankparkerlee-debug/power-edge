@@ -7,7 +7,7 @@ import { FinancingPrequal } from "@/components/FinancingPrequal";
 import { Reviews } from "@/components/Reviews";
 
 export const metadata: Metadata = {
-  title: "Roof & Deductible Financing in DFW — From $250 Down | PowerEdge",
+  title: "Roof & Deductible Financing in DFW — From $250 Down",
   description:
     "Can't cover your roof deductible or out-of-pocket? Finance it — start for as little as $250 down, low monthly payments, and we schedule the work now. Serving Dallas–Fort Worth. You pay your full deductible over time; we never waive it.",
 };

@@ -7,7 +7,7 @@ import { CtaBand } from "@/components/blocks";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Do You Have a Roof Insurance Claim? Free Check — DFW | PowerEdge",
+  title: "Do You Have a Roof Insurance Claim? Free Check — DFW",
   description:
     "Enter your address and find out in seconds if your storm-damaged roof likely qualifies for an insurance claim — free, no obligation. Then book a free inspection. Serving Dallas–Fort Worth. TECL #39773.",
 };
