@@ -36,6 +36,14 @@ export function CountUp({
       return;
     }
     let backstop: ReturnType<typeof setTimeout>;
+    // Absolute fallback: if the observer never fires (occluded tab, IO quirks),
+    // just show the real number after a few seconds so it's never stuck at 0.
+    const fill = setTimeout(() => {
+      if (!started.current) {
+        started.current = true;
+        setVal(to);
+      }
+    }, 4000);
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -62,6 +70,7 @@ export function CountUp({
     return () => {
       io.disconnect();
       clearTimeout(backstop);
+      clearTimeout(fill);
     };
   }, [to, duration]);
 
