@@ -11,7 +11,9 @@ import Script from "next/script";
  */
 export function Analytics() {
   const ga = process.env.NEXT_PUBLIC_GA_ID;
-  const metaPixel = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+  // Interim default = the generic "Parker Lee" pixel (never the Merit pixel).
+  // Override with a dedicated PowerEdge pixel via NEXT_PUBLIC_META_PIXEL_ID.
+  const metaPixel = process.env.NEXT_PUBLIC_META_PIXEL_ID || "858008314025357";
   // CallRail JS — required for BOTH dynamic number insertion (call source
   // tracking) AND native form capture (CallTrk.captureForm → Message Flow
   // auto-text). Public client script, safe to ship; env can override.
