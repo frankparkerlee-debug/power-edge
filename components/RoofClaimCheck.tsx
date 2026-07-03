@@ -10,26 +10,16 @@ import { track } from "@/lib/analytics";
 import type { StormData } from "./StormReport";
 
 /**
- * Combined roof-claim eligibility check — merges the old storm-check + roof
- * estimate into ONE binary funnel. Enter address -> silent NWS hail lookup +
- * 3 quick questions -> a yes/no-style verdict on likely claim eligibility ->
- * book the free inspection. The storm detail is demoted to supporting evidence;
- * the verdict + booking are the point. Honest framing: never "your roof is
- * damaged" / "you have a claim" — only "you likely qualify… an inspection
- * confirms." Not an insurance determination.
+ * Roof-claim eligibility check, tuned for paid traffic: address → instant
+ * verdict WITH the booking form right there (no question gauntlet). Solar is a
+ * single optional checkbox on the form; the team qualifies the rest on the
+ * callback. Honest framing: never "your roof is damaged" — only "you likely
+ * qualify… an inspection confirms." Not an insurance determination.
  */
 
 type Result = StormData & { ok?: boolean; found?: boolean; soft?: boolean };
-type Phase = "input" | "questions" | "result";
+type Phase = "input" | "result";
 type Sub = "idle" | "submitting" | "done" | "error";
-
-const AGES = ["0–9 years", "10–15 years", "16–20 years", "20+ / not sure"];
-const SIGNS = [
-  { key: "leaks", label: "Leaks or ceiling stains" },
-  { key: "missing", label: "Missing / cracked shingles" },
-  { key: "granules", label: "Granules in the gutters" },
-  { key: "none", label: "Nothing I've noticed" },
-];
 
 function monthsAgo(iso?: string) {
   if (!iso) return Infinity;
@@ -44,8 +34,6 @@ export function RoofClaimCheck() {
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
-  const [age, setAge] = useState("");
-  const [signs, setSigns] = useState<string[]>([]);
   const [solar, setSolar] = useState(false);
   const [sub, setSub] = useState<Sub>("idle");
 
@@ -73,27 +61,15 @@ export function RoofClaimCheck() {
       setResult({ soft: true });
     } finally {
       setLoading(false);
-      setPhase("questions");
+      setPhase("result");
     }
   }
 
-  function toggleSign(key: string) {
-    setSigns((prev) => {
-      if (key === "none") return prev.includes("none") ? [] : ["none"];
-      const next = prev.filter((s) => s !== "none");
-      return next.includes(key)
-        ? next.filter((s) => s !== key)
-        : [...next, key];
-    });
-  }
-
-  // ---- Verdict logic ------------------------------------------------------
+  // ---- Verdict (from hail data alone — the inspection confirms specifics) --
   const hailCount = result?.count ?? 0;
   const largest = result?.largest?.size ?? 0;
   const hailHit = !!result?.found && hailCount > 0;
-  const oldRoof = age !== "" && age !== "0–9 years";
-  const hasSigns = signs.some((s) => s !== "none");
-  const qualifies = (hailHit && (oldRoof || hasSigns)) || largest >= 1.5;
+  const qualifies = hailHit && (largest >= 1 || hailCount >= 3);
 
   const recentIso = result?.mostRecent?.date || result?.largest?.date;
   const monthsLeft = Math.round(12 - monthsAgo(recentIso));
@@ -126,9 +102,7 @@ export function RoofClaimCheck() {
           solar: solar ? "yes" : "",
           message: `[Roof Claim Check] ${
             qualifies ? "LIKELY QUALIFIES" : "worth a look"
-          } — ${result?.matched || address}; hail: ${hailSummary}; roof age: ${
-            age || "—"
-          }; signs: ${signs.join(", ") || "none"}`,
+          } — ${result?.matched || address}; hail: ${hailSummary}`,
           company_website: fd.company_website,
           ...leadContext({ tool: "roof-claim-check" }),
         }),
@@ -154,9 +128,9 @@ export function RoofClaimCheck() {
           Do you have a roof claim? Find out free.
         </h2>
         <p className="mt-2 text-sm text-fg-inv-dim">
-          Enter your address and answer three quick questions. We&apos;ll check
-          reported hail near your home and tell you if it&apos;s likely worth
-          filing — in about a minute, no obligation.
+          Enter your address — we check reported hail near your home and tell you
+          on the spot if it&apos;s likely worth filing. Takes seconds, no
+          obligation.
         </p>
         <form
           onSubmit={(e) => {
@@ -177,7 +151,7 @@ export function RoofClaimCheck() {
             disabled={loading}
             className="w-full rounded-md bg-bolt px-6 py-4 font-display text-base font-bold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60"
           >
-            {loading ? "Checking storm data…" : "Check my roof"}
+            {loading ? "Checking storm data…" : "Check my roof →"}
           </button>
         </form>
         <p className="mt-3 text-center text-xs text-fg-inv-dim">
@@ -188,101 +162,7 @@ export function RoofClaimCheck() {
     );
   }
 
-  // ---- QUESTIONS ----------------------------------------------------------
-  if (phase === "questions") {
-    return (
-      <div className="rounded-card border border-line bg-ink-2 p-6 shadow-2xl sm:p-8">
-        <button
-          type="button"
-          onClick={() => setPhase("input")}
-          className="text-xs text-fg-inv-dim hover:text-fg-inv"
-        >
-          ← Different address
-        </button>
-        <h2 className="mt-2 font-display text-2xl font-bold text-fg-inv">
-          Three quick questions
-        </h2>
-        <p className="mt-1 text-sm text-fg-inv-dim">
-          {result?.matched ? `For ${result.matched}` : "Almost there"} — this
-          sharpens the read.
-        </p>
-
-        {/* Roof age */}
-        <div className="mt-6">
-          <div className="text-sm font-semibold text-fg-inv">
-            How old is your roof?
-          </div>
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            {AGES.map((a) => (
-              <button
-                key={a}
-                type="button"
-                onClick={() => setAge(a)}
-                className={`rounded-md border px-3 py-2.5 text-sm font-semibold transition-colors ${
-                  age === a
-                    ? "border-bolt bg-bolt/10 text-bolt"
-                    : "border-line text-fg-inv-dim hover:border-bolt"
-                }`}
-              >
-                {a}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Signs */}
-        <div className="mt-5">
-          <div className="text-sm font-semibold text-fg-inv">
-            Noticed any of these? (optional)
-          </div>
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            {SIGNS.map((s) => (
-              <button
-                key={s.key}
-                type="button"
-                onClick={() => toggleSign(s.key)}
-                className={`rounded-md border px-3 py-2.5 text-left text-sm font-semibold transition-colors ${
-                  signs.includes(s.key)
-                    ? "border-bolt bg-bolt/10 text-bolt"
-                    : "border-line text-fg-inv-dim hover:border-bolt"
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Solar */}
-        <label
-          className={`mt-5 flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm transition-colors ${
-            solar
-              ? "border-bolt bg-bolt/10 text-fg-inv"
-              : "border-line bg-ink text-fg-inv-dim"
-          }`}
-        >
-          <input
-            type="checkbox"
-            checked={solar}
-            onChange={(e) => setSolar(e.target.checked)}
-            className="h-4 w-4 accent-bolt"
-          />
-          I have solar panels on my roof
-        </label>
-
-        <button
-          type="button"
-          disabled={!age}
-          onClick={() => setPhase("result")}
-          className="mt-6 w-full rounded-md bg-bolt px-6 py-4 font-display text-base font-bold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-50"
-        >
-          {age ? "See if I qualify →" : "Pick your roof age to continue"}
-        </button>
-      </div>
-    );
-  }
-
-  // ---- RESULT -------------------------------------------------------------
+  // ---- BOOKED -------------------------------------------------------------
   if (sub === "done") {
     return (
       <div className="rounded-card border border-line bg-ink-2 p-6 shadow-2xl sm:p-8">
@@ -303,6 +183,7 @@ export function RoofClaimCheck() {
     );
   }
 
+  // ---- RESULT + CAPTURE (one screen) --------------------------------------
   return (
     <div className="rounded-card border border-line bg-ink-2 p-6 shadow-2xl sm:p-8">
       {/* Verdict */}
@@ -315,9 +196,9 @@ export function RoofClaimCheck() {
             You likely qualify for a roof insurance claim.
           </p>
           <p className="mt-2 text-sm leading-relaxed text-fg-inv-dim">
-            Based on {hailSummary} and your roof&apos;s age, it&apos;s worth
-            filing. A free inspection documents the damage and confirms it — and
-            on a covered claim you typically pay only your deductible.
+            Based on {hailSummary}, it&apos;s worth filing. Book the free
+            inspection below — we document the damage, and on a covered claim you
+            typically pay only your deductible.
           </p>
         </div>
       ) : (
@@ -330,46 +211,34 @@ export function RoofClaimCheck() {
           </p>
           <p className="mt-2 text-sm leading-relaxed text-fg-inv-dim">
             The auto-data isn&apos;t conclusive ({hailSummary}), but North Texas
-            gets hit often and damage is easy to miss from the ground. A free
-            inspection is the only way to know for sure.
+            gets hit often and damage is easy to miss from the ground. Book a
+            free inspection — it&apos;s the only way to know for sure.
           </p>
         </div>
       )}
 
-      {/* Claim-window urgency */}
       {hailHit && monthsLeft > 0 && monthsLeft < 13 && (
         <div className="mt-3 flex items-start gap-2 rounded-md border border-ember/40 bg-ember/10 px-4 py-3 text-sm text-fg-inv">
           <span aria-hidden>⏳</span>
           <span>
             Many Texas policies give you about a year from the storm to file —
-            that could be roughly{" "}
-            <strong>{monthsLeft} month{monthsLeft === 1 ? "" : "s"} left</strong>{" "}
-            on the most recent event. Check your policy; don&apos;t sit on it.
+            roughly{" "}
+            <strong>
+              {monthsLeft} month{monthsLeft === 1 ? "" : "s"} left
+            </strong>{" "}
+            on the most recent event. Don&apos;t sit on it.
           </span>
         </div>
       )}
 
-      {/* Evidence map (supporting, not the star) */}
       {hailHit && result?.home && result?.map && result.map.length > 0 && (
         <div className="mt-4 overflow-hidden rounded-md border border-line">
           <HailMap home={result.home} points={result.map} />
         </div>
       )}
 
-      {solar && (
-        <p className="mt-4 rounded-md border border-bolt/30 bg-bolt/10 px-4 py-3 text-sm leading-relaxed text-fg-inv">
-          You have solar — good. We detach &amp; reset your panels in-house (most
-          roofers can&apos;t), and it&apos;s usually a covered line item on your
-          claim.
-        </p>
-      )}
-
-      <div className="mt-4">
-        <DeductibleFinancing />
-      </div>
-
+      {/* Booking form — right here, no extra steps */}
       <div className="my-6 h-px w-full bg-line" />
-
       <p className="font-display text-lg font-bold text-fg-inv">
         Book your free inspection
       </p>
@@ -381,10 +250,29 @@ export function RoofClaimCheck() {
           <input name="name" required placeholder="Full name" className={inputBase} autoComplete="name" />
           <input name="phone" required type="tel" placeholder="Phone" className={inputBase} autoComplete="tel" />
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <input name="email" type="email" placeholder="Email (we'll send your details)" className={inputBase} autoComplete="email" />
-          <input name="zip" placeholder="ZIP code" className={inputBase} inputMode="numeric" autoComplete="postal-code" />
-        </div>
+        <input name="email" type="email" placeholder="Email (optional)" className={inputBase} autoComplete="email" />
+        <input type="hidden" name="zip" value={result?.matched || address} />
+        <label
+          className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm transition-colors ${
+            solar
+              ? "border-bolt bg-bolt/10 text-fg-inv"
+              : "border-line bg-ink text-fg-inv-dim"
+          }`}
+        >
+          <input
+            type="checkbox"
+            checked={solar}
+            onChange={(e) => setSolar(e.target.checked)}
+            className="h-4 w-4 accent-bolt"
+          />
+          I have solar panels (we handle those too)
+        </label>
+        {solar && (
+          <p className="rounded-md border border-bolt/30 bg-bolt/10 px-4 py-2.5 text-xs leading-relaxed text-fg-inv">
+            Most roofers can&apos;t touch solar — we detach &amp; reset it
+            in-house, usually a covered line item on your claim.
+          </p>
+        )}
         <input type="text" name="company_website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
         <button
           type="submit"
@@ -398,20 +286,23 @@ export function RoofClaimCheck() {
             Something went wrong — please call us instead.
           </p>
         )}
-        <button
-          type="button"
-          onClick={() => {
-            setPhase("input");
-            setResult(null);
-            setAge("");
-            setSigns([]);
-          }}
-          className="w-full text-center text-xs text-fg-inv-dim hover:text-fg-inv"
-        >
-          ← Start over
-        </button>
         <SmsConsent />
       </form>
+
+      <div className="mt-4">
+        <DeductibleFinancing />
+      </div>
+
+      <button
+        type="button"
+        onClick={() => {
+          setPhase("input");
+          setResult(null);
+        }}
+        className="mt-4 w-full text-center text-xs text-fg-inv-dim hover:text-fg-inv"
+      >
+        ← Check a different address
+      </button>
     </div>
   );
 }
