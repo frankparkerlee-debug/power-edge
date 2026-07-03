@@ -26,7 +26,7 @@ const CARDS: Card[] = [
   },
   {
     label: "Deductible Financing",
-    pitch: "“Scan to see your deductible financed — from $500 down, low monthly.”",
+    pitch: "“Scan to see your deductible financed — from $250 down, low monthly.”",
     path: "/financing",
     campaign: "financing",
   },

@@ -40,7 +40,7 @@ export function ClaimCheckInline() {
       <p className="mt-3 text-sm text-fg-inv-dim">
         Free · 60 seconds · no obligation. Approved?{" "}
         <span className="font-semibold text-bolt">
-          Start for as little as $500 down.
+          Start for as little as $250 down.
         </span>
       </p>
     </form>

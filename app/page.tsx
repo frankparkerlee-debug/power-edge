@@ -58,7 +58,7 @@ function Hero() {
           <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4 border-t border-line pt-6">
             {[
               { t: "Free storm inspection", d: "Documented for your claim" },
-              { t: "Deductible financing", d: "As little as $500 down" },
+              { t: "Deductible financing", d: "As little as $250 down" },
               { t: "Solar + roof, one license", d: "Most roofers can't" },
             ].map((p) => (
               <div key={p.t} className="flex items-start gap-2.5">
@@ -358,7 +358,7 @@ function ClaimCheckBand() {
                 </div>
                 <div className="mt-3 text-center text-sm text-fg-inv-dim">
                   Start for as little as{" "}
-                  <span className="font-bold text-fg-inv">$500 down</span>.
+                  <span className="font-bold text-fg-inv">$250 down</span>.
                 </div>
               </div>
             </div>
@@ -467,7 +467,7 @@ function StuckBand() {
           <SectionHeading
             kicker="Stuck on the out-of-pocket?"
             title="Approved for a roof but can't cover the deductible? You're not stuck."
-            intro="In Texas, a wind/hail deductible is often 1–2% of your home's value — $5,000–$10,000 out of pocket before work even starts. If that's the wall between you and a sound roof, we finance it: as little as $500 down, low monthly payments, and we get the job scheduled now. Already have an estimate from another roofer? Bring it — we'll do the work and finance it."
+            intro="In Texas, a wind/hail deductible is often 1–2% of your home's value — $5,000–$10,000 out of pocket before work even starts. If that's the wall between you and a sound roof, we finance it: as little as $250 down, low monthly payments, and we get the job scheduled now. Already have an estimate from another roofer? Bring it — we'll do the work and finance it."
           />
           <ul className="mt-6 space-y-2.5">
             {cases.map((x) => (
