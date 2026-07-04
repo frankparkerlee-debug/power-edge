@@ -34,7 +34,7 @@ const COVERAGE = ["Replacement cost", "Actual cash value", "Not sure"];
 type Step = "1" | "2" | "booked" | "3" | "done";
 type Data = {
   name: string; phone: string; email: string; address: string;
-  date_of_loss: string; cause: string; damage_signs: string[];
+  date_of_loss: string; causes: string[]; damage_signs: string[];
   roof_age: string; concerns: string; mortgage_company: string;
   best_times: string; solar: boolean;
   carrier: string; policy_number: string; deductible: string; coverage_type: string;
@@ -49,7 +49,7 @@ const chip = (on: boolean) =>
   }`;
 
 const empty: Data = {
-  name: "", phone: "", email: "", address: "", date_of_loss: "", cause: "",
+  name: "", phone: "", email: "", address: "", date_of_loss: "", causes: [],
   damage_signs: [], roof_age: "", concerns: "", mortgage_company: "", best_times: "",
   solar: false, carrier: "", policy_number: "", deductible: "", coverage_type: "",
 };
@@ -83,6 +83,16 @@ export function ClaimPrep() {
         ? p.damage_signs.filter((x) => x !== s)
         : [...p.damage_signs, s],
     }));
+  const toggleCause = (c: string) =>
+    setD((p) => {
+      if (c === "Not sure")
+        return { ...p, causes: p.causes.includes("Not sure") ? [] : ["Not sure"] };
+      const base = p.causes.filter((x) => x !== "Not sure");
+      return {
+        ...p,
+        causes: base.includes(c) ? base.filter((x) => x !== c) : [...base, c],
+      };
+    });
 
   async function save(stage: number, completed: boolean) {
     if (!id) return;
@@ -91,7 +101,14 @@ export function ClaimPrep() {
       await fetch("/api/claim-intake", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...d, damage_signs: d.damage_signs.join(", "), id, stage, completed }),
+        body: JSON.stringify({
+          ...d,
+          cause: d.causes.join(", "),
+          damage_signs: d.damage_signs.join(", "),
+          id,
+          stage,
+          completed,
+        }),
       });
     } catch {
       /* best-effort; progressive save */
@@ -272,19 +289,20 @@ export function ClaimPrep() {
         <label className={lbl}>Property address</label>
         <AddressAutocomplete value={d.address} onChange={(v) => set("address", v)} onSelect={(v) => set("address", v)} placeholder="Street address" className={`mt-1 ${inputBase}`} />
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <label className={lbl}>When did the storm hit? <span className="font-normal text-fg-inv-dim">(if known)</span></label>
-          <input type="date" value={d.date_of_loss} onChange={(e) => set("date_of_loss", e.target.value)} className={`mt-1 ${inputBase}`} />
+      <div>
+        <label className={lbl}>What caused it? <span className="font-normal text-fg-inv-dim">(pick any — wind and hail can both hit)</span></label>
+        <div className="mt-1 flex gap-2">
+          {CAUSES.map((x) => (
+            <button type="button" key={x} onClick={() => toggleCause(x)} className={`flex-1 ${chip(d.causes.includes(x))}`}>{x}</button>
+          ))}
         </div>
-        <div>
-          <label className={lbl}>What caused it?</label>
-          <div className="mt-1 flex gap-2">
-            {CAUSES.map((x) => (
-              <button type="button" key={x} onClick={() => set("cause", x)} className={`flex-1 ${chip(d.cause === x)}`}>{x}</button>
-            ))}
-          </div>
-        </div>
+      </div>
+      <div>
+        <label className={lbl}>When did it hit? <span className="font-normal text-fg-inv-dim">(rough date is fine — or leave blank)</span></label>
+        <input type="date" value={d.date_of_loss} onChange={(e) => set("date_of_loss", e.target.value)} className={`mt-1 ${inputBase}`} />
+        <p className="mt-1 text-xs text-fg-inv-dim">
+          Not sure which storm? No problem — we&apos;ll pull the storm history for your address.
+        </p>
       </div>
       <div>
         <label className={lbl}>What are you seeing?</label>
