@@ -13,12 +13,14 @@ export function AddressAutocomplete({
   onSelect,
   placeholder = "Street address, city, ZIP",
   className = "",
+  required = false,
 }: {
   value: string;
   onChange: (v: string) => void;
   onSelect?: (v: string) => void;
   placeholder?: string;
   className?: string;
+  required?: boolean;
 }) {
   const [items, setItems] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
@@ -112,7 +114,7 @@ export function AddressAutocomplete({
             setOpen(false);
           }
         }}
-        required
+        required={required}
         placeholder={placeholder}
         className={className}
         autoComplete="off"

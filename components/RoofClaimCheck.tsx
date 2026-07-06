@@ -139,6 +139,7 @@ export function RoofClaimCheck() {
             onSelect={(v) => runCheck(v)}
             placeholder="Street address or ZIP code"
             className={inputBase}
+            required
           />
           <button
             type="submit"
