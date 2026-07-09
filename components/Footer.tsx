@@ -62,6 +62,11 @@ export function Footer() {
                 About us
               </Link>
             </li>
+            <li>
+              <Link href="/careers" className="hover:text-bolt">
+                Sales careers — we&apos;re hiring
+              </Link>
+            </li>
           </ul>
         </div>
 
