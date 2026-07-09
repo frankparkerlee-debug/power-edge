@@ -51,9 +51,9 @@ export default function FinancingPage() {
     <>
       <PageHero
         kicker="Roof & deductible financing · Dallas–Fort Worth"
-        title="Can't cover the out-of-pocket? Finance it — and get your roof done now."
-        intro="A high deductible or a low insurance check shouldn't stand between you and a sound roof. We finance your deductible — or your whole project — with as little as $250 down and low monthly payments, so we can schedule the work now instead of when you've saved up. You always pay your full deductible over time; we never waive it (that's illegal in Texas, and following the law protects you)."
-        badge="Pre-qualify — no credit impact"
+        title="Can't cover your deductible? We still start now."
+        intro="Your roof can't be replaced until the deductible's handled — but you don't have to pay it in one lump sum. Finance it from as little as $250 down and we get the work going right away, while you pay the rest in low monthly payments. You always pay your full deductible over time; we never waive it (that's illegal in Texas)."
+        badge="See my payment — no credit impact"
         badgeHref="#prequal"
       />
 
@@ -62,7 +62,7 @@ export default function FinancingPage() {
         <Container>
           <SectionHeading
             kicker="See it, then pre-qualify"
-            title="Turn a $8,000 wall into a monthly payment."
+            title="Turn a big deductible into a small monthly payment."
             intro="Check what your deductible looks like spread over time — then pre-qualify with a soft check that won't touch your credit score."
           />
           <div className="mt-10 grid gap-6 lg:grid-cols-2 lg:items-start">

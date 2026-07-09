@@ -42,6 +42,7 @@ export function FinancingCalculator({
   className?: string;
 }) {
   const [amount, setAmount] = useState(8000);
+  const [plan, setPlan] = useState<"pay4" | "m12">("m12");
 
   const pay4 = amount > 0 ? amount / 4 : 0;
   const pay12 = amount > 0 ? amortized(amount, RATE_12, 12) : 0;
@@ -83,9 +84,21 @@ export function FinancingCalculator({
         />
       </label>
 
-      {/* Two in-house plans, side by side */}
-      <div className="mt-6 grid grid-cols-2 gap-3">
-        <div className="rounded-md border border-line bg-ink p-4 text-center">
+      {/* Two in-house plans — tap to choose */}
+      <div className="mt-6 text-xs font-semibold uppercase tracking-wider text-fg-inv-dim">
+        Choose a plan
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={() => setPlan("pay4")}
+          aria-pressed={plan === "pay4"}
+          className={`rounded-md border p-4 text-center transition-colors ${
+            plan === "pay4"
+              ? "border-2 border-bolt bg-bolt/10"
+              : "border border-line bg-ink hover:border-bolt"
+          }`}
+        >
           <div className="text-xs font-semibold uppercase tracking-wider text-fg-inv-dim">
             Pay in 4
           </div>
@@ -96,8 +109,17 @@ export function FinancingCalculator({
           <div className="mt-1 text-xs text-fg-inv-dim">
             4 payments · <span className="text-bolt">0% interest</span>
           </div>
-        </div>
-        <div className="rounded-md border border-bolt/40 bg-bolt/5 p-4 text-center">
+        </button>
+        <button
+          type="button"
+          onClick={() => setPlan("m12")}
+          aria-pressed={plan === "m12"}
+          className={`rounded-md border p-4 text-center transition-colors ${
+            plan === "m12"
+              ? "border-2 border-bolt bg-bolt/10"
+              : "border border-line bg-ink hover:border-bolt"
+          }`}
+        >
           <div className="text-xs font-semibold uppercase tracking-wider text-fg-inv-dim">
             12-month plan
           </div>
@@ -108,17 +130,20 @@ export function FinancingCalculator({
           <div className="mt-1 text-xs text-fg-inv-dim">
             12 payments · 12.99% APR
           </div>
-        </div>
+        </button>
       </div>
 
       <Link
         href={ctaHref}
         onClick={() =>
-          track("financing_calc_cta", { amount: String(amount) })
+          track("financing_calc_cta", {
+            amount: String(amount),
+            plan,
+          })
         }
         className="mt-4 block w-full rounded-md bg-bolt px-6 py-4 text-center font-display text-base font-bold text-ink transition-colors hover:bg-bolt-hi"
       >
-        Get financed &amp; scheduled →
+        Get pre-qualified · {plan === "pay4" ? "Pay in 4" : "12-month"} →
       </Link>
 
       <p className="mt-3 text-xs leading-relaxed text-fg-inv-dim">
