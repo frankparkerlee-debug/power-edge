@@ -30,3 +30,24 @@ alter table public.leads enable row level security;
 
 -- If the table already exists from an earlier run, add the address column:
 alter table public.leads add column if not exists address text;
+
+-- Every address run through the claim check / storm check — including visitors
+-- who never submit the form. Self-identified storm-hit addresses: retargeting +
+-- door-knock gold, and the seed data for the rep "knock map."
+create table if not exists public.roof_checks (
+  id          uuid primary key default gen_random_uuid(),
+  created_at  timestamptz not null default now(),
+  address     text,
+  matched     text,
+  lat         double precision,
+  lon         double precision,
+  hail_count  int,
+  largest_in  double precision,
+  qualifies   boolean,
+  tool        text
+);
+
+create index if not exists roof_checks_created_at_idx on public.roof_checks (created_at desc);
+
+alter table public.roof_checks enable row level security;
+-- No policies = service-role only, same as leads.

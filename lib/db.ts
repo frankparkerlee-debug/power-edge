@@ -146,6 +146,35 @@ export async function markIntakeNurtured(id: string, stage: number) {
   }
 }
 
+export type RoofCheck = {
+  address?: string;
+  matched?: string;
+  lat?: number;
+  lon?: number;
+  hail_count?: number;
+  largest_in?: number;
+  qualifies?: boolean;
+  tool?: string;
+};
+
+/** Log an address someone ran through the claim/storm check — even if they
+ *  never submit. Best-effort; never throws or blocks the check itself. */
+export async function insertRoofCheck(check: RoofCheck) {
+  if (!dbEnabled()) return;
+  try {
+    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/roof_checks`, {
+      method: "POST",
+      headers: { ...authHeaders(), Prefer: "return=minimal" },
+      body: JSON.stringify(check),
+    });
+    if (!res.ok) {
+      console.error("[db] insertRoofCheck non-2xx", res.status, await res.text());
+    }
+  } catch (err) {
+    console.error("[db] insertRoofCheck failed", err);
+  }
+}
+
 export async function listLeads(limit = 300): Promise<LeadRow[]> {
   if (!dbEnabled()) return [];
   try {

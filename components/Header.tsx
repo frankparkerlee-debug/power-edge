@@ -54,7 +54,7 @@ export function Header() {
             Text us
           </a>
           <Link
-            href="/contact"
+            href="/free-inspection"
             className="rounded-md bg-bolt px-4 py-2 font-display text-sm font-bold text-ink transition-colors hover:bg-bolt-hi"
           >
             Free inspection
@@ -110,7 +110,7 @@ export function Header() {
                 </a>
               </div>
               <Link
-                href="/contact"
+                href="/free-inspection"
                 onClick={() => setOpen(false)}
                 className="block rounded-md bg-bolt px-4 py-3 text-center font-display font-bold text-ink"
               >

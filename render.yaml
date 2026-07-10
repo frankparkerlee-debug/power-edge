@@ -26,3 +26,20 @@ services:
       # Optional: Jobber lead push (wire the mutation in app/api/lead/route.ts).
       - key: JOBBER_API_TOKEN
         sync: false
+
+  # Hourly claim-prep drop-off nurture — without this the "claims made easy" /
+  # "you're almost there" emails never send. If the Blueprint isn't synced,
+  # create it in the dashboard instead: New → Cron Job, schedule `0 * * * *`,
+  # the command below, and ADMIN_TOKEN set to the web service's value.
+  - type: cron
+    name: poweredge-claim-nurture
+    runtime: node
+    region: oregon
+    plan: starter
+    branch: main
+    schedule: "0 * * * *"
+    buildCommand: "true"
+    startCommand: 'curl -fsS -X POST https://poweredgetx.com/api/cron/claim-nurture -H "x-admin-token: $ADMIN_TOKEN"'
+    envVars:
+      - key: ADMIN_TOKEN
+        sync: false

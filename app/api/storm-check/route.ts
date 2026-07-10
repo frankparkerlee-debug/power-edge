@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { geocode } from "@/lib/geocode";
+import { insertRoofCheck } from "@/lib/db";
 
 /**
  * Storm check: given a street address, returns reported hail activity near it.
@@ -137,6 +138,21 @@ export async function POST(req: Request) {
     const largest = bySize[0] || null;
     const mostRecent = nearby[0] || null;
     const significantCount = nearby.filter((n) => n.size >= 1).length;
+
+    // Log the check — even if this visitor never submits the form, the address
+    // itself is a self-identified storm-hit lead source (retargeting + knock
+    // map). Fire-and-forget; mirrors the client's qualifies rule.
+    void insertRoofCheck({
+      address,
+      matched: geo.matched || undefined,
+      lat: geo.lat,
+      lon: geo.lon,
+      hail_count: nearby.length,
+      largest_in: largest?.size,
+      qualifies:
+        nearby.length > 0 && ((largest?.size ?? 0) >= 1 || nearby.length >= 3),
+      tool: "storm-check",
+    });
 
     return NextResponse.json({
       ok: true,

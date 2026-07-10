@@ -185,6 +185,16 @@ export function FinancingPrequal() {
         <p className="mt-2 text-fg-inv-dim">
           We&apos;ll reach out to pre-qualify you and walk through your options.
         </p>
+        <a
+          href="/free-inspection"
+          className="mt-5 block w-full rounded-md bg-bolt px-6 py-4 text-center font-display text-base font-extrabold text-ink transition-colors hover:bg-bolt-hi"
+        >
+          Next step: book your free inspection →
+        </a>
+        <p className="mt-2 text-xs text-fg-inv-dim">
+          Financing covers the out-of-pocket — the inspection is what gets your
+          roof documented and scheduled.
+        </p>
       </div>
     );
   }
