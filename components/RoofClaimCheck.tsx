@@ -6,6 +6,7 @@ import { AddressAutocomplete } from "./AddressAutocomplete";
 import { HailMap } from "./HailMap";
 import { leadContext } from "@/lib/leadContext";
 import { track } from "@/lib/analytics";
+import { site } from "@/lib/site";
 import type { StormData } from "./StormReport";
 
 /**
@@ -71,6 +72,19 @@ export function RoofClaimCheck() {
         largest ? `, largest ${largest}″` : ""
       }`
     : "no strong hail reports in recent auto data";
+  const recentDate = (() => {
+    const iso = result?.mostRecent?.date;
+    if (!iso) return "";
+    try {
+      return new Date(iso).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+    } catch {
+      return "";
+    }
+  })();
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -171,7 +185,16 @@ export function RoofClaimCheck() {
             You&apos;re booked in.
           </h2>
           <p className="mt-2 text-fg-inv-dim">
-            We&apos;ll call you fast to lock in your free inspection.
+            We&apos;ll call or text you fast to lock in your free inspection.
+          </p>
+          <p className="mt-3 text-sm text-fg-inv-dim">
+            Want a head start?{" "}
+            <a href={site.textHref} className="font-bold text-bolt hover:text-bolt-hi">
+              Text photos
+            </a>{" "}
+            of your roof, ceiling stains, or gutters to{" "}
+            <strong className="text-fg-inv">{site.textNumber}</strong> and
+            we&apos;ll look before we arrive.
           </p>
         </div>
         <a
@@ -195,44 +218,50 @@ export function RoofClaimCheck() {
   // ---- RESULT + CAPTURE (form-forward) ------------------------------------
   return (
     <div className="rounded-card border border-line bg-ink-2 p-6 shadow-2xl sm:p-8">
-      {/* Compact verdict */}
+      {/* Compact verdict — evidence-first, cite the record */}
       {qualifies ? (
         <div className="rounded-card border-2 border-bolt bg-bolt/10 p-4 sm:p-5">
           <div className="text-xs font-bold uppercase tracking-wider text-bolt">
-            Good news — you likely qualify
+            On the record — you likely qualify
           </div>
           <p className="mt-1 font-display text-2xl font-bold leading-tight text-fg-inv">
-            {largest ? `${largest}″ hail hit near you.` : "Hail hit near you."}{" "}
-            Your roof may already be damaged.
+            {largest ? `${largest}″ hail is on record near you.` : "Hail is on record near you."}
           </p>
           <p className="mt-1.5 text-sm text-fg-inv-dim">
-            {hailSummary} — enough to file. Book your free inspection now, before
-            it gets worse.
+            National Weather Service reports show {hailSummary}
+            {recentDate ? `, most recently ${recentDate}` : ""} — the same
+            records adjusters use, and enough to be worth filing. A free
+            inspection confirms what&apos;s actually on your roof.
           </p>
         </div>
       ) : (
         <div className="rounded-card border border-line bg-ink p-4 sm:p-5">
           <div className="text-xs font-bold uppercase tracking-wider text-fg-inv-dim">
-            Worth a free look
+            Straight answer
           </div>
           <p className="mt-1 font-display text-2xl font-bold leading-tight text-fg-inv">
-            Damage hides — until it&apos;s a leak.
+            The storm record near you is thin.
           </p>
           <p className="mt-1.5 text-sm text-fg-inv-dim">
-            North Texas gets pounded and hail damage is nearly invisible from the
-            ground. A free inspection is the only way to know for sure.
+            We could pressure you anyway — we won&apos;t. But reports are sparse
+            and hail damage is nearly invisible from the ground, so if
+            you&apos;ve noticed leaks, stains, or missing shingles, a free look
+            settles it. If your roof is fine, we&apos;ll tell you exactly that.
           </p>
         </div>
       )}
 
-      {/* One imminent-threat urgency line */}
-      <div className="mt-3 flex items-start gap-2 rounded-md border border-ember/40 bg-ember/10 px-4 py-3 text-sm font-semibold text-fg-inv">
-        <span aria-hidden>⚡</span>
-        <span>
-          Act before the next storm makes it worse — every round of hail and rain
-          deepens the damage and makes it harder to claim.
-        </span>
-      </div>
+      {/* Factual urgency — tied to the record, not generic fear */}
+      {qualifies && (
+        <div className="mt-3 flex items-start gap-2 rounded-md border border-ember/40 bg-ember/10 px-4 py-3 text-sm font-semibold text-fg-inv">
+          <span aria-hidden>⚡</span>
+          <span>
+            {recentDate
+              ? `That hail has been sitting on your roof since ${recentDate} — every rain since works it deeper, and the next storm makes it harder to prove which one did it.`
+              : "Hail damage sits invisible until it leaks — and every storm on top makes it harder to prove which one did it."}
+          </span>
+        </div>
+      )}
 
       {/* THE FORM — right here, no endless scroll */}
       <div className="mt-5">

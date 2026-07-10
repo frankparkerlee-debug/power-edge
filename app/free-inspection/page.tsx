@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Container, Kicker, SectionHeading } from "@/components/ui";
 import { LeadForm } from "@/components/LeadForm";
+import { HonestyStandard } from "@/components/HonestyStandard";
 import { FaqSection } from "@/components/service-blocks";
 import { Reviews } from "@/components/Reviews";
 import { CtaBand } from "@/components/blocks";
@@ -165,34 +166,7 @@ export default function FreeInspectionPage() {
         </Container>
       </section>
 
-      {/* Trust */}
-      <section className="bg-ink py-16 sm:py-20">
-        <Container className="grid gap-8 md:grid-cols-3">
-          {[
-            {
-              h: "Verify us before you trust us",
-              p: `Texas doesn't license roofers — anyone can knock. We're a licensed electrical contractor, TECL #${site.teclLicense}, on the state's public portal.`,
-            },
-            {
-              h: "One accountable crew",
-              p: "Your roof and the electrical it touches — including solar detach & reset — handled in-house. No finger-pointing.",
-            },
-            {
-              h: "Rated by North Texas homeowners",
-              p: `${site.googleRating}★ across ${site.googleReviewCount} Google reviews, with the capacity to actually show up this week.`,
-            },
-          ].map((c) => (
-            <div key={c.h}>
-              <h3 className="font-display text-lg font-bold text-fg-inv">
-                {c.h}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-fg-inv-dim">
-                {c.p}
-              </p>
-            </div>
-          ))}
-        </Container>
-      </section>
+      <HonestyStandard />
 
       <Reviews />
 

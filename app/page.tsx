@@ -203,6 +203,10 @@ function Wedge() {
       h: "Built to show up, not just sign you up",
       p: "Four crews and 15 electricians mean we have the capacity to actually be there this week — not in a month.",
     },
+    {
+      h: "We'll tell you if your roof is fine",
+      p: "No manufactured damage, no scare inspections. If there's nothing worth claiming, you'll hear exactly that — in writing.",
+    },
   ];
   return (
     <section className="bg-paper py-20 sm:py-28">

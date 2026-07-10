@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Container, Kicker, SectionHeading } from "@/components/ui";
 import { RoofClaimCheck } from "@/components/RoofClaimCheck";
+import { HonestyStandard } from "@/components/HonestyStandard";
 import { ServiceTrustBar, FaqSection } from "@/components/service-blocks";
 import { Reviews } from "@/components/Reviews";
 import { CtaBand } from "@/components/blocks";
@@ -105,6 +106,8 @@ export default function RoofClaimCheckPage() {
       </section>
 
       <ServiceTrustBar />
+
+      <HonestyStandard />
 
       {/* How it works */}
       <section className="bg-paper py-20 sm:py-28">
