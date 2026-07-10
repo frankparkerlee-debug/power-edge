@@ -425,6 +425,13 @@ function StormRestoration() {
           <div className="mt-8">
             <Button href="/roof-claim-check">Check if I have a claim →</Button>
           </div>
+          <p className="mt-4 text-sm text-fg-inv-dim">
+            Already know you&apos;re filing?{" "}
+            <a href="/claim-prep" className="font-bold text-bolt hover:text-bolt-hi">
+              Self-serve: prep your claim →
+            </a>{" "}
+            and we&apos;ll show up ready to fix it.
+          </p>
         </div>
 
         <div className="lg:sticky lg:top-24">

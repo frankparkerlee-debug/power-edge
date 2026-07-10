@@ -67,8 +67,9 @@ export function LeadForm({
           Got it — we&apos;ll be in touch fast.
         </h3>
         <p className="mt-2 text-fg-inv-dim">
-          A real person from our team will call you, usually within the hour
-          during business hours.
+          A real person will call or text you fast — usually within the hour
+          during business hours. And you&apos;ll get a straight answer: if your
+          roof is fine, we&apos;ll tell you that in writing.
         </p>
       </div>
     );

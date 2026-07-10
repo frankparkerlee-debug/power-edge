@@ -51,8 +51,8 @@ const steps = [
     p: "Measurements and a written damage assessment your adjuster can work from.",
   },
   {
-    h: "You get a straight answer",
-    p: "Real damage worth claiming, or a clean bill of health. No pressure either way.",
+    h: "You get a straight answer — in writing",
+    p: "Real damage worth claiming, or a clean bill of health. Either way it's documented, and there's no pressure.",
   },
 ];
 
