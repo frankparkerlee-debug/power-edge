@@ -58,12 +58,12 @@ export default function RoofClaimCheckPage() {
       {/* Hero + tool */}
       <section className="relative overflow-hidden bg-ink py-14 sm:py-20">
         <Image
-          src="/photos/hail-shingles.jpg"
+          src="/photos/hail-shingles-v2.jpg"
           alt="Hailstones on asphalt roof shingles after a Texas storm"
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-75 brightness-125"
+          className="object-cover opacity-85"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/60 to-ink/15" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink to-transparent" />
