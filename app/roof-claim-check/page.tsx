@@ -58,7 +58,7 @@ export default function RoofClaimCheckPage() {
       {/* Hero + tool */}
       <section className="relative overflow-hidden bg-ink py-14 sm:py-20">
         <Image
-          src="/photos/hail-shingles-v2.jpg"
+          src="/photos/hail-shingles-v3.jpg"
           alt="Hailstones on asphalt roof shingles after a Texas storm"
           fill
           priority
