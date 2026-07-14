@@ -167,17 +167,17 @@ export function RoofClaimCheck() {
           Data from NWS / NOAA storm reports. This isn&apos;t an insurance
           determination — a free inspection confirms it.
         </p>
-        <a
-          href="/claim-prep"
-          className="mt-4 flex items-center justify-between rounded-md border border-line bg-ink px-4 py-3 text-sm text-fg-inv-dim transition-colors hover:border-bolt hover:text-fg-inv"
-        >
-          <span>
-            Already know you&apos;re filing?{" "}
-            <strong className="text-fg-inv">Self-serve: prep your claim now</strong>{" "}
-            and we&apos;ll show up ready to fix it.
-          </span>
-          <span className="font-display font-bold text-bolt">→</span>
-        </a>
+        <div className="mt-4">
+          <p className="text-center text-xs text-fg-inv-dim">
+            Already know you&apos;re filing?
+          </p>
+          <a
+            href="/claim-prep"
+            className="mt-2 block w-full rounded-md border-2 border-bolt px-6 py-3.5 text-center font-display text-base font-bold text-bolt transition-colors hover:bg-bolt/10"
+          >
+            Start my claim →
+          </a>
+        </div>
       </div>
     );
   }
