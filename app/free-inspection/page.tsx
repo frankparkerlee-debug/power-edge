@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Container, Kicker, SectionHeading } from "@/components/ui";
 import { LeadForm } from "@/components/LeadForm";
@@ -94,6 +95,21 @@ export default function FreeInspectionPage() {
                 </li>
               ))}
             </ul>
+
+            <div className="relative mt-8 hidden aspect-[16/9] overflow-hidden rounded-card border border-line lg:block">
+              <Image
+                src="/photos/new-roof.jpg"
+                alt="New architectural shingle roof on a Texas brick home"
+                fill
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 to-transparent px-4 pb-3 pt-10">
+                <p className="text-sm font-semibold text-fg-inv">
+                  The standard we hand back — done right, documented, warrantied.
+                </p>
+              </div>
+            </div>
 
             <p className="mt-8 text-sm text-fg-inv-dim">
               Licensed Texas contractor · TECL #{site.teclLicense} ·{" "}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button, Container, Kicker, SectionHeading, Stars } from "@/components/ui";
 import { LeadForm } from "@/components/LeadForm";
 import { Reviews } from "@/components/Reviews";
@@ -37,8 +38,18 @@ export default function Home() {
 function Hero() {
   return (
     <section className="relative overflow-hidden bg-ink">
-      <div className="absolute inset-0 grid-texture opacity-70" />
-      <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-bolt/20 blur-[120px]" />
+      <Image
+        src="/photos/storm-home.jpg"
+        alt="Texas brick home under a dark storm sky"
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover object-[center_35%] opacity-50"
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/80 to-ink/30" />
+      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink to-transparent" />
+      <div className="absolute inset-0 grid-texture opacity-40" />
+      <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-bolt/10 blur-[120px]" />
       <Container className="relative grid items-center gap-14 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
         <div>
           <Kicker className="mb-6">

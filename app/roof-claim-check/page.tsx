@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Container, Kicker, SectionHeading } from "@/components/ui";
 import { RoofClaimCheck } from "@/components/RoofClaimCheck";
 import { HonestyStandard } from "@/components/HonestyStandard";
@@ -56,7 +57,17 @@ export default function RoofClaimCheckPage() {
     <>
       {/* Hero + tool */}
       <section className="relative overflow-hidden bg-ink py-14 sm:py-20">
-        <div className="absolute inset-0 grid-texture opacity-60" />
+        <Image
+          src="/photos/hail-shingles.jpg"
+          alt="Hailstones on asphalt roof shingles after a Texas storm"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover opacity-30"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/50" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink to-transparent" />
+        <div className="absolute inset-0 grid-texture opacity-40" />
         <div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-ember/15 blur-[120px]" />
         <Container className="relative flex flex-col-reverse gap-10 lg:grid lg:grid-cols-[1fr_0.95fr] lg:items-start lg:gap-12">
           <div className="lg:pt-6">
