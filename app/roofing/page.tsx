@@ -17,9 +17,9 @@ const service = getService("roofing")!;
 const content = getServiceContent("roofing")!;
 
 export const metadata: Metadata = {
-  title: "Roofing Contractor in DFW — Repair, Replace & Storm Claims",
+  title: "Roofing Company in Dallas–Fort Worth — Roof Repair, Replacement & Storm Claims",
   description:
-    "Residential and commercial roofing across Dallas–Fort Worth. Free inspections, fast replacements, and hail/insurance claims documented by the book. Backed by a licensed electrical contractor.",
+    "DFW roofing company for roof repair, full replacement, and hail/storm insurance claims — documented by the book. Free inspections, deductible financing from $250 down, licensed & verifiable (TECL #39773).",
 };
 
 export default function RoofingPage() {

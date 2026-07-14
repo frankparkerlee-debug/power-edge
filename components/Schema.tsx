@@ -24,7 +24,7 @@ export function Schema() {
     email: site.email,
     priceRange: "$$",
     description:
-      "Licensed Texas electrical contractor and roofing company serving the Dallas–Fort Worth metroplex.",
+      "Storm-first Dallas–Fort Worth roofing company: roof repair, replacement, hail/storm insurance-claim documentation, deductible financing, and in-house solar detach & reset — backed by a licensed Texas electrical contractor.",
     areaServed: cities.map((c) => ({
       "@type": "City",
       name: `${c.name}, TX`,
@@ -56,10 +56,11 @@ export function Schema() {
     knowsAbout: [
       "Roof replacement",
       "Roof repair",
-      "Storm and hail damage",
-      "Electrical panel upgrades",
-      "EV charger installation",
-      "Solar panel repair",
+      "Hail damage roof insurance claims",
+      "Storm damage restoration",
+      "Roof deductible financing",
+      "Solar panel detach and reset",
+      "Commercial roofing and electrical",
     ],
   };
 
