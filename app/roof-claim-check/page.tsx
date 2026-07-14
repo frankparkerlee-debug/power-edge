@@ -63,7 +63,7 @@ export default function RoofClaimCheckPage() {
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-65"
+          className="object-cover opacity-75 brightness-125"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/60 to-ink/15" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink to-transparent" />
