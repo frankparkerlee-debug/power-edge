@@ -39,7 +39,7 @@ function Hero() {
   return (
     <section className="relative overflow-hidden bg-ink">
       <Image
-        src="/photos/storm-home.jpg"
+        src="/photos/storm-home-v2.jpg"
         alt="Texas brick home under a dark storm sky"
         fill
         priority
