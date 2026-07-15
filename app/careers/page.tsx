@@ -48,7 +48,7 @@ const perks = [
   },
   {
     h: "A company that delivers",
-    p: `Licensed (TECL #${site.teclLicense}), ${site.googleRating}★ rated, four crews and the capacity for ~${site.capacity.roofsPerMonth} roofs a month. Your customers get taken care of — your reputation is safe.`,
+    p: `Licensed & insured, ${site.googleRating}★ rated, four crews and the capacity for ~${site.capacity.roofsPerMonth} roofs a month. Your customers get taken care of — your reputation is safe.`,
   },
   {
     h: "Real earnings, real ceiling",
@@ -101,7 +101,7 @@ export default function CareersPage() {
 
             <p className="mt-8 text-sm text-fg-inv-dim">
               Hiring reps + a sales manager across the DFW metroplex. Licensed
-              Texas contractor · TECL #{site.teclLicense} · {site.googleRating}★.
+              Licensed & insured · {site.googleRating}★ on Google.
             </p>
           </div>
 
