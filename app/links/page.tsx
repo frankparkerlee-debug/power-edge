@@ -18,7 +18,7 @@ const links = [
     primary: true,
   },
   {
-    label: "Finance your deductible — from $250 down",
+    label: "Can't front your deductible? Start for $250 down",
     sub: "See your monthly payment in seconds",
     href: `/financing?${UTM}`,
     primary: true,
