@@ -146,8 +146,10 @@ export async function POST(req: Request) {
     // 1b. Kick off the CUSTOMER nurture funnel — a designed 5-touch sequence
     // (instant confirmation + 4 follow-ups) enqueued via Resend scheduled
     // sends. Speed-to-lead + nurture in one shot, no DB/cron. Only when they
-    // gave an email.
-    if (lead.email) {
+    // gave an email. Rep applications are NOT homeowners — they get the team
+    // notification only, never the storm-claim nurture or marketing audience.
+    const isRepApplication = /sales rep application/i.test(lead.service);
+    if (lead.email && !isRepApplication) {
       const financing = /financ|stuck|out-of-pocket|out of pocket/i.test(
         lead.service,
       );
