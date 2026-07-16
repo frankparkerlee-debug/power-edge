@@ -100,7 +100,7 @@ export default function CareersPage() {
             </ul>
 
             <p className="mt-8 text-sm text-fg-inv-dim">
-              Hiring reps + a sales manager across the DFW metroplex. Licensed
+              Hiring reps + a sales manager across the DFW metroplex.
               Licensed & insured · {site.googleRating}★ on Google.
             </p>
           </div>
