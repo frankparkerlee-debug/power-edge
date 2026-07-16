@@ -4,54 +4,45 @@ All roads lead to **poweredgetx.com/careers** (60-second apply, no résumé). Ap
 ---
 
 ## 1. Indeed / ZipRecruiter job post (full description)
-**Title:** Storm Restoration Sales Representative (Roofing) — Commission + Per-Roof Floor, Paid Weekly · Dallas–Fort Worth
-
+**Title:** Roofing Sales Representative, Storm Restoration (Weekly Pay)
+**Pay field:** $60,000 - $180,000 a year · Commission
 **Job type:** Contract (1099) · Commission · Full-time or part-time
-**Location:** Dallas–Fort Worth metroplex (field-based)
+**Location:** Dallas-Fort Worth metroplex (field-based)
 
-### About PowerEdge
-PowerEdge is a licensed and insured Dallas–Fort Worth storm-restoration roofing company. We run four crews with capacity for roughly 100 roofs a month, hold a 4.7★ Google rating, and we're built around one idea most storm shops only pretend to have: do it by the book and tell homeowners the truth — even when the truth is "your roof is fine." That reputation is what keeps your customers referring and your commissions clean.
+### The deal, up front
+You already know how to sell roofs. The question is whether your shop deserves you.
+
+- **50% of gross profit on self-generated deals.** A typical DFW roof pays **$4,000-$6,500 in commission**
+- **Paid weekly, with a large share at the FIRST insurance check.** Not months later at completion
+- **A floor on every approved roof.** A win never pays zero, even on a thin deal
+- **Protected territory.** We don't stack ten reps on the same street
+- **Ground floor.** We're scaling fast; early reps pick territory and inherit the org chart
+
+Reps closing 2-3 roofs a month typically earn **$9K-$13K/month**; storm-season producers run well beyond that. We'll walk you through the full deal math in the interview. Bring a calculator and pressure-test us.
+
+### Why experienced reps move here
+- **Supplementing is dialed in.** Your commission is 50% of gross profit, so we fight for the full scope, not the adjuster's first offer. Starter, drip edge, I&W, ridge vent: documented and claimed. Your GP reflects the real job.
+- **Builds run fast.** Four crews, capacity for ~100 roofs a month. Fast builds mean your back-half commissions release fast. No six-month pipeline of unpaid deals.
+- **No games.** No house-account skimming, no surprise chargebacks, no "the check's coming." Weekly means weekly.
+- **The tech actually closes.** Storm data maps hail by street so you knock where damage is. At the door: a 60-second claim check against NWS records, satellite roof measurement, and deductible financing from $250 down to kill the cost objection.
+- **Inbound feeds producers.** Website, ads, and tracked door-hanger QR codes route leads to reps who close.
+- **A brand that protects your name.** Licensed and insured, 4.7★ on Google, and known for telling homeowners the truth, even "your roof is fine." Your customers refer; your commissions stay clean.
 
 ### The role
-You'll be the face of PowerEdge in storm-hit neighborhoods across DFW. This is door-to-door storm restoration sales: finding hail-damaged roofs, getting homeowners a free documented inspection, and walking them from "I think we might have damage" to a signed agreement and a scheduled build.
-
-**What you'll actually do day to day:**
-- Canvass storm-affected neighborhoods — guided by our storm data, which maps recent hail by street so you knock where the damage is, not blind
-- Run our claim-check tool at the door (60-second address lookup against National Weather Service records) to open honest conversations
-- Schedule and attend free roof inspections; learn to identify and photograph hail/wind damage (we train you)
-- Walk homeowners through the insurance-claim process the legal way — we document and coordinate with adjusters; we never pose as adjusters or touch deductibles
-- Present financing options (deductible plans from $250 down) to remove the cost objection
-- Attend adjuster meetings on your deals; keep your pipeline updated; follow your jobs through build day and ask for referrals
-
-### The comp — with the actual math
-Commission-only, 1099, paid weekly. We pay a large share at the **first insurance check**, not months later at completion.
-
-- **Self-generated deals: up to 50% of gross profit.** On a typical DFW roof, that's roughly **$2,500–$3,000 per roof**.
-- **Company-provided leads: ~30% of gross profit** (website, ads, and inbound calls get distributed to producing reps).
-- **Per-roof floor:** every approved roof pays you a minimum floor — a thin-margin deal never pays zero.
-- **Realistic production:** new reps closing 2–3 roofs/month typically earn **$5,000–$9,000/month**; experienced storm reps closing 5–8/month earn **$15,000–$25,000/month**. Big hail months run higher. (Earnings depend entirely on production — this is commission sales, and we won't pretend otherwise.)
-- **Experienced closers:** ask about ramp support while you build your pipeline.
-
-### What we give you (that other shops don't)
-- **Storm-targeted knock lists** — NWS hail data mapped to neighborhoods, refreshed after every storm
-- **Protected territory** — you're not fighting ten teammates for the same street
-- **Closing tech** — instant claim-check, satellite roof measurement, and deductible financing from $250 down, all working at the doorstep
-- **Inbound leads** — our website, ads, and tracked door-hanger QR codes feed producing reps
-- **A company that delivers** — four crews, fast builds, honest inspections; your reputation is safe attaching your name to us
-- **Print & digital tools** — professional door hangers, yard signs, and a personal tracked QR code so your knocks credit to you
+Door-to-door storm restoration sales across DFW: canvass storm-hit neighborhoods guided by our hail data, open honest conversations with the claim-check tool, run free documented inspections (we train the roof work), walk homeowners through the claim the legal way (we document and coordinate with adjusters, never pose as them, never touch deductibles), present financing, attend adjuster meetings on your deals, and follow your builds through to referrals.
 
 ### What it takes
-- Grit. This is door-knocking in Texas weather — the money is real and so is the work
-- Reliable vehicle, smartphone, and the ability to climb a ladder after training
-- Coachable and honest — our brand is "no games," and we protect it
-- Sales or D2D experience helps and earns more, but we train hungry rookies
+- Grit. This is door-knocking in Texas weather; the money is real and so is the work
+- Reliable vehicle, smartphone, able to climb a ladder after training
+- Coachable and honest. The "no games" brand is the moat, and we protect it
+- Strong salespeople only. Roofing, solar, pest, alarms, car lots — if you can close, we'll teach the roofing. Experience moves you to the front of the line
 - 18+, authorized to work in the US
 
 ### Growth
-Top producers move into **team lead / sales manager** roles with base pay + override on team gross profit. We're new and scaling fast — the org chart is genuinely open. If you already lead a team, come talk to us about bringing it.
+Top producers move into **team lead / sales manager** with base pay plus an override on team gross profit. Already running a team? Bring it. Let's talk overrides and territory before the org chart fills.
 
 ### How to apply
-60 seconds, no résumé: **poweredgetx.com/careers** — or text **469-277-9594**.
+60 seconds, no résumé: **poweredgetx.com/careers** or text **469-277-9594**. We respond fast; come ready to talk numbers.
 
 *PowerEdge (Power Edge, LLC) engages sales representatives as independent contractors (1099). Commission figures are illustrative examples, not guarantees; earnings depend on individual production. We consider all applicants without regard to race, color, religion, sex, national origin, age, disability, or veteran status.*
 
@@ -62,7 +53,7 @@ DFW closers 👋 — new storm-restoration shop, built by people tired of watchi
 
 Here's the deal: paid at the FIRST check (weekly), a floor on every approved roof so you're never at zero on a win, storm-data that tells you which streets just took hail, protected turf, and closing tools (instant claim check + satellite measurement + deductible financing) that do half the objection-handling for you.
 
-Licensed & insured, 4.7★ on Google, real production capacity (4 crews, ~100 roofs/month). Commission-only 1099. Vets and hungry rookies both welcome — leaders who bring a team, let's talk overrides.
+Licensed & insured, 4.7★ on Google, real production capacity (4 crews, ~100 roofs/month). Commission-only 1099. Strong closers only — leaders who bring a team, let's talk overrides.
 
 60-second apply: poweredgetx.com/careers
 

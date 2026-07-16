@@ -29,7 +29,7 @@ const faqs = [
   },
   {
     q: "Do I need experience?",
-    a: "Experience helps and pays more, but we'll train hungry closers. What matters most: work ethic, a vehicle, and the drive to knock.",
+    a: "This is a job for strong salespeople. Roofing experience is a plus but not required — if you've closed in solar, pest, alarms, or anywhere else, we'll teach you the roofing fast. Sales experience moves you to the front of the line.",
   },
 ];
 
