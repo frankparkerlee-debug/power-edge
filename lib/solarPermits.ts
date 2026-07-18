@@ -211,7 +211,7 @@ async function runFortWorthSync(): Promise<{ fetched: number; ok: boolean }> {
 
 export type SolarZipCount = { zip: string; permits: number };
 
-export async function solarPermitStats(): Promise<{
+export async function solarPermitStats(zipLimit = 12): Promise<{
   total: number;
   topZips: SolarZipCount[];
 }> {
@@ -221,7 +221,7 @@ export async function solarPermitStats(): Promise<{
   try {
     const [total, zipRes] = await Promise.all([
       storedCount(),
-      fetch(`${process.env.SUPABASE_URL}/rest/v1/solar_permit_zip_counts?limit=12`, {
+      fetch(`${process.env.SUPABASE_URL}/rest/v1/solar_permit_zip_counts?limit=${zipLimit}`, {
         headers: dbHeaders(),
         cache: "no-store",
       }),

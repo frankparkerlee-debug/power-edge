@@ -2,6 +2,25 @@ import type { Metadata } from "next";
 import { listStormEvents, type StormEventRow } from "@/lib/storm";
 import { solarPermitStats } from "@/lib/solarPermits";
 import { listRoofChecks } from "@/lib/db";
+import { StormDashboard, type DashSolarZip } from "@/components/StormDashboard";
+
+/** Zip centroid via zippopotam.us (free, cached 30 days) — powers the solar
+ *  density overlay without geocoding 20k permit addresses. */
+async function zipCentroid(zip: string): Promise<{ lat: number; lon: number } | null> {
+  try {
+    const res = await fetch(`https://api.zippopotam.us/us/${zip}`, {
+      next: { revalidate: 2592000 },
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!res.ok) return null;
+    const j = await res.json();
+    const p = j?.places?.[0];
+    if (!p) return null;
+    return { lat: parseFloat(p.latitude), lon: parseFloat(p.longitude) };
+  } catch {
+    return null;
+  }
+}
 
 // Storm engine command view — NOT indexed. Gated by ?key=<ADMIN_TOKEN>, same
 // pattern as /admin/leads. Shows storm days (100mi radius), the solar-permit
@@ -95,9 +114,12 @@ export default async function AdminStormsPage({
 
   const [events, solar, checks] = await Promise.all([
     listStormEvents(90),
-    solarPermitStats(),
+    solarPermitStats(40),
     listRoofChecks(40),
   ]);
+  const solarZips: DashSolarZip[] = await Promise.all(
+    solar.topZips.map(async (z) => ({ ...z, ...((await zipCentroid(z.zip)) ?? { lat: null, lon: null }) })),
+  );
   const days = clusterByDay(events);
   const bigDays = days.filter((d) => d.maxHail >= 1 || d.maxGust >= 60 || d.windDmg >= 3);
 
@@ -130,6 +152,26 @@ export default async function AdminStormsPage({
             </div>
           ))}
         </div>
+
+        {/* Map + timeline */}
+        <StormDashboard
+          events={events.map((e) => ({
+            valid_at: e.valid_at,
+            type: e.type,
+            magnitude: e.magnitude,
+            city: e.city,
+            lat: e.lat,
+            lon: e.lon,
+          }))}
+          solarZips={solarZips}
+          checks={checks.map((c) => ({
+            address: c.address || c.matched || "",
+            lat: c.lat ?? null,
+            lon: c.lon ?? null,
+            largest_in: c.largest_in ?? null,
+            qualifies: c.qualifies ?? null,
+          }))}
+        />
 
         {/* Storm days */}
         <h2 className="mt-10 font-display text-lg font-extrabold">Storm days</h2>
