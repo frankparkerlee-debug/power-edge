@@ -175,6 +175,25 @@ export async function insertRoofCheck(check: RoofCheck) {
   }
 }
 
+export type RoofCheckRow = RoofCheck & { id: string; created_at: string };
+
+/** Recent addresses people ran through the claim check — the knock-gold list
+ *  (self-identified storm-anxious homeowners, even if they never submitted). */
+export async function listRoofChecks(limit = 50): Promise<RoofCheckRow[]> {
+  if (!dbEnabled()) return [];
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/roof_checks?select=*&order=created_at.desc&limit=${limit}`,
+      { headers: authHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    return (await res.json()) as RoofCheckRow[];
+  } catch (err) {
+    console.error("[db] listRoofChecks failed", err);
+    return [];
+  }
+}
+
 export async function listLeads(limit = 300): Promise<LeadRow[]> {
   if (!dbEnabled()) return [];
   try {

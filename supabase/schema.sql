@@ -51,3 +51,78 @@ create index if not exists roof_checks_created_at_idx on public.roof_checks (cre
 
 alter table public.roof_checks enable row level security;
 -- No policies = service-role only, same as leads.
+
+-- ============================ STORM ENGINE (2026-07-18) ============================
+-- Applied to the live project via the Supabase MCP migration "storm_engine_phase1".
+-- Kept here for repo parity.
+
+create table if not exists public.storm_events (
+  id          uuid primary key default gen_random_uuid(),
+  created_at  timestamptz not null default now(),
+  valid_at    timestamptz not null,
+  type        text not null,             -- hail | wind_gust | wind_dmg
+  magnitude   double precision,          -- inches (hail) or mph (wind_gust)
+  city        text,
+  county      text,
+  lat         double precision not null,
+  lon         double precision not null,
+  wfo         text,
+  remark      text
+);
+create unique index if not exists storm_events_dedupe_idx
+  on public.storm_events (valid_at, type, lat, lon);
+create index if not exists storm_events_valid_at_idx on public.storm_events (valid_at desc);
+alter table public.storm_events enable row level security;
+
+create table if not exists public.solar_permits (
+  id            uuid primary key default gen_random_uuid(),
+  created_at    timestamptz not null default now(),
+  permit_number text not null unique,
+  source        text,
+  address       text,
+  zip           text,
+  city          text,
+  issued_date   text,
+  contractor    text,
+  land_use      text,
+  description   text,
+  lat           double precision,
+  lon           double precision
+);
+create index if not exists solar_permits_zip_idx on public.solar_permits (zip);
+alter table public.solar_permits enable row level security;
+
+create or replace view public.solar_permit_zip_counts as
+  select zip, count(*)::int as permits
+  from public.solar_permits
+  where zip is not null and zip <> ''
+  group by zip
+  order by permits desc;
+
+create table if not exists public.storm_targets (
+  id            uuid primary key default gen_random_uuid(),
+  created_at    timestamptz not null default now(),
+  storm_date    date,
+  address       text,
+  city          text,
+  zip           text,
+  lat           double precision,
+  lon           double precision,
+  owner_name    text,
+  owner_mailing text,
+  phone         text,
+  phone2        text,
+  property_type text,
+  year_built    int,
+  value         numeric,
+  hail_size_in  double precision,
+  wind_mph      double precision,
+  solar         boolean default false,
+  solar_source  text,
+  score         double precision,
+  status        text default 'new',
+  hubspot_id    text,
+  notes         text
+);
+create index if not exists storm_targets_storm_date_idx on public.storm_targets (storm_date desc, score desc);
+alter table public.storm_targets enable row level security;

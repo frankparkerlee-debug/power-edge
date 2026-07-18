@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { site } from "@/lib/site";
 import { enqueueLeadSequence } from "@/lib/emails";
 import { insertLead } from "@/lib/db";
+import { pushLeadToHubspot } from "@/lib/hubspot";
 
 /**
  * Lead handler.
@@ -100,6 +101,20 @@ export async function POST(req: Request) {
     utm_campaign: lead.utm_campaign,
     gclid: lead.gclid,
   });
+
+  // --- 0b. HubSpot CRM (env-gated HUBSPOT_ACCESS_TOKEN) — fire-and-forget so
+  // the form returns fast; contact + timeline note. Best-effort, never throws.
+  void pushLeadToHubspot({
+    name: lead.name,
+    phone: lead.phone,
+    email: lead.email,
+    address: lead.address,
+    zip: lead.zip,
+    service: lead.service,
+    message: lead.message,
+    solar: lead.solar === "yes",
+    source: sourceLine,
+  }).catch(() => {});
 
   // --- 1. Email notification -------------------------------------------------
   const resendKey = process.env.RESEND_API_KEY;

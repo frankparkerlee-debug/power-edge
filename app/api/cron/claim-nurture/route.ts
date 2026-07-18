@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { listIncompleteIntakes, markIntakeNurtured } from "@/lib/db";
 import { sendClaimNurture } from "@/lib/emails";
+import { runStormWatch } from "@/lib/storm";
+import { runSolarPermitSync } from "@/lib/solarPermits";
 
 /**
  * Drop-off nurture for claim-prep. Run on a schedule (e.g. hourly) — a Render
@@ -20,9 +22,16 @@ export async function POST(req: Request) {
   if (!process.env.ADMIN_TOKEN || token !== process.env.ADMIN_TOKEN) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Storm engine piggybacks on this hourly cron (also serves as the Supabase
+  // free-tier keep-alive). Ingest is best-effort and never blocks nurture.
+  const storm = await runStormWatch();
+  // Solar permit sync once a day, in the quiet ~3am CT hour.
+  const solar =
+    new Date().getUTCHours() === 9 ? await runSolarPermitSync() : { fetched: 0, ok: true };
+
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
-    return NextResponse.json({ error: "RESEND_API_KEY not set" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "RESEND_API_KEY not set", storm, solar });
   }
 
   const now = Date.now();
@@ -51,5 +60,5 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, candidates: candidates.length, touch1, touch2 });
+  return NextResponse.json({ ok: true, candidates: candidates.length, touch1, touch2, storm, solar });
 }
