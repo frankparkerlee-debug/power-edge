@@ -126,3 +126,5 @@ create table if not exists public.storm_targets (
 );
 create index if not exists storm_targets_storm_date_idx on public.storm_targets (storm_date desc, score desc);
 alter table public.storm_targets enable row level security;
+
+alter table public.solar_permits add column if not exists owner text;

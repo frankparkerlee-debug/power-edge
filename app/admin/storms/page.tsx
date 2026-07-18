@@ -122,7 +122,7 @@ export default async function AdminStormsPage({
             { n: days.length, label: "storm days" },
             { n: bigDays.length, label: "major days (1″+ hail / 60+ gust)" },
             { n: events.filter((e) => e.type === "hail").length, label: "hail reports" },
-            { n: solar.total, label: "solar homes on file (Dallas permits)" },
+            { n: solar.total, label: "solar homes on file (Dallas + Fort Worth permits)" },
           ].map((c) => (
             <div key={c.label} className="rounded-lg border border-gray-200 p-4">
               <div className="font-display text-2xl font-extrabold">{c.n}</div>
