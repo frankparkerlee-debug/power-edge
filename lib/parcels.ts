@@ -1,0 +1,267 @@
+// Parcel intersect — turns storm reports into named homeowners at addresses.
+//
+// County connectors (public appraisal-district GIS services, one per county):
+//   • Dallas County — DCAD ParcelPublishing layer (verified): owner, site
+//     address, MAILING address (absentee/investor detection), use type, year
+//     built, assessed value. Web-Mercator envelope queries, max 4000/query.
+//   • Tarrant/Collin/Denton — no public spatial layer found (TAD publishes
+//     downloadable rolls instead → future one-time load into Supabase).
+//
+// Flow (generateStormTargets): hail ≥1″ reports for a day → envelope around
+// each (sized by hail) → parcel query → dedupe → solar-permit match → score →
+// insert storm_targets (idempotent on storm_date+address).
+
+import { haversineMi } from "@/lib/storm";
+
+const DCAD_QUERY =
+  "https://maps.dcad.org/prdwa/rest/services/Property/ParcelQuery/MapServer/4/query";
+const PER_EVENT_CAP = 150;
+const EVENTS_PER_RUN = 40;
+
+export type ParcelHit = {
+  owner_name: string;
+  address: string;
+  city: string;
+  zip: string;
+  mailing: string;
+  property_type: string;
+  year_built: number | null;
+  value: number | null;
+};
+
+function webMercator(lat: number, lon: number) {
+  const x = (lon * 20037508.34) / 180;
+  const y =
+    ((Math.log(Math.tan(((90 + lat) * Math.PI) / 360)) / (Math.PI / 180)) * 20037508.34) / 180;
+  return { x, y };
+}
+
+/** Envelope half-side in miles, scaled by hail size. */
+function reachMi(size: number) {
+  if (size >= 2) return 0.9;
+  if (size >= 1.5) return 0.7;
+  return 0.5;
+}
+
+const clean = (s: unknown) => String(s ?? "").trim();
+
+async function queryDallasParcels(
+  lat: number,
+  lon: number,
+  halfMi: number,
+): Promise<ParcelHit[]> {
+  const dLat = halfMi / 69;
+  const dLon = halfMi / (69 * Math.cos((lat * Math.PI) / 180));
+  const a = webMercator(lat - dLat, lon - dLon);
+  const b = webMercator(lat + dLat, lon + dLon);
+  const params = new URLSearchParams({
+    geometry: `${a.x.toFixed(1)},${a.y.toFixed(1)},${b.x.toFixed(1)},${b.y.toFixed(1)}`,
+    geometryType: "esriGeometryEnvelope",
+    inSR: "102100",
+    where: "SITEADDRESS IS NOT NULL",
+    outFields:
+      "OWNERNME1,SITEADDRESS,PSTLADDRESS,PSTLCITY,PSTLZIP5,USEDSCRP,RESYRBLT,CNTASSDVAL,CVTTXDSCRP",
+    returnGeometry: "false",
+    resultRecordCount: String(PER_EVENT_CAP),
+    f: "json",
+  });
+  const res = await fetch(`${DCAD_QUERY}?${params}`, {
+    signal: AbortSignal.timeout(25000),
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  const feats = (data?.features ?? []) as Array<{ attributes: Record<string, unknown> }>;
+  return feats
+    .map(({ attributes: at }) => ({
+      owner_name: clean(at.OWNERNME1),
+      address: clean(at.SITEADDRESS).toUpperCase(),
+      city: clean(at.CVTTXDSCRP) || "Dallas County",
+      zip: clean(at.PSTLZIP5),
+      mailing: `${clean(at.PSTLADDRESS)}, ${clean(at.PSTLCITY)}`.toUpperCase(),
+      property_type: clean(at.USEDSCRP) || "Unknown",
+      year_built: typeof at.RESYRBLT === "number" && at.RESYRBLT > 1800 ? at.RESYRBLT : null,
+      value: typeof at.CNTASSDVAL === "number" ? at.CNTASSDVAL : null,
+    }))
+    .filter((p) => p.owner_name && p.address);
+}
+
+function dbHeaders() {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
+  return {
+    apikey: key,
+    Authorization: `Bearer ${key}`,
+    "Content-Type": "application/json",
+  };
+}
+
+const normAddr = (s: string) => s.toUpperCase().replace(/[^A-Z0-9 ]/g, "").replace(/\s+/g, " ").trim();
+
+/** Solar-permit addresses in the given zips (normalized set for matching). */
+async function solarAddressSet(zips: string[]): Promise<Set<string>> {
+  const out = new Set<string>();
+  if (zips.length === 0) return out;
+  const list = zips
+    .filter((z) => /^\d{5}$/.test(z))
+    .slice(0, 40)
+    .join(",");
+  if (!list) return out;
+  const res = await fetch(
+    `${process.env.SUPABASE_URL}/rest/v1/solar_permits?select=address&zip=in.(${list})&limit=8000`,
+    { headers: dbHeaders(), cache: "no-store" },
+  );
+  if (!res.ok) return out;
+  const rows = (await res.json()) as Array<{ address: string }>;
+  for (const r of rows) if (r.address) out.add(normAddr(r.address));
+  return out;
+}
+
+/** Street-number+name portion differs between situs and mailing → absentee. */
+function isAbsentee(address: string, mailing: string) {
+  const a = normAddr(address);
+  const m = normAddr(mailing);
+  if (!a || !m) return false;
+  return !m.startsWith(a.split(" ").slice(0, 2).join(" "));
+}
+
+export async function generateStormTargets(
+  dateISO: string,
+): Promise<{ date: string; events: number; targets: number; solar: number; ok: boolean }> {
+  const url = process.env.SUPABASE_URL;
+  if (!url || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return { date: dateISO, events: 0, targets: 0, solar: 0, ok: false };
+  }
+  try {
+    // Hail ≥1″ that day.
+    const res = await fetch(
+      `${url}/rest/v1/storm_events?select=lat,lon,magnitude&type=eq.hail&magnitude=gte.1&valid_at=gte.${dateISO}T00:00:00Z&valid_at=lt.${dateISO}T23:59:59Z&order=magnitude.desc&limit=200`,
+      { headers: dbHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return { date: dateISO, events: 0, targets: 0, solar: 0, ok: false };
+    const all = (await res.json()) as Array<{ lat: number; lon: number; magnitude: number }>;
+
+    // Drop reports within 1mi of an already-kept (larger) one — one query per cell.
+    const kept: typeof all = [];
+    for (const e of all) {
+      if (!kept.some((k) => haversineMi(k.lat, k.lon, e.lat, e.lon) < 1)) kept.push(e);
+      if (kept.length >= EVENTS_PER_RUN) break;
+    }
+
+    // Parcel queries (throttled, sequential — be polite to DCAD).
+    const byAddr = new Map<string, ParcelHit & { hail: number }>();
+    for (const e of kept) {
+      const parcels = await queryDallasParcels(e.lat, e.lon, reachMi(e.magnitude));
+      for (const p of parcels) {
+        const k = normAddr(p.address);
+        const prev = byAddr.get(k);
+        if (!prev || e.magnitude > prev.hail) byAddr.set(k, { ...p, hail: e.magnitude });
+      }
+    }
+    if (byAddr.size === 0) return { date: dateISO, events: kept.length, targets: 0, solar: 0, ok: true };
+
+    // Solar match by normalized address within the affected zips.
+    const zips = [...new Set([...byAddr.values()].map((p) => p.zip).filter(Boolean))];
+    const solarSet = await solarAddressSet(zips);
+
+    let solarCount = 0;
+    const rows = [...byAddr.entries()].map(([norm, p]) => {
+      const solar = solarSet.has(norm);
+      if (solar) solarCount++;
+      const absentee = isAbsentee(p.address, p.mailing);
+      const score =
+        p.hail * 2 +
+        (solar ? 3 : 0) +
+        (absentee ? 0 : 1) +
+        ((p.value ?? 0) >= 300000 ? 1 : 0) +
+        (p.year_built && p.year_built <= 2012 ? 0.5 : 0);
+      return {
+        storm_date: dateISO,
+        address: p.address,
+        city: p.city,
+        zip: p.zip,
+        owner_name: p.owner_name,
+        owner_mailing: p.mailing,
+        property_type: p.property_type,
+        year_built: p.year_built,
+        value: p.value,
+        hail_size_in: p.hail,
+        solar,
+        solar_source: solar ? "permit" : null,
+        absentee,
+        score: Math.round(score * 10) / 10,
+        status: "new",
+      };
+    });
+
+    // Insert in batches, idempotent on (storm_date, address).
+    for (let i = 0; i < rows.length; i += 500) {
+      const ins = await fetch(
+        `${url}/rest/v1/storm_targets?on_conflict=storm_date,address`,
+        {
+          method: "POST",
+          headers: { ...dbHeaders(), Prefer: "resolution=ignore-duplicates,return=minimal" },
+          body: JSON.stringify(rows.slice(i, i + 500)),
+        },
+      );
+      if (!ins.ok) {
+        console.error("[targets] insert non-2xx", ins.status, await ins.text());
+        return { date: dateISO, events: kept.length, targets: i, solar: solarCount, ok: false };
+      }
+    }
+    return { date: dateISO, events: kept.length, targets: rows.length, solar: solarCount, ok: true };
+  } catch (err) {
+    console.error("[targets] generate failed", err);
+    return { date: dateISO, events: 0, targets: 0, solar: 0, ok: false };
+  }
+}
+
+export type StormTargetRow = {
+  id: string;
+  storm_date: string;
+  address: string;
+  city: string;
+  zip: string;
+  owner_name: string;
+  owner_mailing: string;
+  property_type: string;
+  year_built: number | null;
+  value: number | null;
+  hail_size_in: number | null;
+  solar: boolean;
+  absentee: boolean;
+  score: number;
+  status: string;
+};
+
+export async function listStormTargets(date?: string, limit = 200): Promise<StormTargetRow[]> {
+  const url = process.env.SUPABASE_URL;
+  if (!url || !process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
+  const dateFilter = date ? `&storm_date=eq.${date}` : "";
+  try {
+    const res = await fetch(
+      `${url}/rest/v1/storm_targets?select=*${dateFilter}&order=score.desc.nullslast&limit=${limit}`,
+      { headers: dbHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    return (await res.json()) as StormTargetRow[];
+  } catch {
+    return [];
+  }
+}
+
+export async function listTargetDays(): Promise<
+  Array<{ storm_date: string; targets: number; solar_targets: number }>
+> {
+  const url = process.env.SUPABASE_URL;
+  if (!url || !process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
+  try {
+    const res = await fetch(`${url}/rest/v1/storm_target_days?limit=30`, {
+      headers: dbHeaders(),
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}

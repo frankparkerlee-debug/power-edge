@@ -128,3 +128,11 @@ create index if not exists storm_targets_storm_date_idx on public.storm_targets 
 alter table public.storm_targets enable row level security;
 
 alter table public.solar_permits add column if not exists owner text;
+
+-- Phase 1b additions (applied via MCP migration storm_targets_phase1b):
+alter table public.storm_targets add column if not exists absentee boolean default false;
+create unique index if not exists storm_targets_dedupe_idx on public.storm_targets (storm_date, address);
+create or replace view public.storm_target_days as
+  select storm_date, count(*)::int as targets,
+         count(*) filter (where solar)::int as solar_targets
+  from public.storm_targets group by storm_date order by storm_date desc;

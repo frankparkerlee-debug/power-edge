@@ -3,6 +3,7 @@ import { listStormEvents, type StormEventRow } from "@/lib/storm";
 import { solarPermitStats } from "@/lib/solarPermits";
 import { listRoofChecks } from "@/lib/db";
 import { StormDashboard, type DashSolarZip } from "@/components/StormDashboard";
+import { listStormTargets, listTargetDays } from "@/lib/parcels";
 
 /** Zip centroid via zippopotam.us (free, cached 30 days) — powers the solar
  *  density overlay without geocoding 20k permit addresses. */
@@ -78,9 +79,9 @@ function fmtDate(iso: string) {
 export default async function AdminStormsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ key?: string }>;
+  searchParams: Promise<{ key?: string; targets?: string }>;
 }) {
-  const { key } = await searchParams;
+  const { key, targets: targetDate } = await searchParams;
   const adminToken = process.env.ADMIN_TOKEN;
   const authed = !!adminToken && key === adminToken;
 
@@ -112,10 +113,14 @@ export default async function AdminStormsPage({
     );
   }
 
-  const [events, solar, checks] = await Promise.all([
+  const safeTargetDate =
+    targetDate && /^\d{4}-\d{2}-\d{2}$/.test(targetDate) ? targetDate : undefined;
+  const [events, solar, checks, targetDays, topTargets] = await Promise.all([
     listStormEvents(90),
     solarPermitStats(40),
     listRoofChecks(40),
+    listTargetDays(),
+    listStormTargets(safeTargetDate, 100),
   ]);
   const solarZips: DashSolarZip[] = await Promise.all(
     solar.topZips.map(async (z) => ({ ...z, ...((await zipCentroid(z.zip)) ?? { lat: null, lon: null }) })),
@@ -219,6 +224,98 @@ export default async function AdminStormsPage({
               </tbody>
             </table>
           </div>
+        )}
+
+        {/* Homeowner targets */}
+        <h2 className="mt-10 font-display text-lg font-extrabold">
+          Homeowner targets{" "}
+          <span className="text-sm font-semibold text-gray-500">
+            named owners at addresses inside the hail footprint · Dallas County (DCAD)
+          </span>
+        </h2>
+        {targetDays.length === 0 ? (
+          <p className="mt-2 text-gray-600">
+            None generated yet — auto-runs on fresh hail days, or backfill one:{" "}
+            <code className="rounded bg-gray-100 px-1">
+              POST /api/cron/storm-watch?targets=YYYY-MM-DD
+            </code>
+          </p>
+        ) : (
+          <>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <a
+                href={`/admin/storms?key=${key}`}
+                className={`rounded-full border px-3 py-1.5 text-sm ${
+                  !safeTargetDate ? "border-[#0b0e13] bg-[#0b0e13] text-white" : "border-gray-200"
+                }`}
+              >
+                All days
+              </a>
+              {targetDays.map((d) => (
+                <a
+                  key={d.storm_date}
+                  href={`/admin/storms?key=${key}&targets=${d.storm_date}`}
+                  className={`rounded-full border px-3 py-1.5 text-sm ${
+                    safeTargetDate === d.storm_date
+                      ? "border-[#0b0e13] bg-[#0b0e13] text-white"
+                      : "border-gray-200"
+                  }`}
+                >
+                  {d.storm_date} · {d.targets}
+                  {d.solar_targets ? ` (☀️${d.solar_targets})` : ""}
+                </a>
+              ))}
+              <a
+                href={`/api/admin/storm-targets?key=${key}${
+                  safeTargetDate ? `&date=${safeTargetDate}` : ""
+                }&format=csv`}
+                className="rounded-full bg-[#0c7a40] px-3 py-1.5 text-sm font-semibold text-white"
+              >
+                ⬇ CSV for dialer / skip trace
+              </a>
+            </div>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
+                    <th className="py-2 pr-4">Score</th>
+                    <th className="py-2 pr-4">Owner</th>
+                    <th className="py-2 pr-4">Address</th>
+                    <th className="py-2 pr-4">Zip</th>
+                    <th className="py-2 pr-4">Hail</th>
+                    <th className="py-2 pr-4">Solar</th>
+                    <th className="py-2 pr-4">Occupancy</th>
+                    <th className="py-2 pr-4">Built</th>
+                    <th className="py-2 pr-4">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topTargets.map((t) => (
+                    <tr key={t.id} className={`border-b border-gray-100 ${t.solar ? "bg-green-50" : ""}`}>
+                      <td className="py-2 pr-4 font-bold">{t.score}</td>
+                      <td className="py-2 pr-4 font-semibold">{t.owner_name}</td>
+                      <td className="whitespace-nowrap py-2 pr-4">{t.address}</td>
+                      <td className="py-2 pr-4">{t.zip}</td>
+                      <td className="py-2 pr-4">{t.hail_size_in ? `${t.hail_size_in}″` : "—"}</td>
+                      <td className="py-2 pr-4">{t.solar ? "☀️" : ""}</td>
+                      <td className="py-2 pr-4 text-gray-600">
+                        {t.absentee ? "Absentee/investor" : "Owner-occupied"}
+                      </td>
+                      <td className="py-2 pr-4">{t.year_built ?? "—"}</td>
+                      <td className="py-2 pr-4">
+                        {t.value ? `$${Math.round(t.value / 1000)}k` : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="mt-2 text-xs text-gray-500">
+                Top 100 by score{safeTargetDate ? ` for ${safeTargetDate}` : " across all storm days"}.
+                Full list in the CSV. Phones come from batch skip trace (upload the CSV to
+                BatchData or similar, then DNC-scrub before dialing).
+              </p>
+            </div>
+          </>
         )}
 
         {/* Solar inventory */}

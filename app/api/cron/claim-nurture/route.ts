@@ -3,6 +3,7 @@ import { listIncompleteIntakes, markIntakeNurtured } from "@/lib/db";
 import { sendClaimNurture } from "@/lib/emails";
 import { runStormWatch } from "@/lib/storm";
 import { runSolarPermitSync } from "@/lib/solarPermits";
+import { generateStormTargets } from "@/lib/parcels";
 
 /**
  * Drop-off nurture for claim-prep. Run on a schedule (e.g. hourly) — a Render
@@ -28,6 +29,12 @@ export async function POST(req: Request) {
   // Solar permit sync once a day, in the quiet ~3am CT hour.
   const solar =
     new Date().getUTCHours() === 9 ? await runSolarPermitSync() : { fetched: 0, ok: true };
+  // Auto-generate homeowner targets for fresh hail (today + yesterday UTC).
+  // Idempotent (unique storm_date+address), no-op on hail-free days.
+  const today = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 86400 * 1000).toISOString().slice(0, 10);
+  const targetsToday = await generateStormTargets(today);
+  const targetsYday = await generateStormTargets(yesterday);
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
@@ -60,5 +67,13 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, candidates: candidates.length, touch1, touch2, storm, solar });
+  return NextResponse.json({
+    ok: true,
+    candidates: candidates.length,
+    touch1,
+    touch2,
+    storm,
+    solar,
+    targets: { today: targetsToday, yesterday: targetsYday },
+  });
 }
