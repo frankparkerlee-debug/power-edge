@@ -14,8 +14,14 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const date = url.searchParams.get("date") || undefined;
+  const county = url.searchParams.get("county") || undefined;
+  const city = url.searchParams.get("city") || undefined;
   const targets = await listStormTargets(
-    date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : undefined,
+    {
+      date: date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : undefined,
+      county,
+      city,
+    },
     1000,
   );
 
@@ -25,7 +31,7 @@ export async function GET(req: Request) {
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const header =
-      "storm_date,score,owner_name,address,city,zip,owner_mailing,property_type,year_built,value,hail_size_in,solar,absentee,status";
+      "storm_date,score,owner_name,address,city,county,zip,owner_mailing,property_type,year_built,value,hail_size_in,solar,absentee,status";
     const lines = targets.map((t) =>
       [
         t.storm_date,
@@ -33,6 +39,7 @@ export async function GET(req: Request) {
         t.owner_name,
         t.address,
         t.city,
+        t.county,
         t.zip,
         t.owner_mailing,
         t.property_type,

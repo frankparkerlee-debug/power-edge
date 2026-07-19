@@ -3,7 +3,7 @@ import { listStormEvents, type StormEventRow } from "@/lib/storm";
 import { solarPermitStats } from "@/lib/solarPermits";
 import { listRoofChecks } from "@/lib/db";
 import { StormDashboard, type DashSolarZip } from "@/components/StormDashboard";
-import { listStormTargets, listTargetDays } from "@/lib/parcels";
+import { listStormTargets, listTargetDays, listTargetCities } from "@/lib/parcels";
 
 /** Zip centroid via zippopotam.us (free, cached 30 days) — powers the solar
  *  density overlay without geocoding 20k permit addresses. */
@@ -79,9 +79,9 @@ function fmtDate(iso: string) {
 export default async function AdminStormsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ key?: string; targets?: string }>;
+  searchParams: Promise<{ key?: string; targets?: string; county?: string; city?: string }>;
 }) {
-  const { key, targets: targetDate } = await searchParams;
+  const { key, targets: targetDate, county, city } = await searchParams;
   const adminToken = process.env.ADMIN_TOKEN;
   const authed = !!adminToken && key === adminToken;
 
@@ -115,12 +115,15 @@ export default async function AdminStormsPage({
 
   const safeTargetDate =
     targetDate && /^\d{4}-\d{2}-\d{2}$/.test(targetDate) ? targetDate : undefined;
-  const [events, solar, checks, targetDays, topTargets] = await Promise.all([
+  const safeCounty = county === "dallas" || county === "tarrant" ? county : undefined;
+  const safeCity = city && /^[A-Za-z .'-]{2,40}$/.test(city) ? city : undefined;
+  const [events, solar, checks, targetDays, topTargets, targetCities] = await Promise.all([
     listStormEvents(90),
     solarPermitStats(40),
     listRoofChecks(40),
     listTargetDays(),
-    listStormTargets(safeTargetDate, 100),
+    listStormTargets({ date: safeTargetDate, county: safeCounty, city: safeCity }, 100),
+    listTargetCities(),
   ]);
   const solarZips: DashSolarZip[] = await Promise.all(
     solar.topZips.map(async (z) => ({ ...z, ...((await zipCentroid(z.zip)) ?? { lat: null, lon: null }) })),
@@ -241,39 +244,95 @@ export default async function AdminStormsPage({
             </code>
           </p>
         ) : (
-          <>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <a
-                href={`/admin/storms?key=${key}`}
-                className={`rounded-full border px-3 py-1.5 text-sm ${
-                  !safeTargetDate ? "border-[#0b0e13] bg-[#0b0e13] text-white" : "border-gray-200"
-                }`}
-              >
-                All days
-              </a>
-              {targetDays.map((d) => (
-                <a
-                  key={d.storm_date}
-                  href={`/admin/storms?key=${key}&targets=${d.storm_date}`}
-                  className={`rounded-full border px-3 py-1.5 text-sm ${
-                    safeTargetDate === d.storm_date
-                      ? "border-[#0b0e13] bg-[#0b0e13] text-white"
-                      : "border-gray-200"
-                  }`}
-                >
-                  {d.storm_date} · {d.targets}
-                  {d.solar_targets ? ` (☀️${d.solar_targets})` : ""}
-                </a>
-              ))}
-              <a
-                href={`/api/admin/storm-targets?key=${key}${
-                  safeTargetDate ? `&date=${safeTargetDate}` : ""
-                }&format=csv`}
-                className="rounded-full bg-[#0c7a40] px-3 py-1.5 text-sm font-semibold text-white"
-              >
-                ⬇ CSV for dialer / skip trace
-              </a>
-            </div>
+          (() => {
+            const qs = (over: Record<string, string | undefined>) => {
+              const p = new URLSearchParams({ key: key || "" });
+              const merged = {
+                targets: safeTargetDate,
+                county: safeCounty,
+                city: safeCity,
+                ...over,
+              };
+              for (const [k, v] of Object.entries(merged)) if (v) p.set(k, v);
+              return `/admin/storms?${p}`;
+            };
+            const chip = (active: boolean) =>
+              `rounded-full border px-3 py-1.5 text-sm ${
+                active ? "border-[#0b0e13] bg-[#0b0e13] text-white" : "border-gray-200"
+              }`;
+            const cities = targetCities.filter((c) => !safeCounty || c.county === safeCounty);
+            return (
+              <>
+                {/* Day chips */}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <a href={qs({ targets: undefined })} className={chip(!safeTargetDate)}>
+                    All days
+                  </a>
+                  {targetDays.map((d) => (
+                    <a
+                      key={d.storm_date}
+                      href={qs({ targets: d.storm_date })}
+                      className={chip(safeTargetDate === d.storm_date)}
+                    >
+                      {d.storm_date} · {d.targets}
+                      {d.solar_targets ? ` (☀️${d.solar_targets})` : ""}
+                    </a>
+                  ))}
+                </div>
+                {/* County + city filters */}
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <a
+                    href={qs({ county: undefined, city: undefined })}
+                    className={chip(!safeCounty && !safeCity)}
+                  >
+                    All counties
+                  </a>
+                  <a
+                    href={qs({ county: "dallas", city: undefined })}
+                    className={chip(safeCounty === "dallas")}
+                  >
+                    Dallas County
+                  </a>
+                  <a
+                    href={qs({ county: "tarrant", city: undefined })}
+                    className={chip(safeCounty === "tarrant")}
+                  >
+                    Tarrant County
+                  </a>
+                  <form method="get" action="/admin/storms" className="flex items-center gap-1.5">
+                    <input type="hidden" name="key" value={key} />
+                    {safeTargetDate && <input type="hidden" name="targets" value={safeTargetDate} />}
+                    {safeCounty && <input type="hidden" name="county" value={safeCounty} />}
+                    <select
+                      name="city"
+                      defaultValue={safeCity || ""}
+                      className="rounded-md border border-gray-300 px-2.5 py-1.5 text-sm"
+                    >
+                      <option value="">All cities</option>
+                      {cities.map((c) => (
+                        <option key={`${c.county}-${c.city}`} value={c.city}>
+                          {c.city} ({c.targets})
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="submit"
+                      className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-semibold"
+                    >
+                      Filter
+                    </button>
+                  </form>
+                  <a
+                    href={`/api/admin/storm-targets?key=${key}${
+                      safeTargetDate ? `&date=${safeTargetDate}` : ""
+                    }${safeCounty ? `&county=${safeCounty}` : ""}${
+                      safeCity ? `&city=${encodeURIComponent(safeCity)}` : ""
+                    }&format=csv`}
+                    className="rounded-full bg-[#0c7a40] px-3 py-1.5 text-sm font-semibold text-white"
+                  >
+                    ⬇ CSV for dialer / skip trace
+                  </a>
+                </div>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full border-collapse text-sm">
                 <thead>
@@ -281,6 +340,7 @@ export default async function AdminStormsPage({
                     <th className="py-2 pr-4">Score</th>
                     <th className="py-2 pr-4">Owner</th>
                     <th className="py-2 pr-4">Address</th>
+                    <th className="py-2 pr-4">City</th>
                     <th className="py-2 pr-4">Zip</th>
                     <th className="py-2 pr-4">Hail</th>
                     <th className="py-2 pr-4">Solar</th>
@@ -295,6 +355,7 @@ export default async function AdminStormsPage({
                       <td className="py-2 pr-4 font-bold">{t.score}</td>
                       <td className="py-2 pr-4 font-semibold">{t.owner_name}</td>
                       <td className="whitespace-nowrap py-2 pr-4">{t.address}</td>
+                      <td className="whitespace-nowrap py-2 pr-4">{t.city || "—"}</td>
                       <td className="py-2 pr-4">{t.zip}</td>
                       <td className="py-2 pr-4">{t.hail_size_in ? `${t.hail_size_in}″` : "—"}</td>
                       <td className="py-2 pr-4">{t.solar ? "☀️" : ""}</td>
@@ -310,12 +371,15 @@ export default async function AdminStormsPage({
                 </tbody>
               </table>
               <p className="mt-2 text-xs text-gray-500">
-                Top 100 by score{safeTargetDate ? ` for ${safeTargetDate}` : " across all storm days"}.
-                Full list in the CSV. Phones come from batch skip trace (upload the CSV to
-                BatchData or similar, then DNC-scrub before dialing).
+                Top 100 by score{safeTargetDate ? ` for ${safeTargetDate}` : " across all storm days"}
+                {safeCounty ? ` · ${safeCounty === "dallas" ? "Dallas" : "Tarrant"} County` : ""}
+                {safeCity ? ` · ${safeCity}` : ""}. Full list in the CSV. Phones come from batch
+                skip trace (upload the CSV to BatchData or similar, then DNC-scrub before dialing).
               </p>
             </div>
           </>
+            );
+          })()
         )}
 
         {/* Solar inventory */}

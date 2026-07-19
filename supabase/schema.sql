@@ -147,3 +147,10 @@ create table if not exists public.tarrant_roll (
 );
 create index if not exists tarrant_roll_situs_norm_idx on public.tarrant_roll (situs_norm);
 alter table public.tarrant_roll enable row level security;
+
+-- County/city filters (applied via MCP migration storm_targets_county):
+alter table public.storm_targets add column if not exists county text;
+create index if not exists storm_targets_county_city_idx on public.storm_targets (county, city);
+create or replace view public.storm_target_cities as
+  select county, city, count(*)::int as targets from public.storm_targets
+  where city is not null and city <> '' group by county, city order by targets desc;

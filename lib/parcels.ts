@@ -31,6 +31,7 @@ export type ParcelHit = {
   property_type: string;
   year_built: number | null;
   value: number | null;
+  county: "dallas" | "tarrant";
 };
 
 function webMercator(lat: number, lon: number) {
@@ -86,6 +87,7 @@ async function queryDallasParcels(
       property_type: clean(at.USEDSCRP) || "Unknown",
       year_built: typeof at.RESYRBLT === "number" && at.RESYRBLT > 1800 ? at.RESYRBLT : null,
       value: typeof at.CNTASSDVAL === "number" ? at.CNTASSDVAL : null,
+      county: "dallas" as const,
     }))
     .filter((p) => p.owner_name && p.address);
 }
@@ -127,6 +129,7 @@ async function queryTarrantParcels(
       year_built:
         typeof at.yearbuilt === "number" && at.yearbuilt > 1800 ? at.yearbuilt : null,
       value: typeof at.totalmarketvalue === "number" ? at.totalmarketvalue : null,
+      county: "tarrant" as const,
     }))
     .filter((p) => p.owner_name && p.address);
 }
@@ -265,6 +268,7 @@ export async function generateStormTargets(
         storm_date: dateISO,
         address: p.address,
         city: p.city,
+        county: p.county,
         zip: p.zip,
         owner_name: p.owner_name,
         owner_mailing: p.mailing,
@@ -307,6 +311,7 @@ export type StormTargetRow = {
   storm_date: string;
   address: string;
   city: string;
+  county: string;
   zip: string;
   owner_name: string;
   owner_mailing: string;
@@ -320,17 +325,40 @@ export type StormTargetRow = {
   status: string;
 };
 
-export async function listStormTargets(date?: string, limit = 200): Promise<StormTargetRow[]> {
+export async function listStormTargets(
+  filters: { date?: string; county?: string; city?: string } = {},
+  limit = 200,
+): Promise<StormTargetRow[]> {
   const url = process.env.SUPABASE_URL;
   if (!url || !process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
-  const dateFilter = date ? `&storm_date=eq.${date}` : "";
+  let q = "";
+  if (filters.date) q += `&storm_date=eq.${filters.date}`;
+  if (filters.county) q += `&county=eq.${encodeURIComponent(filters.county)}`;
+  if (filters.city) q += `&city=eq.${encodeURIComponent(filters.city)}`;
   try {
     const res = await fetch(
-      `${url}/rest/v1/storm_targets?select=*${dateFilter}&order=score.desc.nullslast&limit=${limit}`,
+      `${url}/rest/v1/storm_targets?select=*${q}&order=score.desc.nullslast&limit=${limit}`,
       { headers: dbHeaders(), cache: "no-store" },
     );
     if (!res.ok) return [];
     return (await res.json()) as StormTargetRow[];
+  } catch {
+    return [];
+  }
+}
+
+export async function listTargetCities(): Promise<
+  Array<{ county: string; city: string; targets: number }>
+> {
+  const url = process.env.SUPABASE_URL;
+  if (!url || !process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
+  try {
+    const res = await fetch(`${url}/rest/v1/storm_target_cities?limit=60`, {
+      headers: dbHeaders(),
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    return await res.json();
   } catch {
     return [];
   }
