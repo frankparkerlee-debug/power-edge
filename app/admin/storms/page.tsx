@@ -115,7 +115,7 @@ export default async function AdminStormsPage({
 
   const safeTargetDate =
     targetDate && /^\d{4}-\d{2}-\d{2}$/.test(targetDate) ? targetDate : undefined;
-  const safeCounty = county === "dallas" || county === "tarrant" ? county : undefined;
+  const safeCounty = county && /^[a-z]{3,20}$/.test(county) ? county : undefined;
   const safeCity = city && /^[A-Za-z .'-]{2,40}$/.test(city) ? city : undefined;
   const [events, solar, checks, targetDays, topTargets, targetCities] = await Promise.all([
     listStormEvents(90),
@@ -279,7 +279,7 @@ export default async function AdminStormsPage({
                     </a>
                   ))}
                 </div>
-                {/* County + city filters */}
+                {/* County + city filters — counties appear once they have targets */}
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <a
                     href={qs({ county: undefined, city: undefined })}
@@ -287,18 +287,15 @@ export default async function AdminStormsPage({
                   >
                     All counties
                   </a>
-                  <a
-                    href={qs({ county: "dallas", city: undefined })}
-                    className={chip(safeCounty === "dallas")}
-                  >
-                    Dallas County
-                  </a>
-                  <a
-                    href={qs({ county: "tarrant", city: undefined })}
-                    className={chip(safeCounty === "tarrant")}
-                  >
-                    Tarrant County
-                  </a>
+                  {[...new Set(targetCities.map((c) => c.county).filter(Boolean))].sort().map((co) => (
+                    <a
+                      key={co}
+                      href={qs({ county: co, city: undefined })}
+                      className={chip(safeCounty === co)}
+                    >
+                      {co.charAt(0).toUpperCase() + co.slice(1)} County
+                    </a>
+                  ))}
                   <form method="get" action="/admin/storms" className="flex items-center gap-1.5">
                     <input type="hidden" name="key" value={key} />
                     {safeTargetDate && <input type="hidden" name="targets" value={safeTargetDate} />}
