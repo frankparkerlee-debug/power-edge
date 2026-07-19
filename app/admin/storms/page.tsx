@@ -230,7 +230,7 @@ export default async function AdminStormsPage({
         <h2 className="mt-10 font-display text-lg font-extrabold">
           Homeowner targets{" "}
           <span className="text-sm font-semibold text-gray-500">
-            named owners at addresses inside the hail footprint · Dallas County (DCAD)
+            named owners at addresses inside the hail footprint · Dallas (DCAD) + Tarrant (TAD)
           </span>
         </h2>
         {targetDays.length === 0 ? (

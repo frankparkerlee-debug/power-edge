@@ -4,8 +4,10 @@
 //   • Dallas County — DCAD ParcelPublishing layer (verified): owner, site
 //     address, MAILING address (absentee/investor detection), use type, year
 //     built, assessed value. Web-Mercator envelope queries, max 4000/query.
-//   • Tarrant/Collin/Denton — no public spatial layer found (TAD publishes
-//     downloadable rolls instead → future one-time load into Supabase).
+//   • Tarrant County — TAD's own FeatureServer (behind their Experience app)
+//     for geometry + owner/situs/year/value, ENRICHED from the TAD roll loaded
+//     into Supabase `tarrant_roll` (mailing address → absentee, city, zip).
+//   • Collin/Denton — no public spatial layer found yet.
 //
 // Flow (generateStormTargets): hail ≥1″ reports for a day → envelope around
 // each (sized by hail) → parcel query → dedupe → solar-permit match → score →
@@ -15,6 +17,8 @@ import { haversineMi } from "@/lib/storm";
 
 const DCAD_QUERY =
   "https://maps.dcad.org/prdwa/rest/services/Property/ParcelQuery/MapServer/4/query";
+const TAD_QUERY =
+  "https://tad.newedgeservices.com/arcgis/rest/services/Hosted/TADMap/FeatureServer/0/query";
 const PER_EVENT_CAP = 150;
 const EVENTS_PER_RUN = 40;
 
@@ -86,6 +90,47 @@ async function queryDallasParcels(
     .filter((p) => p.owner_name && p.address);
 }
 
+/** Tarrant County — TAD's FeatureServer accepts 4326 envelopes directly.
+ *  Gives owner + situs + year/value; mailing/city/zip come from tarrant_roll. */
+async function queryTarrantParcels(
+  lat: number,
+  lon: number,
+  halfMi: number,
+): Promise<ParcelHit[]> {
+  const dLat = halfMi / 69;
+  const dLon = halfMi / (69 * Math.cos((lat * Math.PI) / 180));
+  const params = new URLSearchParams({
+    geometry: `${(lon - dLon).toFixed(5)},${(lat - dLat).toFixed(5)},${(lon + dLon).toFixed(5)},${(lat + dLat).toFixed(5)}`,
+    geometryType: "esriGeometryEnvelope",
+    inSR: "4326",
+    where: "improvementmarketvalue > 25000 AND situsaddress IS NOT NULL",
+    outFields: "displayname,situsaddress,applclasscd,yearbuilt,totalmarketvalue",
+    returnGeometry: "false",
+    resultRecordCount: String(PER_EVENT_CAP),
+    f: "json",
+  });
+  const res = await fetch(`${TAD_QUERY}?${params}`, {
+    signal: AbortSignal.timeout(25000),
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  const feats = (data?.features ?? []) as Array<{ attributes: Record<string, unknown> }>;
+  return feats
+    .map(({ attributes: at }) => ({
+      owner_name: clean(at.displayname),
+      address: clean(at.situsaddress).toUpperCase(),
+      city: "", // enriched from tarrant_roll
+      zip: "",
+      mailing: "",
+      property_type: clean(at.applclasscd) || "Unknown",
+      year_built:
+        typeof at.yearbuilt === "number" && at.yearbuilt > 1800 ? at.yearbuilt : null,
+      value: typeof at.totalmarketvalue === "number" ? at.totalmarketvalue : null,
+    }))
+    .filter((p) => p.owner_name && p.address);
+}
+
 function dbHeaders() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
   return {
@@ -114,6 +159,42 @@ async function solarAddressSet(zips: string[]): Promise<Set<string>> {
   const rows = (await res.json()) as Array<{ address: string }>;
   for (const r of rows) if (r.address) out.add(normAddr(r.address));
   return out;
+}
+
+/** Fill Tarrant hits' mailing/city/zip from the loaded TAD roll (by situs). */
+async function enrichFromTarrantRoll(
+  hits: Array<ParcelHit & { hail: number }>,
+): Promise<void> {
+  const need = hits.filter((h) => !h.mailing);
+  for (let i = 0; i < need.length; i += 60) {
+    const chunk = need.slice(i, i + 60);
+    const list = chunk.map((h) => `"${normAddr(h.address).replace(/"/g, "")}"`).join(",");
+    try {
+      const res = await fetch(
+        `${process.env.SUPABASE_URL}/rest/v1/tarrant_roll?select=situs_norm,mail_addr,mail_citystate,mail_zip,city,bedrooms&situs_norm=in.(${encodeURIComponent(list)})`,
+        { headers: dbHeaders(), cache: "no-store" },
+      );
+      if (!res.ok) continue;
+      const rows = (await res.json()) as Array<{
+        situs_norm: string;
+        mail_addr: string;
+        mail_citystate: string;
+        mail_zip: string;
+        city: string;
+      }>;
+      const byNorm = new Map(rows.map((r) => [r.situs_norm, r]));
+      for (const h of chunk) {
+        const r = byNorm.get(normAddr(h.address));
+        if (!r) continue;
+        h.mailing = `${r.mail_addr}, ${r.mail_citystate} ${r.mail_zip}`.toUpperCase().trim();
+        h.city = r.city || h.city; // jurisdiction-derived — correct for the property
+        // Property zip is only knowable when the owner lives there (mail == situs).
+        if (normAddr(r.mail_addr) === normAddr(h.address)) h.zip = (r.mail_zip || "").slice(0, 5);
+      }
+    } catch {
+      /* enrichment is best-effort */
+    }
+  }
 }
 
 /** Street-number+name portion differs between situs and mailing → absentee. */
@@ -147,16 +228,22 @@ export async function generateStormTargets(
       if (kept.length >= EVENTS_PER_RUN) break;
     }
 
-    // Parcel queries (throttled, sequential — be polite to DCAD).
+    // Parcel queries (throttled, sequential — be polite to the county servers).
     const byAddr = new Map<string, ParcelHit & { hail: number }>();
     for (const e of kept) {
-      const parcels = await queryDallasParcels(e.lat, e.lon, reachMi(e.magnitude));
-      for (const p of parcels) {
+      const reach = reachMi(e.magnitude);
+      const [dallas, tarrant] = await Promise.all([
+        queryDallasParcels(e.lat, e.lon, reach),
+        queryTarrantParcels(e.lat, e.lon, reach),
+      ]);
+      for (const p of [...dallas, ...tarrant]) {
         const k = normAddr(p.address);
         const prev = byAddr.get(k);
         if (!prev || e.magnitude > prev.hail) byAddr.set(k, { ...p, hail: e.magnitude });
       }
     }
+    // Tarrant hits need mailing/city/zip from the loaded TAD roll.
+    await enrichFromTarrantRoll([...byAddr.values()]);
     if (byAddr.size === 0) return { date: dateISO, events: kept.length, targets: 0, solar: 0, ok: true };
 
     // Solar match by normalized address within the affected zips.

@@ -136,3 +136,14 @@ create or replace view public.storm_target_days as
   select storm_date, count(*)::int as targets,
          count(*) filter (where solar)::int as solar_targets
   from public.storm_targets group by storm_date order by storm_date desc;
+
+-- Tarrant roll (TAD PropertyData one-time load, 2026-07-19; applied via MCP):
+create table if not exists public.tarrant_roll (
+  account text primary key, pidn text, owner text, mail_addr text,
+  mail_citystate text, mail_zip text, situs text, situs_norm text,
+  class text, city text, land_value bigint, imp_value bigint,
+  total_value bigint, bedrooms int, year_built int, living_area numeric,
+  pool boolean default false
+);
+create index if not exists tarrant_roll_situs_norm_idx on public.tarrant_roll (situs_norm);
+alter table public.tarrant_roll enable row level security;
