@@ -31,7 +31,7 @@ export type ParcelHit = {
   property_type: string;
   year_built: number | null;
   value: number | null;
-  county: "dallas" | "tarrant";
+  county: string;
 };
 
 function webMercator(lat: number, lon: number) {
@@ -143,6 +143,51 @@ function dbHeaders() {
   };
 }
 
+/** Collin/Denton/Kaufman — TxGIO StratMap parcels loaded into our own DB with
+ *  centroids, so the "query" is a lat/lon box against Supabase. One call covers
+ *  every DB-loaded county at once. */
+async function queryDbParcels(lat: number, lon: number, halfMi: number): Promise<ParcelHit[]> {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
+  const dLat = halfMi / 69;
+  const dLon = halfMi / (69 * Math.cos((lat * Math.PI) / 180));
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/parcels?select=county,owner,situs,city,zip,mail,land_use,year_built,mkt_value` +
+        `&lat=gte.${(lat - dLat).toFixed(6)}&lat=lte.${(lat + dLat).toFixed(6)}` +
+        `&lon=gte.${(lon - dLon).toFixed(6)}&lon=lte.${(lon + dLon).toFixed(6)}` +
+        `&order=imp_value.desc.nullslast&limit=${PER_EVENT_CAP}`,
+      { headers: dbHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    const rows = (await res.json()) as Array<{
+      county: string;
+      owner: string;
+      situs: string;
+      city: string;
+      zip: string;
+      mail: string;
+      land_use: string;
+      year_built: number | null;
+      mkt_value: number | null;
+    }>;
+    return rows
+      .map((r) => ({
+        owner_name: (r.owner || "").trim(),
+        address: (r.situs || "").trim().toUpperCase(),
+        city: (r.city || "").trim(),
+        zip: (r.zip || "").trim().slice(0, 5),
+        mailing: (r.mail || "").trim().toUpperCase(),
+        property_type: (r.land_use || "Unknown").trim(),
+        year_built: r.year_built,
+        value: r.mkt_value,
+        county: r.county,
+      }))
+      .filter((p) => p.owner_name && p.address);
+  } catch {
+    return [];
+  }
+}
+
 const normAddr = (s: string) => s.toUpperCase().replace(/[^A-Z0-9 ]/g, "").replace(/\s+/g, " ").trim();
 
 /** Solar-permit addresses in the given zips (normalized set for matching). */
@@ -235,11 +280,12 @@ export async function generateStormTargets(
     const byAddr = new Map<string, ParcelHit & { hail: number }>();
     for (const e of kept) {
       const reach = reachMi(e.magnitude);
-      const [dallas, tarrant] = await Promise.all([
+      const [dallas, tarrant, dbCounties] = await Promise.all([
         queryDallasParcels(e.lat, e.lon, reach),
         queryTarrantParcels(e.lat, e.lon, reach),
+        queryDbParcels(e.lat, e.lon, reach),
       ]);
-      for (const p of [...dallas, ...tarrant]) {
+      for (const p of [...dallas, ...tarrant, ...dbCounties]) {
         const k = normAddr(p.address);
         const prev = byAddr.get(k);
         if (!prev || e.magnitude > prev.hail) byAddr.set(k, { ...p, hail: e.magnitude });

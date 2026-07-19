@@ -154,3 +154,15 @@ create index if not exists storm_targets_county_city_idx on public.storm_targets
 create or replace view public.storm_target_cities as
   select county, city, count(*)::int as targets from public.storm_targets
   where city is not null and city <> '' group by county, city order by targets desc;
+
+-- TxGIO StratMap county parcels w/ centroids (collin/denton/kaufman; MCP migration parcels_table):
+create table if not exists public.parcels (
+  id bigint generated always as identity primary key,
+  county text not null, prop_id text, owner text, situs text, situs_norm text,
+  city text, zip text, mail text, land_use text, year_built int,
+  imp_value bigint, mkt_value bigint, lat double precision, lon double precision,
+  unique (county, prop_id)
+);
+create index if not exists parcels_lat_lon_idx on public.parcels (lat, lon);
+create index if not exists parcels_county_idx on public.parcels (county);
+alter table public.parcels enable row level security;
