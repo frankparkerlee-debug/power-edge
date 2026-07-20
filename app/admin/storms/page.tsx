@@ -85,7 +85,7 @@ export default async function AdminStormsPage({
   const adminToken = process.env.ADMIN_TOKEN;
   const authed = !!adminToken && key === adminToken;
 
-  const wrap = "min-h-screen bg-white px-6 py-10 text-[#0b0e13]";
+  const wrap = "min-h-screen bg-white px-4 py-6 text-[#0b0e13] sm:px-6 sm:py-10";
 
   if (!authed) {
     return (
@@ -194,11 +194,11 @@ export default async function AdminStormsPage({
               <thead>
                 <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
                   <th className="py-2 pr-4">Date</th>
-                  <th className="py-2 pr-4">Hail reports</th>
+                  <th className="py-2 pr-4">Hail</th>
                   <th className="py-2 pr-4">Max hail</th>
-                  <th className="py-2 pr-4">Severe gusts</th>
-                  <th className="py-2 pr-4">Max gust</th>
-                  <th className="py-2 pr-4">Wind damage</th>
+                  <th className="hidden py-2 pr-4 sm:table-cell">Severe gusts</th>
+                  <th className="hidden py-2 pr-4 sm:table-cell">Max gust</th>
+                  <th className="hidden py-2 pr-4 sm:table-cell">Wind damage</th>
                   <th className="py-2 pr-4">Areas hit</th>
                 </tr>
               </thead>
@@ -217,9 +217,11 @@ export default async function AdminStormsPage({
                       <td className="py-2.5 pr-4 font-semibold">
                         {d.maxHail ? `${d.maxHail}″` : "—"}
                       </td>
-                      <td className="py-2.5 pr-4">{d.gusts || "—"}</td>
-                      <td className="py-2.5 pr-4">{d.maxGust ? `${d.maxGust} mph` : "—"}</td>
-                      <td className="py-2.5 pr-4">{d.windDmg || "—"}</td>
+                      <td className="hidden py-2.5 pr-4 sm:table-cell">{d.gusts || "—"}</td>
+                      <td className="hidden py-2.5 pr-4 sm:table-cell">
+                        {d.maxGust ? `${d.maxGust} mph` : "—"}
+                      </td>
+                      <td className="hidden py-2.5 pr-4 sm:table-cell">{d.windDmg || "—"}</td>
                       <td className="py-2.5 pr-4 text-gray-600">{d.cities.join(", ")}</td>
                     </tr>
                   );
@@ -330,7 +332,64 @@ export default async function AdminStormsPage({
                     ⬇ CSV for dialer / skip trace
                   </a>
                 </div>
-            <div className="mt-3 overflow-x-auto">
+            {/* Mobile: knock cards — tap address for directions */}
+            <div className="mt-3 space-y-2 md:hidden">
+              {topTargets.map((t) => (
+                <div
+                  key={t.id}
+                  className={`rounded-lg border p-3 ${
+                    t.solar ? "border-green-300 bg-green-50" : "border-gray-200"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="truncate font-semibold">{t.owner_name}</div>
+                      <a
+                        href={`https://maps.google.com/?q=${encodeURIComponent(
+                          `${t.address}, ${t.city || ""} TX ${t.zip || ""}`,
+                        )}`}
+                        target="_blank"
+                        rel="noopener"
+                        className="text-sm font-medium text-[#0c7a40] underline"
+                      >
+                        {t.address}
+                        {t.city ? `, ${t.city}` : ""} →
+                      </a>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-[#0b0e13] px-2.5 py-1 text-xs font-bold text-white">
+                      {t.score}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
+                    {t.hail_size_in ? (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-900">
+                        {t.hail_size_in}″ hail
+                      </span>
+                    ) : null}
+                    {t.solar && (
+                      <span className="rounded-full bg-green-200 px-2 py-0.5 font-semibold text-green-900">
+                        ☀️ solar
+                      </span>
+                    )}
+                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-700">
+                      {t.absentee ? "Absentee" : "Owner-occupied"}
+                    </span>
+                    {t.year_built ? (
+                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-700">
+                        built {t.year_built}
+                      </span>
+                    ) : null}
+                    {t.value ? (
+                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-700">
+                        ${Math.round(t.value / 1000)}k
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Desktop: full table */}
+            <div className="mt-3 hidden overflow-x-auto md:block">
               <table className="w-full border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
@@ -351,7 +410,18 @@ export default async function AdminStormsPage({
                     <tr key={t.id} className={`border-b border-gray-100 ${t.solar ? "bg-green-50" : ""}`}>
                       <td className="py-2 pr-4 font-bold">{t.score}</td>
                       <td className="py-2 pr-4 font-semibold">{t.owner_name}</td>
-                      <td className="whitespace-nowrap py-2 pr-4">{t.address}</td>
+                      <td className="whitespace-nowrap py-2 pr-4">
+                        <a
+                          href={`https://maps.google.com/?q=${encodeURIComponent(
+                            `${t.address}, ${t.city || ""} TX ${t.zip || ""}`,
+                          )}`}
+                          target="_blank"
+                          rel="noopener"
+                          className="text-[#0c7a40] hover:underline"
+                        >
+                          {t.address}
+                        </a>
+                      </td>
                       <td className="whitespace-nowrap py-2 pr-4">{t.city || "—"}</td>
                       <td className="py-2 pr-4">{t.zip}</td>
                       <td className="py-2 pr-4">{t.hail_size_in ? `${t.hail_size_in}″` : "—"}</td>
@@ -421,7 +491,7 @@ export default async function AdminStormsPage({
                 <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
                   <th className="py-2 pr-4">When</th>
                   <th className="py-2 pr-4">Address</th>
-                  <th className="py-2 pr-4">Hail events</th>
+                  <th className="hidden py-2 pr-4 sm:table-cell">Hail events</th>
                   <th className="py-2 pr-4">Largest</th>
                   <th className="py-2 pr-4">Verdict</th>
                 </tr>
@@ -436,7 +506,7 @@ export default async function AdminStormsPage({
                       })}
                     </td>
                     <td className="py-2.5 pr-4 font-semibold">{c.address || c.matched || "—"}</td>
-                    <td className="py-2.5 pr-4">{c.hail_count ?? "—"}</td>
+                    <td className="hidden py-2.5 pr-4 sm:table-cell">{c.hail_count ?? "—"}</td>
                     <td className="py-2.5 pr-4">{c.largest_in ? `${c.largest_in}″` : "—"}</td>
                     <td className="py-2.5 pr-4">
                       {c.qualifies ? (

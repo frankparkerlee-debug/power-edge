@@ -195,7 +195,7 @@ export function StormDashboard({
         <select
           value={day}
           onChange={(e) => setDay(e.target.value)}
-          className="rounded-md border border-gray-300 px-3 py-2"
+          className="w-full rounded-md border border-gray-300 px-3 py-2.5 sm:w-auto"
         >
           <option value="all">All storm days (90d)</option>
           {days.map((d) => (
@@ -220,7 +220,7 @@ export function StormDashboard({
           />
           Self-checked addresses
         </label>
-        <span className="ml-auto flex flex-wrap items-center gap-3 text-xs text-gray-500">
+        <span className="flex w-full flex-wrap items-center gap-3 text-xs text-gray-500 sm:ml-auto sm:w-auto">
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#ffc21f" }} />1″+ hail</span>
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#ff3b1f" }} />1.75″+</span>
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#3b82f6" }} />wind</span>
@@ -231,8 +231,7 @@ export function StormDashboard({
       {/* Map */}
       <div
         ref={ref}
-        className="mt-3 w-full overflow-hidden rounded-lg border border-gray-200"
-        style={{ height: 520 }}
+        className="mt-3 h-[400px] w-full overflow-hidden rounded-lg border border-gray-200 sm:h-[520px]"
         aria-label="Storm activity map"
       />
 
