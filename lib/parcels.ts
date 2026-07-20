@@ -36,13 +36,6 @@ export type ParcelHit = {
   lon: number | null;
 };
 
-/** Inverse Web-Mercator → lat/lon (for ArcGIS centroids). */
-function fromWebMercator(x: number, y: number) {
-  return {
-    lon: (x / 20037508.34) * 180,
-    lat: ((2 * Math.atan(Math.exp((y / 20037508.34) * Math.PI)) - Math.PI / 2) * 180) / Math.PI,
-  };
-}
 
 function webMercator(lat: number, lon: number) {
   const x = (lon * 20037508.34) / 180;
@@ -76,8 +69,11 @@ async function queryDallasParcels(
     where: "SITEADDRESS IS NOT NULL",
     outFields:
       "OWNERNME1,SITEADDRESS,PSTLADDRESS,PSTLCITY,PSTLZIP5,USEDSCRP,RESYRBLT,CNTASSDVAL,CVTTXDSCRP",
-    returnGeometry: "false",
-    returnCentroid: "true",
+    // DCAD's older MapServer ignores returnCentroid — pull simplified geometry
+    // (reprojected to 4326) and take the bbox center ourselves.
+    returnGeometry: "true",
+    outSR: "4326",
+    geometryPrecision: "5",
     resultRecordCount: String(PER_EVENT_CAP),
     f: "json",
   });
@@ -89,11 +85,21 @@ async function queryDallasParcels(
   const data = await res.json();
   const feats = (data?.features ?? []) as Array<{
     attributes: Record<string, unknown>;
-    centroid?: { x: number; y: number };
+    geometry?: { rings?: number[][][] };
   }>;
+  const ringCenter = (rings?: number[][][]) => {
+    const ring = rings?.[0];
+    if (!ring || ring.length === 0) return { lat: null, lon: null };
+    const xs = ring.map((p) => p[0]);
+    const ys = ring.map((p) => p[1]);
+    return {
+      lon: (Math.min(...xs) + Math.max(...xs)) / 2,
+      lat: (Math.min(...ys) + Math.max(...ys)) / 2,
+    };
+  };
   return feats
-    .map(({ attributes: at, centroid }) => ({
-      ...(centroid ? fromWebMercator(centroid.x, centroid.y) : { lat: null, lon: null }),
+    .map(({ attributes: at, geometry }) => ({
+      ...ringCenter(geometry?.rings),
       owner_name: clean(at.OWNERNME1),
       address: clean(at.SITEADDRESS).toUpperCase(),
       city: clean(at.CVTTXDSCRP) || "Dallas County",
