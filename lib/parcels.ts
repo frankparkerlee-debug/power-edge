@@ -32,7 +32,17 @@ export type ParcelHit = {
   year_built: number | null;
   value: number | null;
   county: string;
+  lat: number | null;
+  lon: number | null;
 };
+
+/** Inverse Web-Mercator → lat/lon (for ArcGIS centroids). */
+function fromWebMercator(x: number, y: number) {
+  return {
+    lon: (x / 20037508.34) * 180,
+    lat: ((2 * Math.atan(Math.exp((y / 20037508.34) * Math.PI)) - Math.PI / 2) * 180) / Math.PI,
+  };
+}
 
 function webMercator(lat: number, lon: number) {
   const x = (lon * 20037508.34) / 180;
@@ -67,6 +77,7 @@ async function queryDallasParcels(
     outFields:
       "OWNERNME1,SITEADDRESS,PSTLADDRESS,PSTLCITY,PSTLZIP5,USEDSCRP,RESYRBLT,CNTASSDVAL,CVTTXDSCRP",
     returnGeometry: "false",
+    returnCentroid: "true",
     resultRecordCount: String(PER_EVENT_CAP),
     f: "json",
   });
@@ -76,9 +87,13 @@ async function queryDallasParcels(
   });
   if (!res.ok) return [];
   const data = await res.json();
-  const feats = (data?.features ?? []) as Array<{ attributes: Record<string, unknown> }>;
+  const feats = (data?.features ?? []) as Array<{
+    attributes: Record<string, unknown>;
+    centroid?: { x: number; y: number };
+  }>;
   return feats
-    .map(({ attributes: at }) => ({
+    .map(({ attributes: at, centroid }) => ({
+      ...(centroid ? fromWebMercator(centroid.x, centroid.y) : { lat: null, lon: null }),
       owner_name: clean(at.OWNERNME1),
       address: clean(at.SITEADDRESS).toUpperCase(),
       city: clean(at.CVTTXDSCRP) || "Dallas County",
@@ -108,6 +123,8 @@ async function queryTarrantParcels(
     where: "improvementmarketvalue > 25000 AND situsaddress IS NOT NULL",
     outFields: "displayname,situsaddress,applclasscd,yearbuilt,totalmarketvalue",
     returnGeometry: "false",
+    returnCentroid: "true",
+    outSR: "4326",
     resultRecordCount: String(PER_EVENT_CAP),
     f: "json",
   });
@@ -117,9 +134,14 @@ async function queryTarrantParcels(
   });
   if (!res.ok) return [];
   const data = await res.json();
-  const feats = (data?.features ?? []) as Array<{ attributes: Record<string, unknown> }>;
+  const feats = (data?.features ?? []) as Array<{
+    attributes: Record<string, unknown>;
+    centroid?: { x: number; y: number };
+  }>;
   return feats
-    .map(({ attributes: at }) => ({
+    .map(({ attributes: at, centroid }) => ({
+      lat: centroid ? centroid.y : null,
+      lon: centroid ? centroid.x : null,
       owner_name: clean(at.displayname),
       address: clean(at.situsaddress).toUpperCase(),
       city: "", // enriched from tarrant_roll
@@ -152,7 +174,7 @@ async function queryDbParcels(lat: number, lon: number, halfMi: number): Promise
   const dLon = halfMi / (69 * Math.cos((lat * Math.PI) / 180));
   try {
     const res = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/parcels?select=county,owner,situs,city,zip,mail,land_use,year_built,mkt_value` +
+      `${process.env.SUPABASE_URL}/rest/v1/parcels?select=county,owner,situs,city,zip,mail,land_use,year_built,mkt_value,lat,lon` +
         `&lat=gte.${(lat - dLat).toFixed(6)}&lat=lte.${(lat + dLat).toFixed(6)}` +
         `&lon=gte.${(lon - dLon).toFixed(6)}&lon=lte.${(lon + dLon).toFixed(6)}` +
         `&order=imp_value.desc.nullslast&limit=${PER_EVENT_CAP}`,
@@ -169,9 +191,13 @@ async function queryDbParcels(lat: number, lon: number, halfMi: number): Promise
       land_use: string;
       year_built: number | null;
       mkt_value: number | null;
+      lat: number | null;
+      lon: number | null;
     }>;
     return rows
       .map((r) => ({
+        lat: r.lat,
+        lon: r.lon,
         owner_name: (r.owner || "").trim(),
         address: (r.situs || "").trim().toUpperCase(),
         city: (r.city || "").trim(),
@@ -316,6 +342,8 @@ export async function generateStormTargets(
         city: p.city,
         county: p.county,
         zip: p.zip,
+        lat: p.lat,
+        lon: p.lon,
         owner_name: p.owner_name,
         owner_mailing: p.mailing,
         property_type: p.property_type,
@@ -330,13 +358,16 @@ export async function generateStormTargets(
       };
     });
 
-    // Insert in batches, idempotent on (storm_date, address).
+    // Upsert in batches on (storm_date, address). merge-duplicates so re-runs
+    // refresh coords/scores. NOTE for the rep-view build: rep knock statuses
+    // must live in a separate table (or be excluded here) so regen never
+    // clobbers them — today status is always 'new' so merge is safe.
     for (let i = 0; i < rows.length; i += 500) {
       const ins = await fetch(
         `${url}/rest/v1/storm_targets?on_conflict=storm_date,address`,
         {
           method: "POST",
-          headers: { ...dbHeaders(), Prefer: "resolution=ignore-duplicates,return=minimal" },
+          headers: { ...dbHeaders(), Prefer: "resolution=merge-duplicates,return=minimal" },
           body: JSON.stringify(rows.slice(i, i + 500)),
         },
       );
@@ -369,16 +400,22 @@ export type StormTargetRow = {
   absentee: boolean;
   score: number;
   status: string;
+  lat: number | null;
+  lon: number | null;
 };
 
 export async function listStormTargets(
-  filters: { date?: string; county?: string; city?: string } = {},
+  filters: { date?: string; county?: string; city?: string; days?: number } = {},
   limit = 200,
 ): Promise<StormTargetRow[]> {
   const url = process.env.SUPABASE_URL;
   if (!url || !process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
   let q = "";
   if (filters.date) q += `&storm_date=eq.${filters.date}`;
+  else if (filters.days) {
+    const from = new Date(Date.now() - filters.days * 86400 * 1000).toISOString().slice(0, 10);
+    q += `&storm_date=gte.${from}`;
+  }
   if (filters.county) q += `&county=eq.${encodeURIComponent(filters.county)}`;
   if (filters.city) q += `&city=eq.${encodeURIComponent(filters.city)}`;
   try {

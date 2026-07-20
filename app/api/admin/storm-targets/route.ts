@@ -16,11 +16,13 @@ export async function GET(req: Request) {
   const date = url.searchParams.get("date") || undefined;
   const county = url.searchParams.get("county") || undefined;
   const city = url.searchParams.get("city") || undefined;
+  const daysRaw = url.searchParams.get("days") || "";
   const targets = await listStormTargets(
     {
       date: date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : undefined,
       county,
       city,
+      days: ["10", "30", "90"].includes(daysRaw) ? Number(daysRaw) : undefined,
     },
     1000,
   );

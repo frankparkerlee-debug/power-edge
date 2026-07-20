@@ -4,6 +4,7 @@ import { solarPermitStats } from "@/lib/solarPermits";
 import { listRoofChecks } from "@/lib/db";
 import { StormDashboard, type DashSolarZip } from "@/components/StormDashboard";
 import { listStormTargets, listTargetDays, listTargetCities } from "@/lib/parcels";
+import { TargetCards } from "@/components/TargetCards";
 
 /** Zip centroid via zippopotam.us (free, cached 30 days) — powers the solar
  *  density overlay without geocoding 20k permit addresses. */
@@ -79,9 +80,15 @@ function fmtDate(iso: string) {
 export default async function AdminStormsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ key?: string; targets?: string; county?: string; city?: string }>;
+  searchParams: Promise<{
+    key?: string;
+    targets?: string;
+    county?: string;
+    city?: string;
+    days?: string;
+  }>;
 }) {
-  const { key, targets: targetDate, county, city } = await searchParams;
+  const { key, targets: targetDate, county, city, days: daysParam } = await searchParams;
   const adminToken = process.env.ADMIN_TOKEN;
   const authed = !!adminToken && key === adminToken;
 
@@ -117,12 +124,16 @@ export default async function AdminStormsPage({
     targetDate && /^\d{4}-\d{2}-\d{2}$/.test(targetDate) ? targetDate : undefined;
   const safeCounty = county && /^[a-z]{3,20}$/.test(county) ? county : undefined;
   const safeCity = city && /^[A-Za-z .'-]{2,40}$/.test(city) ? city : undefined;
+  const safeDays = ["10", "30", "90"].includes(daysParam || "") ? Number(daysParam) : undefined;
   const [events, solar, checks, targetDays, topTargets, targetCities] = await Promise.all([
     listStormEvents(90),
     solarPermitStats(40),
     listRoofChecks(40),
     listTargetDays(),
-    listStormTargets({ date: safeTargetDate, county: safeCounty, city: safeCity }, 100),
+    listStormTargets(
+      { date: safeTargetDate, county: safeCounty, city: safeCity, days: safeDays },
+      300,
+    ),
     listTargetCities(),
   ]);
   const solarZips: DashSolarZip[] = await Promise.all(
@@ -181,8 +192,14 @@ export default async function AdminStormsPage({
           }))}
         />
 
-        {/* Storm days */}
-        <h2 className="mt-10 font-display text-lg font-extrabold">Storm days</h2>
+        {/* Storm days — collapsed by default so targets stay one thumb-scroll away */}
+        <details className="mt-10 rounded-lg border border-gray-200 p-4">
+          <summary className="cursor-pointer font-display text-lg font-extrabold">
+            Storm days{" "}
+            <span className="text-sm font-semibold text-gray-500">
+              ({days.length} in 90d — tap to expand)
+            </span>
+          </summary>
         {days.length === 0 ? (
           <p className="mt-2 text-gray-600">
             No storm reports ingested yet — the hourly cron fills this, or run a
@@ -230,6 +247,7 @@ export default async function AdminStormsPage({
             </table>
           </div>
         )}
+        </details>
 
         {/* Homeowner targets */}
         <h2 className="mt-10 font-display text-lg font-extrabold">
@@ -253,10 +271,11 @@ export default async function AdminStormsPage({
                 targets: safeTargetDate,
                 county: safeCounty,
                 city: safeCity,
+                days: safeDays ? String(safeDays) : undefined,
                 ...over,
               };
               for (const [k, v] of Object.entries(merged)) if (v) p.set(k, v);
-              return `/admin/storms?${p}`;
+              return `/admin/storms?${p}#targets`;
             };
             const chip = (active: boolean) =>
               `rounded-full border px-3 py-1.5 text-sm ${
@@ -265,8 +284,27 @@ export default async function AdminStormsPage({
             const cities = targetCities.filter((c) => !safeCounty || c.county === safeCounty);
             return (
               <>
-                {/* Day chips */}
-                <div className="mt-3 flex flex-wrap gap-2">
+                {/* Recency quick filter — the field-use default */}
+                <div id="targets" className="mt-3 flex flex-wrap gap-2">
+                  {[
+                    { d: "10", label: "Hit last 10 days" },
+                    { d: "30", label: "Last 30 days" },
+                    { d: "90", label: "Last 90 days" },
+                    { d: undefined, label: "All time" },
+                  ].map((o) => (
+                    <a
+                      key={o.label}
+                      href={qs({ days: o.d, targets: undefined })}
+                      className={`${chip(
+                        o.d ? safeDays === Number(o.d) && !safeTargetDate : !safeDays && !safeTargetDate,
+                      )} py-2`}
+                    >
+                      {o.label}
+                    </a>
+                  ))}
+                </div>
+                {/* Specific storm-day chips */}
+                <div className="mt-2 flex flex-wrap gap-2">
                   <a href={qs({ targets: undefined })} className={chip(!safeTargetDate)}>
                     All days
                   </a>
@@ -324,7 +362,7 @@ export default async function AdminStormsPage({
                   <a
                     href={`/api/admin/storm-targets?key=${key}${
                       safeTargetDate ? `&date=${safeTargetDate}` : ""
-                    }${safeCounty ? `&county=${safeCounty}` : ""}${
+                    }${safeDays && !safeTargetDate ? `&days=${safeDays}` : ""}${safeCounty ? `&county=${safeCounty}` : ""}${
                       safeCity ? `&city=${encodeURIComponent(safeCity)}` : ""
                     }&format=csv`}
                     className="rounded-full bg-[#0c7a40] px-3 py-1.5 text-sm font-semibold text-white"
@@ -332,62 +370,24 @@ export default async function AdminStormsPage({
                     ⬇ CSV for dialer / skip trace
                   </a>
                 </div>
-            {/* Mobile: knock cards — tap address for directions */}
-            <div className="mt-3 space-y-2 md:hidden">
-              {topTargets.map((t) => (
-                <div
-                  key={t.id}
-                  className={`rounded-lg border p-3 ${
-                    t.solar ? "border-green-300 bg-green-50" : "border-gray-200"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="truncate font-semibold">{t.owner_name}</div>
-                      <a
-                        href={`https://maps.google.com/?q=${encodeURIComponent(
-                          `${t.address}, ${t.city || ""} TX ${t.zip || ""}`,
-                        )}`}
-                        target="_blank"
-                        rel="noopener"
-                        className="text-sm font-medium text-[#0c7a40] underline"
-                      >
-                        {t.address}
-                        {t.city ? `, ${t.city}` : ""} →
-                      </a>
-                    </div>
-                    <span className="shrink-0 rounded-full bg-[#0b0e13] px-2.5 py-1 text-xs font-bold text-white">
-                      {t.score}
-                    </span>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
-                    {t.hail_size_in ? (
-                      <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-900">
-                        {t.hail_size_in}″ hail
-                      </span>
-                    ) : null}
-                    {t.solar && (
-                      <span className="rounded-full bg-green-200 px-2 py-0.5 font-semibold text-green-900">
-                        ☀️ solar
-                      </span>
-                    )}
-                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-700">
-                      {t.absentee ? "Absentee" : "Owner-occupied"}
-                    </span>
-                    {t.year_built ? (
-                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-700">
-                        built {t.year_built}
-                      </span>
-                    ) : null}
-                    {t.value ? (
-                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-700">
-                        ${Math.round(t.value / 1000)}k
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Mobile: knock cards w/ GPS near-me sorting (client component) */}
+            <TargetCards
+              targets={topTargets.map((t) => ({
+                id: t.id,
+                owner_name: t.owner_name,
+                address: t.address,
+                city: t.city,
+                zip: t.zip,
+                hail_size_in: t.hail_size_in,
+                solar: t.solar,
+                absentee: t.absentee,
+                year_built: t.year_built,
+                value: t.value,
+                score: t.score,
+                lat: t.lat ?? null,
+                lon: t.lon ?? null,
+              }))}
+            />
             {/* Desktop: full table */}
             <div className="mt-3 hidden overflow-x-auto md:block">
               <table className="w-full border-collapse text-sm">
