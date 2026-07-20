@@ -1,10 +1,11 @@
 "use client";
 
-// Mobile knock cards with "Near me" GPS mode: sorts targets by distance from
-// the rep's current position and shows how far each door is. Falls back to
-// score order when location is off/denied.
+// Mobile knock cards with "Near me" GPS mode. Near-me queries the SERVER for
+// everything within 15mi of the rep's position (the full target DB, not just
+// the page's score-ranked subset) sorted by true distance — and says so
+// plainly when nothing is close, including where the nearest cluster is.
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 export type TargetCard = {
   id: string;
@@ -22,16 +23,7 @@ export type TargetCard = {
   lon: number | null;
 };
 
-function haversineMi(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 3958.8;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
+type NearTarget = TargetCard & { distance_mi: number; storm_date?: string };
 
 function fmtMi(mi: number) {
   if (mi < 0.19) return `${Math.round(mi * 5280)} ft`;
@@ -39,39 +31,47 @@ function fmtMi(mi: number) {
 }
 
 export function TargetCards({ targets }: { targets: TargetCard[] }) {
-  const [me, setMe] = useState<{ lat: number; lon: number } | null>(null);
-  const [locState, setLocState] = useState<"off" | "locating" | "on" | "denied">("off");
+  const [locState, setLocState] = useState<"off" | "locating" | "on" | "denied" | "error">("off");
+  const [nearTargets, setNearTargets] = useState<NearTarget[] | null>(null);
+  const [emptyInfo, setEmptyInfo] = useState<{ city: string; mi: number } | null>(null);
+
+  const reset = () => {
+    setLocState("off");
+    setNearTargets(null);
+    setEmptyInfo(null);
+  };
 
   const locate = () => {
-    if (locState === "on") {
-      setMe(null);
-      setLocState("off");
-      return;
-    }
-    if (!navigator.geolocation) {
-      setLocState("denied");
-      return;
-    }
+    if (locState === "on") return reset();
+    if (!navigator.geolocation) return setLocState("denied");
     setLocState("locating");
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setMe({ lat: pos.coords.latitude, lon: pos.coords.longitude });
-        setLocState("on");
+      async (pos) => {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const key = params.get("key") || "";
+          const days = params.get("days") || "";
+          const res = await fetch(
+            `/api/admin/storm-targets?key=${encodeURIComponent(key)}&near=${pos.coords.latitude.toFixed(5)},${pos.coords.longitude.toFixed(5)}${days ? `&days=${days}` : ""}`,
+          );
+          if (!res.ok) throw new Error(String(res.status));
+          const data = await res.json();
+          setNearTargets(data.targets ?? []);
+          setEmptyInfo(data.nearest_beyond ?? null);
+          setLocState("on");
+        } catch {
+          setLocState("error");
+        }
       },
       () => setLocState("denied"),
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
     );
   };
 
-  const sorted = useMemo(() => {
-    if (!me) return targets.map((t) => ({ t, mi: null as number | null }));
-    return targets
-      .map((t) => ({
-        t,
-        mi: t.lat != null && t.lon != null ? haversineMi(me.lat, me.lon, t.lat, t.lon) : null,
-      }))
-      .sort((a, b) => (a.mi ?? 1e9) - (b.mi ?? 1e9));
-  }, [targets, me]);
+  const showing: Array<{ t: TargetCard; mi: number | null }> =
+    locState === "on" && nearTargets
+      ? nearTargets.map((t) => ({ t, mi: t.distance_mi }))
+      : targets.map((t) => ({ t, mi: null }));
 
   return (
     <div className="mt-3 md:hidden">
@@ -84,16 +84,30 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
         }`}
       >
         {locState === "locating"
-          ? "Locating…"
+          ? "Finding doors near you…"
           : locState === "on"
-            ? "📍 Sorted by distance from you — tap to reset"
+            ? `📍 ${nearTargets?.length ?? 0} doors within 15 mi — tap to reset`
             : locState === "denied"
-              ? "Location blocked — enable it in browser settings"
-              : "📍 Near me — sort doors by where I'm standing"}
+              ? "Location blocked — enable it in browser settings, then tap again"
+              : locState === "error"
+                ? "Couldn't load nearby doors — tap to retry"
+                : "📍 Near me — show doors around where I'm standing"}
       </button>
 
+      {locState === "on" && nearTargets && nearTargets.length === 0 && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm">
+          <p className="font-bold">No storm targets within 15 miles of you.</p>
+          <p className="mt-1 text-gray-700">
+            {emptyInfo
+              ? `Nearest cluster: ${emptyInfo.city}, about ${emptyInfo.mi} miles away.`
+              : "No targets found in this region for the current filters."}
+            {" "}Try widening the recency filter, or work inbound leads instead.
+          </p>
+        </div>
+      )}
+
       <div className="space-y-2">
-        {sorted.map(({ t, mi }) => (
+        {showing.map(({ t, mi }) => (
           <div
             key={t.id}
             className={`rounded-lg border p-3 ${
