@@ -4,6 +4,7 @@ import { sendClaimNurture } from "@/lib/emails";
 import { runStormWatch } from "@/lib/storm";
 import { runSolarPermitSync } from "@/lib/solarPermits";
 import { generateStormTargets } from "@/lib/parcels";
+import { runStormContactTasks } from "@/lib/hubspotStorm";
 
 /**
  * Drop-off nurture for claim-prep. Run on a schedule (e.g. hourly) — a Render
@@ -35,6 +36,8 @@ export async function POST(req: Request) {
   const yesterday = new Date(Date.now() - 86400 * 1000).toISOString().slice(0, 10);
   const targetsToday = await generateStormTargets(today);
   const targetsYday = await generateStormTargets(yesterday);
+  // Fresh hail near an existing HubSpot contact → HIGH-priority call task.
+  const hubspotTasks = await runStormContactTasks();
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
@@ -75,5 +78,6 @@ export async function POST(req: Request) {
     storm,
     solar,
     targets: { today: targetsToday, yesterday: targetsYday },
+    hubspotTasks,
   });
 }

@@ -30,6 +30,88 @@ export type HubspotLead = {
   source?: string;
 };
 
+const normAddr = (s: string) =>
+  s.toUpperCase().replace(/[^A-Z0-9 ]/g, "").replace(/\s+/g, " ").trim();
+
+/** Hail history near a zip (last 12mo): latest 1″+ date + max size. */
+export async function stormContextForZip(
+  zip: string,
+): Promise<{ storm_date: string; hail_size_in: number } | null> {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key || !/^\d{5}$/.test(zip)) return null;
+  try {
+    const zres = await fetch(`https://api.zippopotam.us/us/${zip}`, {
+      next: { revalidate: 2592000 },
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!zres.ok) return null;
+    const place = (await zres.json())?.places?.[0];
+    if (!place) return null;
+    const lat = parseFloat(place.latitude);
+    const lon = parseFloat(place.longitude);
+
+    const since = new Date(Date.now() - 365 * 86400 * 1000).toISOString();
+    const eres = await fetch(
+      `${url}/rest/v1/storm_events?select=valid_at,magnitude,lat,lon&type=eq.hail&magnitude=gte.1&valid_at=gte.${since}&limit=2000`,
+      {
+        headers: { apikey: key, Authorization: `Bearer ${key}` },
+        cache: "no-store",
+        signal: AbortSignal.timeout(8000),
+      },
+    );
+    if (!eres.ok) return null;
+    const events = (await eres.json()) as Array<{
+      valid_at: string;
+      magnitude: number;
+      lat: number;
+      lon: number;
+    }>;
+    const R = 3958.8;
+    const toRad = (d: number) => (d * Math.PI) / 180;
+    let latest = "";
+    let maxSize = 0;
+    for (const e of events) {
+      const dLat = toRad(e.lat - lat);
+      const dLon = toRad(e.lon - lon);
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat)) * Math.cos(toRad(e.lat)) * Math.sin(dLon / 2) ** 2;
+      const mi = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      if (mi > 15) continue;
+      if (e.magnitude > maxSize) maxSize = e.magnitude;
+      const d = e.valid_at.slice(0, 10);
+      if (d > latest) latest = d;
+    }
+    return latest ? { storm_date: latest, hail_size_in: maxSize } : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Permit-confirmed solar at this address? (solar_permits, matched by zip+address) */
+async function solarAtAddress(address: string, zip: string): Promise<boolean> {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key || !address || !/^\d{5}$/.test(zip)) return false;
+  try {
+    const res = await fetch(
+      `${url}/rest/v1/solar_permits?select=address&zip=eq.${zip}&limit=2000`,
+      {
+        headers: { apikey: key, Authorization: `Bearer ${key}` },
+        cache: "no-store",
+        signal: AbortSignal.timeout(6000),
+      },
+    );
+    if (!res.ok) return false;
+    const rows = (await res.json()) as Array<{ address: string }>;
+    const target = normAddr(address);
+    return rows.some((r) => r.address && normAddr(r.address) === target);
+  } catch {
+    return false;
+  }
+}
+
 async function findContact(email: string, phone: string): Promise<string | null> {
   const filters = [];
   if (email) filters.push({ propertyName: "email", operator: "EQ", value: email });
@@ -53,6 +135,18 @@ export async function pushLeadToHubspot(lead: HubspotLead) {
     const email = (lead.email || "").trim().toLowerCase();
     const phone = (lead.phone || "").trim();
     const parts = (lead.name || "").trim().split(/\s+/);
+    const isRep = /sales rep application/i.test(lead.service || "");
+    const zip = (lead.zip || "").trim().slice(0, 5);
+
+    // Storm + solar enrichment (homeowners only; best-effort, in parallel).
+    const [storm, permitSolar] = isRep
+      ? [null, false]
+      : await Promise.all([
+          stormContextForZip(zip),
+          lead.solar ? Promise.resolve(false) : solarAtAddress(lead.address || "", zip),
+        ]);
+    const solarHome = !!lead.solar || permitSolar;
+
     const properties: Record<string, string> = {
       firstname: parts[0] || "",
       lastname: parts.slice(1).join(" ") || "",
@@ -61,8 +155,19 @@ export async function pushLeadToHubspot(lead: HubspotLead) {
       zip: lead.zip || "",
       lifecyclestage: "lead",
       hs_lead_status: "NEW",
+      lead_type: isRep
+        ? "rep_applicant"
+        : /commercial/i.test(lead.service || "")
+          ? "commercial"
+          : "homeowner",
     };
     if (email) properties.email = email;
+    if (solarHome) properties.solar_home = "true";
+    if (storm) {
+      properties.storm_date = storm.storm_date;
+      properties.hail_size_in = String(storm.hail_size_in);
+      properties.storm_map_link = `https://poweredgetx.com/admin/storms?targets=${storm.storm_date}`;
+    }
 
     let id = await findContact(email, phone);
     if (id) {
@@ -89,7 +194,10 @@ export async function pushLeadToHubspot(lead: HubspotLead) {
 
     const noteLines = [
       `New website lead — ${lead.service || "general"}`,
-      lead.solar ? "☀️ SOLAR HOME — scope panel detach & reset + D&R supplement." : "",
+      solarHome ? "☀️ SOLAR HOME — scope panel detach & reset + D&R supplement." : "",
+      storm
+        ? `⛈️ Hail history: ${storm.hail_size_in}″ documented near their zip, most recent ${storm.storm_date}. Map: https://poweredgetx.com/admin/storms?targets=${storm.storm_date}`
+        : "",
       lead.message ? `Message: ${lead.message}` : "",
       lead.source ? `Source: ${lead.source}` : "",
     ].filter(Boolean);
