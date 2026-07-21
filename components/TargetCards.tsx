@@ -97,7 +97,8 @@ function HouseSheet({
   const windStorms = data.storms.filter((s) => s.type !== "hail");
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white">
+    // z must clear Leaflet's internal panes/controls (z-index up to ~1000)
+    <div className="fixed inset-0 z-[1200] flex flex-col bg-white">
       <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
         <div className="min-w-0">
           <div className="truncate font-display text-base font-extrabold">{target.owner_name}</div>
