@@ -125,7 +125,7 @@ function Hero() {
             </span>
             <span className="h-4 w-px bg-line" />
             <span>
-              <strong className="text-fg-inv">TECL #{site.teclLicense}</strong>
+              <strong className="text-fg-inv">Licensed &amp; insured</strong>
             </span>
             <span className="h-4 w-px bg-line" />
             <span>
@@ -164,8 +164,8 @@ function Hero() {
 function TrustBar() {
   const items = [
     {
-      big: <CountUp to={Number(site.teclLicense)} prefix="#" duration={1500} />,
-      small: "TX license you can verify (TECL)",
+      big: <>Licensed</>,
+      small: "& insured Texas contractor",
     },
     {
       big: <CountUp to={site.capacity.crews} suffix=" crews" />,
@@ -204,7 +204,7 @@ function Wedge() {
   const bullets = [
     {
       h: "We're licensed where it counts",
-      p: `TECL #${site.teclLicense}, backed by John Lott's 40-year Master Electrician license. Look us up on the state's public TDLR portal before you ever sign.`,
+      p: `Backed by John Lott's 40-year Master Electrician license and $2,000,000 in liability coverage — a real, accountable company, not a fly-by-night storm crew.`,
     },
     {
       h: "Two trades, one accountable team",
@@ -251,29 +251,22 @@ function Wedge() {
         <div className="rounded-card border border-paper-2 bg-ink p-9 text-fg-inv shadow-xl">
           <Kicker className="mb-5">Don&apos;t take our word</Kicker>
           <p className="font-display text-2xl font-bold leading-snug">
-            Check our license yourself.
+            A real company stands behind the work.
           </p>
           <p className="mt-3 text-fg-inv-dim">
-            The Texas Department of Licensing & Regulation keeps a free public
-            record of every licensed electrical contractor — including status
-            and any complaints.
+            Every roof runs under a 40-year Master Electrician and one
+            accountable, insured team — no subcontractor finger-pointing, and
+            an honest verdict in writing even when the answer is &ldquo;your
+            roof is fine.&rdquo;
           </p>
           <div className="mt-6 rounded-md border border-line bg-ink-2 p-5">
             <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
-              Our license
+              Coverage
             </div>
             <div className="mt-1 font-display text-3xl font-extrabold text-bolt">
-              TECL #{site.teclLicense}
+              {site.liabilityCoverage} liability
             </div>
           </div>
-          <a
-            href={site.tdlrVerifyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-flex items-center gap-2 font-display font-bold text-bolt hover:text-bolt-hi"
-          >
-            Verify at TDLR.texas.gov →
-          </a>
         </div>
       </Container>
     </section>
@@ -552,9 +545,9 @@ function SolarReadyBand() {
                 warranty.
               </div>
               <div className="mt-4 border-t border-line pt-4 text-sm text-fg-inv-dim">
-                Performed under{" "}
+                Performed by{" "}
                 <span className="font-bold text-fg-inv">
-                  TECL #{site.teclLicense}
+                  one licensed, insured team
                 </span>
               </div>
             </div>

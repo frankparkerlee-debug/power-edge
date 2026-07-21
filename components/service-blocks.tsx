@@ -16,15 +16,9 @@ export function ServiceTrustBar() {
           {site.googleReviewCount} Google reviews)
         </span>
         <Divider />
-        <a
-          href={site.tdlrVerifyUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-fg-inv-dim hover:text-bolt"
-        >
-          <strong className="text-fg-inv">TECL #{site.teclLicense}</strong> —
-          verify at TDLR
-        </a>
+        <span className="text-fg-inv-dim">
+          <strong className="text-fg-inv">Licensed</strong> &amp; insured
+        </span>
         <Divider />
         <span className="text-fg-inv-dim">
           <strong className="text-fg-inv">{site.liabilityCoverage}</strong>{" "}

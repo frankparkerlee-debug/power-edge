@@ -12,7 +12,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Free Roof Inspection in DFW — Documented for Your Claim",
   description:
-    "Book a free, no-obligation roof inspection across Dallas–Fort Worth. We photograph and document storm damage for your insurance claim, and tell you straight if your roof is fine. Licensed — TECL #39773.",
+    "Book a free, no-obligation roof inspection across Dallas–Fort Worth. We photograph and document storm damage for your insurance claim, and tell you straight if your roof is fine. Licensed & insured.",
 };
 
 const faqs = [
@@ -34,7 +34,7 @@ const faqs = [
   },
   {
     q: "Will you try to sell me a roof I don't need?",
-    a: "No. Texas doesn't license roofers, so plenty of storm-chasers manufacture damage. We're a licensed contractor (TECL #" + site.teclLicense + ") you can verify — our reputation depends on being straight with you.",
+    a: "No. Texas doesn't license roofers, so plenty of storm-chasers manufacture damage. We're a licensed contractor (licensed & insured) you can verify — our reputation depends on being straight with you.",
   },
 ];
 
@@ -112,7 +112,7 @@ export default function FreeInspectionPage() {
             </div>
 
             <p className="mt-8 text-sm text-fg-inv-dim">
-              Licensed Texas contractor · TECL #{site.teclLicense} ·{" "}
+              Licensed & insured Texas contractor ·{" "}
               {site.googleRating}★ ({site.googleReviewCount} reviews) · We never
               waive deductibles or pose as your adjuster.
             </p>

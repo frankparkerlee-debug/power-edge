@@ -89,7 +89,7 @@ export function CtaBand({
               {site.phone}
             </a>
             <p className="mt-1 text-sm text-fg-dim">
-              TECL #{site.teclLicense} · Licensed & insured ·{" "}
+              Licensed & insured ·{" "}
               {site.liabilityCoverage} coverage
             </p>
           </div>

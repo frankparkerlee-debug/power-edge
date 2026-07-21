@@ -60,10 +60,10 @@ export default function SolarPage() {
           </div>
           <div className="rounded-card border border-line bg-ink-2 p-8 text-center">
             <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
-              Performed under
+              Performed by
             </div>
             <div className="mt-2 font-display text-3xl font-extrabold text-bolt">
-              TECL #{site.teclLicense}
+              A licensed team
             </div>
             <div className="mt-2 text-sm text-fg-inv-dim">
               Master Electrician John Lott · 40 years

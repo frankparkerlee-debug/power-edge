@@ -21,8 +21,8 @@ export function HonestyStandard({ className = "" }: { className?: string }) {
       p: "We document the damage and coordinate with your adjuster — we don't \"handle your claim.\" That line is the law, and it protects you.",
     },
     {
-      h: "Verify us before you sign anything",
-      p: `Texas doesn't license roofers — but electrical contractors are licensed and public. Look up TECL #${site.teclLicense} at TDLR yourself.`,
+      h: "A real, accountable company",
+      p: `Texas doesn't license roofers, so anyone can claim to be one. We're a licensed, insured electrical contractor with a 40-year Master Electrician — not a magnet sign on a truck.`,
     },
   ];
   return (
@@ -53,12 +53,10 @@ export function HonestyStandard({ className = "" }: { className?: string }) {
           ))}
         </div>
         <a
-          href={site.tdlrVerifyUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={site.phoneHref}
           className="mt-8 inline-block font-display font-bold text-bolt hover:text-bolt-hi"
         >
-          Check our license at TDLR.texas.gov →
+          Questions before you sign? Call or text us →
         </a>
       </div>
     </section>

@@ -56,7 +56,7 @@ export default function LinksPage() {
           Roofing &amp; storm restoration · DFW
         </p>
         <p className="mt-3 text-center text-sm text-fg-inv-dim">
-          Licensed &amp; verifiable · TECL #{site.teclLicense} ·{" "}
+          Licensed &amp; insured ·{" "}
           {site.googleRating}★
         </p>
 

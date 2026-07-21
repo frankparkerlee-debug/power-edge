@@ -229,7 +229,7 @@ export function StormReport({ data }: { data: StormData }) {
           cracks panels and microinverters — and most roofers aren&apos;t
           licensed to touch solar. We repair your{" "}
           <strong className="text-fg-inv">roof and your solar</strong> under one
-          licensed crew (TECL #39773). Check the box below and we&apos;ll inspect
+          licensed crew. Check the box below and we&apos;ll inspect
           both.
         </p>
       </div>

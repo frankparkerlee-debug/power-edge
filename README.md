@@ -14,8 +14,10 @@ npm run build    # production build
 ## Strategy baked in
 
 - **The wedge:** Roofing is unlicensed in Texas; electrical + solar legally require
-  a Master Electrician. The site leads with verifiable credentials (TECL #39773,
-  John Lott) and links to the public TDLR portal — something roofers can't fake.
+  a Master Electrician. The site leads with real credentials (licensed & insured,
+  40-year Master Electrician John Lott) — something storm-chasers can't fake.
+  NOTE: TECL license number temporarily pulled sitewide (2026-07-20, new number
+  pending); restore via `site.teclLicense` — see lib/site.ts.
 - **Pricing = land-grab:** transparent electrical flat-rate menu (priced to win
   share now); roofing & storm stay free-inspection / quote-only.
 - **Solar = repair & replacement only** (no new installs), under the electrical license.

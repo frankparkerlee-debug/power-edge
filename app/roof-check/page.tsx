@@ -47,8 +47,7 @@ export default function RoofCheckPage() {
           </ul>
 
           <p className="mt-8 text-sm text-fg-inv-dim">
-            Backed by a licensed Texas electrical contractor · TECL #
-            {site.teclLicense} · Rated {site.googleRating}★
+            Licensed & insured Texas electrical contractor · Rated {site.googleRating}★
           </p>
         </div>
 

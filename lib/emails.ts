@@ -76,9 +76,9 @@ function verifyChip() {
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:26px;border-top:1px solid ${LINE};padding-top:18px;">
     <tr>
       <td style="font-family:${FONT};font-size:13px;color:${MUTED};line-height:1.5;">
-        <strong style="color:${TEXT};">Licensed in Texas — TECL #${site.teclLicense}.</strong>
-        Roofing is unlicensed statewide, so anyone can knock after a storm.
-        <a href="${site.tdlrVerifyUrl}" target="_blank" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;">Verify us at TDLR &rarr;</a>
+        <strong style="color:${TEXT};">Licensed & insured in Texas.</strong>
+        Roofing is unlicensed statewide, so anyone can knock after a storm — we're
+        a real, accountable company backed by a 40-year Master Electrician.
         <br/><span style="color:${MUTED};">${stars()}</span>
       </td>
     </tr>
@@ -139,7 +139,7 @@ function shell({
               &nbsp;·&nbsp;
               <a href="${site.url}" style="color:#9aa3b0;text-decoration:none;">${site.domain}</a>
               <br/>
-              ${site.legalEntity} · TECL #${site.teclLicense} · Serving ${site.serviceArea}.
+              ${site.legalEntity} · Licensed & insured · Serving ${site.serviceArea}.
               <br/><br/>
               <span style="color:#6b7280;">You&rsquo;re receiving this because you requested contact at ${site.domain}.
               Reply <strong>STOP</strong> to opt out, or
@@ -269,7 +269,7 @@ export const leadSequence: SequenceEmail[] = [
             ${[
               [
                 "A license you can actually check",
-                `TECL #${site.teclLicense}, backed by a 40-year Master Electrician. Look us up on the state&rsquo;s public portal before you sign anything.`,
+                `Backed by a 40-year Master Electrician and ${site.liabilityCoverage} in liability coverage — a real company standing behind the work.`,
               ],
               [
                 "One accountable crew",
@@ -385,7 +385,7 @@ export const leadSequence: SequenceEmail[] = [
             `After a storm your street fills with trucks and clipboards. The uncomfortable truth: <strong>Texas doesn&rsquo;t license roofers</strong> — a magnet sign and a ladder is the whole barrier to entry, and plenty vanish before the warranty ever matters.`,
           ) +
           p(
-            `We&rsquo;re the opposite kind of company: a licensed electrical contractor (TECL #${site.teclLicense}) you can look up on the state&rsquo;s site in ten seconds, ${site.googleRating}&#9733; across ${site.googleReviewCount} reviews, one accountable crew for your whole roof${
+            `We&rsquo;re the opposite kind of company: a licensed, insured electrical contractor, ${site.googleRating}&#9733; across ${site.googleReviewCount} reviews, one accountable crew for your whole roof${
               c.solar ? " — solar included" : ""
             }. Verify us before you trust anyone knocking.`,
           ) +

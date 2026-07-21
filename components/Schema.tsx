@@ -40,7 +40,7 @@ export function Schema() {
       reviewCount: site.googleReviewCount,
       bestRating: "5",
     },
-    hasCredential: `Texas Electrical Contractor License (TECL) #${site.teclLicense}`,
+    hasCredential: `Licensed & insured Texas electrical contractor`,
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "Roofing, electrical & solar services",

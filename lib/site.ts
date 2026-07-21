@@ -17,7 +17,11 @@ export const site = {
   url: "https://poweredgetx.com",
 
   // Trust signals — all verifiable, which is the entire point.
-  teclLicense: "39773",
+  // teclLicense temporarily blank — old TECL #39773 retired, new number pending
+  // (Parker 2026-07-20). License-NUMBER + "verify on TDLR" language was pulled
+  // sitewide; "licensed & insured" positioning kept. To restore: set the new
+  // number here, then re-add the number/TDLR-verify copy (grep "licensed & insured").
+  teclLicense: "",
   tdlrVerifyUrl: "https://www.tdlr.texas.gov/LicenseSearch/",
   liabilityCoverage: "$2,000,000",
   googleRating: "4.7",

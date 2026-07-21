@@ -6,9 +6,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "About — Licensed Roofing & Electrical in Texas",
   description:
-    "PowerEdge is a licensed Texas electrical contractor (TECL #" +
-    site.teclLicense +
-    ") that also does roofing and solar repair across DFW. Meet the team and verify our license.",
+    "PowerEdge is a licensed, insured Texas electrical contractor that also does roofing and solar repair across DFW. Meet the team behind the work.",
 };
 
 export default function AboutPage() {
@@ -16,7 +14,7 @@ export default function AboutPage() {
     <>
       <PageHero
         kicker="About PowerEdge"
-        title="Built on a license you can check."
+        title="Built on real credentials."
         intro="Texas doesn't license roofers — so the bar to call yourself one is a magnet sign. We built PowerEdge on the opposite idea: real credentials, real people, and the receipts to prove it."
         badge="Work with us"
       />
@@ -54,14 +52,14 @@ export default function AboutPage() {
 
           {/* Verify card */}
           <div className="rounded-card border border-paper-2 bg-ink p-8 text-fg-inv shadow-xl">
-            <p className="kicker text-bolt">Verify us</p>
+            <p className="kicker text-bolt">The company</p>
             <div className="mt-5 space-y-4">
               <div className="rounded-md border border-line bg-ink-2 p-5">
                 <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
-                  Electrical license
+                  Licensed &amp; insured
                 </div>
                 <div className="mt-1 font-display text-2xl font-extrabold text-bolt">
-                  TECL #{site.teclLicense}
+                  Master Electrician · 40 yrs
                 </div>
               </div>
               <div className="rounded-md border border-line bg-ink-2 p-5">
@@ -82,12 +80,10 @@ export default function AboutPage() {
               </div>
             </div>
             <a
-              href={site.tdlrVerifyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={site.phoneHref}
               className="mt-6 inline-flex font-display font-bold text-bolt hover:text-bolt-hi"
             >
-              Look us up at TDLR.texas.gov →
+              Questions? Call or text us →
             </a>
           </div>
         </Container>

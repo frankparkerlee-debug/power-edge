@@ -204,7 +204,7 @@ export const guides: Guide[] = [
         h: "What CAN you actually verify in Texas?",
         p: [
           "Electrical work is different. Electricians ARE regulated by the Texas Department of Licensing and Regulation (TDLR), and their licenses are publicly verifiable. So if a company also does electrical or solar work, you can look up their electrical contractor license and confirm it's real.",
-          "PowerEdge is a licensed Texas electrical contractor — TECL #39773 — and we run our roofing under that same accountable, verifiable company. You can check our license on the TDLR public portal before you ever sign.",
+          "PowerEdge is a licensed, insured Texas electrical contractor, and we run our roofing under that same accountable company — a real business standing behind the work, not a magnet sign on a truck.",
         ],
       },
       {
@@ -229,12 +229,12 @@ export const guides: Guide[] = [
       },
       {
         q: "Is PowerEdge licensed?",
-        a: "Yes — PowerEdge is a licensed Texas electrical contractor, TECL #39773, verifiable on the TDLR portal, and runs its roofing under that same company.",
+        a: "Yes — PowerEdge is a licensed, insured Texas electrical contractor, and runs its roofing under that same company.",
       },
     ],
     cta: {
       heading: "Hire a crew you can actually verify.",
-      sub: "Licensed Texas electrical contractor (TECL #39773) that also does your roof. Get a free, no-pressure inspection.",
+      sub: "Licensed Texas electrical contractor that also does your roof. Get a free, no-pressure inspection.",
     },
   },
 

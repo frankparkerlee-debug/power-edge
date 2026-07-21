@@ -33,7 +33,7 @@ export const serviceContent: Record<string, Content> = {
     faqs: [
       {
         q: "Do I need a licensed contractor for a roof in Texas?",
-        a: "Texas doesn't license roofers — anyone can claim to be one, which is exactly the problem. PowerEdge is a licensed electrical contractor (TECL #39773), so you can actually verify who you're hiring on the state TDLR portal.",
+        a: "Texas doesn't license roofers — anyone can claim to be one, which is exactly the problem. PowerEdge is a licensed, insured electrical contractor, so you're hiring an accountable company, not a fly-by-night crew.",
       },
       {
         q: "Will you help with my insurance claim?",
@@ -76,7 +76,7 @@ export const serviceContent: Record<string, Content> = {
     faqs: [
       {
         q: "Are your electricians licensed?",
-        a: "Yes. All work runs under John Lott's 40-year Master Electrician license (TECL #39773) — which you can verify for free on the Texas TDLR portal.",
+        a: "Yes. All work runs under John Lott's 40-year Master Electrician license and $2,000,000 in liability coverage.",
       },
       {
         q: "Do you charge for an estimate?",
@@ -123,7 +123,7 @@ export const serviceContent: Record<string, Content> = {
       },
       {
         q: "Why does solar repair require an electrical license?",
-        a: "Solar is electrical work. Texas law — tightened in 2025 — requires it to be performed under a licensed electrical contractor. That's us: TECL #39773.",
+        a: "Solar is electrical work. Texas law — tightened in 2025 — requires it to be performed under a licensed electrical contractor. That's us.",
       },
       {
         q: "My roof is being replaced — can you handle the panels?",
@@ -178,7 +178,7 @@ export const serviceContent: Record<string, Content> = {
       },
       {
         q: "Are you licensed and insured for commercial work?",
-        a: "Yes — Texas electrical contractor license TECL #39773, backed by $2,000,000 in liability coverage.",
+        a: "Yes — licensed Texas electrical contractor, backed by $2,000,000 in liability coverage.",
       },
     ],
   },

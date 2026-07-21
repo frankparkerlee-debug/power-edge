@@ -22,7 +22,7 @@ export async function generateMetadata({
   if (!c) return {};
   return {
     title: `Roofing Company in ${c.name}, TX — Storm & Hail Roof Repair`,
-    description: `Storm & hail roof repair, replacement, and insurance-claim roofing in ${c.name}. Free inspections, deductible financing from $250 down, licensed & verifiable (TECL #${site.teclLicense}), rated ${site.googleRating}★.`,
+    description: `Storm & hail roof repair, replacement, and insurance-claim roofing in ${c.name}. Free inspections, deductible financing from $250 down, licensed & insured, rated ${site.googleRating}★.`,
   };
 }
 
@@ -48,7 +48,7 @@ function cityFaqs(c: City) {
     },
     {
       q: `My ${c.name} home has solar panels. Can you still replace the roof?`,
-      a: `Yes — that's our specialty. Panels have to come off and go back on for a replacement, which is electrical work most roofers can't legally perform. We detach and reset them in-house under TECL #${site.teclLicense}, and it's usually a covered line item on your claim.`,
+      a: `Yes — that's our specialty. Panels have to come off and go back on for a replacement, which is electrical work most roofers can't legally perform. We detach and reset them in-house, and it's usually a covered line item on your claim.`,
     },
   ];
 }
@@ -132,7 +132,7 @@ export default async function CityPage({
                 `Free roof inspections across ${c.name} — verdict in writing`,
                 "Deductible financing from $250 down, paid in full over time",
                 `Storm & hail insurance claims documented by the book`,
-                `Rated ${site.googleRating}★ by North Texas homeowners · TECL #${site.teclLicense}`,
+                `Rated ${site.googleRating}★ by North Texas homeowners`,
               ]}
             />
           </div>

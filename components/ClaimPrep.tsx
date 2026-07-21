@@ -118,7 +118,7 @@ export function ClaimPrep() {
 
   const Disclaimer = () => (
     <p className="mt-4 text-center text-xs leading-relaxed text-fg-inv-dim">
-      PowerEdge is a licensed roofing contractor (TECL #{site.teclLicense}), not a
+      PowerEdge is a licensed roofing contractor, not a
       public insurance adjuster. We document damage and coordinate our inspection
       with your adjuster; you file and manage your claim with your insurer.
     </p>

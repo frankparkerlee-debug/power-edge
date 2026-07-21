@@ -11,7 +11,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Do You Have a Roof Insurance Claim? Free Check — DFW",
   description:
-    "Enter your address and find out in seconds if your storm-damaged roof likely qualifies for an insurance claim — free, no obligation. Then book a free inspection. Serving Dallas–Fort Worth. TECL #39773.",
+    "Enter your address and find out in seconds if your storm-damaged roof likely qualifies for an insurance claim — free, no obligation. Then book a free inspection. Serving Dallas–Fort Worth.",
 };
 
 const faqs = [
@@ -106,7 +106,7 @@ export default function RoofClaimCheckPage() {
             </ul>
 
             <p className="mt-8 text-sm text-fg-inv-dim">
-              Licensed Texas contractor · TECL #{site.teclLicense} ·{" "}
+              Licensed & insured Texas contractor ·{" "}
               {site.googleRating}★ ({site.googleReviewCount} reviews) · We never
               waive deductibles or pose as your adjuster.
             </p>

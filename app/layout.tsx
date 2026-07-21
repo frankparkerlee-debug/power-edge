@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: `%s | ${site.name}`,
   },
   description:
-    `Insurance-first storm & hail roof restoration across Dallas–Fort Worth. Free inspections, deductible financing, and one licensed team that can handle your solar too. Verify us — TECL #${site.teclLicense}.`,
+    `Insurance-first storm & hail roof restoration across Dallas–Fort Worth. Free inspections, deductible financing, and one licensed team that can handle your solar too.`,
   openGraph: {
     title: `${site.legalName} | Storm Roof Restoration, Verified`,
     description:

@@ -81,7 +81,7 @@ export default function ContactPage() {
               </span>
             </div>
             <p className="text-sm text-fg-inv-dim">
-              TECL #{site.teclLicense} · Licensed & insured ·{" "}
+              Licensed & insured ·{" "}
               {site.liabilityCoverage} liability coverage
             </p>
           </div>

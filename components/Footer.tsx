@@ -104,7 +104,7 @@ export function Footer() {
               </a>
             </li>
             <li className="pt-2 text-xs leading-relaxed">
-              TECL #{site.teclLicense} · Licensed & insured
+              Licensed & insured
               <br />
               {site.liabilityCoverage} liability coverage
             </li>
@@ -126,17 +126,9 @@ export function Footer() {
             </Link>
           </p>
           <p>
-            Texas electrical contractor TECL #{site.teclLicense}. Roofing is
-            unlicensed statewide in Texas —{" "}
-            <a
-              href={site.tdlrVerifyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-bolt hover:underline"
-            >
-              verify our license at TDLR
-            </a>
-            .
+            Licensed &amp; insured Texas electrical contractor. Roofing is
+            unlicensed statewide in Texas — we run ours under an accountable,
+            insured company either way.
           </p>
         </div>
       </div>

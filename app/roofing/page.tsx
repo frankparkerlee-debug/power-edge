@@ -19,7 +19,7 @@ const content = getServiceContent("roofing")!;
 export const metadata: Metadata = {
   title: "Roofing Company in Dallas–Fort Worth — Roof Repair, Replacement & Storm Claims",
   description:
-    "DFW roofing company for roof repair, full replacement, and hail/storm insurance claims — documented by the book. Free inspections, deductible financing from $250 down, licensed & verifiable (TECL #39773).",
+    "DFW roofing company for roof repair, full replacement, and hail/storm insurance claims — documented by the book. Free inspections, deductible financing from $250 down, licensed & verifiable.",
 };
 
 export default function RoofingPage() {
