@@ -67,6 +67,23 @@ export async function POST(req: Request) {
   const stormDate = String(target.storm_date || "");
   const mapLink = `https://poweredgetx.com/admin/storms?targets=${stormDate}`;
 
+  // One human-readable context block, reused on the deal description AND the
+  // notes, so the info shows whether the rep opens the contact or the deal.
+  const contextLines = [
+    `${address}${city ? `, ${city}` : ""} ${zip}`.trim(),
+    `Owner: ${ownerName}`,
+    target.hail_size_in ? `Hail: ${target.hail_size_in}″ documented near this address (${stormDate})` : null,
+    target.solar ? "☀️ SOLAR HOME — panel detach & reset applies (extra scope + supplement)" : null,
+    target.absentee
+      ? `Absentee/investor owner — mailing address: ${target.owner_mailing || "n/a"}`
+      : "Owner-occupied",
+    target.phone ? `Phone on file: ${target.phone}${target.phone_dnc ? " (⛔ DNC — do not call)" : ""}` : null,
+    target.value ? `Assessed value: $${Math.round(Number(target.value) / 1000)}k` : null,
+    target.year_built ? `Year built: ${target.year_built}` : null,
+    `Storm map: ${mapLink}`,
+  ].filter(Boolean);
+  const contextBlock = contextLines.join("\n");
+
   try {
     // 1. Contact.
     const cres = await fetch(`${HS}/crm/v3/objects/contacts`, {
@@ -108,6 +125,9 @@ export async function POST(req: Request) {
           dealname: `Roof — ${address}${city ? `, ${city}` : ""}`,
           pipeline: PIPELINE_ID,
           dealstage: STAGE_NEW_LEAD,
+          // Description rides on the deal itself so the storm context is visible
+          // the moment a rep opens the deal they're working — no sidebar digging.
+          description: contextBlock,
         },
         associations: [
           {
@@ -120,27 +140,23 @@ export async function POST(req: Request) {
     });
     const dealId = dres.ok ? ((await dres.json()).id as string) : null;
 
-    // 3. Note with full door context.
+    // 3. Note with full door context, attached to BOTH the contact and the deal
+    //    (association typeId 202 = note→contact, 214 = note→deal).
+    const noteAssoc: Array<{ to: { id: string }; types: Array<{ associationCategory: string; associationTypeId: number }> }> = [
+      { to: { id: contactId }, types: [{ associationCategory: "HUBSPOT_DEFINED", associationTypeId: 202 }] },
+    ];
+    if (dealId) {
+      noteAssoc.push({ to: { id: dealId }, types: [{ associationCategory: "HUBSPOT_DEFINED", associationTypeId: 214 }] });
+    }
     await fetch(`${HS}/crm/v3/objects/notes`, {
       method: "POST",
       headers: hs(),
       body: JSON.stringify({
         properties: {
-          hs_note_body:
-            `Converted from the storm tool at the door.\n` +
-            `${target.hail_size_in ? `${target.hail_size_in}″ hail documented (${stormDate}). ` : ""}` +
-            `${target.solar ? "☀️ SOLAR HOME — detach & reset applies. " : ""}` +
-            `${target.absentee ? "Absentee owner — mail: " + target.owner_mailing + ". " : "Owner-occupied. "}` +
-            `Assessed value ${target.value ? `$${Math.round(Number(target.value) / 1000)}k` : "n/a"}, ` +
-            `built ${target.year_built ?? "n/a"}. Map: ${mapLink}`,
+          hs_note_body: `Converted from the storm tool at the door.\n\n${contextBlock}`,
           hs_timestamp: new Date().toISOString(),
         },
-        associations: [
-          {
-            to: { id: contactId },
-            types: [{ associationCategory: "HUBSPOT_DEFINED", associationTypeId: 202 }],
-          },
-        ],
+        associations: noteAssoc,
       }),
       signal: AbortSignal.timeout(15000),
     }).catch(() => {});
