@@ -126,6 +126,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
       }
 
       const focus = mappable.find(({ t }) => t.id === focusId);
+      let focusMarker: any = null;
       for (const { t, mi } of mappable) {
         const isFocus = t.id === focusId;
         const color = t.solar ? "#0c7a40" : isFocus ? "#ff8a1f" : "#0b0e13";
@@ -143,7 +144,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
               `<br/><a href="${gmapsHref(t)}" target="_blank" rel="noopener">Directions ↗</a>`,
           )
           .addTo(layer);
-        if (isFocus) m.openPopup();
+        if (isFocus) focusMarker = m;
       }
 
       if (focus) {
@@ -155,7 +156,12 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
       } else if (me) {
         map.setView([me.lat, me.lon], 13);
       }
-      setTimeout(() => map.invalidateSize(), 200);
+      // Open the focused popup AFTER the container has its real size —
+      // opening while the map is 0×0 silently no-ops.
+      setTimeout(() => {
+        map.invalidateSize();
+        if (focusMarker) focusMarker.openPopup();
+      }, 250);
     });
     return () => {
       cancelled = true;
