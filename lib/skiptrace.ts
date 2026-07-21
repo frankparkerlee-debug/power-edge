@@ -25,14 +25,21 @@ type TraceTarget = {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function extractPhones(person: any): Array<{ number: string; dnc: boolean }> {
+  // A TCPA litigator or person-level TCPA flag makes EVERY number unsafe to
+  // dial — mark all dnc=true so the field tool shows knock/mail-only.
+  const unsafe = !!person?.litigator || !!person?.dnc?.tcpa;
   const phones = (person?.phoneNumbers ?? person?.phones ?? []) as any[];
   return phones
     .map((p) => ({
       number: String(p?.number ?? p?.phoneNumber ?? "").replace(/[^0-9]/g, ""),
-      dnc: !!(p?.dnc ?? p?.isDnc ?? p?.dncStatus),
+      dnc: unsafe || !!(p?.dnc ?? p?.isDnc ?? p?.dncStatus),
+      // Prefer numbers BatchData tested as reachable, then by confidence score.
+      rank: (p?.reachable ? 1000 : 0) + (typeof p?.score === "number" ? p.score : 0),
     }))
     .filter((p) => p.number.length >= 10)
-    .slice(0, 2);
+    .sort((a, b) => b.rank - a.rank)
+    .slice(0, 2)
+    .map(({ number, dnc }) => ({ number, dnc }));
 }
 
 export async function runSkipTrace(): Promise<{ traced: number; hits: number; ok: boolean }> {
