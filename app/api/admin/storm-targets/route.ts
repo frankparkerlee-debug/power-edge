@@ -47,6 +47,9 @@ async function bboxTargets(lat: number, lon: number, halfMi: number, days?: numb
     storm_date: string;
     lat: number;
     lon: number;
+    phone: string | null;
+    phone_dnc: boolean | null;
+    status: string;
   }>;
 }
 
@@ -129,7 +132,7 @@ export async function GET(req: Request) {
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const header =
-      "storm_date,score,owner_name,address,city,county,zip,owner_mailing,property_type,year_built,value,hail_size_in,solar,absentee,status";
+      "storm_date,score,owner_name,address,city,county,zip,phone,phone_dnc,phone2,owner_mailing,property_type,year_built,value,hail_size_in,solar,absentee,status";
     const lines = targets.map((t) =>
       [
         t.storm_date,
@@ -139,6 +142,9 @@ export async function GET(req: Request) {
         t.city,
         t.county,
         t.zip,
+        (t as unknown as { phone?: string }).phone ?? "",
+        (t as unknown as { phone_dnc?: boolean }).phone_dnc ? "DNC" : "",
+        (t as unknown as { phone2?: string }).phone2 ?? "",
         t.owner_mailing,
         t.property_type,
         t.year_built ?? "",

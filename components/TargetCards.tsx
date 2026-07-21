@@ -221,6 +221,69 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
   const [house, setHouse] = useState<TargetCard | null>(null);
   const [houseData, setHouseData] = useState<HouseData>({ loading: false, roof: null, storms: [] });
   const [converted, setConverted] = useState<Record<string, "working" | "done" | "error">>({});
+  // Ad-hoc "add a house" (bad roof not in the storm data)
+  const [addOpen, setAddOpen] = useState(false);
+  const [addState, setAddState] = useState<"idle" | "locating" | "listing" | "error">("idle");
+  const [candidates, setCandidates] = useState<
+    Array<TargetCard & { distance_mi: number | null; mailing?: string; property_type?: string }>
+  >([]);
+  const [added, setAdded] = useState<TargetCard[]>([]);
+
+  const findHouses = () => {
+    setAddOpen(true);
+    setAddState("locating");
+    if (!navigator.geolocation) return setAddState("error");
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        setAddState("listing");
+        try {
+          const res = await fetch(
+            `/api/admin/lookup-house?key=${encodeURIComponent(adminKey())}&near=${pos.coords.latitude.toFixed(5)},${pos.coords.longitude.toFixed(5)}`,
+          );
+          if (!res.ok) throw new Error();
+          const d = await res.json();
+          setCandidates(d.candidates ?? []);
+          setAddState("idle");
+        } catch {
+          setAddState("error");
+        }
+      },
+      () => setAddState("error"),
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 },
+    );
+  };
+
+  const addHouse = async (c: (typeof candidates)[number]) => {
+    try {
+      const res = await fetch("/api/admin/lookup-house", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: adminKey(),
+          parcel: {
+            owner_name: c.owner_name,
+            address: c.address,
+            city: c.city,
+            zip: c.zip,
+            county: (c as { county?: string }).county ?? "",
+            mailing: c.mailing ?? "",
+            property_type: c.property_type ?? "",
+            year_built: c.year_built,
+            value: c.value,
+            lat: c.lat,
+            lon: c.lon,
+          },
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const d = await res.json();
+      const t = d.target as TargetCard;
+      setAdded((a) => [t, ...a]);
+      setCandidates((cs) => cs.filter((x) => x.address !== c.address));
+    } catch {
+      /* leave it in the list to retry */
+    }
+  };
 
   const promote = async (t: TargetCard) => {
     if (converted[t.id] === "working" || converted[t.id] === "done") return;
@@ -282,10 +345,12 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
     );
   };
 
-  const showing: Array<{ t: TargetCard; mi: number | null }> =
+  const base: Array<{ t: TargetCard; mi: number | null }> =
     locState === "on" && nearTargets
       ? nearTargets.map((t) => ({ t, mi: t.distance_mi }))
       : targets.map((t) => ({ t, mi: null }));
+  // Rep-added houses always pin to the top so they can convert immediately.
+  const showing = [...added.map((t) => ({ t, mi: null })), ...base];
   const mappable = showing.filter(({ t }) => t.lat != null && t.lon != null);
 
   // Map lifecycle — init when entering map view, redraw on data/focus change.
@@ -424,6 +489,62 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
                 ? "Couldn't load nearby doors — tap to retry"
                 : "📍 Near me — show doors around where I'm standing"}
       </button>
+
+      {/* Add a house that isn't in the storm data */}
+      <button
+        onClick={findHouses}
+        className="mb-2 w-full rounded-lg border-2 border-dashed border-gray-300 px-4 py-2.5 text-sm font-bold text-gray-600"
+      >
+        ➕ See a bad roof? Add this house
+      </button>
+      {addOpen && (
+        <div className="mb-2 rounded-lg border border-gray-200 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm font-bold">
+              {addState === "locating"
+                ? "Finding your location…"
+                : addState === "listing"
+                  ? "Looking up nearby homes…"
+                  : addState === "error"
+                    ? "Couldn't look up this spot"
+                    : "Which house? (nearest first)"}
+            </span>
+            <button onClick={() => setAddOpen(false)} className="text-xs text-gray-400 underline">
+              close
+            </button>
+          </div>
+          {addState === "error" && (
+            <button onClick={findHouses} className="text-sm font-bold text-[#0c7a40] underline">
+              Retry
+            </button>
+          )}
+          <div className="space-y-1.5">
+            {candidates.map((c) => (
+              <button
+                key={c.address}
+                onClick={() => addHouse(c)}
+                className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-200 p-2.5 text-left"
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold">{c.address}</span>
+                  <span className="block truncate text-xs text-gray-500">
+                    {c.owner_name}
+                    {c.city ? ` · ${c.city}` : ""}
+                  </span>
+                </span>
+                <span className="shrink-0 text-xs font-bold text-[#0c7a40]">
+                  {c.distance_mi != null ? fmtMi(c.distance_mi) : ""} +Add
+                </span>
+              </button>
+            ))}
+            {addState === "idle" && candidates.length === 0 && added.length === 0 && (
+              <p className="text-xs text-gray-500">
+                No parcels found here — you may be outside the 11 covered counties.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* List ⇄ Map toggle */}
       <div className="mb-2 grid grid-cols-2 gap-1 rounded-lg border border-gray-200 p-1 text-center text-sm font-bold">

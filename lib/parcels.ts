@@ -53,7 +53,7 @@ function reachMi(size: number) {
 
 const clean = (s: unknown) => String(s ?? "").trim();
 
-async function queryDallasParcels(
+export async function queryDallasParcels(
   lat: number,
   lon: number,
   halfMi: number,
@@ -115,7 +115,7 @@ async function queryDallasParcels(
 
 /** Tarrant County — TAD's FeatureServer accepts 4326 envelopes directly.
  *  Gives owner + situs + year/value; mailing/city/zip come from tarrant_roll. */
-async function queryTarrantParcels(
+export async function queryTarrantParcels(
   lat: number,
   lon: number,
   halfMi: number,
@@ -174,7 +174,7 @@ function dbHeaders() {
 /** Collin/Denton/Kaufman — TxGIO StratMap parcels loaded into our own DB with
  *  centroids, so the "query" is a lat/lon box against Supabase. One call covers
  *  every DB-loaded county at once. */
-async function queryDbParcels(lat: number, lon: number, halfMi: number): Promise<ParcelHit[]> {
+export async function queryDbParcels(lat: number, lon: number, halfMi: number): Promise<ParcelHit[]> {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
   const dLat = halfMi / 69;
   const dLon = halfMi / (69 * Math.cos((lat * Math.PI) / 180));
