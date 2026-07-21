@@ -41,6 +41,168 @@ function gmapsHref(t: TargetCard) {
   )}`;
 }
 
+type HouseData = {
+  loading: boolean;
+  roof: { roofSqft: number; squares: number; pitchDeg: number | null } | null;
+  storms: Array<{ date: string; type: string; magnitude: number | null; city: string; mi: number }>;
+};
+
+/** Full-screen house dossier: satellite view of THEIR roof + measured squares
+ *  + every storm near the address. The at-the-door show piece. */
+function HouseSheet({
+  target,
+  data,
+  onClose,
+}: {
+  target: TargetCard;
+  data: HouseData;
+  onClose: () => void;
+}) {
+  const satDiv = useRef<HTMLDivElement>(null);
+  const satRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (target.lat == null || target.lon == null) return;
+    let cancelled = false;
+    import("leaflet").then((mod) => {
+      const L = (mod as any).default ?? mod;
+      if (cancelled || !satDiv.current || satRef.current) return;
+      const map = L.map(satDiv.current, { zoomControl: true, attributionControl: false }).setView(
+        [target.lat as number, target.lon as number],
+        20,
+      );
+      satRef.current = map;
+      L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        { maxNativeZoom: 19, maxZoom: 21 },
+      ).addTo(map);
+      L.circleMarker([target.lat as number, target.lon as number], {
+        radius: 10,
+        color: "#7ffbae",
+        weight: 3,
+        fill: false,
+      }).addTo(map);
+      setTimeout(() => map.invalidateSize(), 200);
+    });
+    return () => {
+      cancelled = true;
+      if (satRef.current) {
+        satRef.current.remove();
+        satRef.current = null;
+      }
+    };
+  }, [target]);
+
+  const hailStorms = data.storms.filter((s) => s.type === "hail");
+  const windStorms = data.storms.filter((s) => s.type !== "hail");
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-white">
+      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+        <div className="min-w-0">
+          <div className="truncate font-display text-base font-extrabold">{target.owner_name}</div>
+          <div className="truncate text-xs text-gray-500">
+            {target.address}
+            {target.city ? `, ${target.city}` : ""}
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          className="ml-3 shrink-0 rounded-full bg-[#0b0e13] px-4 py-2 text-sm font-bold text-white"
+        >
+          ✕ Close
+        </button>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {/* Satellite */}
+        <div ref={satDiv} className="h-[42vh] w-full" aria-label="Satellite view of the roof" />
+
+        {/* Roof measurement */}
+        <div className="border-b border-gray-100 px-4 py-3">
+          {data.loading ? (
+            <p className="text-sm text-gray-500">Measuring roof from satellite…</p>
+          ) : data.roof ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-[#0b0e13] px-3 py-1.5 text-sm font-bold text-white">
+                ~{data.roof.squares} squares
+              </span>
+              <span className="rounded-full bg-gray-100 px-3 py-1.5 text-sm text-gray-700">
+                {data.roof.roofSqft.toLocaleString()} sqft roof surface
+              </span>
+              {data.roof.pitchDeg != null && (
+                <span className="rounded-full bg-gray-100 px-3 py-1.5 text-sm text-gray-700">
+                  ~{data.roof.pitchDeg}° pitch
+                </span>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">
+              Satellite measurement unavailable for this roof — measure on-site.
+            </p>
+          )}
+          <p className="mt-1.5 text-xs text-gray-400">
+            Measured from satellite imagery (actual 3-D roof surface, +10% waste). Exact count
+            confirmed at the free inspection.
+          </p>
+        </div>
+
+        {/* Storm history */}
+        <div className="px-4 py-3">
+          <h3 className="font-display text-sm font-extrabold uppercase tracking-wide">
+            Storms near this home (12 mo)
+          </h3>
+          {data.loading ? (
+            <p className="mt-1 text-sm text-gray-500">Loading storm history…</p>
+          ) : data.storms.length === 0 ? (
+            <p className="mt-1 text-sm text-gray-500">
+              No documented reports within 10 miles in the window.
+            </p>
+          ) : (
+            <>
+              <ul className="mt-2 space-y-1.5">
+                {hailStorms.slice(0, 12).map((s, i) => (
+                  <li key={`h${i}`} className="flex items-center gap-2 text-sm">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                        (s.magnitude ?? 0) >= 1.75
+                          ? "bg-red-100 text-red-800"
+                          : (s.magnitude ?? 0) >= 1
+                            ? "bg-amber-100 text-amber-900"
+                            : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      {s.magnitude ? `${s.magnitude}″ hail` : "hail"}
+                    </span>
+                    <span className="text-gray-700">{s.date}</span>
+                    <span className="text-gray-400">
+                      {s.mi} mi away{s.city ? ` · ${s.city}` : ""}
+                    </span>
+                  </li>
+                ))}
+                {windStorms.slice(0, 5).map((s, i) => (
+                  <li key={`w${i}`} className="flex items-center gap-2 text-sm">
+                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-800">
+                      {s.type === "wind_gust" && s.magnitude ? `${s.magnitude} mph wind` : "wind damage"}
+                    </span>
+                    <span className="text-gray-700">{s.date}</span>
+                    <span className="text-gray-400">{s.mi} mi away</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 rounded-lg bg-gray-50 p-3 text-xs leading-relaxed text-gray-600">
+                Official NWS storm reports near this address. Reported hail nearby doesn&apos;t
+                guarantee damage here — the free documented inspection is how we find out, and
+                if the roof is fine we say so in writing.
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function TargetCards({ targets }: { targets: TargetCard[] }) {
   const [locState, setLocState] = useState<"off" | "locating" | "on" | "denied" | "error">("off");
   const [nearTargets, setNearTargets] = useState<NearTarget[] | null>(null);
@@ -48,6 +210,8 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
   const [me, setMe] = useState<{ lat: number; lon: number } | null>(null);
   const [view, setView] = useState<"list" | "map">("list");
   const [focusId, setFocusId] = useState<string | null>(null);
+  const [house, setHouse] = useState<TargetCard | null>(null);
+  const [houseData, setHouseData] = useState<HouseData>({ loading: false, roof: null, storms: [] });
 
   const mapDiv = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -141,7 +305,8 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
             `<b>${t.owner_name}</b><br/>${t.address}${t.city ? `, ${t.city}` : ""}` +
               `<br/>${t.hail_size_in ? `${t.hail_size_in}″ hail · ` : ""}score ${t.score}` +
               `${t.solar ? " · ☀️ solar" : ""}${mi != null ? ` · ${fmtMi(mi)} away` : ""}` +
-              `<br/><a href="${gmapsHref(t)}" target="_blank" rel="noopener">Directions ↗</a>`,
+              `<br/><a href="#" data-house-id="${t.id}"><b>🏠 Roof &amp; storm history</b></a>` +
+              ` · <a href="${gmapsHref(t)}" target="_blank" rel="noopener">Directions ↗</a>`,
           )
           .addTo(layer);
         if (isFocus) focusMarker = m;
@@ -182,6 +347,32 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
     setFocusId(id);
     setView("map");
   };
+
+  const openHouse = (t: TargetCard) => {
+    setHouse(t);
+    setHouseData({ loading: true, roof: null, storms: [] });
+    const key = new URLSearchParams(window.location.search).get("key") || "";
+    fetch(`/api/admin/house?key=${encodeURIComponent(key)}&lat=${t.lat}&lon=${t.lon}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => setHouseData({ loading: false, roof: d.roof ?? null, storms: d.storms ?? [] }))
+      .catch(() => setHouseData({ loading: false, roof: null, storms: [] }));
+  };
+
+  // Map popups are plain HTML — delegate their "roof & storms" links here.
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement)?.closest?.("[data-house-id]");
+      if (!el) return;
+      e.preventDefault();
+      const id = el.getAttribute("data-house-id");
+      const all = nearTargets ?? targets;
+      const t = all.find((x) => x.id === id);
+      if (t) openHouse(t);
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nearTargets, targets]);
 
   return (
     <div className="mt-3 md:hidden">
@@ -315,11 +506,19 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
                     ${Math.round(t.value / 1000)}k
                   </span>
                 ) : null}
+                {t.lat != null && (
+                  <button
+                    onClick={() => openHouse(t)}
+                    className="ml-auto rounded-full bg-[#0b0e13] px-3 py-1 font-bold text-white"
+                  >
+                    🏠 Roof
+                  </button>
+                )}
                 <a
                   href={gmapsHref(t)}
                   target="_blank"
                   rel="noopener"
-                  className="ml-auto text-gray-400 underline"
+                  className={`${t.lat != null ? "" : "ml-auto "}text-gray-400 underline`}
                 >
                   Directions ↗
                 </a>
@@ -327,6 +526,10 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
             </div>
           ))}
         </div>
+      )}
+
+      {house && (
+        <HouseSheet target={house} data={houseData} onClose={() => setHouse(null)} />
       )}
     </div>
   );
