@@ -26,9 +26,16 @@ export type TargetCard = {
   score: number;
   lat: number | null;
   lon: number | null;
+  phone?: string | null;
+  phone_dnc?: boolean | null;
+  status?: string;
 };
 
 type NearTarget = TargetCard & { distance_mi: number };
+
+function adminKey() {
+  return new URLSearchParams(window.location.search).get("key") || "";
+}
 
 function fmtMi(mi: number) {
   if (mi < 0.19) return `${Math.round(mi * 5280)} ft`;
@@ -213,6 +220,28 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
   const [focusId, setFocusId] = useState<string | null>(null);
   const [house, setHouse] = useState<TargetCard | null>(null);
   const [houseData, setHouseData] = useState<HouseData>({ loading: false, roof: null, storms: [] });
+  const [converted, setConverted] = useState<Record<string, "working" | "done" | "error">>({});
+
+  const promote = async (t: TargetCard) => {
+    if (converted[t.id] === "working" || converted[t.id] === "done") return;
+    setConverted((c) => ({ ...c, [t.id]: "working" }));
+    try {
+      const res = await fetch("/api/admin/promote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: adminKey(), id: t.id }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      setConverted((c) => ({ ...c, [t.id]: "done" }));
+    } catch {
+      setConverted((c) => ({ ...c, [t.id]: "error" }));
+    }
+  };
+
+  const convertState = (t: TargetCard): "idle" | "working" | "done" | "error" =>
+    converted[t.id] === "done" || t.status === "converted"
+      ? "done"
+      : (converted[t.id] ?? "idle");
 
   const mapDiv = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -507,10 +536,48 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
                     ${Math.round(t.value / 1000)}k
                   </span>
                 ) : null}
+              </div>
+              {/* Phone row — only when skip-traced and callable */}
+              {t.phone && !t.phone_dnc && (
+                <a
+                  href={`tel:${t.phone}`}
+                  className="mt-2 block rounded-lg border border-[#0c7a40] py-2 text-center text-sm font-bold text-[#0c7a40]"
+                >
+                  📞 Call {t.phone.replace(/(\d{3})(\d{3})(\d{4})$/, "($1) $2-$3")}
+                </a>
+              )}
+              {t.phone && t.phone_dnc && (
+                <p className="mt-2 rounded-lg bg-red-50 px-3 py-1.5 text-center text-xs font-semibold text-red-700">
+                  ⛔ Do-Not-Call list — knock or mail only
+                </p>
+              )}
+              {/* Actions */}
+              <div className="mt-2 flex items-center gap-2 text-xs">
+                <button
+                  onClick={() => promote(t)}
+                  disabled={convertState(t) !== "idle" && convertState(t) !== "error"}
+                  className={`flex-1 rounded-lg py-2.5 text-sm font-bold ${
+                    convertState(t) === "done"
+                      ? "bg-green-600 text-white"
+                      : convertState(t) === "working"
+                        ? "bg-gray-300 text-gray-600"
+                        : convertState(t) === "error"
+                          ? "bg-red-600 text-white"
+                          : "bg-[#0c7a40] text-white"
+                  }`}
+                >
+                  {convertState(t) === "done"
+                    ? "✓ Lead created"
+                    : convertState(t) === "working"
+                      ? "Converting…"
+                      : convertState(t) === "error"
+                        ? "Failed — tap to retry"
+                        : "Convert to lead"}
+                </button>
                 {t.lat != null && (
                   <button
                     onClick={() => openHouse(t)}
-                    className="ml-auto rounded-full bg-[#0b0e13] px-3 py-1 font-bold text-white"
+                    className="rounded-lg bg-[#0b0e13] px-3 py-2.5 font-bold text-white"
                   >
                     🏠 Roof
                   </button>
@@ -519,7 +586,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
                   href={gmapsHref(t)}
                   target="_blank"
                   rel="noopener"
-                  className={`${t.lat != null ? "" : "ml-auto "}text-gray-400 underline`}
+                  className="text-gray-400 underline"
                 >
                   Directions ↗
                 </a>

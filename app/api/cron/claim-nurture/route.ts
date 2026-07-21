@@ -5,6 +5,7 @@ import { runStormWatch } from "@/lib/storm";
 import { runSolarPermitSync } from "@/lib/solarPermits";
 import { generateStormTargets } from "@/lib/parcels";
 import { runStormContactTasks } from "@/lib/hubspotStorm";
+import { runSkipTrace } from "@/lib/skiptrace";
 
 /**
  * Drop-off nurture for claim-prep. Run on a schedule (e.g. hourly) — a Render
@@ -38,6 +39,8 @@ export async function POST(req: Request) {
   const targetsYday = await generateStormTargets(yesterday);
   // Fresh hail near an existing HubSpot contact → HIGH-priority call task.
   const hubspotTasks = await runStormContactTasks();
+  // Skip-trace the highest-score untraced targets (no-op until BATCHDATA_API_KEY).
+  const skiptrace = await runSkipTrace();
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
@@ -79,5 +82,6 @@ export async function POST(req: Request) {
     solar,
     targets: { today: targetsToday, yesterday: targetsYday },
     hubspotTasks,
+    skiptrace,
   });
 }

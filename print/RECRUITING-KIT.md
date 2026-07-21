@@ -5,27 +5,25 @@ All roads lead to **poweredgetx.com/careers** (60-second apply, no résumé). Ap
 
 ## 1. Indeed / ZipRecruiter job post (full description)
 **Title:** Roofing Sales Representative, Storm Restoration (Weekly Pay)
-**Pay field:** $60,000 - $180,000 a year · Commission
+**Pay field:** $60,000 - $250,000 a year · Commission (top producers at 5-8 roofs/month clear $20K+/month in storm season — the math is in the description)
 **Job type:** Contract (1099) · Commission · Full-time or part-time
-**Location:** Dallas-Fort Worth metroplex (field-based)
+**Location:** post separately in Dallas · Fort Worth · Arlington · Plano · Garland (Indeed treats each as a local job — split the sponsor budget across them)
 
-### The deal, up front
-You already know how to sell roofs. The question is whether your shop deserves you.
+### We hand you the doors. You close them.
+Our storm engine maps every hail report to the street, hands you homeowner names inside the damage path, measures the roof from satellite while you're standing on the porch, and runs a 60-second claim check that opens doors for you. Inbound leads from our website and ads route to reps who close. Full training on the roofing side — if you can sell, we'll teach you storms and shingles fast. You'll see the tool in your interview; no other DFW shop has it.
 
-- **50% of gross profit on self-generated deals.** A typical DFW roof pays **$4,000-$6,500 in commission**
+- **50% of gross profit on self-generated deals.** A typical DFW roof pays **$4,000-$6,500 in commission** — no commission cap
 - **Paid weekly, with a large share at the FIRST insurance check.** Not months later at completion
 - **A floor on every approved roof.** A win never pays zero, even on a thin deal
 - **Protected territory.** We don't stack ten reps on the same street
 - **Ground floor.** We're scaling fast; early reps pick territory and inherit the org chart
 
-Reps closing 2-3 roofs a month typically earn **$9K-$13K/month**; storm-season producers run well beyond that. We'll walk you through the full deal math in the interview. Bring a calculator and pressure-test us.
+The math, straight: reps closing 2-3 roofs a month typically earn **$9K-$13K/month**. Storm-season producers running 5-8 roofs a month clear **$20K+/month** — that's the top of the posted range, and we'll walk you through every number in the interview. Bring a calculator and pressure-test us.
 
 ### Why experienced reps move here
 - **Supplementing is dialed in.** Your commission is 50% of gross profit, so we fight for the full scope, not the adjuster's first offer. Starter, drip edge, I&W, ridge vent: documented and claimed. Your GP reflects the real job.
 - **Builds run fast.** Four crews, capacity for ~100 roofs a month. Fast builds mean your back-half commissions release fast. No six-month pipeline of unpaid deals.
 - **No games.** No house-account skimming, no surprise chargebacks, no "the check's coming." Weekly means weekly.
-- **The tech actually closes.** Storm data maps hail by street so you knock where damage is. At the door: a 60-second claim check against NWS records, satellite roof measurement, and deductible financing from $250 down to kill the cost objection.
-- **Inbound feeds producers.** Website, ads, and tracked door-hanger QR codes route leads to reps who close.
 - **A brand that protects your name.** Licensed and insured, 4.7★ on Google, and known for telling homeowners the truth, even "your roof is fine." Your customers refer; your commissions stay clean.
 
 ### The role
@@ -42,7 +40,7 @@ Door-to-door storm restoration sales across DFW: canvass storm-hit neighborhoods
 Top producers move into **team lead / sales manager** with base pay plus an override on team gross profit. Already running a team? Bring it. Let's talk overrides and territory before the org chart fills.
 
 ### How to apply
-60 seconds, no résumé: **poweredgetx.com/careers** or text **469-277-9594**. We respond fast; come ready to talk numbers.
+Tap **Apply now** right here — takes 60 seconds, no résumé needed. We respond same-day; come ready to talk numbers. Questions first? Text **469-277-9594**.
 
 *PowerEdge (Power Edge, LLC) engages sales representatives as independent contractors (1099). Commission figures are illustrative examples, not guarantees; earnings depend on individual production. We consider all applicants without regard to race, color, religion, sex, national origin, age, disability, or veteran status.*
 

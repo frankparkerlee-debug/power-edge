@@ -386,6 +386,9 @@ export default async function AdminStormsPage({
                 score: t.score,
                 lat: t.lat ?? null,
                 lon: t.lon ?? null,
+                phone: t.phone ?? null,
+                phone_dnc: t.phone_dnc ?? null,
+                status: t.status,
               }))}
             />
             {/* Desktop: full table */}

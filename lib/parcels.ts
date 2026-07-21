@@ -360,7 +360,9 @@ export async function generateStormTargets(
         solar_source: solar ? "permit" : null,
         absentee,
         score: Math.round(score * 10) / 10,
-        status: "new",
+        // NOTE: no `status` here on purpose — new rows get the column default
+        // ('new'), and merge-duplicates re-runs must never clobber rep statuses
+        // (converted/knocked/dnc) or skip-traced phones.
       };
     });
 
@@ -408,6 +410,8 @@ export type StormTargetRow = {
   status: string;
   lat: number | null;
   lon: number | null;
+  phone: string | null;
+  phone_dnc: boolean | null;
 };
 
 export async function listStormTargets(
