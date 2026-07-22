@@ -8,7 +8,7 @@ import { CtaBand } from "@/components/blocks";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Solar Installer Out of Business? DFW Solar Repair & Service | PowerEdge",
+  title: "Solar Installer Out of Business? DFW Solar Repair & Service",
   description:
     "Your solar installer went bankrupt or disappeared? We're a licensed Texas electrical contractor that services, repairs, and supports any solar system across Dallas–Fort Worth — plus safe panel removal & reinstall for a new roof. Free assessment.",
 };

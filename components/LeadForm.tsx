@@ -130,6 +130,20 @@ export function LeadForm({
             <option value="" disabled>
               What do you need?
             </option>
+            {/* A page can pass a defaultService that isn't in the standard menu
+                (e.g. "Orphaned solar service"). Surface it as a real, selected
+                option so the lead submits with the right service, not the first
+                roofing item. */}
+            {defaultService &&
+              !services.some((s) => s.short === defaultService) &&
+              ![
+                "Storm / insurance claim",
+                "Financing / stuck on out-of-pocket",
+                "Emergency",
+                "Other",
+              ].includes(defaultService) && (
+                <option value={defaultService}>{defaultService}</option>
+              )}
             {services.map((s) => (
               <option key={s.slug} value={s.short}>
                 {s.title}
