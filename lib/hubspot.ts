@@ -157,9 +157,11 @@ export async function pushLeadToHubspot(lead: HubspotLead) {
       hs_lead_status: "NEW",
       lead_type: isRep
         ? "rep_applicant"
-        : /commercial/i.test(lead.service || "")
-          ? "commercial"
-          : "homeowner",
+        : /orphan|solar service/i.test(lead.service || "")
+          ? "solar_orphan"
+          : /commercial/i.test(lead.service || "")
+            ? "commercial"
+            : "homeowner",
     };
     if (email) properties.email = email;
     if (solarHome) properties.solar_home = "true";
