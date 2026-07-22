@@ -13,10 +13,15 @@ All roads lead to **poweredgetx.com/careers** (60-second apply, no résumé). Ap
 Our storm engine maps every hail report to the street, hands you homeowner names inside the damage path, measures the roof from satellite while you're standing on the porch, and runs a 60-second claim check that opens doors for you. Inbound leads from our website and ads route to reps who close. Full training on the roofing side — if you can sell, we'll teach you storms and shingles fast. You'll see the tool in your interview; no other DFW shop has it.
 
 - **50% of gross profit on self-generated deals.** A typical DFW roof pays **$4,000-$6,500 in commission** — no commission cap
-- **Paid weekly, with a large share at the FIRST insurance check.** Not months later at completion
+- **Accelerator: 55% of gross profit from your 6th self-gen roof each month.** Producers get paid like producers
+- **Forgivable ramp draw for proven closers: $600/week for your first 6 weeks.** Close 4 approved roofs by week 8 and the draw is FORGIVEN — you keep it on top of commissions. Switching shops shouldn't cost you a month of income
+- **Paid weekly: 50% of your commission at the FIRST insurance check, 50% at completion.** Not months later
 - **A floor on every approved roof.** A win never pays zero, even on a thin deal
 - **Protected territory.** We don't stack ten reps on the same street
 - **Ground floor.** We're scaling fast; early reps pick territory and inherit the org chart
+
+### Do the math against your current shop
+Most storm shops run a 10/50/50: they skim 10% of revenue "for overhead," pad the cost sheet, then split what's left. On a $16,800 roof that nets you about $3,710. Our math on the same roof: revenue minus a FIXED $275-per-square cost basis, published in writing, times 50% = **$4,550. About 23% more on the identical roof.** Ask your shop two questions: what's the redline, and who sets it. Ours doesn't move after you sell — and every deal is logged and attributed in the app the moment you close it, so nobody can take a deal off your sheet.
 
 The math, straight: reps closing 2-3 roofs a month typically earn **$9K-$13K/month**. Storm-season producers running 5-8 roofs a month clear **$20K+/month** — that's the top of the posted range, and we'll walk you through every number in the interview. Bring a calculator and pressure-test us.
 
@@ -77,5 +82,7 @@ Licensed & insured, 4.7★ on Google, real production capacity (4 crews, ~100 ro
 
 ## Compliance notes
 - Reps are 1099 independent contractors — never promise wages/guaranteed income in posts (floor = per-approved-roof, contingent on production).
+- COUNSEL BEFORE FIRST HIRE: the forgivable draw must be papered as an "advance against commissions" with the forgiveness condition in the contractor agreement — draws/stipends are the classification-risk pieces of the comp plan. One hour of lawyer wording protects the whole structure.
+- Pressure-test the $275/sq cost basis against a month of real job costs (Ernesto) before scaling the accelerator — the "fixed redline in writing" promise only works if the redline is real.
 - Don't solicit a competitor's CUSTOMER lists or induce breach of enforceable non-competes; have each hire confirm they're unencumbered (counsel).
 - Meta/Indeed ads run under EMPLOYMENT rules — no age/gender/zip micro-targeting (already handled in the campaign build).

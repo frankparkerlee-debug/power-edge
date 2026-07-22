@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const faqs = [
   {
     q: "Is this commission-only?",
-    a: "Yes — this is a 1099, commission-only role built for closers. But you're never at zero on a win: every approved roof carries a floor, and experienced reps can get a short ramp guarantee while they build a pipeline.",
+    a: "Yes — 1099, commission-only, built for closers. But switching shops shouldn't cost you a month of income: proven closers get a $600/week ramp draw for the first 6 weeks, and if you close 4 approved roofs by week 8 the draw is forgiven — you keep it on top of your commissions. And every approved roof carries a floor, so a win never pays zero.",
   },
   {
     q: "When do I get paid?",
@@ -52,7 +52,11 @@ const perks = [
   },
   {
     h: "Real earnings, real ceiling",
-    p: "Up to 50% of gross profit on your own deals, plus retail work to keep income steady between storms.",
+    p: "50% of gross profit on your own deals against a fixed, published cost basis — and 55% from your 6th roof each month. No overhead skim, no moving redline, no cap.",
+  },
+  {
+    h: "A ramp that respects closers",
+    p: "$600/week forgivable draw for your first 6 weeks. Close 4 approved roofs by week 8 and you keep the draw on top of your commissions.",
   },
   {
     h: "A path up",
@@ -83,10 +87,10 @@ export default function CareersPage() {
 
             <ul className="mt-8 space-y-3 text-fg-inv-dim">
               {[
-                "Paid at the first check, weekly — no commission games",
-                "A floor on every approved roof, plus ramp support to start",
-                "Storm-targeted leads + protected territory",
-                "Instant claim check, satellite measurement, deductible financing",
+                "50% of gross profit — 55% from your 6th roof each month",
+                "$600/wk forgivable ramp draw for proven closers",
+                "Paid weekly at the first check, plus a floor on every approved roof",
+                "Storm-mapped doors with owner names + satellite roof measurement",
               ].map((b) => (
                 <li key={b} className="flex gap-3">
                   <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bolt">
