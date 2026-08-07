@@ -23,6 +23,26 @@ export async function POST(req: Request) {
   const completed = body.completed === true || body.completed === "true";
   const stage = Number(body.stage) || 1;
 
+  // --- Spam guard -----------------------------------------------------------
+  // The bots hammering this endpoint have a clean fingerprint: honeypot ignored,
+  // instant submit, gibberish name, and a one-word address with NO house number.
+  // Real storm leads always have a street number. We drop obvious bots BEFORE
+  // any DB write or email, and return ok:true so bots don't learn what tripped.
+  const elapsed = Number(body.form_elapsed_ms) || 0;
+  const addr = s("address");
+  const nameVal = s("name");
+  const consonantRun = /[bcdfghjklmnpqrstvwxz]{5,}/i.test(nameVal.replace(/\s/g, ""));
+  const spamReasons: string[] = [];
+  if (s("company_website")) spamReasons.push("honeypot"); // hidden field bots fill
+  if (elapsed > 0 && elapsed < 2500) spamReasons.push("too-fast");
+  if (consonantRun) spamReasons.push("gibberish-name");
+  // At the notify/complete step the address must contain a house number.
+  if (completed && stage >= 2 && addr && !/\d/.test(addr)) spamReasons.push("no-street-number");
+  if (spamReasons.length > 0) {
+    console.warn("[claim-intake] dropped spam:", spamReasons.join(","), "| name:", nameVal);
+    return NextResponse.json({ ok: true });
+  }
+
   // Full view (defaults) — used for the notification emails.
   const intake = {
     id,

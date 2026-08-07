@@ -59,6 +59,10 @@ export function ClaimPrep() {
   const [step, setStep] = useState<Step>("1");
   const [saving, setSaving] = useState(false);
   const [d, setD] = useState<Data>(empty);
+  // Anti-spam: honeypot (bots fill hidden fields) + start time (bots submit
+  // instantly). Neither is visible to a real homeowner.
+  const [hp, setHp] = useState("");
+  const [startedAt] = useState(() => Date.now());
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
@@ -108,6 +112,8 @@ export function ClaimPrep() {
           id,
           stage,
           completed,
+          company_website: hp, // honeypot — must stay empty
+          form_elapsed_ms: Date.now() - startedAt,
         }),
       });
     } catch {
@@ -124,8 +130,22 @@ export function ClaimPrep() {
     </p>
   );
 
+  const Honeypot = () => (
+    <input
+      type="text"
+      name="company_website"
+      tabIndex={-1}
+      autoComplete="off"
+      aria-hidden="true"
+      value={hp}
+      onChange={(e) => setHp(e.target.value)}
+      className="absolute left-[-9999px] h-0 w-0 opacity-0"
+    />
+  );
+
   const Progress = ({ n }: { n: number }) => (
     <div className="mb-5">
+      <Honeypot />
       <div className="flex justify-between text-xs font-semibold uppercase tracking-wider text-fg-inv-dim">
         <span>Step {n} of 3</span>
         <span>{n === 1 ? "Your home & the storm" : n === 2 ? "Damage & scheduling" : "Policy details (optional)"}</span>
