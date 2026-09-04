@@ -4,7 +4,7 @@ import { services } from "@/lib/services";
 
 /**
  * LocalBusiness structured data (JSON-LD). Uses the precise schema.org subtypes
- * (RoofingContractor + Electrician under HomeAndConstructionBusiness) carrying
+ * (RoofingContractor under HomeAndConstructionBusiness) carrying
  * NAP, areaServed, rating, and a service catalog — the markup that aids normal
  * SEO rich-result eligibility and gives engines clean entity data.
  * Rendered once in the root layout.
@@ -13,7 +13,7 @@ export function Schema() {
   const logo = `${site.url}/brand/poweredge-icon.png`;
   const data = {
     "@context": "https://schema.org",
-    "@type": ["RoofingContractor", "Electrician"],
+    "@type": ["RoofingContractor", "HomeAndConstructionBusiness"],
     "@id": `${site.url}/#business`,
     name: site.legalName,
     legalName: site.legalEntity,
@@ -24,7 +24,7 @@ export function Schema() {
     email: site.email,
     priceRange: "$$",
     description:
-      "Storm-first Dallas–Fort Worth roofing company: roof repair, replacement, hail/storm insurance-claim documentation, deductible financing, and in-house solar detach & reset — backed by a licensed Texas electrical contractor.",
+      "Storm-first Dallas–Fort Worth roofing company: roof repair, replacement, hail/storm insurance-claim documentation, deductible financing, and in-house solar detach & reset for existing systems.",
     areaServed: cities.map((c) => ({
       "@type": "City",
       name: `${c.name}, TX`,
@@ -40,10 +40,10 @@ export function Schema() {
       reviewCount: site.googleReviewCount,
       bestRating: "5",
     },
-    hasCredential: `Licensed & insured Texas electrical contractor`,
+    hasCredential: `Licensed & insured`,
     hasOfferCatalog: {
       "@type": "OfferCatalog",
-      name: "Roofing, electrical & solar services",
+      name: "Roofing, home repair & solar services",
       itemListElement: services.map((s) => ({
         "@type": "Offer",
         itemOffered: {
@@ -60,7 +60,7 @@ export function Schema() {
       "Storm damage restoration",
       "Roof deductible financing",
       "Solar panel detach and reset",
-      "Commercial roofing and electrical",
+      "Commercial roofing",
     ],
   };
 

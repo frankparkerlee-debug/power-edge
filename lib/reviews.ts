@@ -23,18 +23,6 @@ export const reviews: Review[] = [
   },
   {
     quote:
-      "Hands down the best electricians in Dallas. From the people, to the service and most importantly the quality of work.",
-    author: "Matthew B.",
-    detail: "Verified Google review",
-  },
-  {
-    quote:
-      "He handled everything and was very honest and hardworking. I would highly recommend him… Pricing was reasonable and feasible for our breaker box problem.",
-    author: "Shawn W.",
-    detail: "Verified Google review",
-  },
-  {
-    quote:
       "He did the best he could to be as fast as possible while still giving the best service and doing the job right. I would definitely recommend to friends and family!",
     author: "Leanne G.",
     detail: "Verified Google review",

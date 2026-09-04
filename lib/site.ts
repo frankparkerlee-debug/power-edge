@@ -5,7 +5,7 @@ export const site = {
   name: "PowerEdge",
   legalName: "PowerEdge Electric & Roofing",
   legalEntity: "Power Edge, LLC", // registered entity (formerly Solar Shield LLC) — used in legal/SMS copy
-  tagline: "Roofing and electrical, under one license you can actually verify.",
+  tagline: "Roofing and home repair, done by a licensed, insured team you can actually verify.",
   // Primary + secondary lines pulled from the current live site.
   phone: "469-277-9594",
   phoneHref: "tel:+14692779594",
@@ -58,7 +58,6 @@ export const site = {
   capacity: {
     crews: 4,
     roofsPerMonth: 100,
-    electricians: 15,
   },
 
   serviceArea:

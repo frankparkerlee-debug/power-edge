@@ -4,9 +4,9 @@ import { PageHero, CtaBand } from "@/components/blocks";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "About — Licensed Roofing & Electrical in Texas",
+  title: "About — Licensed & Insured Roofing & Home Repair in Texas",
   description:
-    "PowerEdge is a licensed, insured Texas electrical contractor that also does roofing and solar repair across DFW. Meet the team behind the work.",
+    "PowerEdge is a licensed, insured company doing roofing, home repair, and solar repair across DFW. Meet the team behind the work.",
 };
 
 export default function AboutPage() {
@@ -29,17 +29,16 @@ export default function AboutPage() {
             />
             <div className="mt-6 space-y-4 text-fg-dim">
               <p>
-                PowerEdge serves the Dallas–Fort Worth metroplex with two
-                trades under one roof: licensed electrical work and roofing.
-                That combination isn&apos;t common — and it&apos;s deliberate.
+                PowerEdge serves the Dallas–Fort Worth metroplex as a
+                licensed, insured roofing and home repair contractor.
+                Texas doesn&apos;t require a state license to call yourself a
+                roofer — so we hold ourselves to the standard anyway.
               </p>
               <p>
-                Electrical and solar work legally require a Master
-                Electrician&apos;s license in Texas. Roofing doesn&apos;t require
-                anything. By running both under our electrical license and a
-                seasoned roofing project manager, every job — whether it&apos;s
-                a panel upgrade or a full re-roof — answers to the same
-                standard.
+                Every job runs under the same accountable company: a
+                seasoned roofing project manager on every crew, a documented
+                1-year workmanship guarantee, and $2,000,000 in liability
+                coverage behind the work.
               </p>
               <p>
                 We&apos;ll be straight with you: our service slipped at the end
@@ -56,10 +55,10 @@ export default function AboutPage() {
             <div className="mt-5 space-y-4">
               <div className="rounded-md border border-line bg-ink-2 p-5">
                 <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
-                  Licensed &amp; insured
+                  Capacity
                 </div>
                 <div className="mt-1 font-display text-2xl font-extrabold text-bolt">
-                  Master Electrician · 40 yrs
+                  {site.capacity.crews} crews · {site.capacity.roofsPerMonth} roofs/mo
                 </div>
               </div>
               <div className="rounded-md border border-line bg-ink-2 p-5">

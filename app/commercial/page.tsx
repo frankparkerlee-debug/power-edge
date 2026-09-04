@@ -15,9 +15,9 @@ const service = getService("commercial")!;
 const content = getServiceContent("commercial")!;
 
 export const metadata: Metadata = {
-  title: "Commercial Roofing & Electrical in DFW",
+  title: "Commercial Roofing in DFW",
   description:
-    "One licensed partner for commercial roofing and electrical across Dallas–Fort Worth. Property managers and business owners get scheduled, documented, warrantied work with a single point of contact.",
+    "One licensed, insured partner for commercial roofing across Dallas–Fort Worth. Property managers and business owners get scheduled, documented, warrantied work with a single point of contact.",
 };
 
 export default function CommercialPage() {
@@ -25,8 +25,8 @@ export default function CommercialPage() {
     <>
       <PageHero
         kicker="Commercial · Property managers"
-        title="One licensed partner for your roof and your electrical."
-        intro="Property managers and business owners shouldn't juggle two contractors. PowerEdge covers commercial roofing and electrical under one accountable team — scheduled around your operation and documented for your records."
+        title="One licensed, insured partner for your roof."
+        intro="Property managers and business owners shouldn't have to chase down a contractor. PowerEdge covers commercial roofing under one accountable team — scheduled around your operation and documented for your records."
         badge="Request a commercial quote"
         withForm
       />
@@ -37,7 +37,7 @@ export default function CommercialPage() {
         <Container>
           <SectionHeading
             kicker="Built for business"
-            title="Roofing and electrical, on your schedule."
+            title="Commercial roofing, on your schedule."
             intro={service.blurb}
           />
           <div className="mt-10">
@@ -58,7 +58,7 @@ export default function CommercialPage() {
             {[
               {
                 h: "Single point of contact",
-                p: "One number for roofing and electrical — no chasing two trades.",
+                p: "One number, one crew, no chasing subcontractors.",
               },
               {
                 h: "Documented & warrantied",
@@ -99,7 +99,7 @@ export default function CommercialPage() {
 
       <CtaBand
         heading="Let's scope your property."
-        sub="Tell us about your building and we'll put together a plan for the roof, the electrical, or both."
+        sub="Tell us about your building and we'll put together a plan for the roof."
       />
     </>
   );

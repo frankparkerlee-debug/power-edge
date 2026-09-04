@@ -22,7 +22,7 @@ export function HonestyStandard({ className = "" }: { className?: string }) {
     },
     {
       h: "A real, accountable company",
-      p: `Texas doesn't license roofers, so anyone can claim to be one. We're a licensed, insured electrical contractor with a 40-year Master Electrician — not a magnet sign on a truck.`,
+      p: `Texas doesn't license roofers, so anyone can claim to be one. We're a licensed, insured company with $2,000,000 in liability coverage and a 1-year workmanship guarantee — not a magnet sign on a truck.`,
     },
   ];
   return (

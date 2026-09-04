@@ -68,7 +68,7 @@ export function PageHero({
 /** Bottom-of-page lead capture band, reused across interior pages. */
 export function CtaBand({
   heading = "Tell us what's going on.",
-  sub = "Free roof inspection, up-front electrical pricing, and a real person on the phone.",
+  sub = "Free roof inspection, upfront pricing, and a real person on the phone.",
 }: {
   heading?: string;
   sub?: string;

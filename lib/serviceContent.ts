@@ -33,7 +33,7 @@ export const serviceContent: Record<string, Content> = {
     faqs: [
       {
         q: "Do I need a licensed contractor for a roof in Texas?",
-        a: "Texas doesn't license roofers — anyone can claim to be one, which is exactly the problem. PowerEdge is a licensed, insured electrical contractor, so you're hiring an accountable company, not a fly-by-night crew.",
+        a: "Texas doesn't license roofers — anyone can claim to be one, which is exactly the problem. PowerEdge is a licensed, insured company backed by $2,000,000 in liability coverage, so you're hiring an accountable business, not a fly-by-night crew.",
       },
       {
         q: "Will you help with my insurance claim?",
@@ -50,49 +50,6 @@ export const serviceContent: Record<string, Content> = {
       {
         q: "Do you do repairs, or only full replacements?",
         a: "Both. If a repair is the honest fix, we'll tell you — we don't push a replacement you don't need.",
-      },
-    ],
-  },
-
-  electrical: {
-    process: [
-      {
-        title: "Book a service call",
-        desc: "Call or request online and we get a licensed electrician scheduled fast — often the same day.",
-      },
-      {
-        title: "Diagnose & quote",
-        desc: "We find the actual problem and give you a written, flat-rate price before any work starts.",
-      },
-      {
-        title: "Fix it right",
-        desc: "Work is done to code under our Master Electrician's license — permitted and inspection-ready where required.",
-      },
-      {
-        title: "Verify & guarantee",
-        desc: "We test the work, clean up, and back it with our workmanship guarantee.",
-      },
-    ],
-    faqs: [
-      {
-        q: "Are your electricians licensed?",
-        a: "Yes. All work runs under John Lott's 40-year Master Electrician license and $2,000,000 in liability coverage.",
-      },
-      {
-        q: "Do you charge for an estimate?",
-        a: "Service calls carry a flat $89 diagnostic fee, waived if you book the repair the same visit. Larger jobs like panel upgrades get a free on-site quote.",
-      },
-      {
-        q: "How much is a panel upgrade?",
-        a: "A like-for-like panel swap starts around $1,850, and a 100A-to-200A service upgrade around $2,650 with permit included. You get a firm price after a free assessment.",
-      },
-      {
-        q: "Can you install an EV charger?",
-        a: "Yes. A dedicated 240V Level 2 charger circuit starts around $695, depending on the run length and your panel's capacity.",
-      },
-      {
-        q: "Do you offer same-day service?",
-        a: "For most service and repair calls, yes — a dead outlet or a tripping breaker isn't something you should have to wait days for.",
       },
     ],
   },
@@ -144,15 +101,15 @@ export const serviceContent: Record<string, Content> = {
     process: [
       {
         title: "Walk the property",
-        desc: "We assess your roof, your electrical, or both, and put together a documented scope of work.",
+        desc: "We assess your roof and put together a documented scope of work.",
       },
       {
         title: "Scheduled around you",
         desc: "Work is planned around your operating hours to minimize disruption to your business.",
       },
       {
-        title: "One accountable team",
-        desc: "One contractor and one point of contact for both trades — no coordinating separate subs.",
+        title: "One accountable crew",
+        desc: "One contractor and one point of contact from start to finish — no coordinating separate subs.",
       },
       {
         title: "Documented & warrantied",
@@ -162,15 +119,11 @@ export const serviceContent: Record<string, Content> = {
     faqs: [
       {
         q: "Do you work with property managers?",
-        a: "Yes — property managers and business owners are core to what we do, with a single point of contact across roofing and electrical.",
-      },
-      {
-        q: "Can you handle both roofing and electrical?",
-        a: "That's the whole point. One licensed team covers both trades, so there's no finger-pointing when a roof penetration meets your wiring.",
+        a: "Yes — property managers and business owners are core to what we do, with a single point of contact for all of your roofing needs.",
       },
       {
         q: "Do you offer emergency service?",
-        a: "Yes — 24/7 emergency response for electrical and roofing failures.",
+        a: "Yes — 24/7 emergency response for roofing failures.",
       },
       {
         q: "Can you service multiple locations?",
@@ -178,7 +131,7 @@ export const serviceContent: Record<string, Content> = {
       },
       {
         q: "Are you licensed and insured for commercial work?",
-        a: "Yes — licensed Texas electrical contractor, backed by $2,000,000 in liability coverage.",
+        a: "Yes — licensed & insured, backed by $2,000,000 in liability coverage.",
       },
     ],
   },

@@ -47,7 +47,7 @@ export default function RoofCheckPage() {
           </ul>
 
           <p className="mt-8 text-sm text-fg-inv-dim">
-            Licensed & insured Texas electrical contractor · Rated {site.googleRating}★
+            Licensed & insured, {site.liabilityCoverage} coverage · Rated {site.googleRating}★
           </p>
         </div>
 

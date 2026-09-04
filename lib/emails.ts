@@ -78,7 +78,7 @@ function verifyChip() {
       <td style="font-family:${FONT};font-size:13px;color:${MUTED};line-height:1.5;">
         <strong style="color:${TEXT};">Licensed & insured in Texas.</strong>
         Roofing is unlicensed statewide, so anyone can knock after a storm — we're
-        a real, accountable company backed by a 40-year Master Electrician.
+        a real, accountable company backed by ${site.liabilityCoverage} in liability coverage.
         <br/><span style="color:${MUTED};">${stars()}</span>
       </td>
     </tr>
@@ -268,12 +268,12 @@ export const leadSequence: SequenceEmail[] = [
           `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:4px 0 8px;">
             ${[
               [
-                "A license you can actually check",
-                `Backed by a 40-year Master Electrician and ${site.liabilityCoverage} in liability coverage — a real company standing behind the work.`,
+                "Licensed & insured",
+                `Backed by ${site.liabilityCoverage} in liability coverage and a documented 1-year workmanship guarantee — a real company standing behind the work.`,
               ],
               [
                 "One accountable crew",
-                "Roof and the electrical it touches, handled in-house — no subcontractor finger-pointing.",
+                "Your roof handled in-house, start to finish — no subcontractor finger-pointing.",
               ],
               [
                 "Capacity to actually show up",
@@ -385,7 +385,7 @@ export const leadSequence: SequenceEmail[] = [
             `After a storm your street fills with trucks and clipboards. The uncomfortable truth: <strong>Texas doesn&rsquo;t license roofers</strong> — a magnet sign and a ladder is the whole barrier to entry, and plenty vanish before the warranty ever matters.`,
           ) +
           p(
-            `We&rsquo;re the opposite kind of company: a licensed, insured electrical contractor, ${site.googleRating}&#9733; across ${site.googleReviewCount} reviews, one accountable crew for your whole roof${
+            `We&rsquo;re the opposite kind of company: licensed and insured, ${site.googleRating}&#9733; across ${site.googleReviewCount} reviews, one accountable crew for your whole roof${
               c.solar ? " — solar included" : ""
             }. Verify us before you trust anyone knocking.`,
           ) +

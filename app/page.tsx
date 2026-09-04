@@ -129,8 +129,8 @@ function Hero() {
             </span>
             <span className="h-4 w-px bg-line" />
             <span>
-              <strong className="text-fg-inv">40-year</strong> master
-              electrician
+              <strong className="text-fg-inv">20-year</strong> roofing
+              project manager
             </span>
             <span className="h-4 w-px bg-line" />
             <span>
@@ -203,16 +203,16 @@ function TrustBar() {
 function Wedge() {
   const bullets = [
     {
-      h: "We're licensed where it counts",
-      p: `Backed by John Lott's 40-year Master Electrician license and $2,000,000 in liability coverage — a real, accountable company, not a fly-by-night storm crew.`,
+      h: "We're licensed & insured",
+      p: `Backed by $2,000,000 in liability coverage and a documented 1-year workmanship guarantee — a real, accountable company, not a fly-by-night storm crew.`,
     },
     {
-      h: "Two trades, one accountable team",
-      p: "Roof and electrical handled in-house — no subcontractor finger-pointing when your roof penetration meets your wiring.",
+      h: "One accountable crew",
+      p: "Our own crews handle your roof, inspection to final walk — no subcontractor finger-pointing.",
     },
     {
       h: "Built to show up, not just sign you up",
-      p: "Four crews and 15 electricians mean we have the capacity to actually be there this week — not in a month.",
+      p: "Four crews and capacity for up to 100 roofs a month mean we can actually be there this week — not in a month.",
     },
     {
       h: "We'll tell you if your roof is fine",
@@ -226,7 +226,7 @@ function Wedge() {
           <SectionHeading
             kicker="Why PowerEdge"
             title="The one contractor you can actually verify."
-            intro="Texas doesn't license roofers. Anyone with a ladder and a magnet sign can knock your door after a storm. But electrical and solar work legally require a Master Electrician's license — and that's exactly what we're built on."
+            intro="Texas doesn't license roofers. Anyone with a ladder and a magnet sign can knock your door after a storm. We hold ourselves to a higher bar anyway — licensed and insured as a company, with the reviews and workmanship guarantee to back it up."
           />
           <ul className="mt-8 space-y-5">
             {bullets.map((b) => (
@@ -254,10 +254,9 @@ function Wedge() {
             A real company stands behind the work.
           </p>
           <p className="mt-3 text-fg-inv-dim">
-            Every roof runs under a 40-year Master Electrician and one
-            accountable, insured team — no subcontractor finger-pointing, and
-            an honest verdict in writing even when the answer is &ldquo;your
-            roof is fine.&rdquo;
+            Every roof runs under one accountable, insured team — no
+            subcontractor finger-pointing, and an honest verdict in writing
+            even when the answer is &ldquo;your roof is fine.&rdquo;
           </p>
           <div className="mt-6 rounded-md border border-line bg-ink-2 p-5">
             <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
@@ -281,8 +280,8 @@ function ServicesGrid() {
         <SectionHeading
           dark
           kicker="What we do"
-          title="Roofing, solar, and commercial — one licensed team."
-          intro="Storm restoration and roof replacement for homes, solar detach & reset under our electrical license, and full roofing + electrical for commercial properties. Free inspections, no runaround."
+          title="Roofing, solar, and commercial — one licensed, insured team."
+          intro="Storm restoration and roof replacement for homes, solar detach & reset for existing systems, and full commercial roofing for property managers. Free inspections, no runaround."
         />
         <div className="mt-12 grid gap-5 sm:grid-cols-2">
           {services.map((s) => (
@@ -639,7 +638,7 @@ function FinalCTA() {
             Get a crew you can verify.
           </h2>
           <p className="mt-5 max-w-md text-lg text-ink/80">
-            Free roof inspection, up-front electrical pricing, and a real person
+            Free roof inspection, upfront pricing, and a real person
             on the phone. Tell us what&apos;s going on.
           </p>
           <div className="mt-8">

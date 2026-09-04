@@ -126,9 +126,8 @@ export function Footer() {
             </Link>
           </p>
           <p>
-            Licensed &amp; insured Texas electrical contractor. Roofing is
-            unlicensed statewide in Texas — we run ours under an accountable,
-            insured company either way.
+            Licensed &amp; insured. Roofing is unlicensed statewide in Texas —
+            we run ours under an accountable, insured company either way.
           </p>
         </div>
       </div>

@@ -1,8 +1,7 @@
 // Service-area city pages — the backbone of local/organic findability.
 // Each generates /service-areas/[slug] with localized copy + schema.
 // Add or trim cities here; the routes, sitemap, and schema update automatically.
-// Copy is storm-roofing-first (the business focus + the keywords that matter);
-// electrical appears only as the license/solar differentiator.
+// Copy is storm-roofing-first (the business focus + the keywords that matter).
 
 export type City = {
   slug: string;

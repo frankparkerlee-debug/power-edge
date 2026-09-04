@@ -6,7 +6,7 @@ import { guides } from "@/lib/guides";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Roofing & Electrical Guides for Texas Homeowners",
+  title: "Roofing & Home Repair Guides for Texas Homeowners",
   description:
     "Straight answers on roof replacement cost, Texas hail insurance claims, and how to vet a roofer — from a licensed DFW contractor.",
   alternates: { canonical: `${site.url}/guides` },

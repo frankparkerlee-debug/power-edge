@@ -176,12 +176,12 @@ export const guides: Guide[] = [
     title: "Is My Roofer Licensed in Texas? (The Honest Answer)",
     h1: "Is my roofer licensed in Texas?",
     description:
-      "The honest answer: Texas does not license roofers, so anyone can call themselves one. Here's how to actually vet a roofer — and the one credential you can truly verify.",
+      "The honest answer: Texas does not license roofers, so anyone can call themselves one. Here's how to actually vet a roofer before you sign anything.",
     category: "Hiring guide",
     datePublished: "2026-06-30",
     readMins: 4,
     intro:
-      "Short version: in Texas, the bar to call yourself a roofer is owning a ladder. Here's how to protect yourself — and the credential that actually means something.",
+      "Short version: in Texas, the bar to call yourself a roofer is owning a ladder. Here's how to protect yourself — and what to actually check before you sign.",
     sections: [
       {
         h: "Does Texas license roofers?",
@@ -203,8 +203,8 @@ export const guides: Guide[] = [
       {
         h: "What CAN you actually verify in Texas?",
         p: [
-          "Electrical work is different. Electricians ARE regulated by the Texas Department of Licensing and Regulation (TDLR), and their licenses are publicly verifiable. So if a company also does electrical or solar work, you can look up their electrical contractor license and confirm it's real.",
-          "PowerEdge is a licensed, insured Texas electrical contractor, and we run our roofing under that same accountable company — a real business standing behind the work, not a magnet sign on a truck.",
+          "Since there's no state roofer license to check, verify what you actually can: liability insurance (ask for the certificate directly, not just a claim), a real local address and business history, and recent, specific reviews you can read yourself — not a stranger's word on your doorstep.",
+          "PowerEdge is a licensed, insured company backed by $2,000,000 in liability coverage and a 1-year workmanship guarantee, with a real local team behind every job — not a magnet sign on a truck.",
         ],
       },
       {
@@ -225,16 +225,16 @@ export const guides: Guide[] = [
       },
       {
         q: "How can I verify a contractor's license in Texas?",
-        a: "You can verify electricians through the Texas Department of Licensing and Regulation (TDLR) public portal — electrical work is state-regulated. Roofing is not, so there is no state roofer license to check.",
+        a: "Roofing itself has no state license to check in Texas. What you can verify: liability insurance (ask for the certificate), a real local address and business history, and voluntary certifications like RCAT (Roofing Contractors Association of Texas).",
       },
       {
         q: "Is PowerEdge licensed?",
-        a: "Yes — PowerEdge is a licensed, insured Texas electrical contractor, and runs its roofing under that same company.",
+        a: "PowerEdge is a licensed, insured company backed by $2,000,000 in liability coverage and a 1-year workmanship guarantee on every roofing job.",
       },
     ],
     cta: {
       heading: "Hire a crew you can actually verify.",
-      sub: "Licensed Texas electrical contractor that also does your roof. Get a free, no-pressure inspection.",
+      sub: "Licensed, insured, and backed by real reviews. Get a free, no-pressure inspection.",
     },
   },
 
