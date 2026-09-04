@@ -31,10 +31,6 @@ const faqs = [
     q: "What if I can't cover my deductible?",
     a: "On a covered claim you typically pay only your deductible — and if that's tough up front, we can finance it from as little as $250 down. You still pay it in full over time; waiving deductibles is illegal in Texas and we never do it.",
   },
-  {
-    q: "I have solar. Can you still do the roof?",
-    a: "Yes — that's a strength. Most roofers can't legally touch your panels, so they sub it out. We detach and reset them in-house under our electrical license, and it's usually a covered line item on your claim.",
-  },
 ];
 
 const steps = [
@@ -91,7 +87,6 @@ export default function RoofClaimCheckPage() {
                 "A straight read on whether it's worth filing",
                 "On a covered claim, you typically pay only your deductible",
                 "Can't cover it up front? Start for as little as $250 down",
-                "Got solar? We handle the panels too — most roofers can't",
                 "Free inspection, documented honestly and by the book",
               ].map((b) => (
                 <li key={b} className="flex gap-3">

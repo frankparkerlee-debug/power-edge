@@ -30,12 +30,6 @@ const links = [
     primary: false,
   },
   {
-    label: "Solar on your roof? We handle that too",
-    sub: "Detach & reset in-house — most roofers can't",
-    href: `/solar?${UTM}`,
-    primary: false,
-  },
-  {
     label: "We're hiring roofing sales reps",
     sub: "Paid at first check · 60-second apply",
     href: `/careers?${UTM}`,

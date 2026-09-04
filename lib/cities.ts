@@ -38,7 +38,7 @@ export const cities: City[] = [
     lat: 33.0198,
     lon: -96.6989,
     blurb:
-      "Plano roofs take Collin County hail hard. We inspect free, document the damage for your claim, and replace roofs fast — including homes with solar, which most roofers can't legally touch.",
+      "Plano roofs take Collin County hail hard. We inspect free, document the damage for your claim, and replace roofs fast.",
   },
   {
     slug: "frisco",
@@ -47,7 +47,7 @@ export const cities: City[] = [
     lat: 33.1507,
     lon: -96.8236,
     blurb:
-      "Frisco's newer neighborhoods still lose roofs to hail every season. Free storm inspections, insurance claims documented right, and solar detach & reset in-house.",
+      "Frisco's newer neighborhoods still lose roofs to hail every season. Free storm inspections and insurance claims documented right.",
   },
   {
     slug: "mckinney",
@@ -137,7 +137,7 @@ export const cities: City[] = [
     lat: 33.0146,
     lon: -97.097,
     blurb:
-      "Flower Mound hail-damage roofing done honestly: evidence-based inspections, claims documented by the book, and solar homes handled in-house.",
+      "Flower Mound hail-damage roofing done honestly: evidence-based inspections, claims documented by the book.",
   },
   {
     slug: "mansfield",

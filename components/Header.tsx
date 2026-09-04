@@ -9,7 +9,6 @@ const nav = [
   { href: "/roof-claim-check", label: "Claim Check", accent: true },
   { href: "/financing", label: "Financing", accent: true },
   { href: "/roofing", label: "Roofing" },
-  { href: "/solar", label: "Solar" },
   { href: "/commercial", label: "Commercial" },
 ];
 

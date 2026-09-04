@@ -298,7 +298,7 @@ export function RoofClaimCheck() {
               onChange={(e) => setSolar(e.target.checked)}
               className="h-4 w-4 accent-bolt"
             />
-            I have solar panels (we handle those too)
+            I have solar panels
           </label>
           <input type="text" name="company_website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
           <button

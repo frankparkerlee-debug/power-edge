@@ -320,7 +320,8 @@ export function RoofEstimate() {
 
               <DeductibleFinancing className="mt-4" />
 
-              {/* Solar qualifier — tags the lead so we scope the detach & reset */}
+              {/* Solar qualifier — informational only (panels aren't a service
+                  we offer); helps the crew document them during the inspection. */}
               <label
                 className={`mt-4 flex cursor-pointer items-start gap-3 rounded-md border px-4 py-3 text-sm transition-colors ${
                   solar
@@ -336,13 +337,6 @@ export function RoofEstimate() {
                 />
                 <span>I have solar panels on my roof</span>
               </label>
-              {solar && (
-                <p className="mt-2 rounded-md border border-bolt/30 bg-bolt/10 px-4 py-3 text-sm leading-relaxed text-fg-inv">
-                  Good — we detach &amp; reset your panels in-house (most roofers
-                  can&apos;t), and it&apos;s usually a covered line item on your
-                  claim.
-                </p>
-              )}
 
               <p className="mt-4 text-sm leading-relaxed text-fg-inv-dim">
                 We document the damage and coordinate with your adjuster, by the

@@ -21,7 +21,6 @@ export default function Home() {
       <StormRestoration />
       <StuckBand />
       <Wedge />
-      <SolarReadyBand />
       <DfwHailActivity />
       <ClaimCheckBand />
       <ServicesGrid />
@@ -67,12 +66,11 @@ function Hero() {
             finance that. Not a storm? We&apos;ll still get you an honest price.
           </p>
 
-          {/* Conversion pillars — storm-first, financing, solar-ready */}
+          {/* Conversion pillars — storm-first, financing */}
           <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4 border-t border-line pt-6">
             {[
               { t: "Free roof inspection", d: "Storm claim or cash — honest read" },
               { t: "Deductible financing", d: "As little as $250 down" },
-              { t: "Solar + roof, one license", d: "Most roofers can't" },
             ].map((p) => (
               <div key={p.t} className="flex items-start gap-2.5">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 bg-bolt" />
@@ -280,8 +278,8 @@ function ServicesGrid() {
         <SectionHeading
           dark
           kicker="What we do"
-          title="Roofing, solar, and commercial — one licensed, insured team."
-          intro="Storm restoration and roof replacement for homes, solar detach & reset for existing systems, and full commercial roofing for property managers. Free inspections, no runaround."
+          title="Roofing, home repair, and commercial — one licensed, insured team."
+          intro="Storm restoration and roof replacement for homes, home repair, and full commercial roofing for property managers. Free inspections, no runaround."
         />
         <div className="mt-12 grid gap-5 sm:grid-cols-2">
           {services.map((s) => (
@@ -474,7 +472,6 @@ function StuckBand() {
     "Deductible too high to front (Texas deductibles run 1–2% of home value)",
     "Insurance check came in low — older roof on actual-cash-value coverage",
     "No claim — paying out of pocket",
-    "Solar detach & reset not covered on the claim",
   ];
   return (
     <section className="bg-paper py-20 sm:py-28">
@@ -498,60 +495,6 @@ function StuckBand() {
           </div>
         </div>
         <FinancingCalculator ctaHref="#quote" />
-      </Container>
-    </section>
-  );
-}
-
-/* -------------------------------------------------------- SOLAR-READY BAND */
-function SolarReadyBand() {
-  return (
-    <section className="bg-paper py-16 sm:py-20">
-      <Container>
-        <div className="overflow-hidden rounded-card border-2 border-bolt/40 bg-ink shadow-xl">
-          <div className="grid items-center gap-8 p-9 sm:p-12 lg:grid-cols-[1.2fr_0.8fr]">
-            <div>
-              <Kicker className="mb-4">Got solar panels?</Kicker>
-              <h2 className="font-display text-3xl font-bold leading-tight text-fg-inv sm:text-4xl">
-                Solar on your roof? We&apos;re one of the few who can legally do
-                the whole job.
-              </h2>
-              <p className="mt-4 text-fg-inv-dim">
-                Replacing a roof with solar means the panels have to come off and
-                go back on — and in Texas that&apos;s electrical work most roofers
-                can&apos;t legally touch. They sub it out, and you&apos;re left
-                juggling two companies with your roof sitting exposed. We detach,
-                re-roof, and reset your panels in-house, on one schedule, under
-                one license — and the detach &amp; reset is usually a covered line
-                item on your claim.
-              </p>
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <Button href="#quote">Book my free inspection</Button>
-                <Button href="/solar" variant="ghost">
-                  How solar + roof works →
-                </Button>
-              </div>
-            </div>
-            <div className="rounded-card border border-line bg-ink-2 p-7 text-center">
-              <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
-                One licensed team
-              </div>
-              <div className="mt-2 font-display text-3xl font-extrabold text-bolt">
-                Roof + Solar
-              </div>
-              <div className="mt-3 text-sm leading-relaxed text-fg-inv-dim">
-                Detach · re-roof · reset · re-energize — no finger-pointing, one
-                warranty.
-              </div>
-              <div className="mt-4 border-t border-line pt-4 text-sm text-fg-inv-dim">
-                Performed by{" "}
-                <span className="font-bold text-fg-inv">
-                  one licensed, insured team
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
       </Container>
     </section>
   );

@@ -6,7 +6,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "About — Licensed & Insured Roofing & Home Repair in Texas",
   description:
-    "PowerEdge is a licensed, insured company doing roofing, home repair, and solar repair across DFW. Meet the team behind the work.",
+    "PowerEdge is a licensed, insured company doing roofing and home repair across DFW. Meet the team behind the work.",
 };
 
 export default function AboutPage() {

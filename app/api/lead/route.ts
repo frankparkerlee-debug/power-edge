@@ -54,9 +54,8 @@ export async function POST(req: Request) {
     // Which on-site form/tool produced this (e.g. roof-claim-check). From
     // leadContext({tool}); shown in the dashboard so you know where they signed up.
     tool: (body.tool || "").trim(),
-    // Solar flag — set by the "I have solar panels" qualifier on every form.
-    // Tells the team to scope detach & reset, document the panels, and add the
-    // claimable D&R supplement line (the ~$3–10k most roofers miss).
+    // Solar flag — informational only (panels aren't a service we offer);
+    // set by the "I have solar panels" qualifier on some forms.
     solar: body.solar === "yes" ? "yes" : "",
     // Attribution — so you know which page/campaign produced the lead.
     page_path: (body.page_path || "").trim(),
@@ -135,11 +134,6 @@ export async function POST(req: Request) {
           }`,
           html: `
             <h2>New website lead</h2>
-            ${
-              lead.solar === "yes"
-                ? `<p style="background:#fff3cd;border:1px solid #ffe08a;border-radius:8px;padding:12px 14px;margin:0 0 12px"><strong>☀️ SOLAR HOME</strong> — scope the panel <strong>detach &amp; reset</strong>, photograph the array, and add the D&amp;R supplement line to the claim (the ~$3–10k most roofers miss).</p>`
-                : ""
-            }
             <p><strong>Name:</strong> ${escapeHtml(lead.name)}</p>
             <p><strong>Phone:</strong> ${escapeHtml(lead.phone)}</p>
             <p><strong>Email:</strong> ${escapeHtml(lead.email) || "—"}</p>

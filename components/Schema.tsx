@@ -24,7 +24,7 @@ export function Schema() {
     email: site.email,
     priceRange: "$$",
     description:
-      "Storm-first Dallas–Fort Worth roofing company: roof repair, replacement, hail/storm insurance-claim documentation, deductible financing, and in-house solar detach & reset for existing systems.",
+      "Storm-first Dallas–Fort Worth roofing company: roof repair, replacement, hail/storm insurance-claim documentation, and deductible financing.",
     areaServed: cities.map((c) => ({
       "@type": "City",
       name: `${c.name}, TX`,
@@ -43,7 +43,7 @@ export function Schema() {
     hasCredential: `Licensed & insured`,
     hasOfferCatalog: {
       "@type": "OfferCatalog",
-      name: "Roofing, home repair & solar services",
+      name: "Roofing & home repair services",
       itemListElement: services.map((s) => ({
         "@type": "Offer",
         itemOffered: {
@@ -59,7 +59,6 @@ export function Schema() {
       "Hail damage roof insurance claims",
       "Storm damage restoration",
       "Roof deductible financing",
-      "Solar panel detach and reset",
       "Commercial roofing",
     ],
   };

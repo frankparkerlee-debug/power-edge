@@ -54,49 +54,6 @@ export const serviceContent: Record<string, Content> = {
     ],
   },
 
-  solar: {
-    process: [
-      {
-        title: "Tell us the symptom",
-        desc: "Panels not producing, an inverter error, or storm damage — describe it and we'll get out to look.",
-      },
-      {
-        title: "Licensed diagnosis",
-        desc: "A licensed electrician assesses the system — Texas law requires solar electrical work to run under a Master Electrician.",
-      },
-      {
-        title: "Repair or replace",
-        desc: "We repair what's fixable and replace what isn't, including re-energizing your system during a roof replacement.",
-      },
-      {
-        title: "Test & confirm",
-        desc: "We confirm the system is producing and safe before we leave.",
-      },
-    ],
-    faqs: [
-      {
-        q: "Do you install new solar systems?",
-        a: "No — we focus on repair and replacement of existing systems. That means no sales pitch, just the fix.",
-      },
-      {
-        q: "Why does solar repair require an electrical license?",
-        a: "Solar is electrical work. Texas law — tightened in 2025 — requires it to be performed under a licensed electrical contractor. That's us.",
-      },
-      {
-        q: "My roof is being replaced — can you handle the panels?",
-        a: "Yes. We can disconnect, protect, and re-energize your solar system around a roof replacement, all under one roof.",
-      },
-      {
-        q: "Can you fix panels after hail or wind damage?",
-        a: "Yes — we replace damaged panels and repair affected wiring and inverters, and can document it for an insurance claim.",
-      },
-      {
-        q: "Do you service any brand of system?",
-        a: "We service most common residential systems. Tell us your equipment and we'll confirm before we come out.",
-      },
-    ],
-  },
-
   commercial: {
     process: [
       {

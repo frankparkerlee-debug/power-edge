@@ -100,10 +100,6 @@ export default function FinancingPage() {
                 h: "No claim — you're paying out of pocket",
                 p: "No storm claim? We can finance the full project so a new roof isn't a lump-sum decision.",
               },
-              {
-                h: "You've got solar in the mix",
-                p: "If the detach & reset isn't fully covered, that cost doesn't have to stop you either.",
-              },
             ].map((c) => (
               <div
                 key={c.h}

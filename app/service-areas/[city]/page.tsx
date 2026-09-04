@@ -46,10 +46,6 @@ function cityFaqs(c: City) {
       q: `Do you handle the insurance claim for me?`,
       a: `We document the damage — photos, measurements, a written scope — and coordinate with your adjuster by the book. Texas law doesn't allow a roofer to negotiate your claim or waive your deductible, and we never do either. Doing it right protects you.`,
     },
-    {
-      q: `My ${c.name} home has solar panels. Can you still replace the roof?`,
-      a: `Yes — that's our specialty. Panels have to come off and go back on for a replacement, which is electrical work most roofers can't legally perform. We detach and reset them in-house, and it's usually a covered line item on your claim.`,
-    },
   ];
 }
 

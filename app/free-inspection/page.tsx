@@ -83,7 +83,6 @@ export default function FreeInspectionPage() {
                 "Photos, measurements, and a written damage report",
                 "Documented the way your adjuster needs it",
                 "On a covered claim, you typically pay just your deductible",
-                "We handle your solar too — most roofers can't",
               ].map((b) => (
                 <li key={b} className="flex gap-3">
                   <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bolt">

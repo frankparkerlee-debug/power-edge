@@ -9,9 +9,8 @@
 // legally publish insurance-claim pricing anyway).
 //
 // Electrical is no longer offered (Parker, 2026-09-04) — the electrical
-// flat-rate menu was removed here. Solar remains for now (separate decision
-// pending on whether to strip it too); its legal basis still references the
-// Master Electrician license, which is unchanged.
+// flat-rate menu was removed here. Solar is no longer offered either
+// (decision #14, 2026-09-04) — the solar service entry was removed here.
 
 export type FlatRateItem = {
   job: string;
@@ -42,20 +41,6 @@ export const services: Service[] = [
       "Residential re-roofs and commercial systems",
       "Storm & hail insurance claims documented to the letter of Texas law",
       "4 crews — capacity for up to 100 roofs a month, so you're not waiting weeks",
-    ],
-  },
-  {
-    slug: "solar",
-    title: "Solar repair & replacement",
-    short: "Solar",
-    blurb:
-      "We service and replace existing solar — the electrical work solar legally requires a licensed contractor to perform. (We do not sell new installs.)",
-    pricingMode: "quote",
-    bullets: [
-      "Repair underperforming or dead panels and microinverters",
-      "Replace damaged panels after storms",
-      "Re-connect and re-energize systems during a roof replacement",
-      "Performed under our Master Electrician license — as Texas law requires",
     ],
   },
   {

@@ -222,18 +222,6 @@ export function StormReport({ data }: { data: StormData }) {
       {/* Deductible financing — the selling feature (compliant framing) */}
       <DeductibleFinancing className="mt-4" />
 
-      {/* Solar — hail damages panels too, and we're licensed for both */}
-      <div className="mt-4 rounded-card border border-line bg-ink p-4">
-        <p className="text-sm text-fg-inv">
-          <strong className="text-bolt">Got solar panels?</strong> The same hail
-          cracks panels and microinverters — and most roofers aren&apos;t
-          licensed to touch solar. We repair your{" "}
-          <strong className="text-fg-inv">roof and your solar</strong> under one
-          licensed crew. Check the box below and we&apos;ll inspect
-          both.
-        </p>
-      </div>
-
       {/* Recent timeline */}
       {(data.recent?.length ?? 0) > 0 && (
         <div className="mt-5">

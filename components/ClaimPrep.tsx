@@ -285,7 +285,7 @@ export function ClaimPrep() {
         </div>
         <label className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm ${d.solar ? "border-bolt bg-bolt/10 text-fg-inv" : "border-line bg-ink text-fg-inv-dim"}`}>
           <input type="checkbox" checked={d.solar} onChange={(e) => set("solar", e.target.checked)} className="h-4 w-4 accent-bolt" />
-          I have solar panels (we handle those too)
+          I have solar panels
         </label>
         <p className="rounded-md border border-line bg-ink px-4 py-3 text-xs leading-relaxed text-fg-inv-dim">
           📸 Got photos of the damage? Text them to <strong className="text-fg-inv">{site.textNumber}</strong> — it speeds up your claim.

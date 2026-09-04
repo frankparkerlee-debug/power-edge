@@ -25,11 +25,11 @@ export const metadata: Metadata = {
     template: `%s | ${site.name}`,
   },
   description:
-    `Insurance-first storm & hail roof restoration across Dallas–Fort Worth. Free inspections, deductible financing, and one licensed team that can handle your solar too.`,
+    `Insurance-first storm & hail roof restoration across Dallas–Fort Worth. Free inspections, deductible financing, and one licensed, insured team you can actually verify.`,
   openGraph: {
     title: `${site.legalName} | Storm Roof Restoration, Verified`,
     description:
-      "The insurance-first DFW roof team you can actually verify — free inspections, deductible financing, and licensed to handle your solar too.",
+      "The insurance-first DFW roof team you can actually verify — free inspections, deductible financing, licensed and insured.",
     url: site.url,
     siteName: site.name,
     type: "website",

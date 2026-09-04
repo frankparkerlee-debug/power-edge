@@ -92,7 +92,7 @@ export default function ContactPage() {
             Request a free quote
           </h2>
           <p className="mt-1.5 text-sm text-fg-inv-dim">
-            Roofing, home repair, solar, or storm claim — we&apos;ll point you to
+            Roofing, home repair, or storm claim — we&apos;ll point you to
             the right crew.
           </p>
           <div className="mt-6">

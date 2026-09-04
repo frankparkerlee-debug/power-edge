@@ -85,19 +85,6 @@ function verifyChip() {
   </table>`;
 }
 
-function solarBlock() {
-  return `
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px;">
-    <tr>
-      <td style="background:#f0fbf4;border:1px solid #bfe9cf;border-radius:8px;padding:16px 18px;font-family:${FONT};font-size:15px;color:${TEXT};line-height:1.55;">
-        <strong>You told us you have solar — good.</strong> Most roofers can&rsquo;t legally
-        touch your panels, so they sub it out. We detach &amp; reset them in-house under our
-        electrical license, and it&rsquo;s usually a covered line item on your claim. One
-        crew, one warranty, no finger-pointing.
-      </td>
-    </tr>
-  </table>`;
-}
 
 /** Wrap body content in the branded shell. */
 function shell({
@@ -191,7 +178,7 @@ export const leadSequence: SequenceEmail[] = [
             body:
               h1(`Hi ${c.firstName} — a quick refresher.`) +
               p(
-                `You&rsquo;re on our list, so here&rsquo;s the short version of who we are: <strong>DFW&rsquo;s insurance-first storm roof team</strong>. When hail hits, you typically pay just your deductible — we document the damage, coordinate with your adjuster by the book, and can even handle your solar.`,
+                `You&rsquo;re on our list, so here&rsquo;s the short version of who we are: <strong>DFW&rsquo;s insurance-first storm roof team</strong>. When hail hits, you typically pay just your deductible — we document the damage and coordinate with your adjuster by the book.`,
               ) +
               p(
                 `Over the next couple weeks we&rsquo;ll show you exactly how it works. Want to skip the line? See if your roof already has a claim:`,
@@ -219,7 +206,6 @@ export const leadSequence: SequenceEmail[] = [
               p(
                 `<strong>Want us in and out fast?</strong> <a href="${CLAIM_PREP_URL}" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;">Prep your claim in 2 minutes &rarr;</a> — add your carrier and deductible so we can inspect and close on-site.`,
               ) +
-              (c.solar ? solarBlock() : "") +
               verifyChip(),
           }),
   },
@@ -287,7 +273,6 @@ export const leadSequence: SequenceEmail[] = [
               )
               .join("")}
           </table>` +
-          (c.solar ? solarBlock() : "") +
           button("Book my free inspection", BOOK_URL) +
           verifyChip(),
       }),
@@ -385,9 +370,7 @@ export const leadSequence: SequenceEmail[] = [
             `After a storm your street fills with trucks and clipboards. The uncomfortable truth: <strong>Texas doesn&rsquo;t license roofers</strong> — a magnet sign and a ladder is the whole barrier to entry, and plenty vanish before the warranty ever matters.`,
           ) +
           p(
-            `We&rsquo;re the opposite kind of company: licensed and insured, ${site.googleRating}&#9733; across ${site.googleReviewCount} reviews, one accountable crew for your whole roof${
-              c.solar ? " — solar included" : ""
-            }. Verify us before you trust anyone knocking.`,
+            `We&rsquo;re the opposite kind of company: licensed and insured, ${site.googleRating}&#9733; across ${site.googleReviewCount} reviews, one accountable crew for your whole roof. Verify us before you trust anyone knocking.`,
           ) +
           button("Verify us, then book a free inspection", BOOK_URL) +
           verifyChip(),
@@ -408,9 +391,7 @@ export const leadSequence: SequenceEmail[] = [
             `This is the part where we gracefully back off. No hard feelings — your roof&rsquo;s still up there, the free inspection still stands, and we&rsquo;re exactly one text away the day you want it.`,
           ) +
           p(
-            `If a storm ever does a number on your roof, you know who to call: the licensed crew that <em>shows you the license</em>${
-              c.solar ? " and handles your solar too" : ""
-            }. Until then, ${c.firstName}, take care.`,
+            `If a storm ever does a number on your roof, you know who to call: the licensed crew that <em>shows you the license</em>. Until then, ${c.firstName}, take care.`,
           ) +
           button("Actually, I'm ready — book it", BOOK_URL) +
           p(`Or text <strong>${site.phone}</strong>. That&rsquo;s it. Promise.`) +

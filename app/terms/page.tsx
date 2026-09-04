@@ -30,7 +30,7 @@ export default function TermsPage() {
             <h2>Use of this website</h2>
             <p>
               Content on this site is provided for general information about our
-              roofing, home repair, and solar services. Pricing shown is a
+              roofing and home repair services. Pricing shown is a
               starting estimate and is not a binding quote; final pricing is
               provided in writing after an inspection or on-site assessment.
               Tools such as our roof coverage check and storm/hail check are

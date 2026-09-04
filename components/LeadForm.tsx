@@ -163,8 +163,8 @@ export function LeadForm({
             className={inputBase}
           />
 
-          {/* Solar qualifier — tags the lead so the team scopes detach & reset
-              and documents the panels (the claimable line most roofers miss). */}
+          {/* Solar qualifier — informational only (panels aren't a service we
+              offer); helps the crew document them during the inspection. */}
           <label
             className={`flex cursor-pointer items-start gap-3 rounded-md border px-4 py-3 text-sm transition-colors ${
               solar
@@ -182,12 +182,6 @@ export function LeadForm({
             />
             <span>I have solar panels on my roof</span>
           </label>
-          {solar && (
-            <p className="rounded-md border border-bolt/30 bg-bolt/10 px-4 py-3 text-sm leading-relaxed text-fg-inv">
-              Good — we detach &amp; reset your panels in-house (most roofers
-              can&apos;t), and it&apos;s usually a covered line item on your claim.
-            </p>
-          )}
         </>
       )}
 

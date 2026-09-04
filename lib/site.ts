@@ -44,7 +44,7 @@ export const site = {
       name: "John Lott",
       role: "Master Electrician",
       cred: "40 years of electrical work",
-      bio: "Holds the Master Electrician license every legitimate electrical and solar job in Texas is legally required to run under. Forty years on the tools across residential, commercial, and industrial work.",
+      bio: "Forty years on the tools across residential, commercial, and industrial work — the senior hand on PowerEdge's crews.",
     },
     {
       name: "Ernesto Sandoval",
