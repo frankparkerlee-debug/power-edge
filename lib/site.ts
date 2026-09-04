@@ -3,7 +3,7 @@
 
 export const site = {
   name: "PowerEdge",
-  legalName: "PowerEdge Electric & Roofing",
+  legalName: "PowerEdge Roofing & Home Repair",
   legalEntity: "Power Edge, LLC", // registered entity (formerly Solar Shield LLC) — used in legal/SMS copy
   tagline: "Roofing and home repair, done by a licensed, insured team you can actually verify.",
   // Primary + secondary lines pulled from the current live site.
