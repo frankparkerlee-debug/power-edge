@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     q: "Do I get leads or do I knock?",
-    a: "Both. You'll knock — that's where the big money is in storm work — but we point you at the neighborhoods that just took hail (our storm data), hand you inbound as it comes in, and give you a protected area so you're not fighting ten other reps for the same street.",
+    a: "Both. You'll work verified storm-hit areas from our own hail data instead of guessing, plus inbound leads as they come in — and a protected area so you're not fighting ten other reps for the same street.",
   },
   {
     q: "What tools do I get?",
@@ -39,8 +39,8 @@ const perks = [
     p: "Paid at the first check, weekly, no games. Every approved roof carries a floor, so a slow week still pays.",
   },
   {
-    h: "We tell you where to knock",
-    p: "Our storm data points you at the freshest, hardest-hit neighborhoods — not random streets. Plus a protected territory.",
+    h: "Backed by real storm data",
+    p: "You work verified hail-hit areas, not random streets — plus a protected territory.",
   },
   {
     h: "Tools that close for you",
@@ -81,8 +81,8 @@ export default function CareersPage() {
             <p className="mt-6 max-w-md text-lg leading-relaxed text-fg-inv-dim">
               Tired of chasing commissions that show up late — or not at all? We
               pay you at the first check, put a floor under every approved roof,
-              point you at the neighborhoods that just got hit, and hand you the
-              tools to close on the spot. New company, better deal for reps.
+              back you with verified storm data instead of guesswork, and hand you
+              the tools to close on the spot. New company, better deal for reps.
             </p>
 
             <ul className="mt-8 space-y-3 text-fg-inv-dim">

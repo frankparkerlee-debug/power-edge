@@ -1,0 +1,335 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "poweredge home" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e5]: poweredge
+      - navigation [ref=e6]:
+        - link "Claim Check" [ref=e7] [cursor=pointer]:
+          - /url: /roof-claim-check
+        - link "Financing" [ref=e8] [cursor=pointer]:
+          - /url: /financing
+        - link "Roofing" [ref=e9] [cursor=pointer]:
+          - /url: /roofing
+        - link "Commercial" [ref=e10] [cursor=pointer]:
+          - /url: /commercial
+      - generic [ref=e11]:
+        - link "469-277-9594" [ref=e12] [cursor=pointer]:
+          - /url: tel:+14692779594
+        - link "Text us" [ref=e13] [cursor=pointer]:
+          - /url: sms:+14692779594
+        - link "Free inspection" [ref=e16] [cursor=pointer]:
+          - /url: /free-inspection
+  - main [ref=e17]:
+    - generic [ref=e22]:
+      - paragraph [ref=e23]: Roof & deductible financing · Dallas–Fort Worth
+      - heading "Can't cover your deductible? We still start now." [level=1] [ref=e25]
+      - paragraph [ref=e26]: Your roof can't be replaced until the deductible's handled — but you don't have to pay it in one lump sum. Finance it from as little as $250 down and we get the work going right away, while you pay the rest in low monthly payments. You always pay your full deductible over time; we never waive it (that's illegal in Texas).
+      - generic [ref=e27]:
+        - link "See my payment — no credit impact" [ref=e28] [cursor=pointer]:
+          - /url: "#prequal"
+        - link "Call 469-277-9594" [ref=e29] [cursor=pointer]:
+          - /url: tel:+14692779594
+    - generic [ref=e31]:
+      - generic [ref=e32]:
+        - paragraph [ref=e33]: See it, then pre-qualify
+        - heading "Turn a big deductible into a small monthly payment." [level=2] [ref=e35]
+        - paragraph [ref=e36]: Check what your deductible looks like spread over time — then pre-qualify with a soft check that won't touch your credit score.
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - generic [ref=e39]: Your deductible or out-of-pocket
+          - generic [ref=e40]:
+            - button "$1,000" [ref=e41]
+            - button "$2,500" [ref=e42]
+            - button "$5,000" [ref=e43]
+            - button "$8,000" [ref=e44]
+            - button "$10,000" [ref=e45]
+            - button "$15,000" [ref=e46]
+          - generic [ref=e47]:
+            - text: Or enter an amount
+            - spinbutton "Or enter an amount" [ref=e48]: "8000"
+          - generic [ref=e49]: Choose a plan
+          - generic [ref=e50]:
+            - button "Pay in 4 $2,000/mo 4 payments · 0% interest" [ref=e51]:
+              - generic [ref=e52]: Pay in 4
+              - generic [ref=e53]: $2,000/mo
+              - generic [ref=e54]: 4 payments · 0% interest
+            - button "12-month plan $715/mo 12 payments · 12.99% APR" [pressed] [ref=e55]:
+              - generic [ref=e56]: 12-month plan
+              - generic [ref=e57]: $715/mo
+              - generic [ref=e58]: 12 payments · 12.99% APR
+          - link "Get pre-qualified · 12-month →" [ref=e59] [cursor=pointer]:
+            - /url: "#prequal"
+          - paragraph [ref=e60]: Illustrative estimate only — not a financing offer. Plans are in-house and subject to approval; final terms and required disclosures are provided in writing before you sign. You pay your full deductible over time; we never waive it (that's illegal in Texas).
+        - generic [ref=e62]:
+          - heading "Pre-qualify in 60 seconds" [level=2] [ref=e63]
+          - paragraph [ref=e64]:
+            - text: Connect your bank securely and get an instant decision —
+            - strong [ref=e65]: no credit check, no SSN, no impact to your score.
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - textbox "Full name" [ref=e68]
+              - textbox "Phone" [ref=e69]
+            - textbox "Email" [ref=e70]
+            - textbox "Property address" [ref=e71]
+            - textbox "ZIP code" [ref=e72]
+            - generic [ref=e73]:
+              - generic [ref=e74]: Amount you'd finance
+              - generic [ref=e75]:
+                - button "$1,000" [ref=e76]
+                - button "$2,500" [ref=e77]
+                - button "$5,000" [ref=e78]
+                - button "$8,000" [ref=e79]
+                - button "$10,000" [ref=e80]
+                - button "$15,000+" [ref=e81]
+            - generic [ref=e82] [cursor=pointer]:
+              - checkbox "I authorize PowerEdge to contact me and to securely verify my bank and balances to pre-qualify me. This is not a credit checkand won't affect my score. Final terms are provided in writing before I sign; I always pay my full deductible." [ref=e83]
+              - generic [ref=e84]:
+                - text: I authorize PowerEdge to contact me and to securely verify my bank and balances to pre-qualify me. This is
+                - strong [ref=e85]: not a credit check
+                - text: and won't affect my score. Final terms are provided in writing before I sign; I always pay my full deductible.
+            - button "Connect bank — instant decision" [disabled] [ref=e86]
+            - button "Prefer a call? Submit without connecting" [disabled] [ref=e87]
+            - paragraph [ref=e88]:
+              - text: By submitting your information, I am agreeing to receive transactional / informational text messages from Power Edge, LLC. Message Frequency may vary. Msg and data rates may apply. Reply STOP to opt out. See our
+              - link "Privacy Policy" [ref=e89] [cursor=pointer]:
+                - /url: /privacy
+              - text: "&"
+              - link "Terms" [ref=e90] [cursor=pointer]:
+                - /url: /terms
+              - text: .
+      - paragraph [ref=e91]: Illustrative estimate, not a financing offer — your actual payment depends on the plan you choose and credit approval.
+    - generic [ref=e93]:
+      - generic [ref=e94]:
+        - paragraph [ref=e95]: Who this is for
+        - heading "If any of these is you, don't wait to save up." [level=2] [ref=e97]
+      - generic [ref=e98]:
+        - generic [ref=e99]:
+          - heading "Approved, but the deductible's too steep" [level=3] [ref=e100]
+          - paragraph [ref=e101]: Texas deductibles run 1–2% of home value — $5,000–$10,000 before work starts. Finance it and start now.
+        - generic [ref=e102]:
+          - heading "Your insurance check came in low" [level=3] [ref=e103]
+          - paragraph [ref=e104]: Older roofs get put on actual-cash-value — a depreciated check that doesn't cover the job. We finance the gap.
+        - generic [ref=e105]:
+          - heading "No claim — you're paying out of pocket" [level=3] [ref=e106]
+          - paragraph [ref=e107]: No storm claim? We can finance the full project so a new roof isn't a lump-sum decision.
+      - paragraph [ref=e108]:
+        - generic [aria-hidden] [ref=e109]: ⏳
+        - text: Storm damage worsens with every rain and Texas claims have filing deadlines — financing lets you get the roof done now, not months from now.
+    - generic [ref=e111]:
+      - generic [ref=e112]:
+        - paragraph [ref=e113]: How it works
+        - heading "Four steps, no lump sum." [level=2] [ref=e115]
+      - list [ref=e117]:
+        - listitem [ref=e118]:
+          - generic [ref=e122]: Free inspection — we document the damage for your claim
+        - listitem [ref=e123]:
+          - generic [ref=e127]: "You choose: finance your deductible, or the full project"
+        - listitem [ref=e128]:
+          - generic [ref=e132]: Start for as little as $250 down, with low monthly payments (subject to approval)
+        - listitem [ref=e133]:
+          - generic [ref=e137]: We schedule the work now — you don't wait to save up
+    - generic [ref=e139]:
+      - generic [ref=e140]:
+        - generic [ref=e141]:
+          - paragraph [ref=e142]: What North Texas says
+          - heading "Rated 4.7 by your neighbors." [level=2] [ref=e144]
+          - paragraph [ref=e145]: Real Google reviews from real DFW homeowners and businesses. We had a rough patch late last year — we fixed it, and we're earning back every star.
+        - link "4.7 48 Google reviews" [ref=e146] [cursor=pointer]:
+          - /url: https://share.google/Yfo6Ynfmzp3dzVnD6
+          - generic [ref=e147]:
+            - generic [ref=e148]: "4.7"
+            - paragraph [ref=e161]: 48 Google reviews
+      - generic [ref=e162]:
+        - figure "Abi E. Verified Google review" [ref=e163]:
+          - blockquote [ref=e175]: “They were courteous, took time to explain what they were doing and gave me status updates. Happy with the quality. It's good to see that there are still contractors out there that do a good job and are good folks.”
+          - generic [ref=e176]:
+            - text: Abi E.
+            - generic [ref=e177]: Verified Google review
+        - figure "Jon S. Same-day service · Google review" [ref=e178]:
+          - blockquote [ref=e190]: “They were able to make it out the same day I called, diagnosed the issue and made the repair… the price was extremely reasonable. I would definitely recommend them to anyone.”
+          - generic [ref=e191]:
+            - text: Jon S.
+            - generic [ref=e192]: Same-day service · Google review
+        - figure "Leanne G. Verified Google review" [ref=e193]:
+          - blockquote [ref=e205]: “He did the best he could to be as fast as possible while still giving the best service and doing the job right. I would definitely recommend to friends and family!”
+          - generic [ref=e206]:
+            - text: Leanne G.
+            - generic [ref=e207]: Verified Google review
+    - generic [ref=e209]:
+      - generic [ref=e210]:
+        - paragraph [ref=e211]: FAQ
+        - heading "Financing questions, answered straight." [level=2] [ref=e213]
+      - generic [ref=e214]:
+        - group [ref=e215]:
+          - generic "Is financing my roof deductible legal in Texas? +" [ref=e216] [cursor=pointer]:
+            - text: Is financing my roof deductible legal in Texas?
+            - generic [ref=e217]: +
+        - group [ref=e218]:
+          - generic "Why is my deductible so high? +" [ref=e219] [cursor=pointer]:
+            - text: Why is my deductible so high?
+            - generic [ref=e220]: +
+        - group [ref=e221]:
+          - generic "What payment plans do you offer? +" [ref=e222] [cursor=pointer]:
+            - text: What payment plans do you offer?
+            - generic [ref=e223]: +
+        - group [ref=e224]:
+          - generic "Do I need money down? +" [ref=e225] [cursor=pointer]:
+            - text: Do I need money down?
+            - generic [ref=e226]: +
+        - group [ref=e227]:
+          - generic "Can you finance the whole roof, not just the deductible? +" [ref=e228] [cursor=pointer]:
+            - text: Can you finance the whole roof, not just the deductible?
+            - generic [ref=e229]: +
+        - group [ref=e230]:
+          - generic "I already have an estimate from another roofer. Can you still help? +" [ref=e231] [cursor=pointer]:
+            - text: I already have an estimate from another roofer. Can you still help?
+            - generic [ref=e232]: +
+    - generic [ref=e234]:
+      - generic [ref=e235]:
+        - heading "Stuck on the out-of-pocket? Let's fix that." [level=2] [ref=e236]
+        - paragraph [ref=e237]: Free inspection, financing from as little as $250 down, and we schedule the work now — you pay your full deductible over time, never waived.
+        - generic [ref=e238]:
+          - link "469-277-9594" [ref=e239] [cursor=pointer]:
+            - /url: tel:+14692779594
+          - paragraph [ref=e240]: Licensed & insured · $2,000,000 coverage
+      - generic [ref=e242]:
+        - generic [ref=e243]:
+          - textbox "Full name" [ref=e244]
+          - textbox "Phone number" [ref=e245]
+        - generic [ref=e246]:
+          - textbox "Email (we'll send your details)" [ref=e247]
+          - textbox "ZIP code" [ref=e248]
+        - combobox [ref=e249]:
+          - option "What do you need?" [disabled] [selected]
+          - option "Roofing repair & replacement"
+          - option "Commercial roofing"
+          - option "Storm / insurance claim"
+          - option "Financing — stuck on the out-of-pocket"
+          - option "Emergency — need someone now"
+          - option "Something else"
+        - textbox "Briefly, what's going on? (optional)" [ref=e250]
+        - generic [ref=e251] [cursor=pointer]:
+          - checkbox "I have solar panels on my roof" [ref=e252]
+          - generic [ref=e253]: I have solar panels on my roof
+        - button "Get my free quote" [ref=e254]
+        - paragraph [ref=e255]: No spam, no door-knock pressure. We respond fast.
+        - paragraph [ref=e256]:
+          - text: By submitting your information, I am agreeing to receive transactional / informational text messages from Power Edge, LLC. Message Frequency may vary. Msg and data rates may apply. Reply STOP to opt out. See our
+          - link "Privacy Policy" [ref=e257] [cursor=pointer]:
+            - /url: /privacy
+          - text: "&"
+          - link "Terms" [ref=e258] [cursor=pointer]:
+            - /url: /terms
+          - text: .
+  - contentinfo [ref=e259]:
+    - generic [ref=e260]:
+      - generic [ref=e261]:
+        - link "poweredge home" [ref=e262] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e263]: poweredge
+        - paragraph [ref=e264]: Roofing and home repair, done by a licensed, insured team you can actually verify.
+        - generic [ref=e265]:
+          - generic [ref=e277]: "4.7"
+          - generic [ref=e278]: (48 Google reviews)
+      - generic [ref=e279]:
+        - heading "Services" [level=3] [ref=e280]
+        - list [ref=e281]:
+          - listitem [ref=e282]:
+            - link "Roofing" [ref=e283] [cursor=pointer]:
+              - /url: /roofing
+          - listitem [ref=e284]:
+            - link "Commercial" [ref=e285] [cursor=pointer]:
+              - /url: /commercial
+          - listitem [ref=e286]:
+            - link "Free roof claim check" [ref=e287] [cursor=pointer]:
+              - /url: /roof-claim-check
+          - listitem [ref=e288]:
+            - link "Deductible financing" [ref=e289] [cursor=pointer]:
+              - /url: /financing
+          - listitem [ref=e290]:
+            - link "Free roof coverage check" [ref=e291] [cursor=pointer]:
+              - /url: /roof-check
+          - listitem [ref=e292]:
+            - link "Guides" [ref=e293] [cursor=pointer]:
+              - /url: /guides
+          - listitem [ref=e294]:
+            - link "About us" [ref=e295] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=e296]:
+            - link "Sales careers — we're hiring" [ref=e297] [cursor=pointer]:
+              - /url: /careers
+      - generic [ref=e298]:
+        - heading "Service areas" [level=3] [ref=e299]
+        - list [ref=e300]:
+          - listitem [ref=e301]:
+            - link "Dallas" [ref=e302] [cursor=pointer]:
+              - /url: /service-areas/dallas
+          - listitem [ref=e303]:
+            - link "Fort Worth" [ref=e304] [cursor=pointer]:
+              - /url: /service-areas/fort-worth
+          - listitem [ref=e305]:
+            - link "Plano" [ref=e306] [cursor=pointer]:
+              - /url: /service-areas/plano
+          - listitem [ref=e307]:
+            - link "Frisco" [ref=e308] [cursor=pointer]:
+              - /url: /service-areas/frisco
+          - listitem [ref=e309]:
+            - link "McKinney" [ref=e310] [cursor=pointer]:
+              - /url: /service-areas/mckinney
+          - listitem [ref=e311]:
+            - link "Arlington" [ref=e312] [cursor=pointer]:
+              - /url: /service-areas/arlington
+          - listitem [ref=e313]:
+            - link "Irving" [ref=e314] [cursor=pointer]:
+              - /url: /service-areas/irving
+          - listitem [ref=e315]:
+            - link "Denton" [ref=e316] [cursor=pointer]:
+              - /url: /service-areas/denton
+          - listitem [ref=e317]:
+            - link "Garland" [ref=e318] [cursor=pointer]:
+              - /url: /service-areas/garland
+          - listitem [ref=e319]:
+            - link "Richardson" [ref=e320] [cursor=pointer]:
+              - /url: /service-areas/richardson
+          - listitem [ref=e321]:
+            - link "Carrollton" [ref=e322] [cursor=pointer]:
+              - /url: /service-areas/carrollton
+          - listitem [ref=e323]:
+            - link "Allen" [ref=e324] [cursor=pointer]:
+              - /url: /service-areas/allen
+          - listitem [ref=e325]:
+            - link "Grand Prairie" [ref=e326] [cursor=pointer]:
+              - /url: /service-areas/grand-prairie
+          - listitem [ref=e327]:
+            - link "Flower Mound" [ref=e328] [cursor=pointer]:
+              - /url: /service-areas/flower-mound
+          - listitem [ref=e329]:
+            - link "Mansfield" [ref=e330] [cursor=pointer]:
+              - /url: /service-areas/mansfield
+          - listitem [ref=e331]:
+            - link "Rockwall" [ref=e332] [cursor=pointer]:
+              - /url: /service-areas/rockwall
+      - generic [ref=e333]:
+        - heading "Contact" [level=3] [ref=e334]
+        - list [ref=e335]:
+          - listitem [ref=e336]:
+            - link "469-277-9594" [ref=e337] [cursor=pointer]:
+              - /url: tel:+14692779594
+          - listitem [ref=e338]:
+            - link "info@poweredgetx.com" [ref=e339] [cursor=pointer]:
+              - /url: mailto:info@poweredgetx.com
+          - listitem [ref=e340]: Licensed & insured$2,000,000 liability coverage
+    - generic [ref=e342]:
+      - paragraph [ref=e343]:
+        - text: © 2026 Power Edge, LLC. Serving Dallas–Fort Worth metroplex and surrounding North Texas communities.
+        - link "Privacy Policy" [ref=e344] [cursor=pointer]:
+          - /url: /privacy
+        - text: ·
+        - link "Terms" [ref=e345] [cursor=pointer]:
+          - /url: /terms
+      - paragraph [ref=e346]: Licensed & insured. Roofing is unlicensed statewide in Texas — we run ours under an accountable, insured company either way.
+  - link "Text us at 469-277-9594" [ref=e347] [cursor=pointer]:
+    - /url: sms:+14692779594
+    - text: Text us
+  - alert [ref=e350]

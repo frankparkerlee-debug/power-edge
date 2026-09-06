@@ -16,13 +16,6 @@ export type DashEvent = {
   lon: number;
 };
 
-export type DashSolarZip = {
-  zip: string;
-  permits: number;
-  lat: number | null;
-  lon: number | null;
-};
-
 export type DashCheck = {
   address: string;
   lat: number | null;
@@ -42,18 +35,15 @@ function hailColor(size: number) {
 
 export function StormDashboard({
   events,
-  solarZips,
   checks,
 }: {
   events: DashEvent[];
-  solarZips: DashSolarZip[];
   checks: DashCheck[];
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const layerRef = useRef<any>(null);
   const [day, setDay] = useState<string>("all");
-  const [showSolar, setShowSolar] = useState(true);
   const [showChecks, setShowChecks] = useState(true);
 
   // Storm days, newest first, with per-day intensity for the timeline strip.
@@ -114,23 +104,6 @@ export function StormDashboard({
       if (!layer) return;
       layer.clearLayers();
 
-      // Solar density — one translucent circle per zip, scaled by permit count.
-      if (showSolar) {
-        for (const z of solarZips) {
-          if (z.lat == null || z.lon == null) continue;
-          L.circle([z.lat, z.lon], {
-            radius: Math.min(4200, 900 + z.permits * 2.2),
-            color: "#0c7a40",
-            weight: 1,
-            opacity: 0.5,
-            fillColor: "#0c7a40",
-            fillOpacity: 0.14,
-          })
-            .bindPopup(`<b>${z.zip}</b><br/>${z.permits} solar-permitted homes`)
-            .addTo(layer);
-        }
-      }
-
       // Storm reports.
       for (const e of filtered) {
         if (e.type === "hail") {
@@ -184,7 +157,7 @@ export function StormDashboard({
         }
       }
     });
-  }, [filtered, solarZips, checks, showSolar, showChecks]);
+  }, [filtered, checks, showChecks]);
 
   const maxDayCount = Math.max(1, ...days.map((d) => d.hail + d.wind));
 
@@ -207,14 +180,6 @@ export function StormDashboard({
         <label className="flex items-center gap-1.5">
           <input
             type="checkbox"
-            checked={showSolar}
-            onChange={(e) => setShowSolar(e.target.checked)}
-          />
-          Solar density
-        </label>
-        <label className="flex items-center gap-1.5">
-          <input
-            type="checkbox"
             checked={showChecks}
             onChange={(e) => setShowChecks(e.target.checked)}
           />
@@ -224,7 +189,6 @@ export function StormDashboard({
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#ffc21f" }} />1″+ hail</span>
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#ff3b1f" }} />1.75″+</span>
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#3b82f6" }} />wind</span>
-          <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full" style={{ background: "#0c7a40", opacity: 0.4 }} />solar zips</span>
         </span>
       </div>
 

@@ -1,32 +1,13 @@
 import type { Metadata } from "next";
 import { listStormEvents, type StormEventRow } from "@/lib/storm";
-import { solarPermitStats } from "@/lib/solarPermits";
 import { listRoofChecks } from "@/lib/db";
-import { StormDashboard, type DashSolarZip } from "@/components/StormDashboard";
+import { StormDashboard } from "@/components/StormDashboard";
 import { listStormTargets, listTargetDays, listTargetCities } from "@/lib/parcels";
 import { TargetCards } from "@/components/TargetCards";
 
-/** Zip centroid via zippopotam.us (free, cached 30 days) — powers the solar
- *  density overlay without geocoding 20k permit addresses. */
-async function zipCentroid(zip: string): Promise<{ lat: number; lon: number } | null> {
-  try {
-    const res = await fetch(`https://api.zippopotam.us/us/${zip}`, {
-      next: { revalidate: 2592000 },
-      signal: AbortSignal.timeout(4000),
-    });
-    if (!res.ok) return null;
-    const j = await res.json();
-    const p = j?.places?.[0];
-    if (!p) return null;
-    return { lat: parseFloat(p.latitude), lon: parseFloat(p.longitude) };
-  } catch {
-    return null;
-  }
-}
-
 // Storm engine command view — NOT indexed. Gated by ?key=<ADMIN_TOKEN>, same
-// pattern as /admin/leads. Shows storm days (100mi radius), the solar-permit
-// target inventory, and self-identified claim-check addresses (knock gold).
+// pattern as /admin/leads. Shows storm days (100mi radius), scored homeowner
+// targets, and self-identified claim-check addresses (knock gold).
 export const metadata: Metadata = {
   title: "Storm Engine",
   robots: { index: false, follow: false },
@@ -125,9 +106,8 @@ export default async function AdminStormsPage({
   const safeCounty = county && /^[a-z]{3,20}$/.test(county) ? county : undefined;
   const safeCity = city && /^[A-Za-z .'-]{2,40}$/.test(city) ? city : undefined;
   const safeDays = ["10", "30", "90"].includes(daysParam || "") ? Number(daysParam) : undefined;
-  const [events, solar, checks, targetDays, topTargets, targetCities] = await Promise.all([
+  const [events, checks, targetDays, topTargets, targetCities] = await Promise.all([
     listStormEvents(90),
-    solarPermitStats(40),
     listRoofChecks(40),
     listTargetDays(),
     listStormTargets(
@@ -136,9 +116,6 @@ export default async function AdminStormsPage({
     ),
     listTargetCities(),
   ]);
-  const solarZips: DashSolarZip[] = await Promise.all(
-    solar.topZips.map(async (z) => ({ ...z, ...((await zipCentroid(z.zip)) ?? { lat: null, lon: null }) })),
-  );
   const days = clusterByDay(events);
   const bigDays = days.filter((d) => d.maxHail >= 1 || d.maxGust >= 60 || d.windDmg >= 3);
 
@@ -158,12 +135,11 @@ export default async function AdminStormsPage({
         </div>
 
         {/* Summary chips */}
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
           {[
             { n: days.length, label: "storm days" },
             { n: bigDays.length, label: "major days (1″+ hail / 60+ gust)" },
             { n: events.filter((e) => e.type === "hail").length, label: "hail reports" },
-            { n: solar.total, label: "solar homes on file (Dallas + Fort Worth permits)" },
           ].map((c) => (
             <div key={c.label} className="rounded-lg border border-gray-200 p-4">
               <div className="font-display text-2xl font-extrabold">{c.n}</div>
@@ -182,7 +158,6 @@ export default async function AdminStormsPage({
             lat: e.lat,
             lon: e.lon,
           }))}
-          solarZips={solarZips}
           checks={checks.map((c) => ({
             address: c.address || c.matched || "",
             lat: c.lat ?? null,
@@ -315,7 +290,6 @@ export default async function AdminStormsPage({
                       className={chip(safeTargetDate === d.storm_date)}
                     >
                       {d.storm_date} · {d.targets}
-                      {d.solar_targets ? ` (☀️${d.solar_targets})` : ""}
                     </a>
                   ))}
                 </div>
@@ -379,7 +353,6 @@ export default async function AdminStormsPage({
                 city: t.city,
                 zip: t.zip,
                 hail_size_in: t.hail_size_in,
-                solar: t.solar,
                 absentee: t.absentee,
                 year_built: t.year_built,
                 value: t.value,
@@ -402,7 +375,6 @@ export default async function AdminStormsPage({
                     <th className="py-2 pr-4">City</th>
                     <th className="py-2 pr-4">Zip</th>
                     <th className="py-2 pr-4">Hail</th>
-                    <th className="py-2 pr-4">Solar</th>
                     <th className="py-2 pr-4">Occupancy</th>
                     <th className="py-2 pr-4">Built</th>
                     <th className="py-2 pr-4">Value</th>
@@ -410,7 +382,7 @@ export default async function AdminStormsPage({
                 </thead>
                 <tbody>
                   {topTargets.map((t) => (
-                    <tr key={t.id} className={`border-b border-gray-100 ${t.solar ? "bg-green-50" : ""}`}>
+                    <tr key={t.id} className="border-b border-gray-100">
                       <td className="py-2 pr-4 font-bold">{t.score}</td>
                       <td className="py-2 pr-4 font-semibold">{t.owner_name}</td>
                       <td className="whitespace-nowrap py-2 pr-4">
@@ -428,7 +400,6 @@ export default async function AdminStormsPage({
                       <td className="whitespace-nowrap py-2 pr-4">{t.city || "—"}</td>
                       <td className="py-2 pr-4">{t.zip}</td>
                       <td className="py-2 pr-4">{t.hail_size_in ? `${t.hail_size_in}″` : "—"}</td>
-                      <td className="py-2 pr-4">{t.solar ? "☀️" : ""}</td>
                       <td className="py-2 pr-4 text-gray-600">
                         {t.absentee ? "Absentee/investor" : "Owner-occupied"}
                       </td>
@@ -450,32 +421,6 @@ export default async function AdminStormsPage({
           </>
             );
           })()
-        )}
-
-        {/* Solar inventory */}
-        <h2 className="mt-10 font-display text-lg font-extrabold">
-          Solar target inventory{" "}
-          <span className="text-sm font-semibold text-gray-500">
-            {solar.total} permit-confirmed homes · priority-one after any hail day
-          </span>
-        </h2>
-        {solar.topZips.length === 0 ? (
-          <p className="mt-2 text-gray-600">
-            No permits synced yet — runs nightly, or force it:{" "}
-            <code className="rounded bg-gray-100 px-1">POST /api/cron/storm-watch?solar=1</code>
-          </p>
-        ) : (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {solar.topZips.map((z) => (
-              <span
-                key={z.zip}
-                className="rounded-full border border-gray-200 px-3 py-1.5 text-sm"
-              >
-                <span className="font-semibold">{z.zip}</span>{" "}
-                <span className="text-gray-500">· {z.permits} homes</span>
-              </span>
-            ))}
-          </div>
         )}
 
         {/* Knock gold */}

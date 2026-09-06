@@ -1,0 +1,555 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "poweredge home" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e5]: poweredge
+      - navigation [ref=e6]:
+        - link "Claim Check" [ref=e7] [cursor=pointer]:
+          - /url: /roof-claim-check
+        - link "Financing" [ref=e8] [cursor=pointer]:
+          - /url: /financing
+        - link "Roofing" [ref=e9] [cursor=pointer]:
+          - /url: /roofing
+        - link "Solar" [ref=e10] [cursor=pointer]:
+          - /url: /solar
+        - link "Commercial" [ref=e11] [cursor=pointer]:
+          - /url: /commercial
+      - generic [ref=e12]:
+        - link "469-277-9594" [ref=e13] [cursor=pointer]:
+          - /url: tel:+14692779594
+        - link "Text us" [ref=e14] [cursor=pointer]:
+          - /url: sms:+14692779594
+        - link "Free inspection" [ref=e17] [cursor=pointer]:
+          - /url: /free-inspection
+  - main [ref=e18]:
+    - generic [ref=e19]:
+      - img "Texas brick home under a dark storm sky" [ref=e20]
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - paragraph [ref=e27]: Roofing & storm restoration · Dallas–Fort Worth
+          - heading "Storm damage? We can help with that." [level=1] [ref=e29]: Storm damage?We can help with that.
+          - paragraph [ref=e30]:
+            - text: Leak, missing shingles, hail — we inspect it free and tell you straight. If it's a covered storm claim, you likely pay just your
+            - strong [ref=e31]: deductible
+            - text: ", and we can finance that. Not a storm? We'll still get you an honest price."
+          - generic [ref=e32]:
+            - generic [ref=e35]:
+              - generic [ref=e36]: Free roof inspection
+              - generic [ref=e37]: Storm claim or cash — honest read
+            - generic [ref=e40]:
+              - generic [ref=e41]: Deductible financing
+              - generic [ref=e42]: As little as $250 down
+            - generic [ref=e45]:
+              - generic [ref=e46]: Solar + roof, one license
+              - generic [ref=e47]: Most roofers can't
+          - generic [ref=e48]:
+            - link "Book a free inspection Documented for your claim — no cost, no pressure. Get started →" [ref=e49] [cursor=pointer]:
+              - /url: /free-inspection
+              - generic [ref=e50]: Book a free inspection
+              - generic [ref=e51]: Documented for your claim — no cost, no pressure.
+              - generic [ref=e52]: Get started →
+            - link "Do I have a claim? Free 60-second eligibility check. Check my roof →" [ref=e53] [cursor=pointer]:
+              - /url: /roof-claim-check
+              - generic [ref=e54]: Do I have a claim?
+              - generic [ref=e55]: Free 60-second eligibility check.
+              - generic [ref=e56]: Check my roof →
+          - generic [ref=e57]:
+            - generic [ref=e58]:
+              - strong [ref=e70]: "4.7"
+              - text: (48 reviews)
+            - strong [ref=e73]: Licensed & insured
+            - generic [ref=e75]:
+              - strong [ref=e76]: 40-year
+              - text: master electrician
+            - generic [ref=e78]:
+              - strong [ref=e79]: $2,000,000
+              - text: insured
+        - generic [ref=e81]:
+          - heading "Book your free roof inspection" [level=2] [ref=e82]
+          - paragraph [ref=e83]: Just your name and number — a licensed pro calls you back fast, usually within the hour.
+          - generic [ref=e85]:
+            - generic [ref=e86]:
+              - textbox "Full name" [ref=e87]
+              - textbox "Phone number" [ref=e88]
+            - textbox "Email (optional)" [ref=e89]
+            - button "Get my free quote" [ref=e90]
+            - paragraph [ref=e91]: No spam, no door-knock pressure. We respond fast.
+            - paragraph [ref=e92]:
+              - text: By submitting your information, I am agreeing to receive transactional / informational text messages from Power Edge, LLC. Message Frequency may vary. Msg and data rates may apply. Reply STOP to opt out. See our
+              - link "Privacy Policy" [ref=e93] [cursor=pointer]:
+                - /url: /privacy
+              - text: "&"
+              - link "Terms" [ref=e94] [cursor=pointer]:
+                - /url: /terms
+              - text: .
+    - generic [ref=e96]:
+      - generic [ref=e97]:
+        - generic [ref=e98]: Licensed
+        - generic [ref=e99]: "& insured Texas contractor"
+      - generic [ref=e100]:
+        - generic [ref=e101]: 0 crews
+        - generic [ref=e103]: ~100 roofs / month capacity
+      - generic [ref=e104]:
+        - generic [ref=e105]: 0.0★
+        - generic [ref=e106]: 48 Google reviews
+      - generic [ref=e107]:
+        - generic [ref=e108]: 1-yr
+        - generic [ref=e109]: workmanship guarantee
+    - generic [ref=e112]:
+      - generic [ref=e113]:
+        - paragraph [ref=e114]: Storm & hail damage
+        - heading "Hail damage? We make the insurance claim simple — and by the book." [level=2] [ref=e115]
+        - paragraph [ref=e116]: "A storm claim is where homeowners get burned by fly-by-night roofers. Here's how we do it differently: no waiving your deductible, no posing as your adjuster — just an honest claim and a roof done right."
+        - list [ref=e117]:
+          - listitem [ref=e118]:
+            - generic [ref=e119]: "1"
+            - generic [ref=e120]:
+              - heading "We inspect and document — free" [level=3] [ref=e121]
+              - paragraph [ref=e122]: Photos, measurements, and a written damage assessment, so your claim is built on evidence, not guesswork.
+          - listitem [ref=e123]:
+            - generic [ref=e124]: "2"
+            - generic [ref=e125]:
+              - heading "You file; we coordinate with your adjuster" [level=3] [ref=e126]
+              - paragraph [ref=e127]: We meet your adjuster on-site and document the full scope so nothing legitimate gets missed. We don't act as your public adjuster — that's the law, and it protects you.
+          - listitem [ref=e128]:
+            - generic [ref=e129]: "3"
+            - generic [ref=e130]:
+              - heading "You pay your deductible — we handle the roof" [level=3] [ref=e131]
+              - paragraph [ref=e132]: On a covered claim you typically pay only your deductible. Short on it up front? Finance it into low monthly payments and start now.
+        - link "Check if I have a claim →" [ref=e134] [cursor=pointer]:
+          - /url: /roof-claim-check
+        - paragraph [ref=e135]:
+          - text: Already know you're filing?
+          - 'link "Self-serve: prep your claim →" [ref=e136] [cursor=pointer]':
+            - /url: /claim-prep
+          - text: and we'll show up ready to fix it.
+      - generic [ref=e137]:
+        - generic [ref=e143]:
+          - paragraph [ref=e144]: Finance your deductible — from $250 down.
+          - paragraph [ref=e145]: Short on cash for your deductible? Spread it into low monthly payments and get your roof replaced now. You still pay your full deductible over time — we never waive it (that's illegal in Texas, and following the law protects you).
+          - link "See how deductible financing works →" [ref=e146] [cursor=pointer]:
+            - /url: /guides/roof-deductible-financing-texas
+        - generic [ref=e147]:
+          - generic [ref=e148]: What a storm claim usually looks like
+          - generic [ref=e149]:
+            - generic [ref=e150]:
+              - generic [ref=e151]: New roof (retail)
+              - generic [ref=e152]: ~$15,000
+            - generic [ref=e153]:
+              - generic [ref=e154]: Your out of pocket
+              - generic [ref=e155]: Just your deductible
+            - paragraph [ref=e156]: On a covered claim with replacement-cost coverage. Your deductible depends on your policy — and you can finance it.
+    - generic [ref=e158]:
+      - generic [ref=e159]:
+        - generic [ref=e160]:
+          - paragraph [ref=e161]: Stuck on the out-of-pocket?
+          - heading "Approved for a roof but can't cover the deductible? You're not stuck." [level=2] [ref=e163]
+          - paragraph [ref=e164]: "In Texas, a wind/hail deductible is often 1–2% of your home's value — $5,000–$10,000 out of pocket before work even starts. If that's the wall between you and a sound roof, we finance it: as little as $250 down, low monthly payments, and we get the job scheduled now. Already have an estimate from another roofer? Bring it — we'll do the work and finance it."
+        - list [ref=e165]:
+          - listitem [ref=e166]:
+            - generic [ref=e168]: Deductible too high to front (Texas deductibles run 1–2% of home value)
+          - listitem [ref=e169]:
+            - generic [ref=e171]: Insurance check came in low — older roof on actual-cash-value coverage
+          - listitem [ref=e172]:
+            - generic [ref=e174]: No claim — paying out of pocket
+          - listitem [ref=e175]:
+            - generic [ref=e177]: Solar detach & reset not covered on the claim
+        - link "See financing options →" [ref=e179] [cursor=pointer]:
+          - /url: /financing
+      - generic [ref=e180]:
+        - generic [ref=e181]: Your deductible or out-of-pocket
+        - generic [ref=e182]:
+          - button "$1,000" [ref=e183]
+          - button "$2,500" [ref=e184]
+          - button "$5,000" [ref=e185]
+          - button "$8,000" [ref=e186]
+          - button "$10,000" [ref=e187]
+          - button "$15,000" [ref=e188]
+        - generic [ref=e189]:
+          - text: Or enter an amount
+          - spinbutton "Or enter an amount" [ref=e190]: "8000"
+        - generic [ref=e191]: Choose a plan
+        - generic [ref=e192]:
+          - button "Pay in 4 $2,000/mo 4 payments · 0% interest" [ref=e193]:
+            - generic [ref=e194]: Pay in 4
+            - generic [ref=e195]: $2,000/mo
+            - generic [ref=e196]: 4 payments · 0% interest
+          - button "12-month plan $715/mo 12 payments · 12.99% APR" [pressed] [ref=e197]:
+            - generic [ref=e198]: 12-month plan
+            - generic [ref=e199]: $715/mo
+            - generic [ref=e200]: 12 payments · 12.99% APR
+        - link "Get pre-qualified · 12-month →" [ref=e201] [cursor=pointer]:
+          - /url: "#quote"
+        - paragraph [ref=e202]: Illustrative estimate only — not a financing offer. Plans are in-house and subject to approval; final terms and required disclosures are provided in writing before you sign. You pay your full deductible over time; we never waive it (that's illegal in Texas).
+    - generic [ref=e204]:
+      - generic [ref=e205]:
+        - generic [ref=e206]:
+          - paragraph [ref=e207]: Why PowerEdge
+          - heading "The one contractor you can actually verify." [level=2] [ref=e209]
+          - paragraph [ref=e210]: Texas doesn't license roofers. Anyone with a ladder and a magnet sign can knock your door after a storm. But electrical and solar work legally require a Master Electrician's license — and that's exactly what we're built on.
+        - list [ref=e211]:
+          - listitem [ref=e212]:
+            - generic [ref=e216]:
+              - heading "We're licensed where it counts" [level=3] [ref=e217]
+              - paragraph [ref=e218]: Backed by John Lott's 40-year Master Electrician license and $2,000,000 in liability coverage — a real, accountable company, not a fly-by-night storm crew.
+          - listitem [ref=e219]:
+            - generic [ref=e223]:
+              - heading "Two trades, one accountable team" [level=3] [ref=e224]
+              - paragraph [ref=e225]: Roof and electrical handled in-house — no subcontractor finger-pointing when your roof penetration meets your wiring.
+          - listitem [ref=e226]:
+            - generic [ref=e230]:
+              - heading "Built to show up, not just sign you up" [level=3] [ref=e231]
+              - paragraph [ref=e232]: Four crews and 15 electricians mean we have the capacity to actually be there this week — not in a month.
+          - listitem [ref=e233]:
+            - generic [ref=e237]:
+              - heading "We'll tell you if your roof is fine" [level=3] [ref=e238]
+              - paragraph [ref=e239]: No manufactured damage, no scare inspections. If there's nothing worth claiming, you'll hear exactly that — in writing.
+      - generic [ref=e240]:
+        - paragraph [ref=e241]: Don't take our word
+        - paragraph [ref=e243]: A real company stands behind the work.
+        - paragraph [ref=e244]: Every roof runs under a 40-year Master Electrician and one accountable, insured team — no subcontractor finger-pointing, and an honest verdict in writing even when the answer is “your roof is fine.”
+        - generic [ref=e245]:
+          - generic [ref=e246]: Coverage
+          - generic [ref=e247]: $2,000,000 liability
+    - generic [ref=e251]:
+      - generic [ref=e252]:
+        - paragraph [ref=e253]: Got solar panels?
+        - heading "Solar on your roof? We're one of the few who can legally do the whole job." [level=2] [ref=e255]
+        - paragraph [ref=e256]: Replacing a roof with solar means the panels have to come off and go back on — and in Texas that's electrical work most roofers can't legally touch. They sub it out, and you're left juggling two companies with your roof sitting exposed. We detach, re-roof, and reset your panels in-house, on one schedule, under one license — and the detach & reset is usually a covered line item on your claim.
+        - generic [ref=e257]:
+          - link "Book my free inspection" [ref=e258] [cursor=pointer]:
+            - /url: "#quote"
+          - link "How solar + roof works →" [ref=e259] [cursor=pointer]:
+            - /url: /solar
+      - generic [ref=e260]:
+        - generic [ref=e261]: One licensed team
+        - generic [ref=e262]: Roof + Solar
+        - generic [ref=e263]: Detach · re-roof · reset · re-energize — no finger-pointing, one warranty.
+        - generic [ref=e264]: Performed by one licensed, insured team
+    - generic [ref=e269]:
+      - paragraph [ref=e270]: Live storm intelligence · DFW
+      - 'heading "DFW is the #1 hail metro in the country." [level=2] [ref=e272]': "DFW is the #1 hail metroin the country."
+      - paragraph [ref=e273]: North Texas gets hammered every season — and hail damage is easy to miss from the ground. Check your exact address against reported storm activity, free.
+      - link "Is your roof one of them? Check your address →" [ref=e275] [cursor=pointer]:
+        - /url: /roof-claim-check
+      - paragraph [ref=e276]: "Source: NWS / NOAA Local Storm Reports (Fort Worth/Dallas office)."
+    - generic [ref=e285]:
+      - generic [ref=e286]:
+        - paragraph [ref=e287]: Free 60-second claim check
+        - heading "Do you have a roof claim? Find out before you call anyone." [level=2] [ref=e289]
+        - paragraph [ref=e290]: Enter your address and answer three quick questions. We check reported hail near your home and give you a straight read on whether it's likely worth filing — no salesperson, no obligation. On a covered claim, you typically pay just your deductible.
+        - generic [ref=e291]:
+          - generic [ref=e292]:
+            - textbox "Enter your address" [ref=e293]
+            - button "Check my roof →" [ref=e294]
+          - paragraph [ref=e295]: Free · 60 seconds · no obligation. Approved? Start for as little as $250 down.
+      - generic [ref=e297]:
+        - generic [ref=e298]: Good news
+        - generic [ref=e299]: You likely qualify for a roof insurance claim.
+        - generic [ref=e300]: 3 hail reports within 15 mi · largest 2″ · ~7 months left to file
+        - generic [ref=e301]:
+          - generic [ref=e302]: Your out of pocket
+          - generic [ref=e303]: Just your deductible
+        - generic [ref=e304]: Start for as little as $250 down.
+    - generic [ref=e306]:
+      - generic [ref=e307]:
+        - paragraph [ref=e308]: What we do
+        - heading "Roofing, solar, and commercial — one licensed team." [level=2] [ref=e310]
+        - paragraph [ref=e311]: Storm restoration and roof replacement for homes, solar detach & reset under our electrical license, and full roofing + electrical for commercial properties. Free inspections, no runaround.
+      - generic [ref=e312]:
+        - link "Roofing repair & replacement Free quote Residential and commercial roofs — repairs, full replacements, and storm/insurance claims documented by the book. — Free, no-pressure roof inspection with photo documentation — Residential re-roofs and commercial systems — Storm & hail insurance claims documented to the letter of Texas law Explore Roofing →" [ref=e313] [cursor=pointer]:
+          - /url: /roofing
+          - generic [ref=e314]:
+            - heading "Roofing repair & replacement" [level=3] [ref=e315]
+            - generic [ref=e316]: Free quote
+          - paragraph [ref=e317]: Residential and commercial roofs — repairs, full replacements, and storm/insurance claims documented by the book.
+          - list [ref=e318]:
+            - listitem [ref=e319]:
+              - generic [ref=e320]: —
+              - text: Free, no-pressure roof inspection with photo documentation
+            - listitem [ref=e321]:
+              - generic [ref=e322]: —
+              - text: Residential re-roofs and commercial systems
+            - listitem [ref=e323]:
+              - generic [ref=e324]: —
+              - text: Storm & hail insurance claims documented to the letter of Texas law
+          - generic [ref=e325]: Explore Roofing →
+        - link "Solar repair & replacement Free quote We service and replace existing solar — the electrical work solar legally requires a licensed contractor to perform. (We do not sell new installs.) — Repair underperforming or dead panels and microinverters — Replace damaged panels after storms — Re-connect and re-energize systems during a roof replacement Explore Solar →" [ref=e326] [cursor=pointer]:
+          - /url: /solar
+          - generic [ref=e327]:
+            - heading "Solar repair & replacement" [level=3] [ref=e328]
+            - generic [ref=e329]: Free quote
+          - paragraph [ref=e330]: We service and replace existing solar — the electrical work solar legally requires a licensed contractor to perform. (We do not sell new installs.)
+          - list [ref=e331]:
+            - listitem [ref=e332]:
+              - generic [ref=e333]: —
+              - text: Repair underperforming or dead panels and microinverters
+            - listitem [ref=e334]:
+              - generic [ref=e335]: —
+              - text: Replace damaged panels after storms
+            - listitem [ref=e336]:
+              - generic [ref=e337]: —
+              - text: Re-connect and re-energize systems during a roof replacement
+          - generic [ref=e338]: Explore Solar →
+        - link "Commercial electrical & roofing Free quote One licensed partner for property managers and business owners across roofing and electrical — scheduled, documented, and warrantied. — Commercial roof systems, repairs, and replacements — Electrical installs, upgrades, and routine maintenance — 24/7 emergency response Explore Commercial →" [ref=e339] [cursor=pointer]:
+          - /url: /commercial
+          - generic [ref=e340]:
+            - heading "Commercial electrical & roofing" [level=3] [ref=e341]
+            - generic [ref=e342]: Free quote
+          - paragraph [ref=e343]: One licensed partner for property managers and business owners across roofing and electrical — scheduled, documented, and warrantied.
+          - list [ref=e344]:
+            - listitem [ref=e345]:
+              - generic [ref=e346]: —
+              - text: Commercial roof systems, repairs, and replacements
+            - listitem [ref=e347]:
+              - generic [ref=e348]: —
+              - text: Electrical installs, upgrades, and routine maintenance
+            - listitem [ref=e349]:
+              - generic [ref=e350]: —
+              - text: 24/7 emergency response
+          - generic [ref=e351]: Explore Commercial →
+    - generic [ref=e353]:
+      - generic [ref=e354]:
+        - paragraph [ref=e355]: Who's on the truck
+        - heading "Real names. Real decades on the job." [level=2] [ref=e357]
+      - generic [ref=e358]:
+        - generic [ref=e359]:
+          - generic [ref=e360]: JL
+          - heading "John Lott" [level=3] [ref=e361]
+          - paragraph [ref=e362]: Master Electrician
+          - paragraph [ref=e363]: 40 years of electrical work
+          - paragraph [ref=e364]: Holds the Master Electrician license every legitimate electrical and solar job in Texas is legally required to run under. Forty years on the tools across residential, commercial, and industrial work.
+        - generic [ref=e365]:
+          - generic [ref=e366]: ES
+          - heading "Ernesto Sandoval" [level=3] [ref=e367]
+          - paragraph [ref=e368]: Roofing Project Manager
+          - paragraph [ref=e369]: 20 years roofing & construction
+          - paragraph [ref=e370]: Runs the roofing side end to end — inspection, insurance documentation, crew scheduling, and the final walk. Two decades of roofing and construction across North Texas.
+    - generic [ref=e372]:
+      - generic [ref=e373]:
+        - generic [ref=e374]:
+          - paragraph [ref=e375]: What North Texas says
+          - heading "Rated 4.7 by your neighbors." [level=2] [ref=e377]
+          - paragraph [ref=e378]: Real Google reviews from real DFW homeowners and businesses. We had a rough patch late last year — we fixed it, and we're earning back every star.
+        - link "4.7 48 Google reviews" [ref=e379] [cursor=pointer]:
+          - /url: https://share.google/Yfo6Ynfmzp3dzVnD6
+          - generic [ref=e380]:
+            - generic [ref=e381]: "4.7"
+            - paragraph [ref=e394]: 48 Google reviews
+      - generic [ref=e395]:
+        - figure "Abi E. Verified Google review" [ref=e396]:
+          - blockquote [ref=e408]: “They were courteous, took time to explain what they were doing and gave me status updates. Happy with the quality. It's good to see that there are still contractors out there that do a good job and are good folks.”
+          - generic [ref=e409]:
+            - text: Abi E.
+            - generic [ref=e410]: Verified Google review
+        - figure "Jon S. Same-day service · Google review" [ref=e411]:
+          - blockquote [ref=e423]: “They were able to make it out the same day I called, diagnosed the issue and made the repair… the price was extremely reasonable. I would definitely recommend them to anyone.”
+          - generic [ref=e424]:
+            - text: Jon S.
+            - generic [ref=e425]: Same-day service · Google review
+        - figure "Matthew B. Verified Google review" [ref=e426]:
+          - blockquote [ref=e438]: “Hands down the best electricians in Dallas. From the people, to the service and most importantly the quality of work.”
+          - generic [ref=e439]:
+            - text: Matthew B.
+            - generic [ref=e440]: Verified Google review
+        - figure "Shawn W. Verified Google review" [ref=e441]:
+          - blockquote [ref=e453]: “He handled everything and was very honest and hardworking. I would highly recommend him… Pricing was reasonable and feasible for our breaker box problem.”
+          - generic [ref=e454]:
+            - text: Shawn W.
+            - generic [ref=e455]: Verified Google review
+        - figure "Leanne G. Verified Google review" [ref=e456]:
+          - blockquote [ref=e468]: “He did the best he could to be as fast as possible while still giving the best service and doing the job right. I would definitely recommend to friends and family!”
+          - generic [ref=e469]:
+            - text: Leanne G.
+            - generic [ref=e470]: Verified Google review
+    - generic [ref=e472]:
+      - generic [ref=e473]:
+        - paragraph [ref=e474]: Where we work
+        - heading "Serving the DFW metroplex." [level=2] [ref=e476]
+      - generic [ref=e477]:
+        - link "Dallas" [ref=e478] [cursor=pointer]:
+          - /url: /service-areas/dallas
+        - link "Fort Worth" [ref=e479] [cursor=pointer]:
+          - /url: /service-areas/fort-worth
+        - link "Plano" [ref=e480] [cursor=pointer]:
+          - /url: /service-areas/plano
+        - link "Frisco" [ref=e481] [cursor=pointer]:
+          - /url: /service-areas/frisco
+        - link "McKinney" [ref=e482] [cursor=pointer]:
+          - /url: /service-areas/mckinney
+        - link "Arlington" [ref=e483] [cursor=pointer]:
+          - /url: /service-areas/arlington
+        - link "Irving" [ref=e484] [cursor=pointer]:
+          - /url: /service-areas/irving
+        - link "Denton" [ref=e485] [cursor=pointer]:
+          - /url: /service-areas/denton
+        - link "Garland" [ref=e486] [cursor=pointer]:
+          - /url: /service-areas/garland
+        - link "Richardson" [ref=e487] [cursor=pointer]:
+          - /url: /service-areas/richardson
+        - link "Carrollton" [ref=e488] [cursor=pointer]:
+          - /url: /service-areas/carrollton
+        - link "Allen" [ref=e489] [cursor=pointer]:
+          - /url: /service-areas/allen
+        - link "Grand Prairie" [ref=e490] [cursor=pointer]:
+          - /url: /service-areas/grand-prairie
+        - link "Flower Mound" [ref=e491] [cursor=pointer]:
+          - /url: /service-areas/flower-mound
+        - link "Mansfield" [ref=e492] [cursor=pointer]:
+          - /url: /service-areas/mansfield
+        - link "Rockwall" [ref=e493] [cursor=pointer]:
+          - /url: /service-areas/rockwall
+      - paragraph [ref=e494]:
+        - text: Don't see your town? We cover all of Dallas–Fort Worth metroplex and surrounding North Texas communities.
+        - link "Just ask." [ref=e495] [cursor=pointer]:
+          - /url: /contact
+    - generic [ref=e497]:
+      - generic [ref=e498]:
+        - heading "Get a crew you can verify." [level=2] [ref=e499]
+        - paragraph [ref=e500]: Free roof inspection, up-front electrical pricing, and a real person on the phone. Tell us what's going on.
+        - link "469-277-9594" [ref=e502] [cursor=pointer]:
+          - /url: tel:+14692779594
+      - generic [ref=e504]:
+        - generic [ref=e505]:
+          - textbox "Full name" [ref=e506]
+          - textbox "Phone number" [ref=e507]
+        - generic [ref=e508]:
+          - textbox "Email (we'll send your details)" [ref=e509]
+          - textbox "ZIP code" [ref=e510]
+        - combobox [ref=e511]:
+          - option "What do you need?" [disabled] [selected]
+          - option "Roofing repair & replacement"
+          - option "Solar repair & replacement"
+          - option "Commercial electrical & roofing"
+          - option "Storm / insurance claim"
+          - option "Financing — stuck on the out-of-pocket"
+          - option "Emergency — need someone now"
+          - option "Something else"
+        - textbox "Briefly, what's going on? (optional)" [ref=e512]
+        - generic [ref=e513] [cursor=pointer]:
+          - checkbox "I have solar panels on my roof" [ref=e514]
+          - generic [ref=e515]: I have solar panels on my roof
+        - button "Get my free quote" [ref=e516]
+        - paragraph [ref=e517]: No spam, no door-knock pressure. We respond fast.
+        - paragraph [ref=e518]:
+          - text: By submitting your information, I am agreeing to receive transactional / informational text messages from Power Edge, LLC. Message Frequency may vary. Msg and data rates may apply. Reply STOP to opt out. See our
+          - link "Privacy Policy" [ref=e519] [cursor=pointer]:
+            - /url: /privacy
+          - text: "&"
+          - link "Terms" [ref=e520] [cursor=pointer]:
+            - /url: /terms
+          - text: .
+  - contentinfo [ref=e521]:
+    - generic [ref=e522]:
+      - generic [ref=e523]:
+        - link "poweredge home" [ref=e524] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e525]: poweredge
+        - paragraph [ref=e526]: Roofing and electrical, under one license you can actually verify.
+        - generic [ref=e527]:
+          - generic [ref=e539]: "4.7"
+          - generic [ref=e540]: (48 Google reviews)
+      - generic [ref=e541]:
+        - heading "Services" [level=3] [ref=e542]
+        - list [ref=e543]:
+          - listitem [ref=e544]:
+            - link "Roofing" [ref=e545] [cursor=pointer]:
+              - /url: /roofing
+          - listitem [ref=e546]:
+            - link "Solar" [ref=e547] [cursor=pointer]:
+              - /url: /solar
+          - listitem [ref=e548]:
+            - link "Commercial" [ref=e549] [cursor=pointer]:
+              - /url: /commercial
+          - listitem [ref=e550]:
+            - link "Free roof claim check" [ref=e551] [cursor=pointer]:
+              - /url: /roof-claim-check
+          - listitem [ref=e552]:
+            - link "Deductible financing" [ref=e553] [cursor=pointer]:
+              - /url: /financing
+          - listitem [ref=e554]:
+            - link "Free roof coverage check" [ref=e555] [cursor=pointer]:
+              - /url: /roof-check
+          - listitem [ref=e556]:
+            - link "Guides" [ref=e557] [cursor=pointer]:
+              - /url: /guides
+          - listitem [ref=e558]:
+            - link "About us" [ref=e559] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=e560]:
+            - link "Sales careers — we're hiring" [ref=e561] [cursor=pointer]:
+              - /url: /careers
+      - generic [ref=e562]:
+        - heading "Service areas" [level=3] [ref=e563]
+        - list [ref=e564]:
+          - listitem [ref=e565]:
+            - link "Dallas" [ref=e566] [cursor=pointer]:
+              - /url: /service-areas/dallas
+          - listitem [ref=e567]:
+            - link "Fort Worth" [ref=e568] [cursor=pointer]:
+              - /url: /service-areas/fort-worth
+          - listitem [ref=e569]:
+            - link "Plano" [ref=e570] [cursor=pointer]:
+              - /url: /service-areas/plano
+          - listitem [ref=e571]:
+            - link "Frisco" [ref=e572] [cursor=pointer]:
+              - /url: /service-areas/frisco
+          - listitem [ref=e573]:
+            - link "McKinney" [ref=e574] [cursor=pointer]:
+              - /url: /service-areas/mckinney
+          - listitem [ref=e575]:
+            - link "Arlington" [ref=e576] [cursor=pointer]:
+              - /url: /service-areas/arlington
+          - listitem [ref=e577]:
+            - link "Irving" [ref=e578] [cursor=pointer]:
+              - /url: /service-areas/irving
+          - listitem [ref=e579]:
+            - link "Denton" [ref=e580] [cursor=pointer]:
+              - /url: /service-areas/denton
+          - listitem [ref=e581]:
+            - link "Garland" [ref=e582] [cursor=pointer]:
+              - /url: /service-areas/garland
+          - listitem [ref=e583]:
+            - link "Richardson" [ref=e584] [cursor=pointer]:
+              - /url: /service-areas/richardson
+          - listitem [ref=e585]:
+            - link "Carrollton" [ref=e586] [cursor=pointer]:
+              - /url: /service-areas/carrollton
+          - listitem [ref=e587]:
+            - link "Allen" [ref=e588] [cursor=pointer]:
+              - /url: /service-areas/allen
+          - listitem [ref=e589]:
+            - link "Grand Prairie" [ref=e590] [cursor=pointer]:
+              - /url: /service-areas/grand-prairie
+          - listitem [ref=e591]:
+            - link "Flower Mound" [ref=e592] [cursor=pointer]:
+              - /url: /service-areas/flower-mound
+          - listitem [ref=e593]:
+            - link "Mansfield" [ref=e594] [cursor=pointer]:
+              - /url: /service-areas/mansfield
+          - listitem [ref=e595]:
+            - link "Rockwall" [ref=e596] [cursor=pointer]:
+              - /url: /service-areas/rockwall
+      - generic [ref=e597]:
+        - heading "Contact" [level=3] [ref=e598]
+        - list [ref=e599]:
+          - listitem [ref=e600]:
+            - link "469-277-9594" [ref=e601] [cursor=pointer]:
+              - /url: tel:+14692779594
+          - listitem [ref=e602]:
+            - link "info@poweredgetx.com" [ref=e603] [cursor=pointer]:
+              - /url: mailto:info@poweredgetx.com
+          - listitem [ref=e604]: Licensed & insured$2,000,000 liability coverage
+    - generic [ref=e606]:
+      - paragraph [ref=e607]:
+        - text: © 2026 Power Edge, LLC. Serving Dallas–Fort Worth metroplex and surrounding North Texas communities.
+        - link "Privacy Policy" [ref=e608] [cursor=pointer]:
+          - /url: /privacy
+        - text: ·
+        - link "Terms" [ref=e609] [cursor=pointer]:
+          - /url: /terms
+      - paragraph [ref=e610]: Licensed & insured Texas electrical contractor. Roofing is unlicensed statewide in Texas — we run ours under an accountable, insured company either way.
+  - link "Text us at 469-277-9594" [ref=e611] [cursor=pointer]:
+    - /url: sms:+14692779594
+    - text: Text us

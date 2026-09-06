@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { listIncompleteIntakes, markIntakeNurtured } from "@/lib/db";
 import { sendClaimNurture } from "@/lib/emails";
 import { runStormWatch } from "@/lib/storm";
-import { runSolarPermitSync } from "@/lib/solarPermits";
 import { generateStormTargets } from "@/lib/parcels";
 import { runStormContactTasks } from "@/lib/hubspotStorm";
 import { runSkipTrace } from "@/lib/skiptrace";
@@ -28,9 +27,6 @@ export async function POST(req: Request) {
   // Storm engine piggybacks on this hourly cron (also serves as the Supabase
   // free-tier keep-alive). Ingest is best-effort and never blocks nurture.
   const storm = await runStormWatch();
-  // Solar permit sync once a day, in the quiet ~3am CT hour.
-  const solar =
-    new Date().getUTCHours() === 9 ? await runSolarPermitSync() : { fetched: 0, ok: true };
   // Auto-generate homeowner targets for fresh hail (today + yesterday UTC).
   // Idempotent (unique storm_date+address), no-op on hail-free days.
   const today = new Date().toISOString().slice(0, 10);
@@ -44,7 +40,7 @@ export async function POST(req: Request) {
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
-    return NextResponse.json({ ok: false, error: "RESEND_API_KEY not set", storm, solar });
+    return NextResponse.json({ ok: false, error: "RESEND_API_KEY not set", storm });
   }
 
   const now = Date.now();
@@ -79,7 +75,6 @@ export async function POST(req: Request) {
     touch1,
     touch2,
     storm,
-    solar,
     targets: { today: targetsToday, yesterday: targetsYday },
     hubspotTasks,
     skiptrace,

@@ -12,8 +12,8 @@ import { haversineMi } from "@/lib/storm";
  *   GET  /api/admin/lookup-house?key=..&near=lat,lon
  *        → nearest parcels (owner + details) from all 11 counties
  *   POST /api/admin/lookup-house  { key, parcel: {...} }
- *        → inserts it as a manual storm_target (storm_date = today,
- *          solar-permit matched) so the normal Convert-to-lead flow applies.
+ *        → inserts it as a manual storm_target (storm_date = today) so the
+ *          normal Convert-to-lead flow applies.
  */
 
 function db() {
@@ -84,24 +84,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing parcel" }, { status: 400 });
   }
 
-  // Solar check against the permit inventory.
-  let solar = false;
-  if (p.zip && /^\d{5}$/.test(p.zip)) {
-    try {
-      const sres = await fetch(
-        `${process.env.SUPABASE_URL}/rest/v1/solar_permits?select=address&zip=eq.${p.zip}&limit=2000`,
-        { headers: db(), cache: "no-store" },
-      );
-      if (sres.ok) {
-        const rows = (await sres.json()) as Array<{ address: string }>;
-        const target = normAddr(p.address);
-        solar = rows.some((r) => r.address && normAddr(r.address) === target);
-      }
-    } catch {
-      /* best-effort */
-    }
-  }
-
   const today = new Date().toISOString().slice(0, 10);
   const mailing = (p.mailing || "").trim();
   const absentee =
@@ -120,8 +102,6 @@ export async function POST(req: Request) {
     year_built: p.year_built,
     value: p.value,
     hail_size_in: null,
-    solar,
-    solar_source: solar ? "permit" : "rep_flag_candidate",
     absentee,
     score: 5,
     notes: "Manually added by rep in the field (visual roof condition)",

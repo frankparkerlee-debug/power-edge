@@ -19,7 +19,6 @@ export type TargetCard = {
   city: string;
   zip: string;
   hail_size_in: number | null;
-  solar: boolean;
   absentee: boolean;
   year_built: number | null;
   value: number | null;
@@ -388,7 +387,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
       let focusMarker: any = null;
       for (const { t, mi } of mappable) {
         const isFocus = t.id === focusId;
-        const color = t.solar ? "#0c7a40" : isFocus ? "#ff8a1f" : "#0b0e13";
+        const color = isFocus ? "#ff8a1f" : "#0b0e13";
         const m = L.circleMarker([t.lat as number, t.lon as number], {
           radius: isFocus ? 11 : 7,
           color: "#fff",
@@ -399,7 +398,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
           .bindPopup(
             `<b>${t.owner_name}</b><br/>${t.address}${t.city ? `, ${t.city}` : ""}` +
               `<br/>${t.hail_size_in ? `${t.hail_size_in}″ hail · ` : ""}score ${t.score}` +
-              `${t.solar ? " · ☀️ solar" : ""}${mi != null ? ` · ${fmtMi(mi)} away` : ""}` +
+              `${mi != null ? ` · ${fmtMi(mi)} away` : ""}` +
               `<br/><a href="#" data-house-id="${t.id}"><b>🏠 Roof &amp; storm history</b></a>` +
               ` · <a href="${gmapsHref(t)}" target="_blank" rel="noopener">Directions ↗</a>`,
           )
@@ -585,7 +584,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
       />
       {view === "map" && (
         <p className="mt-1.5 text-xs text-gray-500">
-          ⬤ black = target · ⬤ green = solar · ⬤ blue = you. Tap a pin for details.
+          ⬤ black = target · ⬤ blue = you. Tap a pin for details.
         </p>
       )}
 
@@ -593,12 +592,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
       {view === "list" && (
         <div className="space-y-2">
           {showing.map(({ t, mi }) => (
-            <div
-              key={t.id}
-              className={`rounded-lg border p-3 ${
-                t.solar ? "border-green-300 bg-green-50" : "border-gray-200"
-              }`}
-            >
+            <div key={t.id} className="rounded-lg border border-gray-200 p-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <div className="truncate font-semibold">{t.owner_name}</div>
@@ -639,11 +633,6 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
                     {t.hail_size_in}″ hail
                   </span>
                 ) : null}
-                {t.solar && (
-                  <span className="rounded-full bg-green-200 px-2 py-0.5 font-semibold text-green-900">
-                    ☀️ solar
-                  </span>
-                )}
                 <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-700">
                   {t.absentee ? "Absentee" : "Owner-occupied"}
                 </span>

@@ -28,7 +28,7 @@ async function bboxTargets(lat: number, lon: number, halfMi: number, days?: numb
     q += `&storm_date=gte.${from}`;
   }
   const res = await fetch(
-    `${url}/rest/v1/storm_targets?select=id,owner_name,address,city,zip,hail_size_in,solar,absentee,year_built,value,score,storm_date,lat,lon,phone,phone_dnc,status${q}&limit=3000`,
+    `${url}/rest/v1/storm_targets?select=id,owner_name,address,city,zip,hail_size_in,absentee,year_built,value,score,storm_date,lat,lon,phone,phone_dnc,status${q}&limit=3000`,
     { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
   );
   if (!res.ok) return [];
@@ -39,7 +39,6 @@ async function bboxTargets(lat: number, lon: number, halfMi: number, days?: numb
     city: string;
     zip: string;
     hail_size_in: number | null;
-    solar: boolean;
     absentee: boolean;
     year_built: number | null;
     value: number | null;
@@ -132,7 +131,7 @@ export async function GET(req: Request) {
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const header =
-      "storm_date,score,owner_name,address,city,county,zip,phone,phone_dnc,phone2,owner_mailing,property_type,year_built,value,hail_size_in,solar,absentee,status";
+      "storm_date,score,owner_name,address,city,county,zip,phone,phone_dnc,phone2,owner_mailing,property_type,year_built,value,hail_size_in,absentee,status";
     const lines = targets.map((t) =>
       [
         t.storm_date,
@@ -150,7 +149,6 @@ export async function GET(req: Request) {
         t.year_built ?? "",
         t.value ?? "",
         t.hail_size_in ?? "",
-        t.solar ? "yes" : "",
         t.absentee ? "yes" : "",
         t.status,
       ]

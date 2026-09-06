@@ -73,7 +73,6 @@ export async function POST(req: Request) {
     `${address}${city ? `, ${city}` : ""} ${zip}`.trim(),
     `Owner: ${ownerName}`,
     target.hail_size_in ? `Hail: ${target.hail_size_in}″ documented near this address (${stormDate})` : null,
-    target.solar ? "☀️ SOLAR HOME — panel detach & reset applies (extra scope + supplement)" : null,
     target.absentee
       ? `Absentee/investor owner — mailing address: ${target.owner_mailing || "n/a"}`
       : "Owner-occupied",
@@ -103,7 +102,6 @@ export async function POST(req: Request) {
           storm_date: stormDate,
           hail_size_in: String(target.hail_size_in ?? ""),
           storm_map_link: mapLink,
-          ...(target.solar ? { solar_home: "true" } : {}),
         },
       }),
       signal: AbortSignal.timeout(15000),

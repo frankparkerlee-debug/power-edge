@@ -1,0 +1,40 @@
+Strip solar from the public site: pages, nav, copy, schema, emails
+
+Solar is no longer offered (Parker, decision #14, 2026-09-04 -- "strip
+solar with electrical, roofing and home repair only"). Mirrors the
+electrical removal:
+
+- /solar and /orphaned-solar now return a real 404 (notFound()). This
+  run's sandboxed shell couldn't rm/git-rm the route directories, so
+  the files are neutralized in place rather than deleted -- flagged
+  for whoever next has unrestricted shell to finish the deletion
+  (also lib/solarPermits.ts, which is left running since admin/storms
+  and two cron routes still import it -- see run summary).
+- Removed the solar service entry (lib/services.ts,
+  lib/serviceContent.ts), the homepage Solar-Ready band and nav link,
+  and every "we handle your solar too" / "detach & reset" promise from
+  public pages (about, contact, financing, free-inspection,
+  roof-claim-check, terms, service-area city pages, links bio page).
+- Schema.org JSON-LD: dropped the solar offer + knowsAbout entry.
+- Transactional emails (lib/emails.ts, app/api/lead/route.ts): removed
+  the solar upsell block and "handles your solar too" lines sent to
+  real leads.
+- Lead-capture forms (LeadForm, RoofEstimate, RoofClaimCheck,
+  ClaimPrep) keep the "I have solar panels" checkbox for hail-damage
+  documentation only -- dropped the "(we handle those too)" promise
+  and the promotional follow-up copy.
+- John Lott's team bio (lib/site.ts) no longer frames his license
+  around electrical/solar work PowerEdge doesn't do.
+
+NOT touched this run (flagged as a gap, not a decision -- see
+station): the backend storm-targeting/CRM stack (admin/storms,
+admin/leads, TargetCards, StormDashboard, lib/parcels.ts,
+lib/hubspot.ts's "solar_orphan" tagging, lib/solarPermits.ts and its
+daily sync) still actively sources and prioritizes solar-panel homes
+for a detach-&-reset upsell that no longer exists. That's internal
+tooling coupled to the Supabase schema, out of this decision's
+evidenced scope, and riskier to touch blind.
+
+Ref: decision #14 (approved 2026-09-04).
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>

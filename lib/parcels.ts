@@ -10,7 +10,7 @@
 //   • Collin/Denton — no public spatial layer found yet.
 //
 // Flow (generateStormTargets): hail ≥1″ reports for a day → envelope around
-// each (sized by hail) → parcel query → dedupe → solar-permit match → score →
+// each (sized by hail) → parcel query → dedupe → score →
 // insert storm_targets (idempotent on storm_date+address).
 
 import { haversineMi } from "@/lib/storm";
@@ -222,25 +222,6 @@ export async function queryDbParcels(lat: number, lon: number, halfMi: number): 
 
 const normAddr = (s: string) => s.toUpperCase().replace(/[^A-Z0-9 ]/g, "").replace(/\s+/g, " ").trim();
 
-/** Solar-permit addresses in the given zips (normalized set for matching). */
-async function solarAddressSet(zips: string[]): Promise<Set<string>> {
-  const out = new Set<string>();
-  if (zips.length === 0) return out;
-  const list = zips
-    .filter((z) => /^\d{5}$/.test(z))
-    .slice(0, 40)
-    .join(",");
-  if (!list) return out;
-  const res = await fetch(
-    `${process.env.SUPABASE_URL}/rest/v1/solar_permits?select=address&zip=in.(${list})&limit=8000`,
-    { headers: dbHeaders(), cache: "no-store" },
-  );
-  if (!res.ok) return out;
-  const rows = (await res.json()) as Array<{ address: string }>;
-  for (const r of rows) if (r.address) out.add(normAddr(r.address));
-  return out;
-}
-
 /** Fill Tarrant hits' mailing/city/zip from the loaded TAD roll (by situs). */
 async function enrichFromTarrantRoll(
   hits: Array<ParcelHit & { hail: number }>,
@@ -287,10 +268,10 @@ function isAbsentee(address: string, mailing: string) {
 
 export async function generateStormTargets(
   dateISO: string,
-): Promise<{ date: string; events: number; targets: number; solar: number; ok: boolean }> {
+): Promise<{ date: string; events: number; targets: number; ok: boolean }> {
   const url = process.env.SUPABASE_URL;
   if (!url || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return { date: dateISO, events: 0, targets: 0, solar: 0, ok: false };
+    return { date: dateISO, events: 0, targets: 0, ok: false };
   }
   try {
     // Hail ≥1″ that day.
@@ -298,7 +279,7 @@ export async function generateStormTargets(
       `${url}/rest/v1/storm_events?select=lat,lon,magnitude&type=eq.hail&magnitude=gte.1&valid_at=gte.${dateISO}T00:00:00Z&valid_at=lt.${dateISO}T23:59:59Z&order=magnitude.desc&limit=200`,
       { headers: dbHeaders(), cache: "no-store" },
     );
-    if (!res.ok) return { date: dateISO, events: 0, targets: 0, solar: 0, ok: false };
+    if (!res.ok) return { date: dateISO, events: 0, targets: 0, ok: false };
     const all = (await res.json()) as Array<{ lat: number; lon: number; magnitude: number }>;
 
     // Drop reports within 1mi of an already-kept (larger) one — one query per cell.
@@ -325,20 +306,12 @@ export async function generateStormTargets(
     }
     // Tarrant hits need mailing/city/zip from the loaded TAD roll.
     await enrichFromTarrantRoll([...byAddr.values()]);
-    if (byAddr.size === 0) return { date: dateISO, events: kept.length, targets: 0, solar: 0, ok: true };
+    if (byAddr.size === 0) return { date: dateISO, events: kept.length, targets: 0, ok: true };
 
-    // Solar match by normalized address within the affected zips.
-    const zips = [...new Set([...byAddr.values()].map((p) => p.zip).filter(Boolean))];
-    const solarSet = await solarAddressSet(zips);
-
-    let solarCount = 0;
-    const rows = [...byAddr.entries()].map(([norm, p]) => {
-      const solar = solarSet.has(norm);
-      if (solar) solarCount++;
+    const rows = [...byAddr.values()].map((p) => {
       const absentee = isAbsentee(p.address, p.mailing);
       const score =
         p.hail * 2 +
-        (solar ? 3 : 0) +
         (absentee ? 0 : 1) +
         ((p.value ?? 0) >= 300000 ? 1 : 0) +
         (p.year_built && p.year_built <= 2012 ? 0.5 : 0);
@@ -356,8 +329,6 @@ export async function generateStormTargets(
         year_built: p.year_built,
         value: p.value,
         hail_size_in: p.hail,
-        solar,
-        solar_source: solar ? "permit" : null,
         absentee,
         score: Math.round(score * 10) / 10,
         // NOTE: no `status` here on purpose — new rows get the column default
@@ -381,13 +352,13 @@ export async function generateStormTargets(
       );
       if (!ins.ok) {
         console.error("[targets] insert non-2xx", ins.status, await ins.text());
-        return { date: dateISO, events: kept.length, targets: i, solar: solarCount, ok: false };
+        return { date: dateISO, events: kept.length, targets: i, ok: false };
       }
     }
-    return { date: dateISO, events: kept.length, targets: rows.length, solar: solarCount, ok: true };
+    return { date: dateISO, events: kept.length, targets: rows.length, ok: true };
   } catch (err) {
     console.error("[targets] generate failed", err);
-    return { date: dateISO, events: 0, targets: 0, solar: 0, ok: false };
+    return { date: dateISO, events: 0, targets: 0, ok: false };
   }
 }
 
@@ -404,7 +375,6 @@ export type StormTargetRow = {
   year_built: number | null;
   value: number | null;
   hail_size_in: number | null;
-  solar: boolean;
   absentee: boolean;
   score: number;
   status: string;
@@ -458,7 +428,7 @@ export async function listTargetCities(): Promise<
 }
 
 export async function listTargetDays(): Promise<
-  Array<{ storm_date: string; targets: number; solar_targets: number }>
+  Array<{ storm_date: string; targets: number }>
 > {
   const url = process.env.SUPABASE_URL;
   if (!url || !process.env.SUPABASE_SERVICE_ROLE_KEY) return [];

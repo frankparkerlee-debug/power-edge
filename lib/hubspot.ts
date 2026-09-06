@@ -30,9 +30,6 @@ export type HubspotLead = {
   source?: string;
 };
 
-const normAddr = (s: string) =>
-  s.toUpperCase().replace(/[^A-Z0-9 ]/g, "").replace(/\s+/g, " ").trim();
-
 /** Hail history near a zip (last 12mo): latest 1″+ date + max size. */
 export async function stormContextForZip(
   zip: string,
@@ -89,29 +86,6 @@ export async function stormContextForZip(
   }
 }
 
-/** Permit-confirmed solar at this address? (solar_permits, matched by zip+address) */
-async function solarAtAddress(address: string, zip: string): Promise<boolean> {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key || !address || !/^\d{5}$/.test(zip)) return false;
-  try {
-    const res = await fetch(
-      `${url}/rest/v1/solar_permits?select=address&zip=eq.${zip}&limit=2000`,
-      {
-        headers: { apikey: key, Authorization: `Bearer ${key}` },
-        cache: "no-store",
-        signal: AbortSignal.timeout(6000),
-      },
-    );
-    if (!res.ok) return false;
-    const rows = (await res.json()) as Array<{ address: string }>;
-    const target = normAddr(address);
-    return rows.some((r) => r.address && normAddr(r.address) === target);
-  } catch {
-    return false;
-  }
-}
-
 async function findContact(email: string, phone: string): Promise<string | null> {
   const filters = [];
   if (email) filters.push({ propertyName: "email", operator: "EQ", value: email });
@@ -138,14 +112,8 @@ export async function pushLeadToHubspot(lead: HubspotLead) {
     const isRep = /sales rep application/i.test(lead.service || "");
     const zip = (lead.zip || "").trim().slice(0, 5);
 
-    // Storm + solar enrichment (homeowners only; best-effort, in parallel).
-    const [storm, permitSolar] = isRep
-      ? [null, false]
-      : await Promise.all([
-          stormContextForZip(zip),
-          lead.solar ? Promise.resolve(false) : solarAtAddress(lead.address || "", zip),
-        ]);
-    const solarHome = !!lead.solar || permitSolar;
+    // Storm enrichment (homeowners only; best-effort).
+    const storm = isRep ? null : await stormContextForZip(zip);
 
     const properties: Record<string, string> = {
       firstname: parts[0] || "",
@@ -157,14 +125,11 @@ export async function pushLeadToHubspot(lead: HubspotLead) {
       hs_lead_status: "NEW",
       lead_type: isRep
         ? "rep_applicant"
-        : /orphan|solar service/i.test(lead.service || "")
-          ? "solar_orphan"
-          : /commercial/i.test(lead.service || "")
-            ? "commercial"
-            : "homeowner",
+        : /commercial/i.test(lead.service || "")
+          ? "commercial"
+          : "homeowner",
     };
     if (email) properties.email = email;
-    if (solarHome) properties.solar_home = "true";
     if (storm) {
       properties.storm_date = storm.storm_date;
       properties.hail_size_in = String(storm.hail_size_in);
@@ -196,7 +161,6 @@ export async function pushLeadToHubspot(lead: HubspotLead) {
 
     const noteLines = [
       `New website lead — ${lead.service || "general"}`,
-      solarHome ? "☀️ SOLAR HOME — scope panel detach & reset + D&R supplement." : "",
       storm
         ? `⛈️ Hail history: ${storm.hail_size_in}″ documented near their zip, most recent ${storm.storm_date}. Map: https://poweredgetx.com/admin/storms?targets=${storm.storm_date}`
         : "",
