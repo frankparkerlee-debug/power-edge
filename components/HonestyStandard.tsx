@@ -22,7 +22,7 @@ export function HonestyStandard({ className = "" }: { className?: string }) {
     },
     {
       h: "A real, accountable company",
-      p: `Texas doesn't license roofers, so anyone can claim to be one. We're a licensed, insured company with $2,000,000 in liability coverage and a 1-year workmanship guarantee — not a magnet sign on a truck.`,
+      p: `Texas doesn't license roofers, so anyone can claim to be one. We're insured and accountable instead — $2,000,000 in liability coverage, a 1-year workmanship guarantee, and a ${site.googleRating}★ rating across ${site.googleReviewCount} reviews — not a magnet sign on a truck.`,
     },
   ];
   return (

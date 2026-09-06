@@ -5,7 +5,7 @@ export const site = {
   name: "PowerEdge",
   legalName: "PowerEdge Roofing & Home Repair",
   legalEntity: "Power Edge, LLC", // registered entity (formerly Solar Shield LLC) — used in legal/SMS copy
-  tagline: "Roofing and home repair, done by a licensed, insured team you can actually verify.",
+  tagline: "Roofing and home repair, done by an insured, accountable team you can actually verify.",
   // Primary + secondary lines pulled from the current live site.
   phone: "469-277-9594",
   phoneHref: "tel:+14692779594",
@@ -17,10 +17,13 @@ export const site = {
   url: "https://poweredgetx.com",
 
   // Trust signals — all verifiable, which is the entire point.
-  // teclLicense temporarily blank — old TECL #39773 retired, new number pending
-  // (Parker 2026-07-20). License-NUMBER + "verify on TDLR" language was pulled
-  // sitewide; "licensed & insured" positioning kept. To restore: set the new
-  // number here, then re-add the number/TDLR-verify copy (grep "licensed & insured").
+  // teclLicense retired for good: it was John Lott's electrical TECL, and
+  // electrical is being dropped from the business (decision #19, 2026-09-06).
+  // No licence backs "licensed & insured" anymore — Texas doesn't license
+  // roofers either. Sitewide copy was rewritten to lean on liabilityCoverage,
+  // workmanshipGuarantee, and the Google rating instead (grep "insured &
+  // accountable"). Only restore teclLicense if a real, current credential
+  // (e.g. a roofing-specific certification) is confirmed.
   teclLicense: "",
   tdlrVerifyUrl: "https://www.tdlr.texas.gov/LicenseSearch/",
   liabilityCoverage: "$2,000,000",

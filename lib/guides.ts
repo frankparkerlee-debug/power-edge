@@ -143,7 +143,7 @@ export const guides: Guide[] = [
       {
         h: "How a claim works with PowerEdge",
         p: [
-          "We document the damage with photos and measurements, work directly with your adjuster, and do it all by the book — no deductible games, no posing as your adjuster. Just an honest claim and a roof done right, backed by a licensed contractor you can verify.",
+          "We document the damage with photos and measurements, work directly with your adjuster, and do it all by the book — no deductible games, no posing as your adjuster. Just an honest claim and a roof done right, backed by an insured, accountable contractor you can verify.",
         ],
       },
     ],
@@ -204,7 +204,7 @@ export const guides: Guide[] = [
         h: "What CAN you actually verify in Texas?",
         p: [
           "Since there's no state roofer license to check, verify what you actually can: liability insurance (ask for the certificate directly, not just a claim), a real local address and business history, and recent, specific reviews you can read yourself — not a stranger's word on your doorstep.",
-          "PowerEdge is a licensed, insured company backed by $2,000,000 in liability coverage and a 1-year workmanship guarantee, with a real local team behind every job — not a magnet sign on a truck.",
+          "PowerEdge is an insured, accountable company backed by $2,000,000 in liability coverage, a 1-year workmanship guarantee, and a 4.7★ rating across 48 Google reviews, with a real local team behind every job — not a magnet sign on a truck.",
         ],
       },
       {
@@ -229,12 +229,12 @@ export const guides: Guide[] = [
       },
       {
         q: "Is PowerEdge licensed?",
-        a: "PowerEdge is a licensed, insured company backed by $2,000,000 in liability coverage and a 1-year workmanship guarantee on every roofing job.",
+        a: "Texas doesn't license roofers, so there's no license to hold — PowerEdge is insured and accountable instead: $2,000,000 in liability coverage, a 1-year workmanship guarantee, and a 4.7★ rating across 48 Google reviews on every roofing job.",
       },
     ],
     cta: {
       heading: "Hire a crew you can actually verify.",
-      sub: "Licensed, insured, and backed by real reviews. Get a free, no-pressure inspection.",
+      sub: "Insured, accountable, and backed by real reviews. Get a free, no-pressure inspection.",
     },
   },
 

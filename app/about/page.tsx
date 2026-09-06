@@ -4,9 +4,9 @@ import { PageHero, CtaBand } from "@/components/blocks";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "About — Licensed & Insured Roofing & Home Repair in Texas",
+  title: "About — Insured & Accountable Roofing & Home Repair in Texas",
   description:
-    "PowerEdge is a licensed, insured company doing roofing and home repair across DFW. Meet the team behind the work.",
+    "PowerEdge is an insured, accountable company doing roofing and home repair across DFW. Meet the team behind the work.",
 };
 
 export default function AboutPage() {
@@ -29,10 +29,10 @@ export default function AboutPage() {
             />
             <div className="mt-6 space-y-4 text-fg-dim">
               <p>
-                PowerEdge serves the Dallas–Fort Worth metroplex as a
-                licensed, insured roofing and home repair contractor.
+                PowerEdge serves the Dallas–Fort Worth metroplex as an
+                insured, accountable roofing and home repair contractor.
                 Texas doesn&apos;t require a state license to call yourself a
-                roofer — so we hold ourselves to the standard anyway.
+                roofer — so we hold ourselves to a higher standard anyway.
               </p>
               <p>
                 Every job runs under the same accountable company: a

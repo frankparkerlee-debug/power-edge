@@ -8,7 +8,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Roofing & Home Repair Guides for Texas Homeowners",
   description:
-    "Straight answers on roof replacement cost, Texas hail insurance claims, and how to vet a roofer — from a licensed DFW contractor.",
+    "Straight answers on roof replacement cost, Texas hail insurance claims, and how to vet a roofer — from an insured, accountable DFW contractor.",
   alternates: { canonical: `${site.url}/guides` },
 };
 
@@ -24,7 +24,7 @@ export default function GuidesIndexPage() {
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-fg-inv-dim">
             What roofs cost, how Texas hail claims really work, and how to hire a
-            crew you can trust — from a licensed DFW contractor.
+            crew you can trust — from an insured, accountable DFW contractor.
           </p>
         </Container>
       </section>

@@ -76,9 +76,10 @@ function verifyChip() {
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:26px;border-top:1px solid ${LINE};padding-top:18px;">
     <tr>
       <td style="font-family:${FONT};font-size:13px;color:${MUTED};line-height:1.5;">
-        <strong style="color:${TEXT};">Licensed & insured in Texas.</strong>
+        <strong style="color:${TEXT};">Insured & accountable in Texas.</strong>
         Roofing is unlicensed statewide, so anyone can knock after a storm — we're
-        a real, accountable company backed by ${site.liabilityCoverage} in liability coverage.
+        a real, accountable company backed by ${site.liabilityCoverage} in liability coverage
+        and a 1-year workmanship guarantee.
         <br/><span style="color:${MUTED};">${stars()}</span>
       </td>
     </tr>
@@ -126,7 +127,7 @@ function shell({
               &nbsp;·&nbsp;
               <a href="${site.url}" style="color:#9aa3b0;text-decoration:none;">${site.domain}</a>
               <br/>
-              ${site.legalEntity} · Licensed & insured · Serving ${site.serviceArea}.
+              ${site.legalEntity} · Insured & accountable · Serving ${site.serviceArea}.
               <br/><br/>
               <span style="color:#6b7280;">You&rsquo;re receiving this because you requested contact at ${site.domain}.
               Reply <strong>STOP</strong> to opt out, or

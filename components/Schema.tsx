@@ -40,7 +40,6 @@ export function Schema() {
       reviewCount: site.googleReviewCount,
       bestRating: "5",
     },
-    hasCredential: `Licensed & insured`,
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "Roofing & home repair services",

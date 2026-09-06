@@ -104,7 +104,7 @@ export function Footer() {
               </a>
             </li>
             <li className="pt-2 text-xs leading-relaxed">
-              Licensed & insured
+              Insured & accountable
               <br />
               {site.liabilityCoverage} liability coverage
             </li>
@@ -126,8 +126,9 @@ export function Footer() {
             </Link>
           </p>
           <p>
-            Licensed &amp; insured. Roofing is unlicensed statewide in Texas —
-            we run ours under an accountable, insured company either way.
+            Insured &amp; accountable. Roofing is unlicensed statewide in Texas —
+            we back every job with {site.liabilityCoverage} in liability coverage and
+            a {site.workmanshipGuarantee}.
           </p>
         </div>
       </div>

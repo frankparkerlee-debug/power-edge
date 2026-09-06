@@ -123,7 +123,7 @@ function Hero() {
             </span>
             <span className="h-4 w-px bg-line" />
             <span>
-              <strong className="text-fg-inv">Licensed &amp; insured</strong>
+              <strong className="text-fg-inv">Insured &amp; accountable</strong>
             </span>
             <span className="h-4 w-px bg-line" />
             <span>
@@ -145,7 +145,7 @@ function Hero() {
               Book your free roof inspection
             </h2>
             <p className="mt-1.5 text-sm text-fg-inv-dim">
-              Just your name and number — a licensed pro calls you back fast,
+              Just your name and number — a real pro calls you back fast,
               usually within the hour.
             </p>
             <div className="mt-6">
@@ -162,8 +162,8 @@ function Hero() {
 function TrustBar() {
   const items = [
     {
-      big: <>Licensed</>,
-      small: "& insured Texas contractor",
+      big: <>Insured</>,
+      small: "& accountable Texas contractor",
     },
     {
       big: <CountUp to={site.capacity.crews} suffix=" crews" />,
@@ -201,7 +201,7 @@ function TrustBar() {
 function Wedge() {
   const bullets = [
     {
-      h: "We're licensed & insured",
+      h: "We're insured & accountable",
       p: `Backed by $2,000,000 in liability coverage and a documented 1-year workmanship guarantee — a real, accountable company, not a fly-by-night storm crew.`,
     },
     {
@@ -224,7 +224,7 @@ function Wedge() {
           <SectionHeading
             kicker="Why PowerEdge"
             title="The one contractor you can actually verify."
-            intro="Texas doesn't license roofers. Anyone with a ladder and a magnet sign can knock your door after a storm. We hold ourselves to a higher bar anyway — licensed and insured as a company, with the reviews and workmanship guarantee to back it up."
+            intro="Texas doesn't license roofers. Anyone with a ladder and a magnet sign can knock your door after a storm. We hold ourselves to a higher bar anyway — insured and accountable as a company, with the reviews and workmanship guarantee to back it up."
           />
           <ul className="mt-8 space-y-5">
             {bullets.map((b) => (
