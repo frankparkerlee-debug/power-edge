@@ -4,8 +4,6 @@ import { Button, Container, Kicker, SectionHeading, Stars } from "@/components/u
 import { LeadForm } from "@/components/LeadForm";
 import { Reviews } from "@/components/Reviews";
 import { Gallery } from "@/components/Gallery";
-import { DeductibleFinancing } from "@/components/DeductibleFinancing";
-import { FinancingCalculator } from "@/components/FinancingCalculator";
 import { CountUp } from "@/components/CountUp";
 import { ClaimCheckInline } from "@/components/ClaimCheckInline";
 import { DfwHailActivity } from "@/components/DfwHailActivity";
@@ -19,7 +17,6 @@ export default function Home() {
       <Hero />
       <TrustBar />
       <StormRestoration />
-      <StuckBand />
       <Wedge />
       <DfwHailActivity />
       <ClaimCheckBand />
@@ -61,16 +58,15 @@ function Hero() {
           </h1>
           <p className="mt-7 max-w-xl text-lg leading-relaxed text-fg-inv-dim">
             Leak, missing shingles, hail — we inspect it free and tell you
-            straight. If it&apos;s a covered storm claim, you likely pay just
-            your <strong className="text-fg-inv">deductible</strong>, and we can
-            finance that. Not a storm? We&apos;ll still get you an honest price.
+            straight, storm claim or not. One accountable, insured crew,
+            documented from inspection to final walk.
           </p>
 
-          {/* Conversion pillars — storm-first, financing */}
+          {/* Conversion pillars — storm-first, credibility */}
           <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4 border-t border-line pt-6">
             {[
               { t: "Free roof inspection", d: "Storm claim or cash — honest read" },
-              { t: "Deductible financing", d: "As little as $250 down" },
+              { t: "Insured & accountable", d: `${site.liabilityCoverage} liability coverage` },
             ].map((p) => (
               <div key={p.t} className="flex items-start gap-2.5">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 bg-bolt" />
@@ -340,8 +336,7 @@ function ClaimCheckBand() {
                 Enter your address and answer three quick questions. We check
                 reported hail near your home and give you a straight read on
                 whether it&apos;s likely worth filing — no salesperson, no
-                obligation. On a covered claim, you typically pay just your
-                deductible.
+                obligation.
               </p>
               <ClaimCheckInline />
             </div>
@@ -351,21 +346,14 @@ function ClaimCheckBand() {
                   Good news
                 </div>
                 <div className="mt-2 font-display text-2xl font-extrabold leading-tight text-fg-inv">
-                  You likely qualify for a roof insurance claim.
+                  Reported hail activity near your address.
                 </div>
                 <div className="mt-4 rounded-md border border-line bg-ink p-3 text-sm text-fg-inv-dim">
                   3 hail reports within 15 mi · largest 2″ · ~7 months left to
                   file
                 </div>
-                <div className="mt-3 flex items-center justify-between rounded-md border border-line bg-ink p-3">
-                  <span className="text-sm text-fg-inv-dim">Your out of pocket</span>
-                  <span className="font-display text-lg font-extrabold text-bolt">
-                    Just your deductible
-                  </span>
-                </div>
                 <div className="mt-3 text-center text-sm text-fg-inv-dim">
-                  Start for as little as{" "}
-                  <span className="font-bold text-fg-inv">$250 down</span>.
+                  Worth a free inspection to find out for sure.
                 </div>
               </div>
             </div>
@@ -388,8 +376,8 @@ function StormRestoration() {
       p: "We meet your adjuster on-site and document the full scope so nothing legitimate gets missed. We don't act as your public adjuster — that's the law, and it protects you.",
     },
     {
-      h: "You pay your deductible — we handle the roof",
-      p: "On a covered claim you typically pay only your deductible. Short on it up front? Finance it into low monthly payments and start now.",
+      h: "We do the roof — you deal with your insurer",
+      p: "We document the damage and meet your adjuster on-site. What you owe and what your policy covers is between you and your insurance company.",
     },
   ];
   return (
@@ -436,65 +424,30 @@ function StormRestoration() {
         </div>
 
         <div className="lg:sticky lg:top-24">
-          <DeductibleFinancing />
-          <div className="mt-6 rounded-card border border-line bg-ink-2 p-6">
+          <div className="rounded-card border border-line bg-ink-2 p-6">
             <div className="text-xs uppercase tracking-wider text-fg-inv-dim">
-              What a storm claim usually looks like
+              Why homeowners verify us first
             </div>
             <div className="mt-4 space-y-3 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-fg-inv-dim">New roof (retail)</span>
-                <span className="font-display font-bold text-fg-inv-dim line-through">
-                  ~$15,000
+                <span className="text-fg-inv-dim">Liability coverage</span>
+                <span className="font-display font-bold text-bolt">
+                  {site.liabilityCoverage}
                 </span>
               </div>
               <div className="flex items-center justify-between border-t border-line pt-3">
-                <span className="text-fg-inv">Your out of pocket</span>
-                <span className="font-display text-2xl font-extrabold text-bolt">
-                  Just your deductible
+                <span className="text-fg-inv-dim">Workmanship guarantee</span>
+                <span className="font-display font-bold text-fg-inv">
+                  {site.workmanshipGuarantee}
                 </span>
               </div>
               <p className="pt-1 text-xs leading-relaxed text-fg-inv-dim">
-                On a covered claim with replacement-cost coverage. Your deductible
-                depends on your policy — and you can finance it.
+                Ask any storm-chasing crew to show you the same. We can back
+                every one of these up.
               </p>
             </div>
           </div>
         </div>
-      </Container>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------- STUCK / FINANCING */
-function StuckBand() {
-  const cases = [
-    "Deductible too high to front (Texas deductibles run 1–2% of home value)",
-    "Insurance check came in low — older roof on actual-cash-value coverage",
-    "No claim — paying out of pocket",
-  ];
-  return (
-    <section className="bg-paper py-20 sm:py-28">
-      <Container className="grid gap-12 lg:grid-cols-2 lg:items-center">
-        <div>
-          <SectionHeading
-            kicker="Stuck on the out-of-pocket?"
-            title="Approved for a roof but can't cover the deductible? You're not stuck."
-            intro="In Texas, a wind/hail deductible is often 1–2% of your home's value — $5,000–$10,000 out of pocket before work even starts. If that's the wall between you and a sound roof, we finance it: as little as $250 down, low monthly payments, and we get the job scheduled now. Already have an estimate from another roofer? Bring it — we'll do the work and finance it."
-          />
-          <ul className="mt-6 space-y-2.5">
-            {cases.map((x) => (
-              <li key={x} className="flex gap-2.5 text-fg-dim">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-bolt-deep" />
-                <span>{x}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-7">
-            <Button href="/financing">See financing options →</Button>
-          </div>
-        </div>
-        <FinancingCalculator ctaHref="#quote" />
       </Container>
     </section>
   );
