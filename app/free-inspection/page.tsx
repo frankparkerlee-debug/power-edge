@@ -12,7 +12,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Free Roof Inspection in DFW — Documented for Your Claim",
   description:
-    "Book a free, no-obligation roof inspection across Dallas–Fort Worth. We photograph and document storm damage for your insurance claim, and tell you straight if your roof is fine. Licensed & insured.",
+    "Book a free, no-obligation roof inspection across Dallas–Fort Worth. We photograph and document storm damage for your insurance claim, and tell you straight if your roof is fine. Insured & accountable.",
 };
 
 const faqs = [
@@ -34,7 +34,7 @@ const faqs = [
   },
   {
     q: "Will you try to sell me a roof I don't need?",
-    a: "No. Texas doesn't license roofers, so plenty of storm-chasers manufacture damage. We're a licensed contractor (licensed & insured) you can verify — our reputation depends on being straight with you.",
+    a: "No. Texas doesn't license roofers, so plenty of storm-chasers manufacture damage. We're an insured, accountable contractor you can verify — our reputation depends on being straight with you.",
   },
 ];
 
@@ -44,7 +44,7 @@ const steps = [
     p: "Name and number is all we need to get you on the schedule.",
   },
   {
-    h: "A licensed pro inspects your roof",
+    h: "One of our pros inspects your roof",
     p: "We get up there, check for hail and wind damage, and photograph everything — including your solar if you have it.",
   },
   {
@@ -66,13 +66,13 @@ export default function FreeInspectionPage() {
         <div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-bolt/15 blur-[120px]" />
         <Container className="relative flex flex-col-reverse gap-10 lg:grid lg:grid-cols-[1fr_0.95fr] lg:items-start lg:gap-12">
           <div className="lg:pt-4">
-            <Kicker className="mb-5">Free · No obligation · Licensed</Kicker>
+            <Kicker className="mb-5">Free · No obligation · Insured</Kicker>
             <h1 className="font-display text-4xl leading-[0.98] text-fg-inv sm:text-5xl">
               Your free roof inspection —{" "}
               <span className="bolt-underline">booked in minutes.</span>
             </h1>
             <p className="mt-6 max-w-md text-lg leading-relaxed text-fg-inv-dim">
-              A licensed pro gets on your roof, photographs and documents any
+              One of our pros gets on your roof, photographs and documents any
               storm damage for your claim, and gives you a straight answer — even
               if that answer is &ldquo;your roof is fine.&rdquo; No cost, no
               pressure, no storm-chaser games.
@@ -111,7 +111,7 @@ export default function FreeInspectionPage() {
             </div>
 
             <p className="mt-8 text-sm text-fg-inv-dim">
-              Licensed & insured Texas contractor ·{" "}
+              Insured & accountable Texas contractor ·{" "}
               {site.googleRating}★ ({site.googleReviewCount} reviews) · We never
               waive deductibles or pose as your adjuster.
             </p>
@@ -189,7 +189,7 @@ export default function FreeInspectionPage() {
 
       <CtaBand
         heading="Book your free roof inspection."
-        sub="A licensed pro, an honest read, and documentation for your claim — at no cost. Tell us where to come."
+        sub="One of our pros, an honest read, and documentation for your claim — at no cost. Tell us where to come."
       />
     </>
   );

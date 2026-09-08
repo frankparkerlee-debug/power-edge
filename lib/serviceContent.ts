@@ -33,7 +33,7 @@ export const serviceContent: Record<string, Content> = {
     faqs: [
       {
         q: "Do I need a licensed contractor for a roof in Texas?",
-        a: "Texas doesn't license roofers — anyone can claim to be one, which is exactly the problem. PowerEdge is a licensed, insured company backed by $2,000,000 in liability coverage, so you're hiring an accountable business, not a fly-by-night crew.",
+        a: "Texas doesn't license roofers — anyone can claim to be one, which is exactly the problem. PowerEdge is an insured, accountable company backed by $2,000,000 in liability coverage, so you're hiring an accountable business, not a fly-by-night crew.",
       },
       {
         q: "Will you help with my insurance claim?",
@@ -87,8 +87,8 @@ export const serviceContent: Record<string, Content> = {
         a: "Yes. Tell us about your portfolio and we'll set up a plan and schedule that works across all your sites.",
       },
       {
-        q: "Are you licensed and insured for commercial work?",
-        a: "Yes — licensed & insured, backed by $2,000,000 in liability coverage.",
+        q: "Are you insured for commercial work?",
+        a: "Yes — insured & accountable, backed by $2,000,000 in liability coverage.",
       },
     ],
   },

@@ -274,7 +274,7 @@ function ServicesGrid() {
         <SectionHeading
           dark
           kicker="What we do"
-          title="Roofing, home repair, and commercial — one licensed, insured team."
+          title="Roofing, home repair, and commercial — one insured, accountable team."
           intro="Storm restoration and roof replacement for homes, home repair, and full commercial roofing for property managers. Free inspections, no runaround."
         />
         <div className="mt-12 grid gap-5 sm:grid-cols-2">

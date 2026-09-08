@@ -50,7 +50,7 @@ export default function LinksPage() {
           Roofing &amp; storm restoration · DFW
         </p>
         <p className="mt-3 text-center text-sm text-fg-inv-dim">
-          Licensed &amp; insured ·{" "}
+          Insured &amp; accountable ·{" "}
           {site.googleRating}★
         </p>
 

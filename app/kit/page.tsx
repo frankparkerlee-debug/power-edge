@@ -32,7 +32,7 @@ const CARDS: Card[] = [
   },
   {
     label: "PowerEdge Home",
-    pitch: "“Scan to see who we are — licensed, verifiable, local.”",
+    pitch: "“Scan to see who we are — insured, verifiable, local.”",
     path: "/",
     campaign: "home",
   },

@@ -65,7 +65,7 @@ export const cities: City[] = [
     lat: 32.7357,
     lon: -97.1081,
     blurb:
-      "Arlington hail and wind roof repair from a licensed, verifiable contractor — not a storm-chaser with a magnet sign. Insurance claims documented, deductibles financeable.",
+      "Arlington hail and wind roof repair from an insured, verifiable contractor — not a storm-chaser with a magnet sign. Insurance claims documented, deductibles financeable.",
   },
   {
     slug: "irving",
@@ -101,7 +101,7 @@ export const cities: City[] = [
     lat: 32.9483,
     lon: -96.7299,
     blurb:
-      "Richardson roof repair and hail-claim replacements from a licensed contractor you can look up before you sign — free inspection, honest verdict, one accountable crew.",
+      "Richardson roof repair and hail-claim replacements from an insured contractor you can verify before you sign — free inspection, honest verdict, one accountable crew.",
   },
   {
     slug: "carrollton",
@@ -128,7 +128,7 @@ export const cities: City[] = [
     lat: 32.746,
     lon: -96.9978,
     blurb:
-      "Grand Prairie roof replacement and storm-damage repair — licensed, insured, and rated by North Texas homeowners, with capacity to be there this week.",
+      "Grand Prairie roof replacement and storm-damage repair — insured, accountable, and rated by North Texas homeowners, with capacity to be there this week.",
   },
   {
     slug: "flower-mound",

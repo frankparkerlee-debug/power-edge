@@ -48,7 +48,7 @@ export const services: Service[] = [
     title: "Commercial roofing",
     short: "Commercial",
     blurb:
-      "One licensed, insured partner for property managers and business owners — scheduled, documented, and warrantied roof work.",
+      "One insured, accountable partner for property managers and business owners — scheduled, documented, and warrantied roof work.",
     pricingMode: "quote",
     bullets: [
       "Commercial roof systems, repairs, and replacements",

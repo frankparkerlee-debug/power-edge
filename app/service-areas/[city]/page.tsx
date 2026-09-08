@@ -22,7 +22,7 @@ export async function generateMetadata({
   if (!c) return {};
   return {
     title: `Roofing Company in ${c.name}, TX — Storm & Hail Roof Repair`,
-    description: `Storm & hail roof repair, replacement, and insurance-claim roofing in ${c.name}. Free inspections, deductible financing from $250 down, licensed & insured, rated ${site.googleRating}★.`,
+    description: `Storm & hail roof repair, replacement, and insurance-claim roofing in ${c.name}. Free inspections, deductible financing from $250 down, insured & accountable, rated ${site.googleRating}★.`,
   };
 }
 
@@ -66,7 +66,7 @@ export default async function CityPage({
         <Container className="relative py-16 sm:py-20">
           <p className="kicker text-bolt mb-5">
             <span className="mr-2 inline-block h-2 w-2 translate-y-[-1px] bg-bolt" />
-            {c.county} · Licensed & insured
+            {c.county} · Insured & accountable
           </p>
           <h1 className="max-w-3xl font-display text-4xl leading-[0.98] text-fg-inv sm:text-5xl md:text-6xl">
             {c.name}&apos;s storm-first roofing company.
@@ -102,7 +102,7 @@ export default async function CityPage({
           <SectionHeading
             kicker={`Serving ${c.name}`}
             title={`Roof repair, replacement & storm claims in ${c.name}.`}
-            intro={`The same licensed crew and the same standard across ${c.county}: evidence-based inspections, claims documented by the book, and honest answers — even when the answer is "your roof is fine."`}
+            intro={`The same crew and the same standard across ${c.county}: evidence-based inspections, claims documented by the book, and honest answers — even when the answer is "your roof is fine."`}
           />
           <div className="mt-10 grid gap-5 sm:grid-cols-2">
             {services.map((s) => (

@@ -124,7 +124,7 @@ export function ClaimPrep() {
 
   const Disclaimer = () => (
     <p className="mt-4 text-center text-xs leading-relaxed text-fg-inv-dim">
-      PowerEdge is a licensed roofing contractor, not a
+      PowerEdge is an insured roofing contractor, not a
       public insurance adjuster. We document damage and coordinate our inspection
       with your adjuster; you file and manage your claim with your insurer.
     </p>
@@ -165,7 +165,7 @@ export function ClaimPrep() {
         </div>
         <h3 className="font-display text-2xl font-bold text-fg-inv">You&apos;re all set.</h3>
         <p className="mt-2 text-fg-inv-dim">
-          A licensed member of our team will call you <strong className="text-fg-inv">right away</strong> to
+          A member of our team will call you <strong className="text-fg-inv">right away</strong> to
           lock in your inspection — and we&apos;ll arrive ready to get on the roof, not do paperwork.
         </p>
         <p className="mt-3 text-sm text-fg-inv-dim">Need us now? Call or text {site.phone}.</p>

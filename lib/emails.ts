@@ -189,13 +189,13 @@ export const leadSequence: SequenceEmail[] = [
           })
         : shell({
             preheader:
-              "A licensed member of our team will call you shortly to schedule.",
+              "A member of our team will call you shortly to schedule.",
             body:
               h1(`Thanks, ${c.firstName} — we're on it.`) +
               p(
                 `We&rsquo;ve got your request${
                   c.service ? ` about <strong>${c.service}</strong>` : ""
-                }. A licensed member of our team will call you shortly — usually within the hour during business hours — to lock in your <strong>free inspection</strong>.`,
+                }. A member of our team will call you shortly — usually within the hour during business hours — to lock in your <strong>free inspection</strong>.`,
               ) +
               steps([
                 "We call you to schedule — fast.",
@@ -246,7 +246,7 @@ export const leadSequence: SequenceEmail[] = [
     subject: () => "Anyone can knock after a storm. Not everyone can prove it.",
     html: (c) =>
       shell({
-        preheader: `Licensed, ${site.googleRating}★, and one crew for your whole roof.`,
+        preheader: `Insured, ${site.googleRating}★, and one crew for your whole roof.`,
         body:
           h1("Why homeowners pick PowerEdge.") +
           p(
@@ -255,7 +255,7 @@ export const leadSequence: SequenceEmail[] = [
           `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:4px 0 8px;">
             ${[
               [
-                "Licensed & insured",
+                "Insured & accountable",
                 `Backed by ${site.liabilityCoverage} in liability coverage and a documented 1-year workmanship guarantee — a real company standing behind the work.`,
               ],
               [
@@ -371,7 +371,7 @@ export const leadSequence: SequenceEmail[] = [
             `After a storm your street fills with trucks and clipboards. The uncomfortable truth: <strong>Texas doesn&rsquo;t license roofers</strong> — a magnet sign and a ladder is the whole barrier to entry, and plenty vanish before the warranty ever matters.`,
           ) +
           p(
-            `We&rsquo;re the opposite kind of company: licensed and insured, ${site.googleRating}&#9733; across ${site.googleReviewCount} reviews, one accountable crew for your whole roof. Verify us before you trust anyone knocking.`,
+            `We&rsquo;re the opposite kind of company: insured and accountable, ${site.googleRating}&#9733; across ${site.googleReviewCount} reviews, one accountable crew for your whole roof. Verify us before you trust anyone knocking.`,
           ) +
           button("Verify us, then book a free inspection", BOOK_URL) +
           verifyChip(),
@@ -392,7 +392,7 @@ export const leadSequence: SequenceEmail[] = [
             `This is the part where we gracefully back off. No hard feelings — your roof&rsquo;s still up there, the free inspection still stands, and we&rsquo;re exactly one text away the day you want it.`,
           ) +
           p(
-            `If a storm ever does a number on your roof, you know who to call: the licensed crew that <em>shows you the license</em>. Until then, ${c.firstName}, take care.`,
+            `If a storm ever does a number on your roof, you know who to call: the insured crew that <em>shows you the coverage</em>. Until then, ${c.firstName}, take care.`,
           ) +
           button("Actually, I'm ready — book it", BOOK_URL) +
           p(`Or text <strong>${site.phone}</strong>. That&rsquo;s it. Promise.`) +
@@ -462,7 +462,7 @@ export async function sendClaimComplete(
       body:
         h1(`You're all set, ${first}.`) +
         p(
-          `We&rsquo;ve got your claim details, and a licensed member of our team will call you <strong>right away</strong> to lock in your inspection. When we arrive we go straight to documenting the roof — no paperwork on the doorstep.`,
+          `We&rsquo;ve got your claim details, and a member of our team will call you <strong>right away</strong> to lock in your inspection. When we arrive we go straight to documenting the roof — no paperwork on the doorstep.`,
         ) +
         p(`Need us sooner? Call or text <strong>${site.phone}</strong>.`) +
         button(`Call ${site.phone}`, site.phoneHref) +

@@ -17,7 +17,7 @@ const content = getServiceContent("commercial")!;
 export const metadata: Metadata = {
   title: "Commercial Roofing in DFW",
   description:
-    "One licensed, insured partner for commercial roofing across Dallas–Fort Worth. Property managers and business owners get scheduled, documented, warrantied work with a single point of contact.",
+    "One insured, accountable partner for commercial roofing across Dallas–Fort Worth. Property managers and business owners get scheduled, documented, warrantied work with a single point of contact.",
 };
 
 export default function CommercialPage() {
@@ -25,7 +25,7 @@ export default function CommercialPage() {
     <>
       <PageHero
         kicker="Commercial · Property managers"
-        title="One licensed, insured partner for your roof."
+        title="One insured, accountable partner for your roof."
         intro="Property managers and business owners shouldn't have to chase down a contractor. PowerEdge covers commercial roofing under one accountable team — scheduled around your operation and documented for your records."
         badge="Request a commercial quote"
         withForm
@@ -66,7 +66,7 @@ export default function CommercialPage() {
               },
               {
                 h: "24/7 emergency response",
-                p: "When something fails after hours, a licensed crew responds.",
+                p: "When something fails after hours, our crew responds.",
               },
             ].map((b) => (
               <div

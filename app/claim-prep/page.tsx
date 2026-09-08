@@ -28,7 +28,7 @@ export default function ClaimPrepPage() {
           <ClaimPrep />
         </div>
         <p className="mt-6 text-sm text-fg-inv-dim">
-          Licensed & insured Texas contractor · Your details are
+          Insured & accountable Texas contractor · Your details are
           used only to prepare your inspection.
         </p>
       </Container>

@@ -17,7 +17,7 @@ export function ServiceTrustBar() {
         </span>
         <Divider />
         <span className="text-fg-inv-dim">
-          <strong className="text-fg-inv">Licensed</strong> &amp; insured
+          <strong className="text-fg-inv">Insured</strong> &amp; accountable
         </span>
         <Divider />
         <span className="text-fg-inv-dim">

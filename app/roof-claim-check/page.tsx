@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     q: "What does the inspection cost?",
-    a: "Nothing. A licensed pro photographs and measures your roof and gives you an honest read. If there's damage worth claiming, we document it for your adjuster. If not, we tell you straight.",
+    a: "Nothing. One of our pros photographs and measures your roof and gives you an honest read. If there's damage worth claiming, we document it for your adjuster. If not, we tell you straight.",
   },
   {
     q: "What if I can't cover my deductible?",
@@ -40,7 +40,7 @@ const steps = [
   },
   {
     h: "Book your free inspection",
-    p: "A licensed pro documents your roof — photos, measurements, an honest read.",
+    p: "One of our pros documents your roof — photos, measurements, an honest read.",
   },
   {
     h: "We handle the rest",
@@ -101,7 +101,7 @@ export default function RoofClaimCheckPage() {
             </ul>
 
             <p className="mt-8 text-sm text-fg-inv-dim">
-              Licensed & insured Texas contractor ·{" "}
+              Insured & accountable Texas contractor ·{" "}
               {site.googleRating}★ ({site.googleReviewCount} reviews) · We never
               waive deductibles or pose as your adjuster.
             </p>
@@ -165,7 +165,7 @@ export default function RoofClaimCheckPage() {
             Start my claim →
           </a>
           <p className="mt-3 text-xs text-fg-inv-dim">
-            Licensed contractor, not a public adjuster — we document &amp;
+            Insured contractor, not a public adjuster — we document &amp;
             coordinate; you file with your insurer.
           </p>
         </Container>
