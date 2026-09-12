@@ -8,7 +8,11 @@ import { track } from "@/lib/analytics";
  * Deductible / project financing calculator — reflects PowerEdge's two IN-HOUSE
  * (self-funded) payment plans:
  *   • Pay-in-4  — 4 monthly payments, 0% interest
- *   • 12-month  — 12 monthly payments, 12.99% APR
+ *   • 12-month  — rate set by credit and payment history, up to the maximum
+ *     allowed under Texas law (decision #55: no flat APR is quoted anywhere
+ *     on site; ILLUSTRATIVE_RATE_12 below is a representative mid-range
+ *     example used only to compute the sample monthly payment shown, never
+ *     displayed as a stated or quoted rate).
  *
  * COMPLIANCE: illustrative estimate only, NOT a financing offer. The homeowner
  * always pays their full deductible over time — we never waive it (illegal in
@@ -17,7 +21,7 @@ import { track } from "@/lib/analytics";
  * and the program itself requires counsel/licensing review before it runs.
  */
 
-const RATE_12 = 0.1299; // 12-month plan APR
+const ILLUSTRATIVE_RATE_12 = 0.1299; // representative example only, never shown as a quoted rate
 
 const PRESETS = [1000, 2500, 5000, 8000, 10000, 15000];
 
@@ -45,7 +49,7 @@ export function FinancingCalculator({
   const [plan, setPlan] = useState<"pay4" | "m12">("m12");
 
   const pay4 = amount > 0 ? amount / 4 : 0;
-  const pay12 = amount > 0 ? amortized(amount, RATE_12, 12) : 0;
+  const pay12 = amount > 0 ? amortized(amount, ILLUSTRATIVE_RATE_12, 12) : 0;
 
   return (
     <div
@@ -128,7 +132,7 @@ export function FinancingCalculator({
             <span className="text-sm font-bold text-fg-inv-dim">/mo</span>
           </div>
           <div className="mt-1 text-xs text-fg-inv-dim">
-            12 payments · 12.99% APR
+            12 payments · rate set by credit, up to TX max
           </div>
         </button>
       </div>
