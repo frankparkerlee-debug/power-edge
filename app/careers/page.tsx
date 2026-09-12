@@ -5,9 +5,9 @@ import { FaqSection } from "@/components/service-blocks";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Roofing Sales Jobs in DFW — Fast Pay, Leads, Real Tools | PowerEdge",
+  title: "Roofing Sales Careers in DFW — Real Pay, Real Leads | PowerEdge",
   description:
-    "Sell storm-restoration roofs where the hustle actually pays: paid at the first check, a floor on every approved roof, storm-targeted leads, and the tools to close on the spot. Now hiring reps + a sales manager across Dallas–Fort Worth.",
+    "Sell roofing and home-repair jobs from real inbound leads — free-inspection requests, referrals, and repeat customers. Paid at the first check, a floor on every approved roof, and the tools to close on the spot. Now hiring reps + a sales manager across Dallas–Fort Worth.",
 };
 
 const faqs = [
@@ -20,16 +20,16 @@ const faqs = [
     a: "Fast. You get a solid chunk at the first insurance check, not months later at job completion, and we pay weekly. No commission games, no surprise deductions.",
   },
   {
-    q: "Do I get leads or do I knock?",
-    a: "Both. You'll work verified storm-hit areas from our own hail data instead of guessing, plus inbound leads as they come in — and a protected area so you're not fighting ten other reps for the same street.",
+    q: "Do I get leads, or do I have to knock doors?",
+    a: "You work inbound leads only — free-inspection requests, referrals, and repeat customers — plus a protected territory so you're not fighting ten other reps for the same lead. PowerEdge doesn't do door-to-door canvassing; that's not how we build trust in this market.",
   },
   {
     q: "What tools do I get?",
-    a: "An instant roof-claim check, satellite roof measurement, deductible financing to kill the 'I can't afford it' objection, and claim pre-fill so you can inspect and open the claim on-site. You close more per door with less effort.",
+    a: "An instant roof-claim check, satellite roof measurement, deductible financing to kill the 'I can't afford it' objection, and claim pre-fill so you can inspect and open the claim on-site. You close more per lead with less effort.",
   },
   {
     q: "Do I need experience?",
-    a: "This is a job for strong salespeople. Roofing experience is a plus but not required — if you've closed in solar, pest, alarms, or anywhere else, we'll teach you the roofing fast. Sales experience moves you to the front of the line.",
+    a: "This is a job for strong salespeople. Roofing experience is a plus but not required — if you've closed in HVAC, pest, alarms, or anywhere else, we'll teach you the roofing fast. Sales experience moves you to the front of the line.",
   },
 ];
 
@@ -39,12 +39,12 @@ const perks = [
     p: "Paid at the first check, weekly, no games. Every approved roof carries a floor, so a slow week still pays.",
   },
   {
-    h: "Backed by real storm data",
-    p: "You work verified hail-hit areas, not random streets — plus a protected territory.",
+    h: "Backed by real inbound demand",
+    p: "You work real inbound leads from free inspections and referrals in a protected territory, not a cold-knock list.",
   },
   {
     h: "Tools that close for you",
-    p: "Instant claim check, satellite measurement, and deductible financing mean more yeses per door and bigger tickets.",
+    p: "Instant claim check, satellite measurement, and deductible financing mean more yeses per lead and bigger tickets.",
   },
   {
     h: "A company that delivers",
@@ -90,7 +90,7 @@ export default function CareersPage() {
                 "50% of gross profit — 55% from your 6th roof each month",
                 "$600/wk forgivable ramp draw for proven closers",
                 "Paid weekly at the first check, plus a floor on every approved roof",
-                "Storm-mapped doors with owner names + satellite roof measurement",
+                "Inbound leads from free inspections and referrals, plus satellite roof measurement — no cold-knocking required",
               ].map((b) => (
                 <li key={b} className="flex gap-3">
                   <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bolt">

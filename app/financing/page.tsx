@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     q: "What payment plans do you offer?",
-    a: "Two in-house plans, subject to approval: a 4-month plan at 0% interest, or a 12-month plan at 12.99% APR to keep the monthly payment lower. Final terms and required disclosures are provided in writing before you sign.",
+    a: "Two in-house plans, subject to approval: a 4-month plan at 0% interest, or a longer plan with your rate set by credit and payment history, up to the maximum allowed under Texas law. Final terms and required disclosures are provided in writing before you sign.",
   },
   {
     q: "Do I need money down?",
