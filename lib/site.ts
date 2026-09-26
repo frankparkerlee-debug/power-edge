@@ -45,8 +45,8 @@ export const site = {
   team: [
     {
       name: "John Lott",
-      role: "Master Electrician",
-      cred: "40 years of electrical work",
+      role: "Senior Crew Lead",
+      cred: "40 years in the trades",
       bio: "Forty years on the tools across residential, commercial, and industrial work — the senior hand on PowerEdge's crews.",
     },
     {
