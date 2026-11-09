@@ -7,18 +7,23 @@ import { TextFab } from "./TextFab";
 import { MobileCtaBar } from "./MobileCtaBar";
 import { CallRailFormCapture } from "./CallRailFormCapture";
 import { Analytics } from "./Analytics";
+import { PortalShell } from "./PortalShell";
 
 /**
- * Renders the marketing chrome (header, footer, CTAs) on public pages, but NOT
- * on internal tools like /admin, so the business phone number in the nav/footer
- * doesn't clutter the leads dashboard (and get mistaken for lead data).
+ * Three chromes, not two.
+ *
+ * Public pages get the marketing chrome. Internal pages used to get NOTHING,
+ * which is why the portal had no navigation, no back and no sense of place,
+ * and why /sales (missing from the old exclusion list) shipped with a
+ * customer "Free Inspection" bar pinned over an admin tool. Internal pages now
+ * get the portal shell.
  */
 export function SiteChrome({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const bare = pathname?.startsWith("/admin");
+  const pathname = usePathname() || "/";
+  const portal = pathname.startsWith("/admin") || pathname.startsWith("/sales");
 
-  if (bare) {
-    return <main className="flex-1">{children}</main>;
+  if (portal) {
+    return <PortalShell>{children}</PortalShell>;
   }
 
   return (
