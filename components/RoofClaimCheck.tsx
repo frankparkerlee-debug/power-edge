@@ -69,11 +69,15 @@ export function RoofClaimCheck() {
   const qualifies = hailHit && (largest >= 1 || hailCount >= 3);
   const hailSummary = hailHit
     ? `${hailCount} hail report${hailCount === 1 ? "" : "s"} within ${result?.radiusMi ?? 15} mi${
-        largest ? `, largest ${largest}″` : ""
+        largest ? `, the largest ${largest}″` : ""
       }`
     : "no strong hail reports in recent auto data";
-  const recentDate = (() => {
-    const iso = result?.mostRecent?.date;
+  // Two DIFFERENT events: the biggest stone and the newest report. Conflating
+  // them told homeowners things like "3\u2033 hail has been sitting on your roof
+  // since September 27" when the 3\u2033 fell in April and September was a 1\u2033
+  // report. These records are public, and we are the company that tells people
+  // the truth, so each number is now quoted with its own date.
+  const fmtDate = (iso?: string) => {
     if (!iso) return "";
     try {
       return new Date(iso).toLocaleDateString("en-US", {
@@ -84,7 +88,10 @@ export function RoofClaimCheck() {
     } catch {
       return "";
     }
-  })();
+  };
+  const largestDate = fmtDate(result?.largest?.date);
+  const recentDate = fmtDate(result?.mostRecent?.date);
+  const sameEvent = !!largestDate && largestDate === recentDate;
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -233,16 +240,17 @@ export function RoofClaimCheck() {
       {qualifies ? (
         <div className="rounded-card border-2 border-bolt bg-bolt/10 p-4 sm:p-5">
           <div className="text-xs font-bold uppercase tracking-wider text-bolt">
-            On the record — you likely qualify
+            On the record · you likely qualify
           </div>
           <p className="mt-1 font-display text-2xl font-bold leading-tight text-fg-inv">
             {largest ? `${largest}″ hail is on record near you.` : "Hail is on record near you."}
           </p>
           <p className="mt-1.5 text-sm text-fg-inv-dim">
             National Weather Service reports show {hailSummary}
-            {recentDate ? `, most recently ${recentDate}` : ""} — the same
-            records adjusters use, and enough to be worth filing. A free
-            inspection confirms what&apos;s actually on your roof.
+            {largestDate ? `, which fell ${largestDate}` : ""}
+            {!sameEvent && recentDate ? `. The most recent report near you was ${recentDate}` : ""}
+            . These are the same records adjusters use, and enough to be worth
+            filing. A free inspection confirms what&apos;s actually on your roof.
           </p>
         </div>
       ) : (
@@ -254,7 +262,7 @@ export function RoofClaimCheck() {
             The storm record near you is thin.
           </p>
           <p className="mt-1.5 text-sm text-fg-inv-dim">
-            We could pressure you anyway — we won&apos;t. But reports are sparse
+            We could pressure you anyway. We won&apos;t. But reports are sparse
             and hail damage is nearly invisible from the ground, so if
             you&apos;ve noticed leaks, stains, or missing shingles, a free look
             settles it. If your roof is fine, we&apos;ll tell you exactly that.
@@ -267,9 +275,9 @@ export function RoofClaimCheck() {
         <div className="mt-3 flex items-start gap-2 rounded-md border border-ember/40 bg-ember/10 px-4 py-3 text-sm font-semibold text-fg-inv">
           <span aria-hidden>⚡</span>
           <span>
-            {recentDate
-              ? `That hail has been sitting on your roof since ${recentDate} — every rain since works it deeper, and the next storm makes it harder to prove which one did it.`
-              : "Hail damage sits invisible until it leaks — and every storm on top makes it harder to prove which one did it."}
+            {largestDate
+              ? `${largest ? `That ${largest}\u2033 hail` : "That hail"} has been sitting on your roof since ${largestDate}. Every rain since works it deeper, and the next storm makes it harder to prove which one did it.`
+              : "Hail damage sits invisible until it leaks, and every storm on top makes it harder to prove which one did it."}
           </span>
         </div>
       )}

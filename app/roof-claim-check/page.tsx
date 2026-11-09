@@ -70,17 +70,17 @@ export default function RoofClaimCheckPage() {
           <div className="lg:pt-6">
             <Kicker className="mb-5">Free · Instant · No obligation</Kicker>
             <h1 className="font-display text-4xl leading-[0.98] text-fg-inv sm:text-5xl">
-              Do you have
+              Adjusters work from{" "}
               <br />
-              <span className="bolt-underline">a roof claim?</span>
+              <span className="bolt-underline">the record.</span>
             </h1>
             <p className="mt-6 max-w-md text-lg leading-relaxed text-fg-inv-dim">
-              Enter your address — we check reported hail near your home against
-              National Weather Service data (the same kind of record an adjuster
-              uses) and tell you on the spot if it&apos;s likely worth filing.
-              Hail damage is nearly invisible from the ground — and once your
-              policy&apos;s filing window closes, the whole roof comes out of
-              your pocket, not your deductible.
+              So do we. The checker above reads the same National Weather
+              Service hail reports your adjuster will, for your exact address,
+              and tells you on the spot whether it&apos;s likely worth filing.
+              Hail damage is nearly invisible from the ground, and once your
+              policy&apos;s filing window closes the whole roof comes out of
+              your pocket instead of your deductible.
             </p>
 
             <ul className="mt-8 space-y-3 text-fg-inv-dim">
