@@ -24,16 +24,36 @@ export function Schema() {
     email: site.email,
     priceRange: "$$",
     description:
-      "Storm-first Dallas–Fort Worth roofing company: roof repair, replacement, hail/storm insurance-claim documentation, and deductible financing.",
+      "Storm-first Dallas–Fort Worth roofing company: roof repair, replacement, and hail/storm insurance-claim documentation, with an honest verdict in writing on every inspection.",
     areaServed: cities.map((c) => ({
       "@type": "City",
       name: `${c.name}, TX`,
     })),
     address: {
       "@type": "PostalAddress",
+      addressLocality: "Dallas",
       addressRegion: "TX",
       addressCountry: "US",
     },
+    // Entity resolution: without sameAs, Google and the AI engines can't tie
+    // this markup to the Google Business Profile that actually ranks locally.
+    // TODO(parker): add Facebook / BBB / Yelp URLs here as they go live.
+    sameAs: [site.googleReviewsUrl as string],
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 32.7767,
+      longitude: -96.797,
+    },
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: [
+          "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+        ],
+        opens: "07:00",
+        closes: "19:00",
+      },
+    ],
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: site.googleRating,

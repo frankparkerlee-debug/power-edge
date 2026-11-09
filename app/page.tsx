@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { Button, Container, Kicker, SectionHeading, Stars } from "@/components/ui";
@@ -10,6 +11,12 @@ import { DfwHailActivity } from "@/components/DfwHailActivity";
 import { site } from "@/lib/site";
 import { services } from "@/lib/services";
 import { cities } from "@/lib/cities";
+
+export const metadata: Metadata = {
+  alternates: { canonical: site.url },
+  description:
+    "Storm & hail roof restoration across Dallas–Fort Worth. Free inspection with photo documentation, an honest verdict in writing — claim or no claim — from an insured, accountable crew.",
+};
 
 export default function Home() {
   return (
@@ -52,9 +59,9 @@ function Hero() {
             Roofing &amp; storm restoration · Dallas–Fort Worth
           </Kicker>
           <h1 className="font-display text-[2.7rem] leading-[0.95] text-fg-inv sm:text-6xl md:text-[4.2rem]">
-            Storm damage?
+            Hail damage, or not?{" "}
             <br />
-            <span className="bolt-underline">We can help with that.</span>
+            <span className="bolt-underline">We&apos;ll tell you straight.</span>
           </h1>
           <p className="mt-7 max-w-xl text-lg leading-relaxed text-fg-inv-dim">
             Leak, missing shingles, hail — we inspect it free and tell you

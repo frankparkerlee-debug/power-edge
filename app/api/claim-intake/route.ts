@@ -31,7 +31,13 @@ export async function POST(req: Request) {
   const elapsed = Number(body.form_elapsed_ms) || 0;
   const addr = s("address");
   const nameVal = s("name");
-  const consonantRun = /[bcdfghjklmnpqrstvwxz]{5,}/i.test(nameVal.replace(/\s/g, ""));
+  // Per-WORD check. Testing the space-stripped string silently dropped real
+  // people ("John Schmidt", "Kathryn Schmidt", "Mark Schwartz" — the run spans
+  // the gap between a consonant-ending first name and a consonant-heavy
+  // surname). Bots put the gibberish inside one token, so test tokens.
+  const consonantRun = nameVal
+    .split(/\s+/)
+    .some((w) => /[bcdfghjklmnpqrstvwxz]{5,}/i.test(w));
   const spamReasons: string[] = [];
   if (s("company_website")) spamReasons.push("honeypot"); // hidden field bots fill
   if (elapsed > 0 && elapsed < 2500) spamReasons.push("too-fast");

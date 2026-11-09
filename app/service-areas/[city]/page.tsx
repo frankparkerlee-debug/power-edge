@@ -22,7 +22,8 @@ export async function generateMetadata({
   if (!c) return {};
   return {
     title: `Roofing Company in ${c.name}, TX — Storm & Hail Roof Repair`,
-    description: `Storm & hail roof repair, replacement, and insurance-claim roofing in ${c.name}. Free inspections, deductible financing from $250 down, insured & accountable, rated ${site.googleRating}★.`,
+    description: `Storm & hail roof repair, replacement, and insurance-claim roofing in ${c.name}. Free inspections, an honest verdict in writing, insured & accountable, rated ${site.googleRating}★.`,
+    alternates: { canonical: `${site.url}/service-areas/${c.slug}` },
   };
 }
 

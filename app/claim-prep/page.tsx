@@ -4,6 +4,7 @@ import { ClaimPrep } from "@/components/ClaimPrep";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/claim-prep` },
   title: "Prep Your Roof Claim — PowerEdge",
   description:
     "Share your claim details ahead of your inspection so our crew arrives ready to inspect, document, and get you moving — not do paperwork on your doorstep.",

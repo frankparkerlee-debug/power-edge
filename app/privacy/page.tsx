@@ -3,6 +3,7 @@ import { Container } from "@/components/ui";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/privacy` },
   title: "Privacy Policy",
   description: `How ${site.legalName} collects, uses, and protects your information, including mobile/SMS opt-in data.`,
 };

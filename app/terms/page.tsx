@@ -3,6 +3,7 @@ import { Container } from "@/components/ui";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/terms` },
   title: "Terms & Conditions",
   description: `Terms and conditions for Power Edge, LLC, including website use and text-messaging (SMS) program terms.`,
 };

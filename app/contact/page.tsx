@@ -4,6 +4,7 @@ import { LeadForm } from "@/components/LeadForm";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/contact` },
   title: "Contact — Free Inspection & Quotes",
   description:
     "Call PowerEdge at " +

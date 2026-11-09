@@ -4,6 +4,7 @@ import { PageHero, CtaBand } from "@/components/blocks";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/about` },
   title: "About — Insured & Accountable Roofing & Home Repair in Texas",
   description:
     "PowerEdge is an insured, accountable company doing roofing and home repair across DFW. Meet the team behind the work.",

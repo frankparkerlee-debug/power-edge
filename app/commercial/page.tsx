@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { site } from "@/lib/site";
 import { Container, SectionHeading } from "@/components/ui";
 import { PageHero, CtaBand, FeatureList } from "@/components/blocks";
 import {
@@ -15,6 +16,7 @@ const service = getService("commercial")!;
 const content = getServiceContent("commercial")!;
 
 export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/commercial` },
   title: "Commercial Roofing in DFW",
   description:
     "One insured, accountable partner for commercial roofing across Dallas–Fort Worth. Property managers and business owners get scheduled, documented, warrantied work with a single point of contact.",

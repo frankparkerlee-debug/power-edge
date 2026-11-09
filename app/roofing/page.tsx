@@ -17,6 +17,7 @@ const service = getService("roofing")!;
 const content = getServiceContent("roofing")!;
 
 export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/roofing` },
   title: "Roofing Company in Dallas–Fort Worth — Roof Repair, Replacement & Storm Claims",
   description:
     "DFW roofing company for roof repair, full replacement, and hail/storm insurance claims — documented by the book. Free inspections, deductible financing from $250 down, insured & verifiable.",

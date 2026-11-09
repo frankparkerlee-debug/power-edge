@@ -1,0 +1,21 @@
+Strip deductible-financing offer + calculator from homepage (decision #12)
+
+Removes the "we can finance your deductible" promise and the payment
+calculator from the homepage, pending a compliance read on whether
+financing (not waiving) a deductible still counts as "handling" it:
+- Hero: dropped the deductible-financing line and pillar
+- StormRestoration: removed the DeductibleFinancing widget and the
+  "finance it" claim-flow copy
+- Removed StuckBand entirely (dedicated financing pitch + FinancingCalculator)
+- ClaimCheckBand: removed the "you likely qualify" / "just your
+  deductible" / "$250 down" demo-card copy that promised an insurance
+  outcome and a financing amount together
+
+Does NOT touch /financing (still the subject of open decisions #11, #24)
+or the primary nav. The /electrical build called for in decision #12's
+approved option was not done -- see signal raised same run: electrical
+was already fully stripped from the business/site by decisions #14/#15/#19
+(2026-09-04), before #12 was approved, so lib/services.ts has no electrical
+menu left to build the page from.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>

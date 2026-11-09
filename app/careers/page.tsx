@@ -5,6 +5,7 @@ import { FaqSection } from "@/components/service-blocks";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/careers` },
   title: "Roofing Sales Careers in DFW — Real Pay, Real Leads | PowerEdge",
   description:
     "Sell roofing and home-repair jobs from real inbound leads — free-inspection requests, referrals, and repeat customers. Paid at the first check, a floor on every approved roof, and the tools to close on the spot. Now hiring reps + a sales manager across Dallas–Fort Worth.",

@@ -10,6 +10,7 @@ import { CtaBand } from "@/components/blocks";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/free-inspection` },
   title: "Free Roof Inspection in DFW — Documented for Your Claim",
   description:
     "Book a free, no-obligation roof inspection across Dallas–Fort Worth. We photograph and document storm damage for your insurance claim, and tell you straight if your roof is fine. Insured & accountable.",

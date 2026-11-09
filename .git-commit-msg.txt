@@ -1,0 +1,18 @@
+Financing calculator still showed flat 12.99% APR, missed by decision #55
+
+Decision #55's approved fix (shipped this run, prior commit) only touched
+the /financing FAQ text file. A full-page fetch of the live site after that
+deploy found the same flat "12.99% APR" label still rendering in
+components/FinancingCalculator.tsx (the interactive payment-plan tool used
+on the same page) — same violation of the attorney-approved variable-rate
+model (directive #36), different file, missed by the original artifact
+#151 spec because it only covered app/financing/page.tsx.
+
+Applied the same treatment: the visible 12-month plan label no longer
+states a percentage; it reads "rate set by credit, up to TX max." The
+amortization math keeps using the same 12.99% figure internally, renamed
+ILLUSTRATIVE_RATE_12 and commented as a representative example used only
+to produce the sample monthly-payment number, never displayed or quoted
+as an actual or offered rate.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
