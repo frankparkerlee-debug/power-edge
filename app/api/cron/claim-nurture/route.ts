@@ -5,6 +5,7 @@ import { runStormWatch } from "@/lib/storm";
 import { generateStormTargets } from "@/lib/parcels";
 import { runStormContactTasks } from "@/lib/hubspotStorm";
 import { runSkipTrace } from "@/lib/skiptrace";
+import { runAppointmentReminders } from "@/lib/scheduling";
 
 /**
  * Drop-off nurture for claim-prep. Run on a schedule (e.g. hourly), a Render
@@ -37,6 +38,8 @@ export async function POST(req: Request) {
   const hubspotTasks = await runStormContactTasks();
   // Skip-trace the highest-score untraced targets (no-op until BATCHDATA_API_KEY).
   const skiptrace = await runSkipTrace();
+  // Day-of reminders for inspections booked through the site.
+  const reminders = await runAppointmentReminders(process.env.RESEND_API_KEY);
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
@@ -78,5 +81,6 @@ export async function POST(req: Request) {
     targets: { today: targetsToday, yesterday: targetsYday },
     hubspotTasks,
     skiptrace,
+    reminders,
   });
 }

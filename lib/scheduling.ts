@@ -1,3 +1,4 @@
+import { sendAppointmentReminder } from "@/lib/emails";
 // Inspection scheduling. Homeowners pick a real slot instead of typing
 // "weekday mornings" into a box and waiting for someone to call back.
 //
@@ -283,5 +284,68 @@ export async function getAppointment(id: string) {
     return rows[0] || null;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Day-of reminders for booked inspections.
+ *
+ * Claims the row FIRST by stamping reminded_at, then sends. If the send then
+ * fails we lose a reminder rather than sending the same homeowner four of
+ * them, because the hourly cron would otherwise retry every hour until the
+ * window passed. The failure is recorded by sendMail either way.
+ *
+ * Fires for windows starting in the next 2 to 8 hours, which on the hourly
+ * cron means one reminder, the morning of, for a window later that day.
+ */
+export async function runAppointmentReminders(resendKey?: string) {
+  if (!dbOn() || !resendKey) return { sent: 0, skipped: "not configured" };
+  const from = new Date(Date.now() + 2 * 3600 * 1000).toISOString();
+  const to = new Date(Date.now() + 8 * 3600 * 1000).toISOString();
+
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/appointments` +
+        `?select=id,slot_start,name,email,address&status=eq.booked` +
+        `&reminded_at=is.null&slot_start=gte.${from}&slot_start=lte.${to}&limit=50`,
+      { headers: authHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return { sent: 0, error: "query failed" };
+    const rows = (await res.json()) as Array<{
+      id: string; slot_start: string; name: string;
+      email: string | null; address: string | null;
+    }>;
+
+    let sent = 0;
+    for (const r of rows) {
+      if (!r.email) continue;
+
+      const claim = await fetch(
+        `${process.env.SUPABASE_URL}/rest/v1/appointments?id=eq.${r.id}&reminded_at=is.null`,
+        {
+          method: "PATCH",
+          headers: { ...authHeaders(), Prefer: "return=representation" },
+          body: JSON.stringify({ reminded_at: new Date().toISOString() }),
+        },
+      );
+      if (!claim.ok) continue;
+      const claimed = (await claim.json()) as unknown[];
+      if (!Array.isArray(claimed) || claimed.length === 0) continue;
+
+      const when = new Date(r.slot_start).toLocaleString("en-US", {
+        timeZone: TZ, weekday: "long", hour: "numeric", minute: "2-digit",
+      });
+      await sendAppointmentReminder(resendKey, {
+        id: r.id,
+        name: r.name,
+        email: r.email,
+        address: r.address || "",
+        when,
+      });
+      sent++;
+    }
+    return { sent, candidates: rows.length };
+  } catch {
+    return { sent: 0, error: "failed" };
   }
 }

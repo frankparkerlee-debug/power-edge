@@ -632,3 +632,37 @@ export async function sendAppointmentConfirmation(
     }),
   );
 }
+
+/**
+ * Day-of reminder for a booked inspection. Short on purpose: the homeowner
+ * already said yes, so this only needs to put the window in front of them and
+ * make cancelling one tap, because an honest cancel is cheaper than a crew
+ * driving out to an empty house.
+ */
+export async function sendAppointmentReminder(
+  resendKey: string,
+  a: { id: string; name: string; email: string; address: string; when: string },
+) {
+  const first = (a.name || "there").split(" ")[0];
+  return sendEmail(
+    resendKey,
+    a.email,
+    `Today: your roof inspection ${a.when}`,
+    shell({
+      preheader: `We'll call before we head over.`,
+      body:
+        h1(`See you today, ${first}.`) +
+        p(
+          `Your free roof inspection is <strong>${a.when}</strong>${
+            a.address ? ` at <strong>${a.address}</strong>` : ""
+          }. That's an arrival window, and we'll call before we head over.`,
+        ) +
+        p(
+          `You don't need to be home for the roof itself, but it helps to be there for the walkthrough.`,
+        ) +
+        button("Change or cancel", `${site.url}/appointment/${a.id}`) +
+        verifyChip(),
+    }),
+    "appointment-reminder",
+  );
+}
