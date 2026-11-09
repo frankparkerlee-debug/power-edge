@@ -349,3 +349,44 @@ export async function runAppointmentReminders(resendKey?: string) {
     return { sent: 0, error: "failed" };
   }
 }
+
+
+/**
+ * A booking is a job. Matching on address keeps a homeowner who books twice,
+ * or who was already knocked, on one record instead of spawning duplicates.
+ */
+export async function upsertJobForBooking(a: {
+  name: string; phone: string; email?: string; address?: string; id?: string;
+}) {
+  if (!dbOn() || !a.address?.trim()) return;
+  const { listJobs, createJob, updateJob, logEvent } = await import("@/lib/jobs");
+  try {
+    const addr = a.address.trim();
+    const existing = (await listJobs({ limit: 500 })).find(
+      (j) => j.address.trim().toLowerCase() === addr.toLowerCase(),
+    );
+    if (existing) {
+      await updateJob(existing.id, {
+        stage: existing.stage === "new" || existing.stage === "contacted"
+          ? "inspection_booked"
+          : existing.stage,
+        appointment_id: a.id ?? null,
+        phone: existing.phone || a.phone,
+        email: existing.email || a.email || null,
+      });
+      await logEvent(existing.id, "appointment", "Booked from the website");
+      return;
+    }
+    const job = await createJob({
+      address: addr,
+      owner_name: a.name,
+      phone: a.phone,
+      email: a.email || null,
+      stage: "inspection_booked",
+      appointment_id: a.id ?? null,
+    });
+    if (job) await logEvent(job.id, "appointment", "Booked from the website");
+  } catch {
+    /* a CRM write must never cost the booking */
+  }
+}

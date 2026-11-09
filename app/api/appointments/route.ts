@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { availableSlots, bookSlot, bookingsFromIpToday } from "@/lib/scheduling";
+import { availableSlots, bookSlot, bookingsFromIpToday, upsertJobForBooking } from "@/lib/scheduling";
 import { burst, clientIp, tooMany } from "@/lib/rateLimit";
 import { sendAppointmentConfirmation } from "@/lib/emails";
 
@@ -67,6 +67,16 @@ export async function POST(req: Request) {
       { status: result.code === "taken" ? 409 : 400 },
     );
   }
+
+  // The booking is also a job, so the office can see it in the pipeline
+  // rather than only on a calendar.
+  await upsertJobForBooking({
+    name: String(body.name || ''),
+    phone: String(body.phone || ''),
+    email: String(body.email || ''),
+    address: String(body.address || ''),
+    id: result.id,
+  });
 
   // Confirmations are best-effort. A mail hiccup must never lose the booking.
   try {

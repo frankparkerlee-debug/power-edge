@@ -310,3 +310,52 @@ export async function markNoticesDelivered(id: string) {
     /* non-fatal */
   }
 }
+
+
+/** An agreement is a job. Same address-matching rule as a booking. */
+export async function linkJobForContract(a: {
+  contractId: string;
+  stage: "agreement_sent" | "signed";
+  address: string;
+  owner: string;
+  phone?: string;
+  email?: string;
+  rep?: string;
+  claim: boolean;
+  carrier?: string;
+  claimNumber?: string;
+  deductible?: string;
+  value?: string;
+}) {
+  if (!dbOn() || !a.address?.trim()) return;
+  const { listJobs, createJob, updateJob, logEvent } = await import("@/lib/jobs");
+  const label = a.stage === "signed" ? "agreement_signed" : "agreement_sent";
+  try {
+    const addr = a.address.trim();
+    const existing = (await listJobs({ limit: 500 })).find(
+      (j) => j.address.trim().toLowerCase() === addr.toLowerCase(),
+    );
+    const patch = {
+      stage: a.stage as never,
+      contract_id: a.contractId,
+      owner_name: a.owner || null,
+      phone: a.phone || null,
+      email: a.email || null,
+      rep: a.rep || null,
+      job_type: (a.claim ? "claim" : "cash") as "claim" | "cash",
+      carrier: a.carrier || null,
+      claim_number: a.claimNumber || null,
+      deductible: a.deductible || null,
+      contract_value: a.value || null,
+    };
+    if (existing) {
+      await updateJob(existing.id, patch, a.rep);
+      await logEvent(existing.id, label, a.value || undefined, a.rep);
+      return;
+    }
+    const job = await createJob({ address: addr, ...patch }, a.rep);
+    if (job) await logEvent(job.id, label, a.value || undefined, a.rep);
+  } catch {
+    /* never cost the agreement */
+  }
+}

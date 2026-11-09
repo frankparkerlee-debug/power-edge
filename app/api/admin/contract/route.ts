@@ -4,6 +4,7 @@ import { markEmailed } from "@/lib/contracts";
 import { sendSignedAgreement } from "@/lib/emails";
 import { clientIp } from "@/lib/rateLimit";
 import { apiUser } from "@/lib/auth";
+import { linkJobForContract } from "@/lib/contracts";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,20 @@ export async function POST(req: Request) {
     if (!draft.ok) {
       return NextResponse.json({ ok: false, error: draft.error }, { status: 400 });
     }
+    await linkJobForContract({
+      contractId: draft.id,
+      stage: "agreement_sent",
+      address: String(body.property_address || ""),
+      owner: String(body.owner_names || ""),
+      phone: String(body.owner_phone || ""),
+      email: String(body.owner_email || ""),
+      rep: String(body.rep || u.name || ""),
+      claim: body.claim_based !== false,
+      carrier: String(body.carrier || ""),
+      claimNumber: String(body.claim_number || ""),
+      deductible: String(body.deductible || ""),
+      value: String(body.total_price || ""),
+    });
     const base = process.env.NEXT_PUBLIC_SITE_URL || "https://poweredgetx.com";
     return NextResponse.json({
       ok: true,
@@ -99,6 +114,21 @@ export async function POST(req: Request) {
   // Chapter 601 wants them furnished in duplicate with the contract; the email
   // is strong evidence but not clearly a substitute, so we record the paper too.
   if (body.notices_delivered === true) await markNoticesDelivered(saved.id);
+
+  await linkJobForContract({
+    contractId: saved.id,
+    stage: "signed",
+    address: String(body.property_address || ""),
+    owner: String(body.owner_names || ""),
+    phone: String(body.owner_phone || ""),
+    email: String(body.owner_email || ""),
+    rep: String(body.rep || u.name || ""),
+    claim: body.claim_based !== false,
+    carrier: String(body.carrier || ""),
+    claimNumber: String(body.claim_number || ""),
+    deductible: String(body.deductible || ""),
+    value: String(body.total_price || ""),
+  });
 
   return NextResponse.json({
     ok: true,
