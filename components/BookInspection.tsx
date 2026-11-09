@@ -125,7 +125,7 @@ export function BookInspection({
       {/* Day strip */}
       <div>
         <span className={lbl}>Pick a day</span>
-        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+        <div className="mt-2 flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1">
           {days.map((d, i) => (
             <button
               key={d.date}

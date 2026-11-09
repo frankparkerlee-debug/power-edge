@@ -19,8 +19,8 @@ export default async function SchedulePage() {
     <section className="relative overflow-hidden bg-ink py-14 sm:py-20">
       <div className="absolute inset-0 grid-texture opacity-40" />
       <div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-bolt/15 blur-[120px]" />
-      <Container className="relative grid gap-12 lg:grid-cols-[0.95fr_1fr] lg:items-start">
-        <div className="lg:pt-4">
+      <Container className="relative grid min-w-0 gap-12 lg:grid-cols-[0.95fr_1fr] lg:items-start">
+        <div className="min-w-0 lg:pt-4">
           <Kicker className="mb-5">Free inspection · Dallas–Fort Worth</Kicker>
           <h1 className="font-display text-4xl leading-[0.98] text-fg-inv sm:text-5xl">
             Pick your window.{" "}
@@ -55,7 +55,7 @@ export default async function SchedulePage() {
           </p>
         </div>
 
-        <div className="rounded-card border border-line bg-ink-2 p-6 sm:p-8">
+        <div className="min-w-0 rounded-card border border-line bg-ink-2 p-6 sm:p-8">
           <h2 className="font-display text-xl font-bold text-fg-inv">
             Book your free roof inspection
           </h2>
