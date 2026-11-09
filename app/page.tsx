@@ -15,7 +15,7 @@ import { cities } from "@/lib/cities";
 export const metadata: Metadata = {
   alternates: { canonical: site.url },
   description:
-    "Storm & hail roof restoration across Dallas–Fort Worth. Free inspection with photo documentation, and an honest verdict in writing whether or not you have a claim, from an insured, accountable crew.",
+    "Storm and hail roof restoration across Dallas–Fort Worth. Free documented inspection and an honest verdict in writing, claim or no claim.",
 };
 
 export default function Home() {

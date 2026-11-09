@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/commercial` },
   title: "Commercial Roofing in DFW",
   description:
-    "One insured, accountable partner for commercial roofing across Dallas–Fort Worth. Property managers and business owners get scheduled, documented, warrantied work with a single point of contact.",
+    "Commercial roofing across Dallas–Fort Worth for property managers: scheduled, documented, warrantied work from one insured, accountable team.",
 };
 
 export default function CommercialPage() {

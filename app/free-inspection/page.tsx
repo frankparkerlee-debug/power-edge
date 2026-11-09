@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/free-inspection` },
   title: "Free Roof Inspection in DFW — Documented for Your Claim",
   description:
-    "Book a free, no-obligation roof inspection across Dallas–Fort Worth. We photograph and document storm damage for your insurance claim, and tell you straight if your roof is fine. Insured & accountable.",
+    "Book a free roof inspection anywhere in Dallas–Fort Worth. Photos, measurements, and an honest verdict in writing, even if your roof is fine.",
 };
 
 const faqs = [

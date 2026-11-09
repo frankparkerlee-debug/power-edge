@@ -7,7 +7,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Book Your Free Roof Inspection: Pick Your Time",
   description:
-    "Pick a two-hour arrival window for a free, documented roof inspection anywhere in Dallas–Fort Worth. Photos, measurements, and an honest verdict in writing, claim or no claim.",
+    "Pick a two-hour arrival window for a free, documented roof inspection anywhere in Dallas–Fort Worth. No phone tag.",
   alternates: { canonical: `${site.url}/schedule` },
 };
 

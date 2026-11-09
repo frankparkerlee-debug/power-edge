@@ -6,9 +6,9 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/careers` },
-  title: "Roofing Sales Careers in DFW — Real Pay, Real Leads | PowerEdge",
+  title: "Roofing Sales Jobs in DFW: Real Leads, Fast Pay | PowerEdge",
   description:
-    "Sell roofing and home-repair jobs from real inbound leads — free-inspection requests, referrals, and repeat customers. Paid at the first check, a floor on every approved roof, and the tools to close on the spot. Now hiring reps + a sales manager across Dallas–Fort Worth.",
+    "Sell storm-restoration roofs in DFW. Paid weekly at the first check, a floor on every approved roof, and storm-mapped leads instead of guesswork.",
 };
 
 const faqs = [

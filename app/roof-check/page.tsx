@@ -5,9 +5,9 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/roof-check` },
-  title: "Free Roof Coverage Check — Is Your Texas Roof Still Fully Covered?",
+  title: "Free Roof Coverage Check: Is Your Roof Still Covered?",
   description:
-    "Take the free 60-second check: find out if your roof is still on full replacement-cost coverage or has been downgraded to actual-cash-value by your insurer. Free inspection across DFW.",
+    "Free 60-second check: find out whether your Texas roof is still on full replacement-cost coverage, before a storm makes it matter.",
 };
 
 export default function RoofCheckPage() {

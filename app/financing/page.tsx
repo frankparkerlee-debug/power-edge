@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/financing` },
   title: "Roof & Deductible Financing in DFW — From $250 Down",
   description:
-    "Can't cover your roof deductible or out-of-pocket? Finance it — start for as little as $250 down, low monthly payments, and we schedule the work now. Serving Dallas–Fort Worth. You pay your full deductible over time; we never waive it.",
+    "Can't cover your roof deductible up front? Finance it from $250 down and get the work scheduled now, across Dallas–Fort Worth.",
 };
 
 const faqs = [
