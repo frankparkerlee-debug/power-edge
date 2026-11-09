@@ -3,6 +3,7 @@ import { recentEmailFailures } from "@/lib/sendMail";
 import { listStormEvents } from "@/lib/storm";
 import { listAppointments } from "@/lib/scheduling";
 import { listLeads } from "@/lib/db";
+import { site } from "@/lib/site";
 
 /**
  * Operations health. NOT indexed. Gated by ?key=<ADMIN_TOKEN>.
@@ -107,6 +108,12 @@ export default async function HealthPage({
 
   const mailState = failuresToday.length === 0 ? "ok" : "bad";
 
+  // Where team notifications actually land. Worth showing: the code falls back
+  // to site.email, but LEAD_TO_EMAIL silently overrides it, so changing
+  // site.email alone may change nothing.
+  const notifyTo = process.env.LEAD_TO_EMAIL || site.email;
+  const overridden = !!process.env.LEAD_TO_EMAIL;
+
   return (
     <div className={wrap}>
       <div className="mx-auto max-w-4xl">
@@ -117,6 +124,16 @@ export default async function HealthPage({
 
         <table className="mt-7 w-full border-collapse text-sm">
           <tbody>
+            <Row
+              name="Lead notifications go to"
+              value={notifyTo}
+              state={notifyTo.includes("@") ? "ok" : "bad"}
+              note={
+                overridden
+                  ? "Set by LEAD_TO_EMAIL, which overrides site.email in the code."
+                  : "From site.email. Set LEAD_TO_EMAIL in Render to send somewhere else."
+              }
+            />
             <Row
               name="Email delivery"
               value={
