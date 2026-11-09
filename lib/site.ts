@@ -29,12 +29,19 @@ export const site = {
   liabilityCoverage: "$2,000,000",
   googleRating: "4.7",
   googleReviewCount: "48",
-  // Google Business Profile (knowledge graph id /g/11w7qkc808). Confirmed by
-  // Parker 2026-11-09. This is the PROFILE link, which is what sameAs needs.
-  googleReviewsUrl: "https://share.google/KrfxkKBSh3Zd0XMSt",
-  // TODO(parker): paste your Google "write a review" link here (GBP dashboard →
-  // "Ask for reviews" → copy link; looks like https://g.page/r/XXXXXXXX/review).
-  // Powers the /review short link your team texts to customers.
+  // Google Business Profile. Canonical CID link, verified 2026-11-09 to
+  // resolve to "PowerEdge Texas" (kgmid /g/11w7qkc808, feature id
+  // 0x8a98395c2829767d:0x6d4b40f54a85be77). Preferred over the share.google
+  // link because that one opens a Google SEARCH page; this opens the Maps
+  // profile, where "Write a review" is a visible one-tap button.
+  googleReviewsUrl: "https://maps.google.com/?cid=7875459795648888439",
+  // The true one-tap review link. It can only come from the GBP dashboard
+  // (Home → "Ask for reviews" → copy link) and is shaped
+  // https://g.page/r/XXXXXXXX/review. It cannot be derived from the CID or
+  // the knowledge-graph id: Google's writereview endpoint rejects both
+  // (verified, HTTP 400), and inventing a place id would be a fabricated
+  // link. Until it is pasted here, /review falls back to googleReviewsUrl,
+  // which lands on the Maps profile and costs the customer one extra tap.
   googleWriteReviewUrl: "#",
   // jobberBookingUrl removed 2026-11-08: nothing read it, and /schedule now
   // books inspections natively rather than handing people to Jobber.

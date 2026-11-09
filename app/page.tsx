@@ -15,7 +15,7 @@ import { cities } from "@/lib/cities";
 export const metadata: Metadata = {
   alternates: { canonical: site.url },
   description:
-    "Storm and hail roof restoration across Dallas–Fort Worth. Free documented inspection and an honest verdict in writing, claim or no claim.",
+    "Storm and hail roof restoration across North Texas. Free documented inspection, 0% in-house deductible financing, and an honest verdict in writing.",
 };
 
 export default function Home() {
@@ -27,6 +27,7 @@ export default function Home() {
       <Wedge />
       <DfwHailActivity />
       <ClaimCheckBand />
+      <FinancingBand />
       <ServicesGrid />
       <Team />
       <Gallery />
@@ -34,6 +35,70 @@ export default function Home() {
       <ServiceAreas />
       <FinalCTA />
     </>
+  );
+}
+
+/* ------------------------------------------------------------ FINANCING */
+/* Restored to the homepage 2026-11-09 (Parker). Decision #12 had stripped the
+   financing offer and its calculator from here. The offer is back, the
+   calculator is not: a band that states the terms and links out keeps the page
+   light, which is what made the original version heavy.
+
+   What changed since #12 is the offer itself. It is in house and 0% on both
+   plans, so this is now a claim most of this market cannot print: everyone
+   else refers you to a lender who charges you for the time. */
+function FinancingBand() {
+  return (
+    <section className="border-y border-line bg-ink-2 py-16 sm:py-20">
+      <Container className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div>
+          <Kicker className="mb-5">Deductible financing · 0% · In house</Kicker>
+          <h2 className="font-display text-3xl font-bold leading-tight text-fg-inv sm:text-4xl">
+            The deductible shouldn&apos;t be the reason you wait.
+          </h2>
+          <p className="mt-4 max-w-xl text-fg-inv-dim">
+            Texas wind and hail deductibles usually run 1 to 2% of your home&apos;s
+            insured value, so a storm can mean thousands before anyone starts.
+            We finance it ourselves, at zero interest, and the work gets
+            scheduled now.
+          </p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Button href="/financing">See the plans</Button>
+            <Link
+              href="/schedule"
+              className="rounded-md border border-line px-6 py-3.5 font-display font-bold text-fg-inv transition-colors hover:border-bolt"
+            >
+              Book an inspection
+            </Link>
+          </div>
+        </div>
+
+        <div className="rounded-card border border-line bg-ink p-7">
+          <ul className="space-y-4">
+            {[
+              { h: "0% on both plans", p: "Pay in 4 months or spread it over 12. No finance charge either way, so what you finance is what you pay." },
+              { h: "We are the lender", p: "Not a referral to a finance company. No application to a bank, no rate set by your credit score." },
+              { h: "You still pay it in full", p: "Every dollar of your deductible, just spread out. A contractor covering it is a crime in Texas, and we follow that." },
+            ].map((i) => (
+              <li key={i.h} className="flex gap-3">
+                <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bolt">
+                  <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-ink">
+                    <path d="M9 16.2l-3.5-3.5L4 14.2 9 19.2l11-11-1.4-1.4z" />
+                  </svg>
+                </span>
+                <span>
+                  <strong className="font-display text-fg-inv">{i.h}</strong>
+                  <span className="mt-0.5 block text-sm leading-relaxed text-fg-inv-dim">{i.p}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-6 border-t border-line pt-4 text-xs leading-relaxed text-fg-inv-dim">
+            Subject to approval. Final terms in writing before you sign.
+          </p>
+        </div>
+      </Container>
+    </section>
   );
 }
 

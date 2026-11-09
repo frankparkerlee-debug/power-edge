@@ -47,10 +47,12 @@ export function Schema() {
     // Confirmed profile 2026-11-09 (knowledge graph id /g/11w7qkc808).
     // TODO(parker): add Facebook / BBB / Yelp URLs here as they go live.
     sameAs: [site.googleReviewsUrl as string],
+    // Actual business location from the verified Google profile, not a
+    // downtown-Dallas centroid. Local ranking keys off proximity.
     geo: {
       "@type": "GeoCoordinates",
-      latitude: 32.7767,
-      longitude: -96.797,
+      latitude: 32.8408977,
+      longitude: -96.7722327,
     },
     openingHoursSpecification: [
       {
