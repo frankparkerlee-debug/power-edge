@@ -38,19 +38,70 @@ export type ContractInput = {
   ip?: string;
 };
 
+/** Federal holidays, with the Sat->Fri / Sun->Mon observed shift. */
+function observedHolidays(year: number): Set<string> {
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+  const nth = (month: number, weekday: number, n: number) => {
+    const d = new Date(Date.UTC(year, month, 1));
+    let count = 0;
+    while (true) {
+      if (d.getUTCDay() === weekday && ++count === n) return d;
+      d.setUTCDate(d.getUTCDate() + 1);
+    }
+  };
+  const last = (month: number, weekday: number) => {
+    const d = new Date(Date.UTC(year, month + 1, 0));
+    while (d.getUTCDay() !== weekday) d.setUTCDate(d.getUTCDate() - 1);
+    return d;
+  };
+  /** A fixed-date holiday falling at a weekend is observed on the nearest weekday. */
+  const shift = (m: number, day: number) => {
+    const d = new Date(Date.UTC(year, m, day));
+    if (d.getUTCDay() === 6) d.setUTCDate(d.getUTCDate() - 1);
+    else if (d.getUTCDay() === 0) d.setUTCDate(d.getUTCDate() + 1);
+    return d;
+  };
+
+  return new Set(
+    [
+      shift(0, 1), // New Year's Day
+      nth(0, 1, 3), // MLK Day
+      nth(1, 1, 3), // Presidents Day
+      last(4, 1), // Memorial Day
+      shift(5, 19), // Juneteenth
+      shift(6, 4), // Independence Day
+      nth(8, 1, 1), // Labor Day
+      nth(9, 1, 2), // Columbus Day
+      shift(10, 11), // Veterans Day
+      nth(10, 4, 4), // Thanksgiving
+      shift(11, 25), // Christmas
+    ].map(iso),
+  );
+}
+
 /**
  * Three BUSINESS days, which is what the cancellation notice has to state.
- * Counting calendar days would understate the homeowner's window and put the
- * wrong date on a statutory form, so weekends are skipped. Public holidays are
- * not, which errs toward giving the homeowner longer rather than shorter.
+ *
+ * Weekends and legal holidays are both skipped. Counting a holiday as a
+ * business day shortens the homeowner's window and puts a wrong, short date on
+ * a statutory form; skipping one only ever lengthens it. Erring long is safe,
+ * erring short is what voids a sale.
  */
 export function cancelDeadline(from = new Date()): Date {
   const d = new Date(from);
   let added = 0;
+  let holidays = observedHolidays(d.getUTCFullYear());
+  let year = d.getUTCFullYear();
   while (added < 3) {
     d.setDate(d.getDate() + 1);
+    if (d.getUTCFullYear() !== year) {
+      year = d.getUTCFullYear();
+      holidays = observedHolidays(year);
+    }
     const day = d.getDay();
-    if (day !== 0 && day !== 6) added++;
+    if (day === 0 || day === 6) continue;
+    if (holidays.has(d.toISOString().slice(0, 10))) continue;
+    added++;
   }
   return d;
 }
