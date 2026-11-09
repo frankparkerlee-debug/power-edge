@@ -666,3 +666,69 @@ export async function sendAppointmentReminder(
     "appointment-reminder",
   );
 }
+
+/**
+ * The signed agreement, to the homeowner.
+ *
+ * Carries the statutory cancellation notice with the real deadline date and
+ * the address to send it to, because Chapter 601 requires the buyer to be
+ * given that in writing. Emailing it also means they keep it, which a page
+ * handed over at a kitchen table frequently does not achieve.
+ */
+export async function sendSignedAgreement(
+  resendKey: string,
+  c: {
+    id: string;
+    ownerNames: string;
+    address: string;
+    email: string;
+    scope: Array<{ description: string; price: string }>;
+    total?: string;
+    claimBased: boolean;
+    signedOn: string;
+    cancelBy: string;
+  },
+) {
+  const first = (c.ownerNames || "there").split(" ")[0];
+  const rows = c.scope
+    .map(
+      (s) =>
+        `<tr><td style="padding:6px 10px 6px 0;border-bottom:1px solid ${LINE};font:13px ${FONT};">${s.description}</td>` +
+        `<td style="padding:6px 0;border-bottom:1px solid ${LINE};font:600 13px ${FONT};text-align:right;">${s.price || ""}</td></tr>`,
+    )
+    .join("");
+
+  return sendEmail(
+    resendKey,
+    c.email,
+    `Your signed agreement with PowerEdge`,
+    shell({
+      preheader: `A copy for your records, plus your right to cancel.`,
+      body:
+        h1(`Thanks, ${first}.`) +
+        p(
+          `Here is your signed agreement for <strong>${c.address}</strong>, dated ${c.signedOn}.`,
+        ) +
+        `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 16px;">${rows}</table>` +
+        (c.total ? p(`<strong>Total: ${c.total}</strong>`) : "") +
+        (c.claimBased
+          ? p(
+              `This work is being done through your insurance claim. The carrier sets the scope and the price; you pay your deductible. We never waive it, because that is a crime in Texas.`,
+            )
+          : "") +
+        `<div style="border:2px solid ${INK};padding:14px;margin:18px 0;font:700 13px ${FONT};line-height:1.45;color:${TEXT};">
+           YOU MAY CANCEL THIS TRANSACTION, WITHOUT ANY PENALTY OR OBLIGATION, WITHIN THREE
+           BUSINESS DAYS FROM THE DATE ABOVE.<br><br>
+           TO CANCEL, MAIL OR DELIVER A SIGNED AND DATED NOTICE, OR ANY OTHER WRITTEN NOTICE,
+           TO POWER EDGE, LLC, OR REPLY TO THIS EMAIL, NOT LATER THAN MIDNIGHT OF
+           <span style="text-decoration:underline">${c.cancelBy}</span>.
+         </div>` +
+        p(
+          `Replying to this email with the word CANCEL before that date cancels it, and we will confirm in writing. No reason needed and nothing owed.`,
+        ) +
+        p(`Questions about any of it, call or text <strong>${site.phone}</strong>.`) +
+        verifyChip(),
+    }),
+    "signed-agreement",
+  );
+}

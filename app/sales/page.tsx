@@ -47,8 +47,8 @@ const DOCS: Doc[] = [
     what: "The one-pager you hand over. Explains the claim process, the deductible law, and the questions to ask any roofer. Leave it even when you don't get the job.",
   },
   {
-    file: "08-agreement-draft.pdf", name: "Inspection & repair agreement", who: "Closer",
-    what: "The REPAIR contract, draft pending attorney review. Different document from the live inspection agreement: this one has scope, price and the statutory notices. Do not use in the field until it is cleared.",
+    file: "08-repair-agreement.pdf", name: "Residential repair agreement", who: "Closer",
+    what: "The paper contract, two pages, with the deductible notice and both detachable cancellation notices. Prefer the digital version below; use this when there is no signal.",
   },
 ];
 
@@ -56,6 +56,7 @@ const TOOLS = [
   { href: "/admin/storms", name: "Storm tool", what: "The knock map. Addresses, owners, hail size, tap to call, convert to lead." },
   { href: "/admin/appointments", name: "Inspection board", what: "Everything booked from the website." },
   { href: "/admin/territories", name: "Territories", what: "Who owns which city. One city, one rep." },
+  { href: "/admin/contract", name: "Sign an agreement", what: "The digital contract. Fill it in with the homeowner, they sign on your screen, their copy and cancellation rights are emailed before you leave." },
   { href: "/admin/health", name: "Health", what: "Is email actually delivering, is the storm feed alive, what is booked. Check it if leads go quiet." },
   { href: "/schedule", name: "Book an inspection", what: "Send this link to a homeowner. They pick their own window." },
   { href: "/roof-claim-check", name: "Claim check", what: "60-second address check. Good door opener." },
