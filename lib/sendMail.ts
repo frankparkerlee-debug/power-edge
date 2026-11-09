@@ -63,6 +63,49 @@ async function recordFailure(
 
 export type SendResult = { ok: boolean; status?: number; id?: string };
 
+/**
+ * Record every send with its resolved destination.
+ *
+ * Failures alone were not enough. When mail silently went to the wrong inbox
+ * there was no record of WHERE it went, only that it had not errored, so
+ * "did that lead notification reach us" was unanswerable after the fact.
+ */
+async function logSend(
+  kind: string,
+  to: string,
+  subject: string,
+  ok: boolean,
+  status: number | null,
+  providerId?: string,
+  error?: string,
+) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return;
+  try {
+    await fetch(`${url}/rest/v1/email_log`, {
+      method: "POST",
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({
+        kind,
+        to_addr: to,
+        subject: subject.slice(0, 300),
+        ok,
+        status,
+        provider_id: providerId ?? null,
+        error: error ? error.slice(0, 1000) : null,
+      }),
+    });
+  } catch {
+    /* logging must never break a send */
+  }
+}
+
 export async function sendMail(a: SendArgs): Promise<SendResult> {
   const to = Array.isArray(a.to) ? a.to : [a.to];
   const toLabel = to.join(",");
@@ -87,13 +130,16 @@ export async function sendMail(a: SendArgs): Promise<SendResult> {
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       await recordFailure(a.kind, toLabel, a.subject, res.status, body);
+      await logSend(a.kind, toLabel, a.subject, false, res.status, undefined, body);
       return { ok: false, status: res.status };
     }
 
     const json = (await res.json().catch(() => ({}))) as { id?: string };
+    await logSend(a.kind, toLabel, a.subject, true, res.status, json?.id);
     return { ok: true, status: res.status, id: json?.id };
   } catch (err) {
     await recordFailure(a.kind, toLabel, a.subject, null, String(err));
+    await logSend(a.kind, toLabel, a.subject, false, null, undefined, String(err));
     return { ok: false };
   }
 }
