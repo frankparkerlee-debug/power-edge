@@ -1,7 +1,7 @@
 import { site } from "@/lib/site";
 
 /**
- * Floating "Text us" button — fixed bottom-right, always within thumb reach on
+ * Floating "Text us" button, fixed bottom-right, always within thumb reach on
  * mobile (where most traffic lands). Opens the device messaging app to the
  * CallRail text line. Pure link, no JS.
  */

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cancelAppointment } from "@/lib/scheduling";
 import { burst, clientIp, tooMany } from "@/lib/rateLimit";
 
-/** DELETE /api/appointments/:id — homeowner cancels from their confirmation link. */
+/** DELETE /api/appointments/:id, homeowner cancels from their confirmation link. */
 export const dynamic = "force-dynamic";
 
 export async function DELETE(

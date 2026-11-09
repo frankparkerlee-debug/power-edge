@@ -21,7 +21,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.legalName} | DFW Roofing Company — Storm & Hail Restoration`,
+    default: `${site.legalName} | DFW Roofing Company, Storm & Hail Restoration`,
     template: `%s | ${site.name}`,
   },
   description:
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: `${site.legalName} | Storm Roof Restoration, Verified`,
     description:
-      "The insurance-first DFW roof team you can actually verify — free inspections, an honest verdict in writing, insured and accountable.",
+      "The insurance-first DFW roof team you can actually verify, free inspections, an honest verdict in writing, insured and accountable.",
     url: site.url,
     siteName: site.name,
     type: "website",

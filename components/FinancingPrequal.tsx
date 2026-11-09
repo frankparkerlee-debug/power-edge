@@ -8,7 +8,7 @@ import { track } from "@/lib/analytics";
 /**
  * Financing pre-qualification.
  *
- * Primary path: connect the bank via Plaid (sandbox) — we verify identity +
+ * Primary path: connect the bank via Plaid (sandbox): we verify identity +
  * balances instantly and return a structure-based decision (no credit pull).
  * Fallback path: submit without connecting -> captured as a lead for manual
  * follow-up. Consent-gated. No SSN/DOB collected here.
@@ -97,7 +97,7 @@ export function FinancingPrequal() {
             setPlaid(res.decision === "approved" ? "approved" : "review");
           } catch {
             setPlaid("error");
-            setMsg("Something went wrong — please call us instead.");
+            setMsg("Something went wrong, please call us instead.");
           }
         },
         onExit: () => setPlaid((s) => (s === "connecting" ? "idle" : s)),
@@ -107,7 +107,7 @@ export function FinancingPrequal() {
     } catch {
       setPlaid("error");
       setMsg(
-        "Instant bank connect isn't available right now — submit below and we'll reach out.",
+        "Instant bank connect isn't available right now, submit below and we'll reach out.",
       );
     }
   }
@@ -180,7 +180,7 @@ export function FinancingPrequal() {
           </svg>
         </div>
         <h3 className="font-display text-2xl font-bold text-fg-inv">
-          You&apos;re in — no credit impact.
+          You&apos;re in, no credit impact.
         </h3>
         <p className="mt-2 text-fg-inv-dim">
           We&apos;ll reach out to pre-qualify you and walk through your options.
@@ -192,7 +192,7 @@ export function FinancingPrequal() {
           Next step: book your free inspection →
         </a>
         <p className="mt-2 text-xs text-fg-inv-dim">
-          Financing covers the out-of-pocket — the inspection is what gets your
+          Financing covers the out-of-pocket, the inspection is what gets your
           roof documented and scheduled.
         </p>
       </div>
@@ -207,7 +207,7 @@ export function FinancingPrequal() {
         Pre-qualify in 60 seconds
       </h2>
       <p className="mt-1.5 text-sm text-fg-inv-dim">
-        Connect your bank securely and get an instant decision —{" "}
+        Connect your bank securely and get an instant decision, {" "}
         <strong className="text-fg-inv">no credit check, no SSN, no impact
         to your score.</strong>
       </p>
@@ -275,7 +275,7 @@ export function FinancingPrequal() {
               ? "Connecting your bank…"
               : plaid === "deciding"
                 ? "Checking…"
-                : "Connect bank — instant decision"}
+                : "Connect bank, instant decision"}
         </button>
 
         <button
@@ -288,7 +288,7 @@ export function FinancingPrequal() {
             : "Prefer a call? Submit without connecting"}
         </button>
         {sub === "error" && (
-          <p className="text-sm text-ember">Something went wrong — please call us.</p>
+          <p className="text-sm text-ember">Something went wrong, please call us.</p>
         )}
         <SmsConsent />
       </form>

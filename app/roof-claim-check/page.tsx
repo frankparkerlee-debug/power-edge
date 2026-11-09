@@ -10,7 +10,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/roof-claim-check` },
-  title: "Do You Have a Roof Insurance Claim? Free Check — DFW",
+  title: "Do You Have a Roof Insurance Claim? Free Check: DFW",
   description:
     "Enter your address and see in seconds whether your roof likely qualifies for a hail claim. Free, no obligation, from the NWS storm record.",
 };
@@ -18,11 +18,11 @@ export const metadata: Metadata = {
 const faqs = [
   {
     q: "Is the check really free?",
-    a: "Completely. We check public National Weather Service hail reports against your address and give you a straight read — no cost, no obligation, no phone call required to see it.",
+    a: "Completely. We check public National Weather Service hail reports against your address and give you a straight read, no cost, no obligation, no phone call required to see it.",
   },
   {
     q: "Does reported hail mean I automatically have a claim?",
-    a: "No — it means it's worth a closer look. Whether you have a claim depends on the actual damage and your policy. A free inspection documents it and confirms; we never pretend to be your adjuster.",
+    a: "No, it means it's worth a closer look. Whether you have a claim depends on the actual damage and your policy. A free inspection documents it and confirms; we never pretend to be your adjuster.",
   },
   {
     q: "What does the inspection cost?",
@@ -30,7 +30,7 @@ const faqs = [
   },
   {
     q: "What if I can't cover my deductible?",
-    a: "On a covered claim you typically pay only your deductible — and if that's tough up front, we can finance it from as little as $250 down. You still pay it in full over time; waiving deductibles is illegal in Texas and we never do it.",
+    a: "On a covered claim you typically pay only your deductible, and if that's tough up front, we can finance it from as little as $250 down. You still pay it in full over time; waiving deductibles is illegal in Texas and we never do it.",
   },
 ];
 
@@ -41,7 +41,7 @@ const steps = [
   },
   {
     h: "Book your free inspection",
-    p: "One of our pros documents your roof — photos, measurements, an honest read.",
+    p: "One of our pros documents your roof, photos, measurements, an honest read.",
   },
   {
     h: "We handle the rest",
@@ -152,11 +152,11 @@ export default function RoofClaimCheckPage() {
       <section className="bg-ink py-16 sm:py-20">
         <Container className="text-center">
           <h2 className="font-display text-3xl font-bold text-fg-inv sm:text-4xl">
-            Start your claim now — we&apos;ll do the heavy lifting.
+            Start your claim now. We&apos;ll do the heavy lifting.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-fg-inv-dim">
             Add a few details and we arrive ready to inspect, document, and get
-            you moving — not do paperwork on your doorstep. Takes about two
+            you moving, not do paperwork on your doorstep. Takes about two
             minutes; your deductible can be financed from $250 down.
           </p>
           <a
@@ -166,7 +166,7 @@ export default function RoofClaimCheckPage() {
             Start my claim →
           </a>
           <p className="mt-3 text-xs text-fg-inv-dim">
-            Insured contractor, not a public adjuster — we document &amp;
+            Insured contractor, not a public adjuster. We document &amp;
             coordinate; you file with your insurer.
           </p>
         </Container>
@@ -174,7 +174,7 @@ export default function RoofClaimCheckPage() {
 
       <CtaBand
         heading="Don't wait for the leak to prove the damage."
-        sub="Free inspection, documented for your claim, deductible financing from $250 down — and we move before your filing window closes. On a covered claim you pay just your deductible."
+        sub="Free inspection, documented for your claim, deductible financing from $250 down, and we move before your filing window closes. On a covered claim you pay just your deductible."
       />
     </>
   );

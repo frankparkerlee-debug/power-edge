@@ -1,13 +1,13 @@
-// Parcel intersect — turns storm reports into named homeowners at addresses.
+// Parcel intersect, turns storm reports into named homeowners at addresses.
 //
 // County connectors (public appraisal-district GIS services, one per county):
-//   • Dallas County — DCAD ParcelPublishing layer (verified): owner, site
+//   • Dallas County, DCAD ParcelPublishing layer (verified): owner, site
 //     address, MAILING address (absentee/investor detection), use type, year
 //     built, assessed value. Web-Mercator envelope queries, max 4000/query.
-//   • Tarrant County — TAD's own FeatureServer (behind their Experience app)
+//   • Tarrant County, TAD's own FeatureServer (behind their Experience app)
 //     for geometry + owner/situs/year/value, ENRICHED from the TAD roll loaded
 //     into Supabase `tarrant_roll` (mailing address → absentee, city, zip).
-//   • Collin/Denton — no public spatial layer found yet.
+//   • Collin/Denton, no public spatial layer found yet.
 //
 // Flow (generateStormTargets): hail ≥1″ reports for a day → envelope around
 // each (sized by hail) → parcel query → dedupe → score →
@@ -69,7 +69,7 @@ export async function queryDallasParcels(
     where: "SITEADDRESS IS NOT NULL",
     outFields:
       "OWNERNME1,SITEADDRESS,PSTLADDRESS,PSTLCITY,PSTLZIP5,USEDSCRP,RESYRBLT,CNTASSDVAL,CVTTXDSCRP",
-    // DCAD's older MapServer ignores returnCentroid — pull simplified geometry
+    // DCAD's older MapServer ignores returnCentroid, pull simplified geometry
     // (reprojected to 4326) and take the bbox center ourselves.
     returnGeometry: "true",
     outSR: "4326",
@@ -113,7 +113,7 @@ export async function queryDallasParcels(
     .filter((p) => p.owner_name && p.address);
 }
 
-/** Tarrant County — TAD's FeatureServer accepts 4326 envelopes directly.
+/** Tarrant County, TAD's FeatureServer accepts 4326 envelopes directly.
  *  Gives owner + situs + year/value; mailing/city/zip come from tarrant_roll. */
 export async function queryTarrantParcels(
   lat: number,
@@ -171,7 +171,7 @@ function dbHeaders() {
   };
 }
 
-/** Collin/Denton/Kaufman — TxGIO StratMap parcels loaded into our own DB with
+/** Collin/Denton/Kaufman, TxGIO StratMap parcels loaded into our own DB with
  *  centroids, so the "query" is a lat/lon box against Supabase. One call covers
  *  every DB-loaded county at once. */
 export async function queryDbParcels(lat: number, lon: number, halfMi: number): Promise<ParcelHit[]> {
@@ -248,7 +248,7 @@ async function enrichFromTarrantRoll(
         const r = byNorm.get(normAddr(h.address));
         if (!r) continue;
         h.mailing = `${r.mail_addr}, ${r.mail_citystate} ${r.mail_zip}`.toUpperCase().trim();
-        h.city = r.city || h.city; // jurisdiction-derived — correct for the property
+        h.city = r.city || h.city; // jurisdiction-derived, correct for the property
         // Property zip is only knowable when the owner lives there (mail == situs).
         if (normAddr(r.mail_addr) === normAddr(h.address)) h.zip = (r.mail_zip || "").slice(0, 5);
       }
@@ -282,14 +282,14 @@ export async function generateStormTargets(
     if (!res.ok) return { date: dateISO, events: 0, targets: 0, ok: false };
     const all = (await res.json()) as Array<{ lat: number; lon: number; magnitude: number }>;
 
-    // Drop reports within 1mi of an already-kept (larger) one — one query per cell.
+    // Drop reports within 1mi of an already-kept (larger) one, one query per cell.
     const kept: typeof all = [];
     for (const e of all) {
       if (!kept.some((k) => haversineMi(k.lat, k.lon, e.lat, e.lon) < 1)) kept.push(e);
       if (kept.length >= EVENTS_PER_RUN) break;
     }
 
-    // Parcel queries (throttled, sequential — be polite to the county servers).
+    // Parcel queries (throttled, sequential, be polite to the county servers).
     const byAddr = new Map<string, ParcelHit & { hail: number }>();
     for (const e of kept) {
       const reach = reachMi(e.magnitude);
@@ -331,7 +331,7 @@ export async function generateStormTargets(
         hail_size_in: p.hail,
         absentee,
         score: Math.round(score * 10) / 10,
-        // NOTE: no `status` here on purpose — new rows get the column default
+        // NOTE: no `status` here on purpose, new rows get the column default
         // ('new'), and merge-duplicates re-runs must never clobber rep statuses
         // (converted/knocked/dnc) or skip-traced phones.
       };
@@ -340,7 +340,7 @@ export async function generateStormTargets(
     // Upsert in batches on (storm_date, address). merge-duplicates so re-runs
     // refresh coords/scores. NOTE for the rep-view build: rep knock statuses
     // must live in a separate table (or be excluded here) so regen never
-    // clobbers them — today status is always 'new' so merge is safe.
+    // clobbers them, today status is always 'new' so merge is safe.
     for (let i = 0; i < rows.length; i += 500) {
       const ins = await fetch(
         `${url}/rest/v1/storm_targets?on_conflict=storm_date,address`,

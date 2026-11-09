@@ -3,7 +3,7 @@ import { site } from "@/lib/site";
 
 /**
  * A2P 10DLC / TCPA consent disclosure. The first sentence is the exact,
- * client-approved opt-in language and must stay verbatim — CallRail / carrier
+ * client-approved opt-in language and must stay verbatim, CallRail / carrier
  * vetting checks for it. Keep it in sync with /terms and /privacy.
  */
 export function SmsConsent({ light = true }: { light?: boolean }) {

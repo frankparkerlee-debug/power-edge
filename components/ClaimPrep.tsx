@@ -10,14 +10,14 @@ import { site } from "@/lib/site";
  * Staged "start your claim" wizard. Order per claim research (maximizes
  * completion): Stage 1 = easy hook (address/storm/what-you-see/contact),
  * Stage 2 = damage + BOOK the inspection (the conversion), Stage 3 = OPTIONAL
- * policy details (carrier/policy#/deductible) — kept last + optional because
+ * policy details (carrier/policy#/deductible), kept last + optional because
  * making people dig out the declarations page is the #1 abandon point.
  *
  * Progressive save: each step upserts one row (by id) so partial progress
  * persists and the drop-off nurture can reach people who don't finish.
  *
  * COMPLIANCE (TX Ins. Code Ch. 4102 / Stonewater): policy # optional, no SSN,
- * we "document & coordinate," never file/negotiate — see the disclaimer.
+ * we "document & coordinate," never file/negotiate, see the disclaimer.
  */
 
 const CAUSES = ["Hail", "Wind", "Not sure"];
@@ -26,7 +26,7 @@ const SIGNS = [
   "Leak or ceiling stain",
   "Dented gutters or downspouts",
   "Granules in the gutters",
-  "No visible damage — just concerned",
+  "No visible damage, just concerned",
 ];
 const AGES = ["0–9 yrs", "10–15 yrs", "16–20 yrs", "20+ / not sure"];
 const DEDUCTIBLES = ["$500", "$1,000", "$2,500", "$5,000", "1% of home value", "Not sure"];
@@ -113,7 +113,7 @@ export function ClaimPrep() {
           id,
           stage,
           completed,
-          company_website: hp, // honeypot — must stay empty
+          company_website: hp, // honeypot, must stay empty
           form_elapsed_ms: Date.now() - startedAt,
         }),
       });
@@ -223,7 +223,7 @@ export function ClaimPrep() {
     );
   }
 
-  // ---- STEP 3 — optional policy -------------------------------------------
+  // ---- STEP 3, optional policy -------------------------------------------
   if (step === "3") {
     return (
       <form
@@ -232,7 +232,7 @@ export function ClaimPrep() {
       >
         <Progress n={3} />
         <p className="text-sm text-fg-inv-dim">
-          All optional — it just speeds up the on-site claim. No policy number handy? Bring it to the visit.
+          All optional, it just speeds up the on-site claim. No policy number handy? Bring it to the visit.
         </p>
         <div>
           <label className={lbl}>Insurance carrier</label>
@@ -262,14 +262,14 @@ export function ClaimPrep() {
           {saving ? "Saving…" : "Save & finish →"}
         </button>
         <button type="button" onClick={() => setStep("done")} className="w-full text-center text-xs text-fg-inv-dim hover:text-fg-inv">
-          Skip — I&apos;ll bring them to the visit
+          Skip, I&apos;ll bring them to the visit
         </button>
         <Disclaimer />
       </form>
     );
   }
 
-  // ---- STEP 2 — damage + book ---------------------------------------------
+  // ---- STEP 2, damage + book ---------------------------------------------
   if (step === "2") {
     return (
       <form
@@ -302,7 +302,7 @@ export function ClaimPrep() {
           I have solar panels
         </label>
         <p className="rounded-md border border-line bg-ink px-4 py-3 text-xs leading-relaxed text-fg-inv-dim">
-          📸 Got photos of the damage? Text them to <strong className="text-fg-inv">{site.textNumber}</strong> — it speeds up your claim.
+          📸 Got photos of the damage? Text them to <strong className="text-fg-inv">{site.textNumber}</strong>, it speeds up your claim.
         </p>
         <button type="submit" disabled={saving} className="w-full rounded-md bg-bolt px-6 py-4 font-display text-base font-extrabold text-ink transition-colors hover:bg-bolt-hi disabled:opacity-60">
           {saving ? "Saving…" : "Book my free inspection →"}
@@ -312,7 +312,7 @@ export function ClaimPrep() {
     );
   }
 
-  // ---- STEP 1 — the hook --------------------------------------------------
+  // ---- STEP 1, the hook --------------------------------------------------
   return (
     <form
       onSubmit={async (e) => { e.preventDefault(); await save(1, false); track("claim_step", { step: "1" }); setStep("2"); }}
@@ -324,7 +324,7 @@ export function ClaimPrep() {
         <AddressAutocomplete value={d.address} onChange={(v) => set("address", v)} onSelect={(v) => set("address", v)} placeholder="Street address" className={`mt-1 ${inputBase}`} />
       </div>
       <div>
-        <label className={lbl}>What caused it? <span className="font-normal text-fg-inv-dim">(pick any — wind and hail can both hit)</span></label>
+        <label className={lbl}>What caused it? <span className="font-normal text-fg-inv-dim">(pick any, wind and hail can both hit)</span></label>
         <div className="mt-1 flex gap-2">
           {CAUSES.map((x) => (
             <button type="button" key={x} onClick={() => toggleCause(x)} className={`flex-1 ${chip(d.causes.includes(x))}`}>{x}</button>
@@ -332,10 +332,10 @@ export function ClaimPrep() {
         </div>
       </div>
       <div>
-        <label className={lbl}>When did it hit? <span className="font-normal text-fg-inv-dim">(rough date is fine — or leave blank)</span></label>
+        <label className={lbl}>When did it hit? <span className="font-normal text-fg-inv-dim">(rough date is fine, or leave blank)</span></label>
         <input type="date" value={d.date_of_loss} onChange={(e) => set("date_of_loss", e.target.value)} className={`mt-1 ${inputBase}`} />
         <p className="mt-1 text-xs text-fg-inv-dim">
-          Not sure which storm? No problem — we&apos;ll pull the storm history for your address.
+          Not sure which storm? No problem, we&apos;ll pull the storm history for your address.
         </p>
       </div>
       <div>

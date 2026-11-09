@@ -9,7 +9,7 @@ import { Reviews } from "@/components/Reviews";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/financing` },
-  title: "Roof & Deductible Financing in DFW — From $250 Down",
+  title: "Roof & Deductible Financing in DFW: From $250 Down",
   description:
     "Can't cover your roof deductible up front? Finance it from $250 down and get the work scheduled now, across Dallas–Fort Worth.",
 };
@@ -17,11 +17,11 @@ export const metadata: Metadata = {
 const faqs = [
   {
     q: "Is financing my roof deductible legal in Texas?",
-    a: "Yes. Texas law (HB 2102) bans a contractor from waiving, paying, or absorbing your deductible — but financing it is legal, because you still pay your full deductible over time. A payment plan is fully compliant; a waiver is a crime.",
+    a: "Yes. Texas law (HB 2102) bans a contractor from waiving, paying, or absorbing your deductible, but financing it is legal, because you still pay your full deductible over time. A payment plan is fully compliant; a waiver is a crime.",
   },
   {
     q: "Why is my deductible so high?",
-    a: "Most Texas policies use a percentage wind/hail deductible — often 1–2% of your home's insured value. On a $400,000–$500,000 home that's $4,000–$10,000 out of pocket before work starts. That's exactly the gap financing is built to bridge.",
+    a: "Most Texas policies use a percentage wind/hail deductible, often 1–2% of your home's insured value. On a $400,000–$500,000 home that's $4,000–$10,000 out of pocket before work starts. That's exactly the gap financing is built to bridge.",
   },
   {
     q: "What payment plans do you offer?",
@@ -33,7 +33,7 @@ const faqs = [
   },
   {
     q: "Can you finance the whole roof, not just the deductible?",
-    a: "Yes. If you don't have a claim — or your claim came in low on an older, actual-cash-value roof — we can finance the full project so you're not stuck waiting.",
+    a: "Yes. If you don't have a claim, or your claim came in low on an older, actual-cash-value roof, we can finance the full project so you're not stuck waiting.",
   },
   {
     q: "I already have an estimate from another roofer. Can you still help?",
@@ -42,10 +42,10 @@ const faqs = [
 ];
 
 const steps = [
-  "Free inspection — we document the damage for your claim",
+  "Free inspection, we document the damage for your claim",
   "You choose: finance your deductible, or the full project",
   "Start for as little as $250 down, with low monthly payments (subject to approval)",
-  "We schedule the work now — you don't wait to save up",
+  "We schedule the work now so you don't wait to save up",
 ];
 
 export default function FinancingPage() {
@@ -54,8 +54,8 @@ export default function FinancingPage() {
       <PageHero
         kicker="Roof & deductible financing · Dallas–Fort Worth"
         title="Can't cover your deductible? We still start now."
-        intro="Your roof can't be replaced until the deductible's handled — but you don't have to pay it in one lump sum. Finance it from as little as $250 down and we get the work going right away, while you pay the rest in low monthly payments. You always pay your full deductible over time; we never waive it (that's illegal in Texas)."
-        badge="See my payment — no credit impact"
+        intro="Your roof can't be replaced until the deductible's handled, but you don't have to pay it in one lump sum. Finance it from as little as $250 down and we get the work going right away, while you pay the rest in low monthly payments. You always pay your full deductible over time; we never waive it (that's illegal in Texas)."
+        badge="See my payment, no credit impact"
         badgeHref="#prequal"
       />
 
@@ -65,7 +65,7 @@ export default function FinancingPage() {
           <SectionHeading
             kicker="See it, then pre-qualify"
             title="Turn a big deductible into a small monthly payment."
-            intro="Check what your deductible looks like spread over time — then pre-qualify with a soft check that won't touch your credit score."
+            intro="Check what your deductible looks like spread over time, then pre-qualify with a soft check that won't touch your credit score."
           />
           <div className="mt-10 grid gap-6 lg:grid-cols-2 lg:items-start">
             <FinancingCalculator ctaHref="#prequal" />
@@ -74,7 +74,7 @@ export default function FinancingPage() {
             </div>
           </div>
           <p className="mt-6 text-center text-sm text-fg-dim">
-            Illustrative estimate, not a financing offer — your actual payment
+            Illustrative estimate, not a financing offer. Your actual payment
             depends on the plan you choose and credit approval.
           </p>
         </Container>
@@ -92,14 +92,14 @@ export default function FinancingPage() {
             {[
               {
                 h: "Approved, but the deductible's too steep",
-                p: "Texas deductibles run 1–2% of home value — $5,000–$10,000 before work starts. Finance it and start now.",
+                p: "Texas deductibles run 1–2% of home value, $5,000–$10,000 before work starts. Finance it and start now.",
               },
               {
                 h: "Your insurance check came in low",
-                p: "Older roofs get put on actual-cash-value — a depreciated check that doesn't cover the job. We finance the gap.",
+                p: "Older roofs get put on actual-cash-value, a depreciated check that doesn't cover the job. We finance the gap.",
               },
               {
-                h: "No claim — you're paying out of pocket",
+                h: "No claim: you're paying out of pocket",
                 p: "No storm claim? We can finance the full project so a new roof isn't a lump-sum decision.",
               },
             ].map((c) => (
@@ -119,7 +119,7 @@ export default function FinancingPage() {
           <p className="mt-8 flex items-center justify-center gap-2 text-center text-sm text-fg-inv-dim">
             <span aria-hidden>⏳</span>
             Storm damage worsens with every rain and Texas claims have filing
-            deadlines — financing lets you get the roof done now, not months from
+            deadlines, financing lets you get the roof done now, not months from
             now.
           </p>
         </Container>
@@ -144,7 +144,7 @@ export default function FinancingPage() {
 
       <CtaBand
         heading="Stuck on the out-of-pocket? Let's fix that."
-        sub="Free inspection, financing from as little as $250 down, and we schedule the work now — you pay your full deductible over time, never waived."
+        sub="Free inspection, financing from as little as $250 down, and we schedule the work now. You pay your full deductible over time, never waived."
       />
     </>
   );

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { site } from "@/lib/site";
 
-// Link-in-bio page for Instagram/social — our own "Linktree," on-brand and
+// Link-in-bio page for Instagram/social, our own "Linktree," on-brand and
 // UTM-tracked. Noindexed: it's a social routing page, not a search surface.
 export const metadata: Metadata = {
-  title: "PowerEdge — Links",
+  title: "PowerEdge: Links",
   robots: { index: false, follow: false },
 };
 
@@ -12,7 +12,7 @@ const UTM = "utm_source=instagram&utm_medium=social&utm_campaign=bio";
 
 const links = [
   {
-    label: "Do I have a roof claim? — free 60-sec check",
+    label: "Do I have a roof claim?: free 60-sec check",
     sub: "Check your address against NWS storm records",
     href: `/roof-claim-check?${UTM}`,
     primary: true,
@@ -87,7 +87,7 @@ export default function LinksPage() {
         </div>
 
         <p className="mt-8 text-center text-xs leading-relaxed text-fg-inv-dim">
-          We never waive deductibles or pose as your adjuster — that&apos;s the
+          We never waive deductibles or pose as your adjuster, that&apos;s the
           law, and it protects you. If your roof is fine, we&apos;ll tell you in
           writing.
         </p>

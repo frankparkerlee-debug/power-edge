@@ -64,7 +64,7 @@ export function Footer() {
             </li>
             <li>
               <Link href="/careers" className="hover:text-bolt">
-                Sales careers — we&apos;re hiring
+                Sales careers, we&apos;re hiring
               </Link>
             </li>
           </ul>
@@ -126,7 +126,7 @@ export function Footer() {
             </Link>
           </p>
           <p>
-            Insured &amp; accountable. Roofing is unlicensed statewide in Texas —
+            Insured &amp; accountable. Roofing is unlicensed statewide in Texas, 
             we back every job with {site.liabilityCoverage} in liability coverage and
             a {site.workmanshipGuarantee}.
           </p>

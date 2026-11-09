@@ -5,7 +5,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/contact` },
-  title: "Contact — Free Inspection & Quotes",
+  title: "Contact: Free Inspection & Quotes",
   description:
     "Call PowerEdge at " +
     site.phone +
@@ -24,7 +24,7 @@ export default function ContactPage() {
           </h1>
           <p className="mt-6 max-w-md text-lg text-fg-inv-dim">
             Tell us what&apos;s going on and a real person from our team will
-            call you back — usually within the hour during business hours.
+            call you back, usually within the hour during business hours.
           </p>
 
           <div className="mt-10 space-y-6">
@@ -93,7 +93,7 @@ export default function ContactPage() {
             Request a free quote
           </h2>
           <p className="mt-1.5 text-sm text-fg-inv-dim">
-            Roofing, home repair, or storm claim — we&apos;ll point you to
+            Roofing, home repair, or storm claim: we&apos;ll point you to
             the right crew.
           </p>
           <div className="mt-6">

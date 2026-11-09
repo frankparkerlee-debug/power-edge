@@ -88,7 +88,7 @@ export function RoofEstimate() {
               ? "Storm/insurance roof (deductible)"
               : "Roof replacement estimate",
           solar: solar ? "yes" : "",
-          message: `[Roof Estimate]${solar ? " [HAS SOLAR]" : ""} ${est?.matched || address} — ~${est?.squaresLow}-${est?.squaresHigh} squares (${est?.source})${intent === "insurance" ? ` — INSURANCE claim, deductible: ${deductible || "unknown"}` : `, est ${range}`}`,
+          message: `[Roof Estimate]${solar ? " [HAS SOLAR]" : ""} ${est?.matched || address}, ~${est?.squaresLow}-${est?.squaresHigh} squares (${est?.source})${intent === "insurance" ? `, INSURANCE claim, deductible: ${deductible || "unknown"}` : `, est ${range}`}`,
           company_website: fd.company_website,
           ...leadContext({ tool: "roof-estimate" }),
         }),
@@ -115,7 +115,7 @@ export function RoofEstimate() {
           </h2>
           <p className="mt-2 text-sm text-fg-inv-dim">
             Enter your address and we&apos;ll measure your roof from aerial data
-            and give you a ballpark replacement price — instantly, no sales call.
+            and give you a ballpark replacement price, instantly, no sales call.
           </p>
           <form
             onSubmit={(e) => {
@@ -256,7 +256,7 @@ export function RoofEstimate() {
             />
           </div>
 
-          {/* Choose path — changes what we show and what they'd actually pay */}
+          {/* Choose path, changes what we show and what they'd actually pay */}
           {intent === "unknown" && (
             <div className="mt-5 rounded-card border border-line bg-ink p-5">
               <p className="font-display text-lg font-bold text-fg-inv">
@@ -271,26 +271,26 @@ export function RoofEstimate() {
                   onClick={() => setIntent("insurance")}
                   className="rounded-md bg-bolt px-5 py-4 font-display font-bold text-ink transition-colors hover:bg-bolt-hi"
                 >
-                  Yes — likely a claim
+                  Yes, likely a claim
                 </button>
                 <button
                   type="button"
                   onClick={() => setIntent("cash")}
                   className="rounded-md border border-line px-5 py-4 font-display font-bold text-fg-inv transition-colors hover:border-bolt hover:text-bolt"
                 >
-                  No — paying myself
+                  No, paying myself
                 </button>
               </div>
             </div>
           )}
 
-          {/* INSURANCE — no retail price; deductible + financing */}
+          {/* INSURANCE, no retail price; deductible + financing */}
           {intent === "insurance" && (
             <>
               <div className="mt-5 rounded-card border border-bolt/40 bg-bolt/5 p-5">
                 <p className="text-sm leading-relaxed text-fg-inv">
                   If your roof qualifies, your out-of-pocket is just your{" "}
-                  <strong className="text-bolt">deductible</strong> — insurance
+                  <strong className="text-bolt">deductible</strong>, insurance
                   covers the rest of the replacement. We&apos;ve already measured
                   your roof, so we know the scope when we work with your adjuster.
                 </p>
@@ -320,7 +320,7 @@ export function RoofEstimate() {
 
               <DeductibleFinancing className="mt-4" />
 
-              {/* Solar qualifier — informational only (panels aren't a service
+              {/* Solar qualifier, informational only (panels aren't a service
                   we offer); helps the crew document them during the inspection. */}
               <label
                 className={`mt-4 flex cursor-pointer items-start gap-3 rounded-md border px-4 py-3 text-sm transition-colors ${
@@ -345,13 +345,13 @@ export function RoofEstimate() {
             </>
           )}
 
-          {/* CASH — show the retail estimate */}
+          {/* CASH, show the retail estimate */}
           {intent === "cash" && (
             <>
               <p className="mt-4 text-sm leading-relaxed text-fg-inv-dim">
                 Based on architectural asphalt shingles at our standard rate.
                 Steeper pitch, premium materials, or extra tear-off can change it
-                — your{" "}
+, your{" "}
                 <strong className="text-fg-inv">exact price is free and on-site.</strong>
               </p>
               <details className="mt-3 text-sm text-fg-inv-dim">
@@ -369,7 +369,7 @@ export function RoofEstimate() {
                 </p>
               </details>
               <p className="mt-4 text-sm text-fg-inv-dim">
-                Financing available — ask about low monthly payment options.
+                Financing available, ask about low monthly payment options.
               </p>
             </>
           )}
@@ -384,7 +384,7 @@ export function RoofEstimate() {
               : "Lock in your free exact quote"}
           </p>
           <p className="mb-4 mt-1 text-sm text-bolt">
-            Inspections book up fast after storms — grab a spot this week.
+            Inspections book up fast after storms, grab a spot this week.
           </p>
           <form id="crf-roof" data-cr-capture onSubmit={submitLead} className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-2">
@@ -419,7 +419,7 @@ export function RoofEstimate() {
               </a>
             </div>
             {sub === "error" && (
-              <p className="text-sm text-ember">Something went wrong — please call us.</p>
+              <p className="text-sm text-ember">Something went wrong, please call us.</p>
             )}
             <SmsConsent />
           </form>

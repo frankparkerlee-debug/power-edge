@@ -6,7 +6,7 @@ import { leadContext } from "@/lib/leadContext";
 import { track } from "@/lib/analytics";
 
 /**
- * Free "Is your roof still fully covered?" checker — the site's primary lead
+ * Free "Is your roof still fully covered?" checker, the site's primary lead
  * magnet. Value-first: it gives an honest read on the homeowner's coverage risk
  * BEFORE asking for contact info (on-brand for "the honest crew"), then converts
  * to a free on-site inspection. Submits to /api/lead with the answers attached.
@@ -87,17 +87,17 @@ function scoreRisk(a: Record<string, string>): Risk {
 const RESULTS: Record<Risk, { headline: string; body: string; accent: string }> = {
   high: {
     headline: "Your roof may be underinsured right now.",
-    body: "Based on your answers, your roof is at the age and condition where many Texas insurers quietly switch coverage from full replacement cost to actual-cash-value — meaning a storm claim could pay you thousands less than a new roof actually costs. If a storm has come through, the window to document it and file matters. This is worth a free, no-pressure inspection and a written coverage check.",
+    body: "Based on your answers, your roof is at the age and condition where many Texas insurers quietly switch coverage from full replacement cost to actual-cash-value, meaning a storm claim could pay you thousands less than a new roof actually costs. If a storm has come through, the window to document it and file matters. This is worth a free, no-pressure inspection and a written coverage check.",
     accent: "var(--color-ember)",
   },
   medium: {
     headline: "You're approaching the coverage cliff.",
-    body: "Your roof is heading toward the age where Texas insurers start downgrading older roofs to actual-cash-value. The smart move is to document its condition now, while it's still likely on full replacement-cost coverage — so if a storm hits later, you have evidence on file. A free inspection gives you that paper trail.",
+    body: "Your roof is heading toward the age where Texas insurers start downgrading older roofs to actual-cash-value. The smart move is to document its condition now, while it's still likely on full replacement-cost coverage, so if a storm hits later, you have evidence on file. A free inspection gives you that paper trail.",
     accent: "var(--color-bolt)",
   },
   low: {
-    headline: "You're likely in good shape — but worth confirming.",
-    body: "Your roof is probably still on full replacement-cost coverage. If you've had a recent storm or you're buying or selling, a free inspection gives you a documented baseline so a future claim goes smoothly. No pressure either way — we'll tell you straight.",
+    headline: "You're likely in good shape, but worth confirming.",
+    body: "Your roof is probably still on full replacement-cost coverage. If you've had a recent storm or you're buying or selling, a free inspection gives you a documented baseline so a future claim goes smoothly. No pressure either way, we'll tell you straight.",
     accent: "var(--color-bolt)",
   },
 };
@@ -128,7 +128,7 @@ export function CoverageCheck() {
     const fd = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
     const summary = STEPS.map((s) => {
       const opt = s.opts.find((o) => o.v === answers[s.id]);
-      return `${s.q} ${opt?.l ?? "—"}`;
+      return `${s.q} ${opt?.l ?? ", "}`;
     }).join(" | ");
     try {
       const res = await fetch("/api/lead", {
@@ -140,7 +140,7 @@ export function CoverageCheck() {
           email: fd.email,
           zip: fd.zip,
           service: "Roof coverage check",
-          message: `[Coverage Checker — risk: ${risk}] ${summary}`,
+          message: `[Coverage Checker, risk: ${risk}] ${summary}`,
           company_website: fd.company_website,
           ...leadContext({ tool: "coverage-check" }),
         }),
@@ -245,11 +245,11 @@ export function CoverageCheck() {
             </button>
             {sub === "error" && (
               <p className="text-sm text-ember">
-                Something went wrong — please call us instead.
+                Something went wrong, please call us instead.
               </p>
             )}
             <p className="text-center text-xs text-fg-inv-dim">
-              No spam, no pressure. This is a general guide, not insurance advice —
+              No spam, no pressure. This is a general guide, not insurance advice, 
               we&apos;ll confirm everything on-site.
             </p>
             <SmsConsent />

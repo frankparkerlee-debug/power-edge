@@ -1,4 +1,4 @@
-// Service-area city pages — the backbone of local/organic findability.
+// Service-area city pages, the backbone of local/organic findability.
 // Each generates /service-areas/[slug] with localized copy + schema.
 // Add or trim cities here; the routes, sitemap, and schema update automatically.
 // Copy is storm-roofing-first (the business focus + the keywords that matter).
@@ -20,7 +20,7 @@ export const cities: City[] = [
     lat: 32.7767,
     lon: -96.797,
     blurb:
-      "Dallas County leads the nation in hail losses — and after every storm the door-knockers follow. PowerEdge is the Dallas roofing company you can actually verify: storm and hail roof repair, full replacements, and insurance claims documented by the book.",
+      "Dallas County leads the nation in hail losses, and after every storm the door-knockers follow. PowerEdge is the Dallas roofing company you can actually verify: storm and hail roof repair, full replacements, and insurance claims documented by the book.",
   },
   {
     slug: "fort-worth",
@@ -29,7 +29,7 @@ export const cities: City[] = [
     lat: 32.7555,
     lon: -97.3308,
     blurb:
-      "Storm and hail roof repair, full replacements, and insurance-claim roofing across Fort Worth and the mid-cities — with deductible financing so the out-of-pocket never stalls the work.",
+      "Storm and hail roof repair, full replacements, and insurance-claim roofing across Fort Worth and the mid-cities, with deductible financing so the out-of-pocket never stalls the work.",
   },
   {
     slug: "plano",
@@ -65,7 +65,7 @@ export const cities: City[] = [
     lat: 32.7357,
     lon: -97.1081,
     blurb:
-      "Arlington hail and wind roof repair from an insured, verifiable contractor — not a storm-chaser with a magnet sign. Insurance claims documented, deductibles financeable.",
+      "Arlington hail and wind roof repair from an insured, verifiable contractor, not a storm-chaser with a magnet sign. Insurance claims documented, deductibles financeable.",
   },
   {
     slug: "irving",
@@ -74,7 +74,7 @@ export const cities: City[] = [
     lat: 32.814,
     lon: -96.9489,
     blurb:
-      "Residential and commercial storm roofing throughout Irving and Las Colinas — repair, replacement, and hail claims handled with photos, measurements, and a written scope.",
+      "Residential and commercial storm roofing throughout Irving and Las Colinas, repair, replacement, and hail claims handled with photos, measurements, and a written scope.",
   },
   {
     slug: "denton",
@@ -83,7 +83,7 @@ export const cities: City[] = [
     lat: 33.2148,
     lon: -97.1331,
     blurb:
-      "Denton-area roof repair and replacement with free storm inspections and straight answers — if your roof is fine, we say so in writing.",
+      "Denton-area roof repair and replacement with free storm inspections and straight answers, if your roof is fine, we say so in writing.",
   },
   {
     slug: "garland",
@@ -92,7 +92,7 @@ export const cities: City[] = [
     lat: 32.9126,
     lon: -96.6389,
     blurb:
-      "Garland sits square in DFW's hail alley. Free roof inspections, storm-claim documentation, and replacement roofs at an honest price — deductible financing from $250 down.",
+      "Garland sits square in DFW's hail alley. Free roof inspections, storm-claim documentation, and replacement roofs at an honest price, deductible financing from $250 down.",
   },
   {
     slug: "richardson",
@@ -101,7 +101,7 @@ export const cities: City[] = [
     lat: 32.9483,
     lon: -96.7299,
     blurb:
-      "Richardson roof repair and hail-claim replacements from an insured contractor you can verify before you sign — free inspection, honest verdict, one accountable crew.",
+      "Richardson roof repair and hail-claim replacements from an insured contractor you can verify before you sign, free inspection, honest verdict, one accountable crew.",
   },
   {
     slug: "carrollton",
@@ -119,7 +119,7 @@ export const cities: City[] = [
     lat: 33.1032,
     lon: -96.6706,
     blurb:
-      "Allen homeowners get a straight read after every storm — free inspection, written verdict, and insurance-claim roofing with the deductible financeable.",
+      "Allen homeowners get a straight read after every storm, free inspection, written verdict, and insurance-claim roofing with the deductible financeable.",
   },
   {
     slug: "grand-prairie",
@@ -128,7 +128,7 @@ export const cities: City[] = [
     lat: 32.746,
     lon: -96.9978,
     blurb:
-      "Grand Prairie roof replacement and storm-damage repair — insured, accountable, and rated by North Texas homeowners, with capacity to be there this week.",
+      "Grand Prairie roof replacement and storm-damage repair, insured, accountable, and rated by North Texas homeowners, with capacity to be there this week.",
   },
   {
     slug: "flower-mound",
@@ -146,7 +146,7 @@ export const cities: City[] = [
     lat: 32.5632,
     lon: -97.1417,
     blurb:
-      "Mansfield storm roof repair and full replacements — free inspection, honest scope in writing, and you typically pay just your deductible on a covered claim.",
+      "Mansfield storm roof repair and full replacements, free inspection, honest scope in writing, and you typically pay just your deductible on a covered claim.",
   },
   {
     slug: "rockwall",

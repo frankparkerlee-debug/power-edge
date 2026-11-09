@@ -57,7 +57,7 @@ export async function POST(req: Request) {
   }
 
   const ownerName = String(target.owner_name || "").trim();
-  // CAD names are usually "LAST FIRST MIDDLE" — best-effort split for HubSpot.
+  // CAD names are usually "LAST FIRST MIDDLE", best-effort split for HubSpot.
   const parts = ownerName.replace(/[&,].*$/, "").trim().split(/\s+/);
   const lastname = parts[0] || ownerName;
   const firstname = parts.slice(1).join(" ") || "";
@@ -74,9 +74,9 @@ export async function POST(req: Request) {
     `Owner: ${ownerName}`,
     target.hail_size_in ? `Hail: ${target.hail_size_in}″ documented near this address (${stormDate})` : null,
     target.absentee
-      ? `Absentee/investor owner — mailing address: ${target.owner_mailing || "n/a"}`
+      ? `Absentee/investor owner, mailing address: ${target.owner_mailing || "n/a"}`
       : "Owner-occupied",
-    target.phone ? `Phone on file: ${target.phone}${target.phone_dnc ? " (⛔ DNC — do not call)" : ""}` : null,
+    target.phone ? `Phone on file: ${target.phone}${target.phone_dnc ? " (⛔ DNC, do not call)" : ""}` : null,
     target.value ? `Assessed value: $${Math.round(Number(target.value) / 1000)}k` : null,
     target.year_built ? `Year built: ${target.year_built}` : null,
     `Storm map: ${mapLink}`,
@@ -120,11 +120,11 @@ export async function POST(req: Request) {
       headers: hs(),
       body: JSON.stringify({
         properties: {
-          dealname: `Roof — ${address}${city ? `, ${city}` : ""}`,
+          dealname: `Roof, ${address}${city ? `, ${city}` : ""}`,
           pipeline: PIPELINE_ID,
           dealstage: STAGE_NEW_LEAD,
           // Description rides on the deal itself so the storm context is visible
-          // the moment a rep opens the deal they're working — no sidebar digging.
+          // the moment a rep opens the deal they're working, no sidebar digging.
           description: contextBlock,
         },
         associations: [

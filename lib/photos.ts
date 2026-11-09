@@ -1,4 +1,4 @@
-// Job photos for the homepage gallery — the #1 trust lift for a contractor.
+// Job photos for the homepage gallery, the #1 trust lift for a contractor.
 // Drop image files in /public/photos and list them here. While this array is
 // empty, the gallery section is hidden entirely (no empty placeholder shows).
 export type Photo = { src: string; alt: string; caption?: string };

@@ -64,10 +64,10 @@ export function LeadForm({
           </svg>
         </div>
         <h3 className="font-display text-2xl font-bold text-fg-inv">
-          Got it — we&apos;ll be in touch fast.
+          Got it, we&apos;ll be in touch fast.
         </h3>
         <p className="mt-2 text-fg-inv-dim">
-          A real person will call or text you fast — usually within the hour
+          A real person will call or text you fast, usually within the hour
           during business hours. And you&apos;ll get a straight answer: if your
           roof is fine, we&apos;ll tell you that in writing.
         </p>
@@ -151,9 +151,9 @@ export function LeadForm({
             ))}
             <option value="Storm / insurance claim">Storm / insurance claim</option>
             <option value="Financing / stuck on out-of-pocket">
-              Financing — stuck on the out-of-pocket
+              Financing, stuck on the out-of-pocket
             </option>
-            <option value="Emergency">Emergency — need someone now</option>
+            <option value="Emergency">Emergency, need someone now</option>
             <option value="Other">Something else</option>
           </select>
           <textarea
@@ -163,7 +163,7 @@ export function LeadForm({
             className={inputBase}
           />
 
-          {/* Solar qualifier — informational only (panels aren't a service we
+          {/* Solar qualifier, informational only (panels aren't a service we
               offer); helps the crew document them during the inspection. */}
           <label
             className={`flex cursor-pointer items-start gap-3 rounded-md border px-4 py-3 text-sm transition-colors ${
@@ -185,7 +185,7 @@ export function LeadForm({
         </>
       )}
 
-      {/* Honeypot — hidden from humans, bots fill it */}
+      {/* Honeypot, hidden from humans, bots fill it */}
       <input
         type="text"
         name="company_website"

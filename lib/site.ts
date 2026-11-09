@@ -4,7 +4,7 @@
 export const site = {
   name: "PowerEdge",
   legalName: "PowerEdge Roofing & Home Repair",
-  legalEntity: "Power Edge, LLC", // registered entity (formerly Solar Shield LLC) — used in legal/SMS copy
+  legalEntity: "Power Edge, LLC", // registered entity (formerly Solar Shield LLC), used in legal/SMS copy
   tagline: "Roofing and home repair, done by an insured, accountable team you can actually verify.",
   // Primary + secondary lines pulled from the current live site.
   phone: "469-277-9594",
@@ -16,10 +16,10 @@ export const site = {
   domain: "poweredgetx.com",
   url: "https://poweredgetx.com",
 
-  // Trust signals — all verifiable, which is the entire point.
+  // Trust signals, all verifiable, which is the entire point.
   // teclLicense retired for good: it was John Lott's electrical TECL, and
   // electrical is being dropped from the business (decision #19, 2026-09-06).
-  // No licence backs "licensed & insured" anymore — Texas doesn't license
+  // No licence backs "licensed & insured" anymore, Texas doesn't license
   // roofers either. Sitewide copy was rewritten to lean on liabilityCoverage,
   // workmanshipGuarantee, and the Google rating instead (grep "insured &
   // accountable"). Only restore teclLicense if a real, current credential
@@ -47,13 +47,13 @@ export const site = {
       name: "John Lott",
       role: "Senior Crew Lead",
       cred: "40 years in the trades",
-      bio: "Forty years on the tools across residential, commercial, and industrial work — the senior hand on PowerEdge's crews.",
+      bio: "Forty years on the tools across residential, commercial, and industrial work, the senior hand on PowerEdge's crews.",
     },
     {
       name: "Ernesto Sandoval",
       role: "Roofing Project Manager",
       cred: "20 years roofing & construction",
-      bio: "Runs the roofing side end to end — inspection, insurance documentation, crew scheduling, and the final walk. Two decades of roofing and construction across North Texas.",
+      bio: "Runs the roofing side end to end, inspection, insurance documentation, crew scheduling, and the final walk. Two decades of roofing and construction across North Texas.",
     },
   ],
 

@@ -7,7 +7,7 @@ import { site } from "@/lib/site";
 // Phase 1 underwrite: exchange the Link public_token, pull identity + balances +
 // auth, and return an instant structure-based decision (no credit pull). Emails
 // the full intel to the team (account numbers masked) and enrolls the lead in
-// the financing nurture. Access token is used transiently and NOT stored —
+// the financing nurture. Access token is used transiently and NOT stored, 
 // persistence + recurring ACH debits are Phase 2 (needs a DB + Plaid Transfer).
 
 type Balances = { available: number | null; current: number | null };
@@ -98,10 +98,10 @@ export async function POST(req: Request) {
       email: body.email,
       address: body.address,
       zip: body.zip,
-      service: `Financing pre-qualification (Plaid — ${decision})`,
+      service: `Financing pre-qualification (Plaid, ${decision})`,
       message: `[Plaid Prequal ${decision}] amount: $${requested.toLocaleString()}; available: $${totalAvailable.toLocaleString()}; name match: ${
         nameMatch ? "yes" : "no"
-      }; property: ${body.address || "—"}`,
+      }; property: ${body.address || ", "}`,
       source: "financing-prequal-plaid",
     });
 
@@ -109,9 +109,9 @@ export async function POST(req: Request) {
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey) {
       const to = process.env.LEAD_TO_EMAIL || site.email;
-      const mask = (acc: string) => (acc ? `••••${acc.slice(-4)}` : "—");
+      const mask = (acc: string) => (acc ? `••••${acc.slice(-4)}` : ", ");
       const routingFor = (id: string) =>
-        ach.find((n) => n.account_id === id)?.routing?.slice(-4) || "—";
+        ach.find((n) => n.account_id === id)?.routing?.slice(-4) || ", ";
       const acctFor = (id: string) =>
         mask(ach.find((n) => n.account_id === id)?.account || "");
       const acctRows = accounts
@@ -139,20 +139,20 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           from: `PowerEdge Site <leads@${site.domain}>`,
           to: [to],
-          subject: `Financing pre-qual (${decision.toUpperCase()}): ${body.name} — $${requested.toLocaleString()}`,
+          subject: `Financing pre-qual (${decision.toUpperCase()}): ${body.name}, $${requested.toLocaleString()}`,
           html: `
-            <h2>Plaid pre-qualification — ${decision.toUpperCase()}</h2>
+            <h2>Plaid pre-qualification, ${decision.toUpperCase()}</h2>
             <p><strong>${escapeHtml(body.name || "")}</strong> · ${escapeHtml(body.phone || "")} · ${escapeHtml(body.email || "")}</p>
-            <p>Property: ${escapeHtml(body.address || "—")} ${escapeHtml(body.zip || "")}</p>
+            <p>Property: ${escapeHtml(body.address || ", ")} ${escapeHtml(body.zip || "")}</p>
             <p><strong>Requested:</strong> $${requested.toLocaleString()} ·
                <strong>Total available:</strong> $${totalAvailable.toLocaleString()} ·
-               <strong>Name match:</strong> ${nameMatch ? "yes" : "NO — review"}</p>
-            <p><strong>Bank owner(s) on file:</strong> ${escapeHtml(ownerLines) || "—"}</p>
+               <strong>Name match:</strong> ${nameMatch ? "yes" : "NO: review"}</p>
+            <p><strong>Bank owner(s) on file:</strong> ${escapeHtml(ownerLines) || ", "}</p>
             <table border="0" cellpadding="6" style="border-collapse:collapse;font-size:13px">
               <tr style="text-align:left"><th>Account</th><th>Numbers (masked)</th><th>Available</th></tr>
               ${acctRows}
             </table>
-            <p style="color:#888;font-size:12px">Sandbox/Phase-1 decision — structure-based, no credit pull. Token not stored; set up the debit via Plaid Transfer (Phase 2).</p>
+            <p style="color:#888;font-size:12px">Sandbox/Phase-1 decision, structure-based, no credit pull. Token not stored; set up the debit via Plaid Transfer (Phase 2).</p>
           `,
         }),
       }).catch((e) => console.error("[plaid] intel email failed", e));
@@ -177,7 +177,7 @@ export async function POST(req: Request) {
       plan: approved ? "4-month (0%) or 12-month plan" : null,
       message: approved
         ? "You're pre-approved, pending final verification. We'll set up your plan and schedule the work."
-        : "Thanks — we've got everything and a team member will confirm your options shortly.",
+        : "Thanks, we've got everything and a team member will confirm your options shortly.",
     });
   } catch (err) {
     console.error("[plaid] underwrite failed", err);

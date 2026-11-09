@@ -1,7 +1,7 @@
 // Branded email funnel for site leads.
 //
 // One capture -> a designed 5-touch nurture sequence, enqueued entirely at
-// lead time via Resend's scheduled sends (`scheduled_at`) — no DB, no cron.
+// lead time via Resend's scheduled sends (`scheduled_at`), no DB, no cron.
 // Compliance: we "document and coordinate with your adjuster," never "handle /
 // negotiate the claim" (public adjusting) and never waive the deductible.
 //
@@ -77,7 +77,7 @@ function verifyChip() {
     <tr>
       <td style="font-family:${FONT};font-size:13px;color:${MUTED};line-height:1.5;">
         <strong style="color:${TEXT};">Insured & accountable in Texas.</strong>
-        Roofing is unlicensed statewide, so anyone can knock after a storm — we're
+        Roofing is unlicensed statewide, so anyone can knock after a storm, we're
         a real, accountable company backed by ${site.liabilityCoverage} in liability coverage
         and a 1-year workmanship guarantee.
         <br/><span style="color:${MUTED};">${stars()}</span>
@@ -163,23 +163,23 @@ export type SequenceEmail = {
 };
 
 export const leadSequence: SequenceEmail[] = [
-  // 0 — Instant confirmation (or re-intro for existing subscribers)
+  // 0, Instant confirmation (or re-intro for existing subscribers)
   {
     key: "confirm",
     delayDays: 0,
     subject: (c) =>
       c.existing
         ? "A quick hello from PowerEdge (and why it matters this season)"
-        : "We've got it — your free roof inspection with PowerEdge",
+        : "We've got it, your free roof inspection with PowerEdge",
     html: (c) =>
       c.existing
         ? shell({
             preheader:
-              "DFW's insurance-first storm roof team — here's the 2-minute version.",
+              "DFW's insurance-first storm roof team, here's the 2-minute version.",
             body:
-              h1(`Hi ${c.firstName} — a quick refresher.`) +
+              h1(`Hi ${c.firstName}, a quick refresher.`) +
               p(
-                `You&rsquo;re on our list, so here&rsquo;s the short version of who we are: <strong>DFW&rsquo;s insurance-first storm roof team</strong>. When hail hits, you typically pay just your deductible — we document the damage and coordinate with your adjuster by the book.`,
+                `You&rsquo;re on our list, so here&rsquo;s the short version of who we are: <strong>DFW&rsquo;s insurance-first storm roof team</strong>. When hail hits, you typically pay just your deductible, we document the damage and coordinate with your adjuster by the book.`,
               ) +
               p(
                 `Over the next couple weeks we&rsquo;ll show you exactly how it works. Want to skip the line? See if your roof already has a claim:`,
@@ -191,27 +191,27 @@ export const leadSequence: SequenceEmail[] = [
             preheader:
               "A member of our team will call you shortly to schedule.",
             body:
-              h1(`Thanks, ${c.firstName} — we're on it.`) +
+              h1(`Thanks, ${c.firstName}, we're on it.`) +
               p(
                 `We&rsquo;ve got your request${
                   c.service ? ` about <strong>${c.service}</strong>` : ""
-                }. A member of our team will call you shortly — usually within the hour during business hours — to lock in your <strong>free inspection</strong>.`,
+                }. A member of our team will call you shortly, usually within the hour during business hours, to lock in your <strong>free inspection</strong>.`,
               ) +
               steps([
-                "We call you to schedule — fast.",
+                "We call you to schedule, fast.",
                 "We inspect &amp; document your roof, free.",
                 "You decide. No pressure, no games.",
               ]) +
               p(`Can&rsquo;t wait? Call or text us at <strong>${site.phone}</strong>.`) +
               button(`Call ${site.phone}`, site.phoneHref) +
               p(
-                `<strong>Want us in and out fast?</strong> <a href="${CLAIM_PREP_URL}" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;">Prep your claim in 2 minutes &rarr;</a> — add your carrier and deductible so we can inspect and close on-site.`,
+                `<strong>Want us in and out fast?</strong> <a href="${CLAIM_PREP_URL}" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;">Prep your claim in 2 minutes &rarr;</a>, add your carrier and deductible so we can inspect and close on-site.`,
               ) +
               verifyChip(),
           }),
   },
 
-  // 1 — How a Texas storm claim works
+  // 1, How a Texas storm claim works
   {
     key: "how-claims-work",
     delayDays: 1,
@@ -220,7 +220,7 @@ export const leadSequence: SequenceEmail[] = [
       shell({
         preheader: "You pay your deductible. We document the rest. No games.",
         body:
-          h1("How your claim works — 4 steps.") +
+          h1("How your claim works, 4 steps.") +
           p("No mystery. Here&rsquo;s exactly how a Texas storm claim goes:") +
           steps([
             "<strong>Free inspection.</strong> We photograph and document the damage.",
@@ -229,17 +229,17 @@ export const leadSequence: SequenceEmail[] = [
             "<strong>We install.</strong> On replacement-cost policies the balance comes once work begins.",
           ]) +
           p(
-            `We never waive your deductible or pose as your adjuster — both are illegal in Texas, and doing it right protects you.`,
+            `We never waive your deductible or pose as your adjuster, both are illegal in Texas, and doing it right protects you.`,
           ) +
           (c.financing
-            ? p(`Deductible in the way? We can finance it — from as little as $250 down, paid in full over time.`)
+            ? p(`Deductible in the way? We can finance it, from as little as $250 down, paid in full over time.`)
             : "") +
           button("Book my free inspection", BOOK_URL) +
           verifyChip(),
       }),
   },
 
-  // 2 — Why PowerEdge / trust
+  // 2, Why PowerEdge / trust
   {
     key: "why-poweredge",
     delayDays: 3,
@@ -250,17 +250,17 @@ export const leadSequence: SequenceEmail[] = [
         body:
           h1("Why homeowners pick PowerEdge.") +
           p(
-            `Texas doesn&rsquo;t license roofers — anyone with a ladder and a magnet sign can knock your door after a hailstorm. We&rsquo;re built the opposite way:`,
+            `Texas doesn&rsquo;t license roofers, anyone with a ladder and a magnet sign can knock your door after a hailstorm. We&rsquo;re built the opposite way:`,
           ) +
           `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:4px 0 8px;">
             ${[
               [
                 "Insured & accountable",
-                `Backed by ${site.liabilityCoverage} in liability coverage and a documented 1-year workmanship guarantee — a real company standing behind the work.`,
+                `Backed by ${site.liabilityCoverage} in liability coverage and a documented 1-year workmanship guarantee, a real company standing behind the work.`,
               ],
               [
                 "One accountable crew",
-                "Your roof handled in-house, start to finish — no subcontractor finger-pointing.",
+                "Your roof handled in-house, start to finish, no subcontractor finger-pointing.",
               ],
               [
                 "Capacity to actually show up",
@@ -279,7 +279,7 @@ export const leadSequence: SequenceEmail[] = [
       }),
   },
 
-  // 4 — Deductible financing (the money objection)
+  // 4, Deductible financing (the money objection)
   {
     key: "deductible-financing",
     delayDays: 5,
@@ -290,20 +290,20 @@ export const leadSequence: SequenceEmail[] = [
         body:
           h1("Short on the deductible? That's not a dead end.") +
           p(
-            `Texas wind/hail deductibles run 1&ndash;2% of your home&rsquo;s value — often <strong>$5,000&ndash;$10,000</strong>. If that number is the only thing between you and a sound roof, here&rsquo;s the fix:`,
+            `Texas wind/hail deductibles run 1&ndash;2% of your home&rsquo;s value, often <strong>$5,000&ndash;$10,000</strong>. If that number is the only thing between you and a sound roof, here&rsquo;s the fix:`,
           ) +
           steps([
-            "<strong>Finance your deductible</strong> — from as little as $250 down, low monthly payments.",
-            "<strong>We schedule the work now</strong> — you don&rsquo;t wait to save up.",
+            "<strong>Finance your deductible</strong>, from as little as $250 down, low monthly payments.",
+            "<strong>We schedule the work now</strong>, you don&rsquo;t wait to save up.",
             "<strong>You still pay it in full</strong>, just over time. (Waiving it is illegal in Texas; financing is smart.)",
           ]) +
-          p(`Already have an estimate from another roofer? Bring it — we can do the work and finance it.`) +
+          p(`Already have an estimate from another roofer? Bring it, we can do the work and finance it.`) +
           button("See my deductible financed", FINANCE_URL) +
           verifyChip(),
       }),
   },
 
-  // 5 — Urgency: you can lose the claim
+  // 5, Urgency: you can lose the claim
   {
     key: "claim-clock",
     delayDays: 8,
@@ -311,17 +311,17 @@ export const leadSequence: SequenceEmail[] = [
     html: (c) =>
       shell({
         preheader:
-          "Texas claims expire — then the whole roof comes out of your pocket.",
+          "Texas claims expire, then the whole roof comes out of your pocket.",
         body:
           h1("Don't lose your claim to the clock.") +
           p(
-            `Here&rsquo;s the part no one warns you about: Texas policies give you a limited window to file — <strong>often about a year from the date of the storm</strong>. Miss it, and the claim is gone for good. At that point the <strong>entire roof</strong> comes out of your pocket — not just your deductible.`,
+            `Here&rsquo;s the part no one warns you about: Texas policies give you a limited window to file, <strong>often about a year from the date of the storm</strong>. Miss it, and the claim is gone for good. At that point the <strong>entire roof</strong> comes out of your pocket, not just your deductible.`,
           ) +
           p(
-            `And the damage doesn&rsquo;t wait for you. Every rain turns a small bruise into a bigger leak — and an aging roof can quietly slip from full-replacement to depreciated coverage, paying you thousands less.`,
+            `And the damage doesn&rsquo;t wait for you. Every rain turns a small bruise into a bigger leak, and an aging roof can quietly slip from full-replacement to depreciated coverage, paying you thousands less.`,
           ) +
           p(
-            `If you think a storm hit your roof, don&rsquo;t sit on it. Check whether you still qualify — it takes about a minute.`,
+            `If you think a storm hit your roof, don&rsquo;t sit on it. Check whether you still qualify, it takes about a minute.`,
           ) +
           button("Check if I still have a claim", BOOK_URL) +
           small(
@@ -331,7 +331,7 @@ export const leadSequence: SequenceEmail[] = [
       }),
   },
 
-  // 6 — Witty re-engagement
+  // 6, Witty re-engagement
   {
     key: "did-we-lose-you",
     delayDays: 12,
@@ -345,19 +345,19 @@ export const leadSequence: SequenceEmail[] = [
             `We&rsquo;ve knocked on your inbox a few times and heard&hellip; crickets. Which means one of three things:`,
           ) +
           steps([
-            "Your roof is flawless — genuinely, congrats.",
+            "Your roof is flawless, genuinely, congrats.",
             "You&rsquo;re already handling it.",
             "Life got loud and the hail slipped your mind.",
           ]) +
           p(
-            `If it&rsquo;s that last one, no judgment — but the storm clock keeps ticking. Sixty seconds tells you whether you&rsquo;ve still got a claim, and then we&rsquo;ll quiet down.`,
+            `If it&rsquo;s that last one, no judgment, but the storm clock keeps ticking. Sixty seconds tells you whether you&rsquo;ve still got a claim, and then we&rsquo;ll quiet down.`,
           ) +
-          button("Check my roof — 60 seconds", BOOK_URL) +
+          button("Check my roof, 60 seconds", BOOK_URL) +
           verifyChip(),
       }),
   },
 
-  // 7 — Trust / objection (witty)
+  // 7, Trust / objection (witty)
   {
     key: "storm-chaser",
     delayDays: 17,
@@ -368,7 +368,7 @@ export const leadSequence: SequenceEmail[] = [
         body:
           h1("Not every 'roofer' is a roofer.") +
           p(
-            `After a storm your street fills with trucks and clipboards. The uncomfortable truth: <strong>Texas doesn&rsquo;t license roofers</strong> — a magnet sign and a ladder is the whole barrier to entry, and plenty vanish before the warranty ever matters.`,
+            `After a storm your street fills with trucks and clipboards. The uncomfortable truth: <strong>Texas doesn&rsquo;t license roofers</strong>: a magnet sign and a ladder is the whole barrier to entry, and plenty vanish before the warranty ever matters.`,
           ) +
           p(
             `We&rsquo;re the opposite kind of company: insured and accountable, ${site.googleRating}&#9733; across ${site.googleReviewCount} reviews, one accountable crew for your whole roof. Verify us before you trust anyone knocking.`,
@@ -378,23 +378,23 @@ export const leadSequence: SequenceEmail[] = [
       }),
   },
 
-  // 8 — Witty last call
+  // 8, Witty last call
   {
     key: "last-call",
     delayDays: 23,
     subject: () => "Okay, we can take a hint",
     html: (c) =>
       shell({
-        preheader: "Last one — the offer stands whenever you're ready.",
+        preheader: "Last one, the offer stands whenever you're ready.",
         body:
           h1("We'll stop crowding your inbox.") +
           p(
-            `This is the part where we gracefully back off. No hard feelings — your roof&rsquo;s still up there, the free inspection still stands, and we&rsquo;re exactly one text away the day you want it.`,
+            `This is the part where we gracefully back off. No hard feelings, your roof&rsquo;s still up there, the free inspection still stands, and we&rsquo;re exactly one text away the day you want it.`,
           ) +
           p(
             `If a storm ever does a number on your roof, you know who to call: the insured crew that <em>shows you the coverage</em>. Until then, ${c.firstName}, take care.`,
           ) +
-          button("Actually, I'm ready — book it", BOOK_URL) +
+          button("Actually, I'm ready, book it", BOOK_URL) +
           p(`Or text <strong>${site.phone}</strong>. That&rsquo;s it. Promise.`) +
           verifyChip(),
       }),
@@ -456,13 +456,13 @@ export async function sendClaimComplete(
   return sendEmail(
     resendKey,
     to,
-    "Your claim details are in — we'll call you right away",
+    "Your claim details are in, we'll call you right away",
     shell({
       preheader: "We've got everything to move fast on-site.",
       body:
         h1(`You're all set, ${first}.`) +
         p(
-          `We&rsquo;ve got your claim details, and a member of our team will call you <strong>right away</strong> to lock in your inspection. When we arrive we go straight to documenting the roof — no paperwork on the doorstep.`,
+          `We&rsquo;ve got your claim details, and a member of our team will call you <strong>right away</strong> to lock in your inspection. When we arrive we go straight to documenting the roof, no paperwork on the doorstep.`,
         ) +
         p(`Need us sooner? Call or text <strong>${site.phone}</strong>.`) +
         button(`Call ${site.phone}`, site.phoneHref) +
@@ -484,13 +484,13 @@ export async function sendClaimNurture(
     return sendEmail(
       resendKey,
       intake.email,
-      "You're almost there — finish your claim in a minute",
+      "You're almost there, finish your claim in a minute",
       shell({
         preheader: "A couple more details and your crew arrives ready.",
         body:
           h1(`Almost done, ${first}.`) +
           p(
-            `You&rsquo;ve done the hard part — just a couple more details and your inspection is fully prepped, so our crew gets right on the roof instead of doing paperwork. Takes about a minute.`,
+            `You&rsquo;ve done the hard part, just a couple more details and your inspection is fully prepped, so our crew gets right on the roof instead of doing paperwork. Takes about a minute.`,
           ) +
           button("Finish my claim →", url) +
           verifyChip(),
@@ -502,11 +502,11 @@ export async function sendClaimNurture(
     intake.email,
     "Your roof claim, made easy",
     shell({
-      preheader: "Storm damage doesn't wait — let's get ahead of it.",
+      preheader: "Storm damage doesn't wait, let's get ahead of it.",
       body:
         h1(`Let's get your claim rolling, ${first}.`) +
         p(
-          `You started your claim prep — smart move. Filing a hail claim <em>sounds</em> like a hassle, but we make it simple: you add a few details, we document the damage and coordinate with your adjuster, and on a covered claim you pay just your deductible.`,
+          `You started your claim prep, smart move. Filing a hail claim <em>sounds</em> like a hassle, but we make it simple: you add a few details, we document the damage and coordinate with your adjuster, and on a covered claim you pay just your deductible.`,
         ) +
         p(
           `<strong>Storm damage only gets worse, and your filing window won&rsquo;t stay open.</strong> Pick up right where you left off:`,
@@ -525,7 +525,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
  * scheduled via Resend `scheduled_at` (day-offset from now, so the timer starts
  * today). Sent SEQUENTIALLY with a throttle to stay under Resend's rate limit
  * (free tier ~2 req/s). Failures are logged, never thrown. Intended to be
- * fire-and-forget (don't block the response) — safe on Render's persistent
+ * fire-and-forget (don't block the response), safe on Render's persistent
  * Node server. Requires RESEND_API_KEY.
  */
 export async function enqueueLeadSequence(opts: {
@@ -565,7 +565,7 @@ export async function enqueueLeadSequence(opts: {
     } catch (err) {
       console.error(`[emails] failed to enqueue ${email.key} for ${to}`, err);
     }
-    await sleep(600); // ~1.6/s — under Resend's 2/s free-tier limit
+    await sleep(600); // ~1.6/s, under Resend's 2/s free-tier limit
   }
 }
 

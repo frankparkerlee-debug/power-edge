@@ -1,7 +1,7 @@
-// Durable lead capture via Supabase (PostgREST REST API — no SDK dependency).
+// Durable lead capture via Supabase (PostgREST REST API, no SDK dependency).
 // Env-gated so the app runs clean until keys are set:
 //   SUPABASE_URL                (e.g. https://xxxx.supabase.co)
-//   SUPABASE_SERVICE_ROLE_KEY   (server-only — bypasses RLS; never expose client-side)
+//   SUPABASE_SERVICE_ROLE_KEY   (server-only, bypasses RLS; never expose client-side)
 //
 // Apply the schema in supabase/schema.sql via the Supabase SQL editor (the
 // transaction pooler can't run DDL from the app). This is also the foundation
@@ -40,7 +40,7 @@ export type LeadInsert = {
 
 export type LeadRow = LeadInsert & { id: string; created_at: string };
 
-/** Best-effort insert — never throws, so a DB hiccup can't drop a lead's email. */
+/** Best-effort insert, never throws, so a DB hiccup can't drop a lead's email. */
 export async function insertLead(lead: LeadInsert) {
   if (!dbEnabled()) return;
   const post = (payload: LeadInsert) =>
@@ -53,7 +53,7 @@ export async function insertLead(lead: LeadInsert) {
     let res = await post(lead);
     if (!res.ok) {
       // If the `address` column hasn't been added yet, PostgREST rejects the
-      // whole row — retry without it so we never drop a lead over one column.
+      // whole row, retry without it so we never drop a lead over one column.
       const { address: _address, ...rest } = lead;
       void _address;
       res = await post(rest);
@@ -92,7 +92,7 @@ export type ClaimIntake = {
   nurtured_stage?: number;
 };
 
-/** Upsert a claim-prep intake by id (progressive save — one row per homeowner,
+/** Upsert a claim-prep intake by id (progressive save, one row per homeowner,
  *  updated as they advance through the wizard). Best-effort; never throws. */
 export async function upsertClaimIntake(intake: ClaimIntake) {
   if (!dbEnabled()) return;
@@ -113,7 +113,7 @@ export async function upsertClaimIntake(intake: ClaimIntake) {
   }
 }
 
-/** Incomplete intakes last touched before `beforeIso` — for drop-off nurture. */
+/** Incomplete intakes last touched before `beforeIso`, for drop-off nurture. */
 export async function listIncompleteIntakes(beforeIso: string): Promise<ClaimIntake[]> {
   if (!dbEnabled()) return [];
   try {
@@ -157,7 +157,7 @@ export type RoofCheck = {
   tool?: string;
 };
 
-/** Log an address someone ran through the claim/storm check — even if they
+/** Log an address someone ran through the claim/storm check, even if they
  *  never submit. Best-effort; never throws or blocks the check itself. */
 export async function insertRoofCheck(check: RoofCheck) {
   if (!dbEnabled()) return;
@@ -177,7 +177,7 @@ export async function insertRoofCheck(check: RoofCheck) {
 
 export type RoofCheckRow = RoofCheck & { id: string; created_at: string };
 
-/** Recent addresses people ran through the claim check — the knock-gold list
+/** Recent addresses people ran through the claim check, the knock-gold list
  *  (self-identified storm-anxious homeowners, even if they never submitted). */
 export async function listRoofChecks(limit = 50): Promise<RoofCheckRow[]> {
   if (!dbEnabled()) return [];

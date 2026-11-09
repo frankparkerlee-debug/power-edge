@@ -28,7 +28,7 @@ export default function RoofingPage() {
     <>
       <PageHero
         kicker="Roofing · Free inspection"
-        title="Roofing done right — and a company you can verify."
+        title="Roofing done right, and a company you can verify."
         intro="In Texas, anyone can call themselves a roofer. We're an insured, accountable company that runs four roofing crews under a 20-year project manager. Free inspections, honest assessments, and replacements done fast."
         badge="Get a free roof inspection"
         withForm
@@ -50,7 +50,7 @@ export default function RoofingPage() {
         </Container>
       </section>
 
-      {/* Instant roof estimate — right here on the roofing page */}
+      {/* Instant roof estimate, right here on the roofing page */}
       <section className="bg-ink py-20 sm:py-28">
         <Container className="grid gap-12 lg:grid-cols-[1fr_0.95fr] lg:items-start">
           <div>
@@ -58,10 +58,10 @@ export default function RoofingPage() {
               dark
               kicker="Instant estimate"
               title="What will your roof cost? Find out right now."
-              intro="Most roofers won't tell you until a salesperson is in your living room. Enter your address — we measure your roof from satellite imagery and give you an honest ballpark on the spot. If it's a storm claim, you likely just pay your deductible."
+              intro="Most roofers won't tell you until a salesperson is in your living room. Enter your address and we measure your roof from satellite imagery and give you an honest ballpark on the spot. If it's a storm claim, you likely just pay your deductible."
             />
             <p className="mt-6 text-sm text-fg-inv-dim">
-              Ballpark only — your exact price comes from a free on-site
+              Ballpark only, your exact price comes from a free on-site
               measurement.
             </p>
           </div>
@@ -69,7 +69,7 @@ export default function RoofingPage() {
         </Container>
       </section>
 
-      {/* Storm / insurance education — the trust + lead-gen play */}
+      {/* Storm / insurance education, the trust + lead-gen play */}
       <section className="bg-ink py-20 sm:py-28">
         <Container className="grid gap-12 lg:grid-cols-2 lg:items-start">
           <div>
@@ -77,18 +77,18 @@ export default function RoofingPage() {
               dark
               kicker="Storm & insurance"
               title="Hail claims, handled honestly."
-              intro="A storm claim is where most homeowners get burned by fly-by-night roofers. Here's how we do it differently — and legally."
+              intro="A storm claim is where most homeowners get burned by fly-by-night roofers. Here's how we do it differently, and legally."
             />
           </div>
           <div className="space-y-5">
             {[
               {
                 h: "We never waive your deductible",
-                p: "It's a crime in Texas for a contractor to offer to waive, rebate, or absorb your insurance deductible. Anyone who offers is breaking the law — and putting you at risk.",
+                p: "It's a crime in Texas for a contractor to offer to waive, rebate, or absorb your insurance deductible. Anyone who offers is breaking the law, and putting you at risk.",
               },
               {
                 h: "We don't pretend to be your adjuster",
-                p: "Texas law prohibits the company doing your repair from also acting as your public insurance adjuster. We document damage and work with your adjuster — we don't cross that line.",
+                p: "Texas law prohibits the company doing your repair from also acting as your public insurance adjuster. We document damage and work with your adjuster, we don't cross that line.",
               },
               {
                 h: "We document everything",
@@ -96,7 +96,7 @@ export default function RoofingPage() {
               },
               {
                 h: "We know the two-check process",
-                p: "Replacement-cost claims pay in two parts — an initial check, then the balance once work begins. We'll walk you through exactly what to expect.",
+                p: "Replacement-cost claims pay in two parts, an initial check, then the balance once work begins. We'll walk you through exactly what to expect.",
               },
             ].map((b) => (
               <div
@@ -143,7 +143,7 @@ export default function RoofingPage() {
       <RelatedServices currentSlug="roofing" />
 
       <CtaBand
-        heading="Free roof inspection — no pressure."
+        heading="Free roof inspection, no pressure."
         sub="We'll get on the roof, take photos, and give you a straight answer. If it doesn't need replacing, we'll tell you."
       />
     </>

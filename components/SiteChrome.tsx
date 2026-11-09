@@ -10,7 +10,7 @@ import { Analytics } from "./Analytics";
 
 /**
  * Renders the marketing chrome (header, footer, CTAs) on public pages, but NOT
- * on internal tools like /admin — so the business phone number in the nav/footer
+ * on internal tools like /admin, so the business phone number in the nav/footer
  * doesn't clutter the leads dashboard (and get mistaken for lead data).
  */
 export function SiteChrome({ children }: { children: React.ReactNode }) {

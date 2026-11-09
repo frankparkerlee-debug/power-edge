@@ -5,7 +5,7 @@ import { StormDashboard } from "@/components/StormDashboard";
 import { listStormTargets, listTargetDays, listTargetCities, withLastKnock } from "@/lib/parcels";
 import { TargetCards } from "@/components/TargetCards";
 
-// Storm engine command view — NOT indexed. Gated by ?key=<ADMIN_TOKEN>, same
+// Storm engine command view, NOT indexed. Gated by ?key=<ADMIN_TOKEN>, same
 // pattern as /admin/leads. Shows storm days (100mi radius), scored homeowner
 // targets, and self-identified claim-check addresses (knock gold).
 export const metadata: Metadata = {
@@ -168,17 +168,17 @@ export default async function AdminStormsPage({
           }))}
         />
 
-        {/* Storm days — collapsed by default so targets stay one thumb-scroll away */}
+        {/* Storm days, collapsed by default so targets stay one thumb-scroll away */}
         <details className="mt-10 rounded-lg border border-gray-200 p-4">
           <summary className="cursor-pointer font-display text-lg font-extrabold">
             Storm days{" "}
             <span className="text-sm font-semibold text-gray-500">
-              ({days.length} in 90d — tap to expand)
+              ({days.length} in 90d, tap to expand)
             </span>
           </summary>
         {days.length === 0 ? (
           <p className="mt-2 text-gray-600">
-            No storm reports ingested yet — the hourly cron fills this, or run a
+            No storm reports ingested yet, the hourly cron fills this, or run a
             backfill: <code className="rounded bg-gray-100 px-1">POST /api/cron/storm-watch?days=365</code>
           </p>
         ) : (
@@ -206,15 +206,15 @@ export default async function AdminStormsPage({
                       <td className="whitespace-nowrap py-2.5 pr-4 font-semibold">
                         {fmtDate(d.date)} {major && "⚡"}
                       </td>
-                      <td className="py-2.5 pr-4">{d.hail || "—"}</td>
+                      <td className="py-2.5 pr-4">{d.hail || ", "}</td>
                       <td className="py-2.5 pr-4 font-semibold">
-                        {d.maxHail ? `${d.maxHail}″` : "—"}
+                        {d.maxHail ? `${d.maxHail}″` : ", "}
                       </td>
-                      <td className="hidden py-2.5 pr-4 sm:table-cell">{d.gusts || "—"}</td>
+                      <td className="hidden py-2.5 pr-4 sm:table-cell">{d.gusts || ", "}</td>
                       <td className="hidden py-2.5 pr-4 sm:table-cell">
-                        {d.maxGust ? `${d.maxGust} mph` : "—"}
+                        {d.maxGust ? `${d.maxGust} mph` : ", "}
                       </td>
-                      <td className="hidden py-2.5 pr-4 sm:table-cell">{d.windDmg || "—"}</td>
+                      <td className="hidden py-2.5 pr-4 sm:table-cell">{d.windDmg || ", "}</td>
                       <td className="py-2.5 pr-4 text-gray-600">{d.cities.join(", ")}</td>
                     </tr>
                   );
@@ -234,7 +234,7 @@ export default async function AdminStormsPage({
         </h2>
         {targetDays.length === 0 ? (
           <p className="mt-2 text-gray-600">
-            None generated yet — auto-runs on fresh hail days, or backfill one:{" "}
+            None generated yet, auto-runs on fresh hail days, or backfill one:{" "}
             <code className="rounded bg-gray-100 px-1">
               POST /api/cron/storm-watch?targets=YYYY-MM-DD
             </code>
@@ -260,7 +260,7 @@ export default async function AdminStormsPage({
             const cities = targetCities.filter((c) => !safeCounty || c.county === safeCounty);
             return (
               <>
-                {/* Recency quick filter — the field-use default */}
+                {/* Recency quick filter, the field-use default */}
                 <div id="targets" className="mt-3 flex flex-wrap gap-2">
                   {[
                     { d: "10", label: "Hit last 10 days" },
@@ -294,7 +294,7 @@ export default async function AdminStormsPage({
                     </a>
                   ))}
                 </div>
-                {/* County + city filters — counties appear once they have targets */}
+                {/* County + city filters, counties appear once they have targets */}
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <a
                     href={qs({ county: undefined, city: undefined })}
@@ -400,15 +400,15 @@ export default async function AdminStormsPage({
                           {t.address}
                         </a>
                       </td>
-                      <td className="whitespace-nowrap py-2 pr-4">{t.city || "—"}</td>
+                      <td className="whitespace-nowrap py-2 pr-4">{t.city || ", "}</td>
                       <td className="py-2 pr-4">{t.zip}</td>
-                      <td className="py-2 pr-4">{t.hail_size_in ? `${t.hail_size_in}″` : "—"}</td>
+                      <td className="py-2 pr-4">{t.hail_size_in ? `${t.hail_size_in}″` : ", "}</td>
                       <td className="py-2 pr-4 text-gray-600">
                         {t.absentee ? "Absentee/investor" : "Owner-occupied"}
                       </td>
-                      <td className="py-2 pr-4">{t.year_built ?? "—"}</td>
+                      <td className="py-2 pr-4">{t.year_built ?? ", "}</td>
                       <td className="py-2 pr-4">
-                        {t.value ? `$${Math.round(t.value / 1000)}k` : "—"}
+                        {t.value ? `$${Math.round(t.value / 1000)}k` : ", "}
                       </td>
                     </tr>
                   ))}
@@ -430,7 +430,7 @@ export default async function AdminStormsPage({
         <h2 className="mt-10 font-display text-lg font-extrabold">
           Self-checked addresses{" "}
           <span className="text-sm font-semibold text-gray-500">
-            ran the claim check — knock/dial first
+            ran the claim check, knock/dial first
           </span>
         </h2>
         {checks.length === 0 ? (
@@ -456,9 +456,9 @@ export default async function AdminStormsPage({
                         day: "numeric",
                       })}
                     </td>
-                    <td className="py-2.5 pr-4 font-semibold">{c.address || c.matched || "—"}</td>
-                    <td className="hidden py-2.5 pr-4 sm:table-cell">{c.hail_count ?? "—"}</td>
-                    <td className="py-2.5 pr-4">{c.largest_in ? `${c.largest_in}″` : "—"}</td>
+                    <td className="py-2.5 pr-4 font-semibold">{c.address || c.matched || ", "}</td>
+                    <td className="hidden py-2.5 pr-4 sm:table-cell">{c.hail_count ?? ", "}</td>
+                    <td className="py-2.5 pr-4">{c.largest_in ? `${c.largest_in}″` : ", "}</td>
                     <td className="py-2.5 pr-4">
                       {c.qualifies ? (
                         <span className="font-semibold text-[#0c7a40]">Likely qualifies</span>
@@ -476,7 +476,7 @@ export default async function AdminStormsPage({
         <p className="mt-10 border-t border-gray-200 pt-4 text-xs text-gray-500">
           Phase 1b adds: parcel intersect (owner names from county CAD rolls),
           batch skip trace, DNC scrub, and per-storm scored target lists pushed
-          to HubSpot. Cold outreach = knock + manual dial only — no cold texts,
+          to HubSpot. Cold outreach = knock + manual dial only, no cold texts,
           no AI cold calls (TCPA).
         </p>
       </div>

@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 /**
  * Registers our JavaScript/AJAX lead forms with CallRail's NATIVE form tracking
- * via CallTrk.captureForm() — so form submissions land in CallRail and can fire
+ * via CallTrk.captureForm(), so form submissions land in CallRail and can fire
  * a Message Flow / Automation Rule auto-text. No Zapier or third-party platform.
  *
  * Mark a form with id + data-cr-capture; this watcher attaches CallRail to it

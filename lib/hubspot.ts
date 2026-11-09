@@ -1,9 +1,9 @@
-// HubSpot CRM pipe — every lead (and later, storm-engine target) flows into
+// HubSpot CRM pipe, every lead (and later, storm-engine target) flows into
 // HubSpot as a contact + a timeline note with the full context. Env-gated:
 //   HUBSPOT_ACCESS_TOKEN   private-app token (Settings → Integrations →
 //                          Private Apps; scopes: crm.objects.contacts.read/write)
 // Uses only standard contact properties, so it works on a fresh free portal
-// with zero configuration. Best-effort — never throws, never blocks a lead.
+// with zero configuration. Best-effort, never throws, never blocks a lead.
 
 const API = "https://api.hubapi.com";
 
@@ -160,7 +160,7 @@ export async function pushLeadToHubspot(lead: HubspotLead) {
     if (!id) return;
 
     const noteLines = [
-      `New website lead — ${lead.service || "general"}`,
+      `New website lead, ${lead.service || "general"}`,
       storm
         ? `⛈️ Hail history: ${storm.hail_size_in}″ documented near their zip, most recent ${storm.storm_date}. Map: https://poweredgetx.com/admin/storms?targets=${storm.storm_date}`
         : "",

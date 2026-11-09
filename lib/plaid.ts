@@ -1,9 +1,9 @@
-// Minimal Plaid REST helper — no SDK dependency, same fetch pattern as the rest
+// Minimal Plaid REST helper, no SDK dependency, same fetch pattern as the rest
 // of the app. Env-gated so the site runs clean until sandbox keys are set:
 //   PLAID_CLIENT_ID, PLAID_SECRET, PLAID_ENV=sandbox|development|production
 //
 // Phase 1 (this): Link + instant bank-verify underwrite (identity/balance/auth).
-// Access tokens are used transiently and NOT persisted — recurring ACH via Plaid
+// Access tokens are used transiently and NOT persisted, recurring ACH via Plaid
 // Transfer (Phase 2) is what needs a database + stored tokens + webhooks.
 
 export function plaidConfig() {

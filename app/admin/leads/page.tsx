@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { listLeads, dbEnabled } from "@/lib/db";
 
-// Internal leads view — NOT indexed. Gated by ?key=<ADMIN_TOKEN>. It's a simple
+// Internal leads view, NOT indexed. Gated by ?key=<ADMIN_TOKEN>. It's a simple
 // internal tool; the token is the same ADMIN_TOKEN used for the backfill route.
 export const metadata: Metadata = {
   title: "Leads",
@@ -87,7 +87,7 @@ export default async function AdminLeadsPage({
           </h1>
           {!dbEnabled() && (
             <span className="text-sm text-red-600">
-              Supabase not configured — set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY.
+              Supabase not configured, set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY.
             </span>
           )}
         </div>
@@ -116,23 +116,23 @@ export default async function AdminLeadsPage({
                     <td className="whitespace-nowrap py-2.5 pr-4 text-gray-500">
                       {fmt(l.created_at)}
                     </td>
-                    <td className="py-2.5 pr-4 font-semibold">{l.name || "—"}</td>
+                    <td className="py-2.5 pr-4 font-semibold">{l.name || ", "}</td>
                     <td className="whitespace-nowrap py-2.5 pr-4">
                       {l.phone ? (
                         <a href={`tel:${l.phone}`} className="text-[#0c7a40] hover:underline">
                           {l.phone}
                         </a>
                       ) : (
-                        "—"
+                        ", "
                       )}
                     </td>
-                    <td className="py-2.5 pr-4">{l.email || "—"}</td>
-                    <td className="py-2.5 pr-4">{l.address || "—"}</td>
-                    <td className="py-2.5 pr-4">{l.service || "—"}</td>
+                    <td className="py-2.5 pr-4">{l.email || ", "}</td>
+                    <td className="py-2.5 pr-4">{l.address || ", "}</td>
+                    <td className="py-2.5 pr-4">{l.service || ", "}</td>
                     <td className="py-2.5 pr-4">{l.solar ? "☀️" : ""}</td>
-                    <td className="py-2.5 pr-4 text-gray-500">{l.source || "—"}</td>
+                    <td className="py-2.5 pr-4 text-gray-500">{l.source || ", "}</td>
                     <td className="max-w-sm py-2.5 pr-4 text-gray-600">
-                      {l.message || "—"}
+                      {l.message || ", "}
                     </td>
                   </tr>
                 ))}

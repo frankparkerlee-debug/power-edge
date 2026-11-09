@@ -12,7 +12,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/free-inspection` },
-  title: "Free Roof Inspection in DFW — Documented for Your Claim",
+  title: "Free Roof Inspection in DFW: Documented for Your Claim",
   description:
     "Book a free roof inspection anywhere in Dallas–Fort Worth. Photos, measurements, and an honest verdict in writing, even if your roof is fine.",
 };
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 const faqs = [
   {
     q: "Is the inspection really free?",
-    a: "Yes — free and no-obligation. We inspect, photograph, and document your roof, and give you an honest read. If your roof is fine, we'll tell you that.",
+    a: "Yes, free and no-obligation. We inspect, photograph, and document your roof, and give you an honest read. If your roof is fine, we'll tell you that.",
   },
   {
     q: "Do I have to file a claim?",
@@ -28,15 +28,15 @@ const faqs = [
   },
   {
     q: "How long does it take?",
-    a: "Most inspections take 30–45 minutes. We can usually get out within a few days — sooner after a storm if you're on the calendar early.",
+    a: "Most inspections take 30–45 minutes. We can usually get out within a few days, sooner after a storm if you're on the calendar early.",
   },
   {
     q: "What do I get?",
-    a: "Photos, measurements, and a written assessment of any storm or hail damage — the evidence your claim is built on. Plus a straight answer, not a sales pitch.",
+    a: "Photos, measurements, and a written assessment of any storm or hail damage, the evidence your claim is built on. Plus a straight answer, not a sales pitch.",
   },
   {
     q: "Will you try to sell me a roof I don't need?",
-    a: "No. Texas doesn't license roofers, so plenty of storm-chasers manufacture damage. We're an insured, accountable contractor you can verify — our reputation depends on being straight with you.",
+    a: "No. Texas doesn't license roofers, so plenty of storm-chasers manufacture damage. We're an insured, accountable contractor you can verify. Our reputation depends on being straight with you.",
   },
 ];
 
@@ -47,14 +47,14 @@ const steps = [
   },
   {
     h: "One of our pros inspects your roof",
-    p: "We get up there, check for hail and wind damage, and photograph everything — including your solar if you have it.",
+    p: "We get up there, check for hail and wind damage, and photograph everything, including your solar if you have it.",
   },
   {
     h: "We document it for your claim",
     p: "Measurements and a written damage assessment your adjuster can work from.",
   },
   {
-    h: "You get a straight answer — in writing",
+    h: "You get a straight answer: in writing",
     p: "Real damage worth claiming, or a clean bill of health. Either way it's documented, and there's no pressure.",
   },
 ];
@@ -73,12 +73,12 @@ export default async function FreeInspectionPage() {
           <div className="lg:pt-4">
             <Kicker className="mb-5">Free · No obligation · Insured</Kicker>
             <h1 className="font-display text-4xl leading-[0.98] text-fg-inv sm:text-5xl">
-              Your free roof inspection —{" "}
+              Your free roof inspection, {" "}
               <span className="bolt-underline">booked in minutes.</span>
             </h1>
             <p className="mt-6 max-w-md text-lg leading-relaxed text-fg-inv-dim">
               One of our pros gets on your roof, photographs and documents any
-              storm damage for your claim, and gives you a straight answer — even
+              storm damage for your claim, and gives you a straight answer, even
               if that answer is &ldquo;your roof is fine.&rdquo; No cost, no
               pressure, no storm-chaser games.
             </p>
@@ -110,7 +110,7 @@ export default async function FreeInspectionPage() {
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 to-transparent px-4 pb-3 pt-10">
                 <p className="text-sm font-semibold text-fg-inv">
-                  The standard we hand back — done right, documented, warrantied.
+                  The standard we hand back, done right, documented, warrantied.
                 </p>
               </div>
             </div>
@@ -194,7 +194,7 @@ export default async function FreeInspectionPage() {
 
       <CtaBand
         heading="Book your free roof inspection."
-        sub="One of our pros, an honest read, and documentation for your claim — at no cost. Tell us where to come."
+        sub="One of our pros, an honest read, and documentation for your claim, at no cost. Tell us where to come."
       />
     </>
   );

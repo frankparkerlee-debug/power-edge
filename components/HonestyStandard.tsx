@@ -1,7 +1,7 @@
 import { site } from "@/lib/site";
 
 /**
- * The named anti-storm-chaser promise — differentiation through verifiable
+ * The named anti-storm-chaser promise, differentiation through verifiable
  * honesty, not urgency. Every claim in here is checkable or legally grounded:
  * that's the point. Used on the ad landing pages (claim check, free inspection)
  * where cold traffic is most wary of roofer games.
@@ -10,7 +10,7 @@ export function HonestyStandard({ className = "" }: { className?: string }) {
   const commitments = [
     {
       h: "We'll tell you if your roof is fine",
-      p: "No manufactured damage, no scare inspections. If there's nothing worth claiming, you'll hear exactly that — in writing.",
+      p: "No manufactured damage, no scare inspections. If there's nothing worth claiming, you'll hear exactly that, in writing.",
     },
     {
       h: "We never touch your deductible",
@@ -18,11 +18,11 @@ export function HonestyStandard({ className = "" }: { className?: string }) {
     },
     {
       h: "We never pose as your adjuster",
-      p: "We document the damage and coordinate with your adjuster — we don't \"handle your claim.\" That line is the law, and it protects you.",
+      p: "We document the damage and coordinate with your adjuster, we don't \"handle your claim.\" That line is the law, and it protects you.",
     },
     {
       h: "A real, accountable company",
-      p: `Texas doesn't license roofers, so anyone can claim to be one. We're insured and accountable instead — $2,000,000 in liability coverage, a 1-year workmanship guarantee, and a ${site.googleRating}★ rating across ${site.googleReviewCount} reviews — not a magnet sign on a truck.`,
+      p: `Texas doesn't license roofers, so anyone can claim to be one. We're insured and accountable instead, $2,000,000 in liability coverage, a 1-year workmanship guarantee, and a ${site.googleRating}★ rating across ${site.googleReviewCount} reviews, not a magnet sign on a truck.`,
     },
   ];
   return (

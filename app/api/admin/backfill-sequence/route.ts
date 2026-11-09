@@ -11,7 +11,7 @@ import { enqueueLeadSequence } from "@/lib/emails";
  *
  * Env required: RESEND_API_KEY, RESEND_AUDIENCE_ID, ADMIN_TOKEN.
  * It returns immediately and enrolls contacts in the background (throttled to
- * respect Resend's rate limit) on Render's persistent server. Run ONCE —
+ * respect Resend's rate limit) on Render's persistent server. Run ONCE, 
  * re-running double-sends to everyone.
  */
 

@@ -76,8 +76,8 @@ export default async function AdminAppointmentsPage({
                     <td className="py-3 pr-4 whitespace-nowrap">
                       <a className="text-[#0c7a40] underline" href={`tel:${r.phone}`}>{r.phone}</a>
                     </td>
-                    <td className="py-3 pr-4 text-gray-700">{r.address || "—"}</td>
-                    <td className="py-3 pr-4 text-gray-500">{r.source || "—"}</td>
+                    <td className="py-3 pr-4 text-gray-700">{r.address || ", "}</td>
+                    <td className="py-3 pr-4 text-gray-500">{r.source || ", "}</td>
                   </tr>
                 ))}
               </tbody>

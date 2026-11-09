@@ -35,7 +35,7 @@ export async function geocode(address: string): Promise<Geo | null> {
     /* fall through */
   }
 
-  // 2. Forgiving rooftop-ish match — OpenStreetMap Nominatim handles partial,
+  // 2. Forgiving rooftop-ish match, OpenStreetMap Nominatim handles partial,
   //    non-standardized, or typo'd street addresses (and cities) the strict
   //    Census geocoder rejects, and returns a point near the actual property
   //    (better for roof measurement than a ZIP centroid). Free, no key.
@@ -66,7 +66,7 @@ export async function geocode(address: string): Promise<Geo | null> {
     /* fall through */
   }
 
-  // 3. ZIP centroid (Zippopotam) — last resort when no street match.
+  // 3. ZIP centroid (Zippopotam), last resort when no street match.
   const zip = address.match(/\b(\d{5})\b/)?.[1];
   if (zip) {
     try {

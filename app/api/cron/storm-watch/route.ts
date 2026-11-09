@@ -4,7 +4,7 @@ import { generateStormTargets } from "@/lib/parcels";
 
 /**
  * Storm engine ingest. The hourly claim-nurture cron chains this automatically,
- * so no separate cron is required — this route exists for manual runs/backfill:
+ * so no separate cron is required, this route exists for manual runs/backfill:
  *   POST /api/cron/storm-watch                     header: x-admin-token: <ADMIN_TOKEN>
  *   POST /api/cron/storm-watch?days=365            backfill a year of storm reports
  *   POST /api/cron/storm-watch?targets=2026-04-28  parcel-intersect a storm day →

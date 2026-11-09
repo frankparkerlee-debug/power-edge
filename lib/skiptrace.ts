@@ -1,8 +1,8 @@
-// BatchData skip trace — turns storm targets (owner + address) into DIALABLE
+// BatchData skip trace, turns storm targets (owner + address) into DIALABLE
 // rows: phones + DNC flags stored on storm_targets. Runs from the hourly cron,
 // highest-score untraced targets first, capped per run for cost control.
 // Env: BATCHDATA_API_KEY (skip-trace no-ops until set)
-//      SKIPTRACE_MAX_PER_RUN (default 100 — ~$10-20/run at list prices)
+//      SKIPTRACE_MAX_PER_RUN (default 100, ~$10-20/run at list prices)
 
 const BATCH_URL = "https://api.batchdata.com/api/v1/property/skip-trace";
 
@@ -26,7 +26,7 @@ type TraceTarget = {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function extractPhones(person: any): Array<{ number: string; dnc: boolean }> {
   // A TCPA litigator or person-level TCPA flag makes EVERY number unsafe to
-  // dial — mark all dnc=true so the field tool shows knock/mail-only.
+  // dial, mark all dnc=true so the field tool shows knock/mail-only.
   const unsafe = !!person?.litigator || !!person?.dnc?.tcpa;
   const phones = (person?.phoneNumbers ?? person?.phones ?? []) as any[];
   return phones
@@ -81,7 +81,7 @@ export async function runSkipTrace(): Promise<{ traced: number; hits: number; ok
       });
       if (!bres.ok) {
         console.error("[skiptrace] batchdata non-2xx", bres.status, (await bres.text()).slice(0, 300));
-        // mark chunk as attempted so we don't re-bill failures forever? No —
+        // mark chunk as attempted so we don't re-bill failures forever? No, 
         // leave untraced so a config fix retries them.
         break;
       }

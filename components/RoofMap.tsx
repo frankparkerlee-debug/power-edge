@@ -4,7 +4,7 @@
 import { useEffect, useRef } from "react";
 import "leaflet/dist/leaflet.css";
 
-// Satellite/aerial view of the home's roof — makes the estimate feel real
+// Satellite/aerial view of the home's roof, makes the estimate feel real
 // ("that's MY roof"). Esri World Imagery tiles (free, no key); Leaflet bundled.
 export function RoofMap({
   home,

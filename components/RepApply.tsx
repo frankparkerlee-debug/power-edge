@@ -8,7 +8,7 @@ import { track } from "@/lib/analytics";
 /**
  * Sales-rep application form for /careers. Posts to /api/lead flagged as a
  * "Sales rep application" so it lands in the leads table + team email like any
- * other lead. Not homeowner-facing — recruiting only.
+ * other lead. Not homeowner-facing, recruiting only.
  */
 
 const EXPERIENCE = [
@@ -43,8 +43,8 @@ export function RepApply() {
           phone: fd.phone,
           email: fd.email,
           service: "Sales rep application",
-          message: `[REP APPLICATION] experience: ${exp || "—"}; city: ${
-            fd.city || "—"
+          message: `[REP APPLICATION] experience: ${exp || ", "}; city: ${
+            fd.city || ", "
           }${fd.note ? `; note: ${fd.note}` : ""}`,
           company_website: fd.company_website,
           ...leadContext({ tool: "careers" }),
@@ -68,7 +68,7 @@ export function RepApply() {
           </svg>
         </div>
         <h3 className="font-display text-2xl font-bold text-fg-inv">
-          Got it — we&apos;ll reach out fast.
+          Got it, we&apos;ll reach out fast.
         </h3>
         <p className="mt-2 text-fg-inv-dim">
           Expect a call or text from our sales lead shortly. Come ready to talk
@@ -131,7 +131,7 @@ export function RepApply() {
         </button>
         {sub === "error" && (
           <p className="text-sm text-ember">
-            Something went wrong — please text us instead.
+            Something went wrong, please text us instead.
           </p>
         )}
         <SmsConsent />

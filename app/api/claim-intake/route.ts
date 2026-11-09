@@ -3,11 +3,11 @@ import { upsertClaimIntake, type ClaimIntake } from "@/lib/db";
 import { sendClaimComplete } from "@/lib/emails";
 import { site } from "@/lib/site";
 
-// Homeowner "claim prep" intake — progressive save. The wizard upserts one row
+// Homeowner "claim prep" intake, progressive save. The wizard upserts one row
 // (by id) as the homeowner advances, so partial progress persists and the
 // drop-off nurture can reach people who don't finish. On completion we notify
 // the team and confirm to the homeowner. We collect the homeowner's OWN claim
-// info to move fast on-site — we don't file or negotiate the claim.
+// info to move fast on-site, we don't file or negotiate the claim.
 export async function POST(req: Request) {
   let body: Record<string, string | boolean | number>;
   try {
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   const addr = s("address");
   const nameVal = s("name");
   // Per-WORD check. Testing the space-stripped string silently dropped real
-  // people ("John Schmidt", "Kathryn Schmidt", "Mark Schwartz" — the run spans
+  // people ("John Schmidt", "Kathryn Schmidt", "Mark Schwartz", the run spans
   // the gap between a consonant-ending first name and a consonant-heavy
   // surname). Bots put the gibberish inside one token, so test tokens.
   const consonantRun = nameVal
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  // Full view (defaults) — used for the notification emails.
+  // Full view (defaults), used for the notification emails.
   const intake = {
     id,
     name: s("name"),
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
     updated_at: new Date().toISOString(),
   };
 
-  // Sparse upsert — omit empty strings so a partial resend (e.g. resume from a
+  // Sparse upsert, omit empty strings so a partial resend (e.g. resume from a
   // nurture email, where only contact is prefilled) never clobbers earlier
   // progressive-save answers. Booleans only when the client actually sent them.
   const payload: Record<string, unknown> = {
@@ -98,14 +98,14 @@ export async function POST(req: Request) {
 
   await upsertClaimIntake(payload as ClaimIntake);
 
-  // Notify only at the booking step (stage 2) — the optional policy step
+  // Notify only at the booking step (stage 2), the optional policy step
   // (stage 3) upserts silently so we don't double-email.
   if (completed && stage === 2) {
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey) {
       const to = process.env.LEAD_TO_EMAIL || site.email;
       const row = (l: string, v: string) =>
-        `<p style="margin:2px 0"><strong>${l}:</strong> ${esc(v) || "—"}</p>`;
+        `<p style="margin:2px 0"><strong>${l}:</strong> ${esc(v) || ", "}</p>`;
       // Team notification (full intake).
       fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -118,7 +118,7 @@ export async function POST(req: Request) {
           to: [to],
           subject: `Claim prep COMPLETE: ${intake.name}${intake.solar ? " ☀️ SOLAR" : ""}`,
           html: `
-            <h2>Homeowner completed claim prep — crew can inspect &amp; close on-site</h2>
+            <h2>Homeowner completed claim prep, crew can inspect &amp; close on-site</h2>
             ${row("Name", intake.name)}${row("Phone", intake.phone)}${row("Email", intake.email)}
             ${row("Property", intake.address)}
             ${row("Cause", intake.cause)}${row("What they see", intake.damage_signs)}
@@ -129,7 +129,7 @@ export async function POST(req: Request) {
             <p style="margin:2px 0"><strong>Already filed:</strong> ${intake.filed ? "Yes" : "No"}</p>
             ${row("Claim #", intake.claim_number)}${row("Mortgage co.", intake.mortgage_company)}
             ${row("Areas of concern", intake.concerns)}
-            <p style="margin:2px 0"><strong>Solar:</strong> ${intake.solar ? "Yes — panels" : "—"}</p>
+            <p style="margin:2px 0"><strong>Solar:</strong> ${intake.solar ? "Yes, panels" : ", "}</p>
           `,
         }),
       }).catch((e) => console.error("[claim-intake] team email failed", e));

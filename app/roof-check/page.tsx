@@ -26,7 +26,7 @@ export default function RoofCheckPage() {
           <p className="mt-6 max-w-md text-lg leading-relaxed text-fg-inv-dim">
             Most Texas homeowners don&apos;t find out their insurer quietly
             downgraded their aging roof to actual-cash-value until they file a
-            claim — and the check is thousands short. Answer five quick questions
+            claim, and the check is thousands short. Answer five quick questions
             and get an honest read on where you stand.
           </p>
 

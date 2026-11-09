@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import QRCode from "qrcode";
 import { site } from "@/lib/site";
 
-// Internal door-knock QR kit — NOT indexed. Generates QR codes that point to
+// Internal door-knock QR kit, NOT indexed. Generates QR codes that point to
 // the tools with UTM attribution so leads from door-knocking (and per-rep) are
 // tracked. Add ?rep=Name to tag a specific knocker.
 export const metadata: Metadata = {
@@ -20,19 +20,19 @@ type Card = {
 const CARDS: Card[] = [
   {
     label: "Free Roof Claim Check",
-    pitch: "“Scan to see if YOUR roof likely qualifies for a claim — free, 60 seconds.”",
+    pitch: "“Scan to see if YOUR roof likely qualifies for a claim: free, 60 seconds.”",
     path: "/roof-claim-check",
     campaign: "claim",
   },
   {
     label: "Deductible Financing",
-    pitch: "“Scan to see your deductible financed — from $250 down, low monthly.”",
+    pitch: "“Scan to see your deductible financed: from $250 down, low monthly.”",
     path: "/financing",
     campaign: "financing",
   },
   {
     label: "PowerEdge Home",
-    pitch: "“Scan to see who we are — insured, verifiable, local.”",
+    pitch: "“Scan to see who we are: insured, verifiable, local.”",
     path: "/",
     campaign: "home",
   },
@@ -74,7 +74,7 @@ export default async function KitPage({
         <div className="flex items-end justify-between border-b border-gray-200 pb-5">
           <div>
             <h1 className="font-display text-3xl font-extrabold">
-              PowerEdge — Door-Knock QR Kit
+              PowerEdge, Door-Knock QR Kit
             </h1>
             <p className="mt-1 text-sm text-gray-600">
               Print this, or save each QR to drop into your door hangers.
@@ -115,11 +115,11 @@ export default async function KitPage({
             Every scan opens the tool with attribution built in, so leads from
             door-knocking show up tagged <strong>source: doorhanger</strong> in
             your lead emails{repClean ? "" : " (and per-rep when you add ?rep=)"}.
-            Give each rep their own link — e.g.{" "}
+            Give each rep their own link, e.g.{" "}
             <code className="rounded bg-gray-100 px-1">
               {site.url}/kit?rep=mike
             </code>{" "}
-            — to print rep-specific QR codes and see who&apos;s driving leads.
+, to print rep-specific QR codes and see who&apos;s driving leads.
           </p>
         </div>
       </div>

@@ -1,4 +1,4 @@
-// Storm engine — ingest NWS/IEM Local Storm Reports (hail + damaging wind)
+// Storm engine, ingest NWS/IEM Local Storm Reports (hail + damaging wind)
 // within 100mi of DFW into Supabase `storm_events`. This is the trigger layer
 // for the post-storm lead engine: watch → (Phase 1b) parcel intersect → score
 // → knock map / dial list / HubSpot.
@@ -80,7 +80,7 @@ export async function fetchStormReports(days: number): Promise<StormEvent[]> {
     else if (tt === "TSTM WND DMG") type = "wind_dmg";
     if (!type) continue;
     // Skip sub-severe gusts (roof-relevant threshold ≈ 55mph). Hail: keep all
-    // sizes — even 0.75" matters for soft-metal + shingle-granule claims.
+    // sizes, even 0.75" matters for soft-metal + shingle-granule claims.
     if (type === "wind_gust" && (p.magf ?? 0) < 55) continue;
 
     out.push({

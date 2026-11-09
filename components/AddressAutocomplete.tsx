@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 /**
  * Address typeahead. Suggests real addresses as the user types (Photon /
- * OpenStreetMap — free, no key, CORS-enabled), biased to North Texas. Picking
+ * OpenStreetMap, free, no key, CORS-enabled), biased to North Texas. Picking
  * a suggestion fills the field and (optionally) fires onSelect to auto-run.
  */
 export function AddressAutocomplete({

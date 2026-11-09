@@ -64,15 +64,15 @@ function Hero() {
             <span className="bolt-underline">We&apos;ll tell you straight.</span>
           </h1>
           <p className="mt-7 max-w-xl text-lg leading-relaxed text-fg-inv-dim">
-            Leak, missing shingles, hail — we inspect it free and tell you
+            Leak, missing shingles, hail. We inspect it free and tell you
             straight, storm claim or not. One accountable, insured crew,
             documented from inspection to final walk.
           </p>
 
-          {/* Conversion pillars — storm-first, credibility */}
+          {/* Conversion pillars, storm-first, credibility */}
           <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4 border-t border-line pt-6">
             {[
-              { t: "Free roof inspection", d: "Storm claim or cash — honest read" },
+              { t: "Free roof inspection", d: "Storm claim or cash, honest read" },
               { t: "Insured & accountable", d: `${site.liabilityCoverage} liability coverage` },
             ].map((p) => (
               <div key={p.t} className="flex items-start gap-2.5">
@@ -96,7 +96,7 @@ function Hero() {
                 Book a free inspection
               </div>
               <div className="mt-0.5 text-sm text-fg-inv-dim">
-                Documented for your claim — no cost, no pressure.
+                Documented for your claim, no cost, no pressure.
               </div>
               <div className="mt-2 font-display text-sm font-bold text-bolt">
                 Get started →
@@ -148,7 +148,7 @@ function Hero() {
               Book your free roof inspection
             </h2>
             <p className="mt-1.5 text-sm text-fg-inv-dim">
-              Just your name and number — a real pro calls you back fast,
+              Just your name and number, a real pro calls you back fast,
               usually within the hour.
             </p>
             <div className="mt-6">
@@ -205,11 +205,11 @@ function Wedge() {
   const bullets = [
     {
       h: "We're insured & accountable",
-      p: `Backed by $2,000,000 in liability coverage and a documented 1-year workmanship guarantee — a real, accountable company, not a fly-by-night storm crew.`,
+      p: `Backed by $2,000,000 in liability coverage and a documented 1-year workmanship guarantee, a real, accountable company, not a fly-by-night storm crew.`,
     },
     {
       h: "One accountable crew",
-      p: "Our own crews handle your roof, inspection to final walk — no subcontractor finger-pointing.",
+      p: "Our own crews handle your roof, inspection to final walk, no subcontractor finger-pointing.",
     },
     {
       h: "Built to show up, not just sign you up",
@@ -217,7 +217,7 @@ function Wedge() {
     },
     {
       h: "We'll tell you if your roof is fine",
-      p: "No manufactured damage, no scare inspections. If there's nothing worth claiming, you'll hear exactly that — in writing.",
+      p: "No manufactured damage, no scare inspections. If there's nothing worth claiming, you'll hear exactly that, and you'll have it in writing.",
     },
   ];
   return (
@@ -227,7 +227,7 @@ function Wedge() {
           <SectionHeading
             kicker="Why PowerEdge"
             title="The one contractor you can actually verify."
-            intro="Texas doesn't license roofers. Anyone with a ladder and a magnet sign can knock your door after a storm. We hold ourselves to a higher bar anyway — insured and accountable as a company, with the reviews and workmanship guarantee to back it up."
+            intro="Texas doesn't license roofers. Anyone with a ladder and a magnet sign can knock your door after a storm. We hold ourselves to a higher bar anyway, insured and accountable as a company, with the reviews and workmanship guarantee to back it up."
           />
           <ul className="mt-8 space-y-5">
             {bullets.map((b) => (
@@ -255,7 +255,7 @@ function Wedge() {
             A real company stands behind the work.
           </p>
           <p className="mt-3 text-fg-inv-dim">
-            Every roof runs under one accountable, insured team — no
+            Every roof runs under one accountable, insured team, no
             subcontractor finger-pointing, and an honest verdict in writing
             even when the answer is &ldquo;your roof is fine.&rdquo;
           </p>
@@ -281,7 +281,7 @@ function ServicesGrid() {
         <SectionHeading
           dark
           kicker="What we do"
-          title="Roofing, home repair, and commercial — one insured, accountable team."
+          title="Roofing, home repair, and commercial, one insured, accountable team."
           intro="Storm restoration and roof replacement for homes, home repair, and full commercial roofing for property managers. Free inspections, no runaround."
         />
         <div className="mt-12 grid gap-5 sm:grid-cols-2">
@@ -311,7 +311,7 @@ function ServicesGrid() {
               <ul className="mt-5 space-y-2 text-sm text-fg-inv-dim">
                 {s.bullets.slice(0, 3).map((b) => (
                   <li key={b} className="flex gap-2">
-                    <span className="text-bolt">—</span>
+                    <span className="text-bolt">, </span>
                     {b}
                   </li>
                 ))}
@@ -342,7 +342,7 @@ function ClaimCheckBand() {
               <p className="mt-4 text-fg-inv-dim">
                 Enter your address and answer three quick questions. We check
                 reported hail near your home and give you a straight read on
-                whether it&apos;s likely worth filing — no salesperson, no
+                whether it&apos;s likely worth filing, no salesperson, no
                 obligation.
               </p>
               <ClaimCheckInline />
@@ -375,15 +375,15 @@ function ClaimCheckBand() {
 function StormRestoration() {
   const steps = [
     {
-      h: "We inspect and document — free",
+      h: "We inspect and document: free",
       p: "Photos, measurements, and a written damage assessment, so your claim is built on evidence, not guesswork.",
     },
     {
       h: "You file; we coordinate with your adjuster",
-      p: "We meet your adjuster on-site and document the full scope so nothing legitimate gets missed. We don't act as your public adjuster — that's the law, and it protects you.",
+      p: "We meet your adjuster on-site and document the full scope so nothing legitimate gets missed. We don't act as your public adjuster. That's the law, and it protects you.",
     },
     {
-      h: "We do the roof — you deal with your insurer",
+      h: "We do the roof: you deal with your insurer",
       p: "We document the damage and meet your adjuster on-site. What you owe and what your policy covers is between you and your insurance company.",
     },
   ];
@@ -394,12 +394,12 @@ function StormRestoration() {
         <div>
           <p className="kicker text-ember">Storm &amp; hail damage</p>
           <h2 className="mt-4 font-display text-3xl font-bold text-fg-inv sm:text-4xl">
-            Hail damage? We make the insurance claim simple — and by the book.
+            Hail damage? We make the insurance claim simple, and by the book.
           </h2>
           <p className="mt-4 text-fg-inv-dim">
             A storm claim is where homeowners get burned by fly-by-night roofers.
             Here&apos;s how we do it differently: no waiving your deductible, no
-            posing as your adjuster — just an honest claim and a roof done right.
+            posing as your adjuster, just an honest claim and a roof done right.
           </p>
           <ol className="mt-8 space-y-5">
             {steps.map((s, i) => (

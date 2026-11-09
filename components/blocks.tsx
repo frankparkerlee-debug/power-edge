@@ -50,7 +50,7 @@ export function PageHero({
                 Get your free quote
               </h2>
               <p className="mt-1 text-sm text-fg-inv-dim">
-                A real person calls you back fast — usually within the hour.
+                A real person calls you back fast, usually within the hour.
               </p>
               <div className="mt-5">
                 <LeadForm compact />

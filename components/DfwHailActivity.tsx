@@ -6,7 +6,7 @@ import { Container, Kicker } from "./ui";
 import { CountUp } from "./CountUp";
 
 /**
- * Live "storm intelligence" band — real DFW-wide hail activity (NWS/IEM, last 12
+ * Live "storm intelligence" band, real DFW-wide hail activity (NWS/IEM, last 12
  * months) via /api/dfw-hail. Dynamic, proprietary-feeling proof that funnels
  * into the per-address claim check. Degrades gracefully if the feed is empty.
  */
@@ -75,7 +75,7 @@ export function DfwHailActivity() {
                 Reported to the National Weather Service in the last 12 months
                 {near ? ` within ~${data!.radiusMi} miles of you` : ""}
                 {data!.largest
-                  ? ` — the largest ${data!.largest}″${near ? " nearby" : " across the metro"}`
+                  ? `, the largest ${data!.largest}″${near ? " nearby" : " across the metro"}`
                   : ""}
                 . Damage is easy to miss from the ground, and Texas claims have
                 deadlines.
@@ -89,7 +89,7 @@ export function DfwHailActivity() {
                 in the country.
               </h2>
               <p className="mt-4 max-w-md text-fg-inv-dim">
-                North Texas gets hammered every season — and hail damage is easy
+                North Texas gets hammered every season, and hail damage is easy
                 to miss from the ground. Check your exact address against
                 reported storm activity, free.
               </p>
@@ -159,7 +159,7 @@ export function DfwHailActivity() {
               </div>
               <p className="mt-2 text-sm text-fg-inv-dim">
                 Dallas County leads the U.S. in hail-damage losses. If a storm
-                came through, your roof may already qualify — check free.
+                came through, your roof may already qualify, check free.
               </p>
             </div>
           )}

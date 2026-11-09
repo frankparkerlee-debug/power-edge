@@ -18,7 +18,7 @@ import { burst, clientIp, tooMany } from "@/lib/rateLimit";
  */
 
 const RADIUS_MI = 15;
-const WFO = "FWD"; // Fort Worth / Dallas — covers PowerEdge's service area
+const WFO = "FWD"; // Fort Worth / Dallas, covers PowerEdge's service area
 
 type Nearby = {
   size: number; // inches
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Address required" }, { status: 422 });
   }
 
-  // 1. Geocode — if this fails, tell the UI so it can fall back gracefully.
+  // 1. Geocode, if this fails, tell the UI so it can fall back gracefully.
   let geo;
   try {
     geo = await geocode(address);
@@ -145,7 +145,7 @@ export async function POST(req: Request) {
     const mostRecent = nearby[0] || null;
     const significantCount = nearby.filter((n) => n.size >= 1).length;
 
-    // Log the check — even if this visitor never submits the form, the address
+    // Log the check, even if this visitor never submits the form, the address
     // itself is a self-identified storm-hit lead source (retargeting + knock
     // map). Fire-and-forget; mirrors the client's qualifies rule.
     void insertRoofCheck({
@@ -182,7 +182,7 @@ export async function POST(req: Request) {
       })),
     });
   } catch {
-    // Data source hiccup — still let the UI capture the lead.
+    // Data source hiccup, still let the UI capture the lead.
     return NextResponse.json({ ok: true, soft: true, matched: geo.matched });
   }
 }

@@ -17,7 +17,7 @@ import type { StormData } from "./StormReport";
  * stakes + evidence + financing detail live BELOW the form as reinforcement.
  * Urgency is imminent-threat ("before the next storm makes it worse"), not a
  * reassuring deadline countdown. Honest framing: never "your roof is damaged" /
- * "you have a claim" — only "you likely qualify… an inspection confirms."
+ * "you have a claim", only "you likely qualify… an inspection confirms."
  */
 
 type Result = StormData & { ok?: boolean; found?: boolean; soft?: boolean };
@@ -117,7 +117,7 @@ export function RoofClaimCheck() {
           solar: solar ? "yes" : "",
           message: `[Roof Claim Check] ${
             qualifies ? "LIKELY QUALIFIES" : "worth a look"
-          } — ${result?.matched || address}; hail: ${hailSummary}`,
+          }, ${result?.matched || address}; hail: ${hailSummary}`,
           company_website: fd.company_website,
           ...leadContext({ tool: "roof-claim-check" }),
         }),
@@ -144,7 +144,7 @@ export function RoofClaimCheck() {
           Do you have a roof claim? Find out free.
         </h2>
         <p className="mt-2 text-sm text-fg-inv-dim">
-          Enter your address — we check reported hail near your home and tell you
+          Enter your address, we check reported hail near your home and tell you
           on the spot if it&apos;s likely worth filing. Takes seconds, no
           obligation.
         </p>
@@ -173,7 +173,7 @@ export function RoofClaimCheck() {
         </form>
         <p className="mt-3 text-center text-xs text-fg-inv-dim">
           Data from NWS / NOAA storm reports. This isn&apos;t an insurance
-          determination — a free inspection confirms it.
+          determination, a free inspection confirms it.
         </p>
         <div className="mt-4">
           <p className="text-center text-xs text-fg-inv-dim">
@@ -253,7 +253,7 @@ export function RoofClaimCheck() {
   // ---- RESULT + CAPTURE (form-forward) ------------------------------------
   return (
     <div className="rounded-card border border-line bg-ink-2 p-6 shadow-2xl sm:p-8">
-      {/* Compact verdict — evidence-first, cite the record */}
+      {/* Compact verdict, evidence-first, cite the record */}
       {qualifies ? (
         <div className="rounded-card border-2 border-bolt bg-bolt/10 p-4 sm:p-5">
           <div className="text-xs font-bold uppercase tracking-wider text-bolt">
@@ -287,7 +287,7 @@ export function RoofClaimCheck() {
         </div>
       )}
 
-      {/* Factual urgency — tied to the record, not generic fear */}
+      {/* Factual urgency, tied to the record, not generic fear */}
       {qualifies && (
         <div className="mt-3 flex items-start gap-2 rounded-md border border-ember/40 bg-ember/10 px-4 py-3 text-sm font-semibold text-fg-inv">
           <span aria-hidden>⚡</span>
@@ -299,7 +299,7 @@ export function RoofClaimCheck() {
         </div>
       )}
 
-      {/* THE FORM — right here, no endless scroll */}
+      {/* THE FORM, right here, no endless scroll */}
       <div className="mt-5">
         <p className="font-display text-lg font-bold text-fg-inv">
           Lock in your free inspection
@@ -335,12 +335,12 @@ export function RoofClaimCheck() {
           </button>
           {sub === "error" && (
             <p className="text-sm text-ember">
-              Something went wrong — please call us instead.
+              Something went wrong, please call us instead.
             </p>
           )}
           {/* Financing reassurance, right at the point of action */}
           <p className="text-center text-xs text-fg-inv-dim">
-            Deductible tight? <strong className="text-bolt">Finance it from $250 down</strong> — paid in full over time, never waived.
+            Deductible tight? <strong className="text-bolt">Finance it from $250 down</strong>, paid in full over time, never waived.
           </p>
           <SmsConsent />
         </form>
@@ -356,7 +356,7 @@ export function RoofClaimCheck() {
             <span className="text-ember" aria-hidden>→</span>
             <span>
               <strong className="text-fg-inv">The next storm makes it worse.</strong>{" "}
-              Each round of hail and rain deepens the damage — and muddies which
+              Each round of hail and rain deepens the damage, and muddies which
               storm caused it.
             </span>
           </li>
@@ -372,7 +372,7 @@ export function RoofClaimCheck() {
             <span className="text-ember" aria-hidden>→</span>
             <span>
               <strong className="text-fg-inv">The window won&apos;t stay open.</strong>{" "}
-              Let the filing deadline pass and the whole roof is on you — not just
+              Let the filing deadline pass and the whole roof is on you, not just
               your deductible.
             </span>
           </li>

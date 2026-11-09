@@ -116,7 +116,7 @@ function estimateFromFootprint(footprint: number) {
 }
 
 /** Google Solar API gives the ACTUAL roof surface area (pitch already baked in)
- *  from aerial/satellite imagery — no footprint-to-roof guessing needed. */
+ *  from aerial/satellite imagery, no footprint-to-roof guessing needed. */
 function estimateFromRoofSqft(roofSqft: number) {
   const sq = (roofSqft / 100) * WASTE; // squares incl. waste/cuts
   const round = (n: number) => Math.round(n / 250) * 250;
@@ -135,11 +135,11 @@ async function measureSatellite(
       `https://solar.googleapis.com/v1/buildingInsights:findClosest?location.latitude=${lat}&location.longitude=${lon}&requiredQuality=LOW&key=${key}`;
     const res = await fetch(url, {
       signal: AbortSignal.timeout(9000),
-      next: { revalidate: 2592000 }, // 30d — roofs don't change; controls cost
+      next: { revalidate: 2592000 }, // 30d, roofs don't change; controls cost
     });
     if (!res.ok) return null;
     const data = await res.json();
-    // wholeRoofStats.areaMeters2 is the actual 3-D roof surface — pitch already
+    // wholeRoofStats.areaMeters2 is the actual 3-D roof surface, pitch already
     // baked in, so no pitch assumption is needed for the estimate.
     const m2 = data?.solarPotential?.wholeRoofStats?.areaMeters2;
     if (!m2 || m2 < 30) return null;
@@ -206,7 +206,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, source: "need_manual", matched: null });
   }
 
-  // 1. Satellite measurement (Google Solar API) — most accurate; actual roof
+  // 1. Satellite measurement (Google Solar API), most accurate; actual roof
   //    surface area from aerial imagery. Used when GOOGLE_SOLAR_API_KEY is set.
   const sat = await measureSatellite(geo.lat, geo.lon);
   if (sat) {
@@ -241,7 +241,7 @@ export async function POST(req: Request) {
     }
   }
 
-  // Couldn't measure automatically — ask for square footage.
+  // Couldn't measure automatically, ask for square footage.
   return NextResponse.json({
     ok: true,
     source: "need_manual",

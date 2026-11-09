@@ -10,7 +10,7 @@ export function Reviews() {
           <SectionHeading
             kicker="What North Texas says"
             title="Rated 4.7 by your neighbors."
-            intro="Real Google reviews from real DFW homeowners and businesses. We had a rough patch late last year — we fixed it, and we're earning back every star."
+            intro="Real Google reviews from real DFW homeowners and businesses. We had a rough patch late last year, we fixed it, and we're earning back every star."
           />
           <a
             href={site.googleReviewsUrl}

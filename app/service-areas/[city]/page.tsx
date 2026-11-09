@@ -21,23 +21,23 @@ export async function generateMetadata({
   const c = getCity(city);
   if (!c) return {};
   return {
-    title: `Roofing Company in ${c.name}, TX — Storm & Hail Roof Repair`,
+    title: `Roofing Company in ${c.name}, TX: Storm & Hail Roof Repair`,
     description: `Storm and hail roof repair, replacement, and insurance-claim roofing in ${c.name}. Free inspection, honest verdict in writing, rated ${site.googleRating}★.`,
     alternates: { canonical: `${site.url}/service-areas/${c.slug}` },
   };
 }
 
-// City-templated FAQs — real answers (FAQPage schema via FaqSection) that
+// City-templated FAQs, real answers (FAQPage schema via FaqSection) that
 // match what homeowners and AI search actually ask about roofing in a city.
 function cityFaqs(c: City) {
   return [
     {
       q: `How much does a roof replacement cost in ${c.name}?`,
-      a: `Most ${c.name} asphalt roofs start around $400–$450 per square (100 sq ft) installed, with premium materials and add-ons running higher. On a covered storm claim you typically pay only your deductible — and you can finance that from $250 down. A free inspection gets you exact numbers in writing.`,
+      a: `Most ${c.name} asphalt roofs start around $400–$450 per square (100 sq ft) installed, with premium materials and add-ons running higher. On a covered storm claim you typically pay only your deductible, and you can finance that from $250 down. A free inspection gets you exact numbers in writing.`,
     },
     {
-      q: `Hail hit ${c.name} — do I have an insurance claim?`,
-      a: `Maybe — reported hail near your address plus actual roof damage is what makes a claim. We check your address against National Weather Service storm records free at our roof claim check, then a free inspection documents whether the damage is worth filing. If your roof is fine, we tell you that in writing.`,
+      q: `Hail hit ${c.name}, do I have an insurance claim?`,
+      a: `Maybe, reported hail near your address plus actual roof damage is what makes a claim. We check your address against National Weather Service storm records free at our roof claim check, then a free inspection documents whether the damage is worth filing. If your roof is fine, we tell you that in writing.`,
     },
     {
       q: `How fast can you get to my roof in ${c.name}?`,
@@ -45,7 +45,7 @@ function cityFaqs(c: City) {
     },
     {
       q: `Do you handle the insurance claim for me?`,
-      a: `We document the damage — photos, measurements, a written scope — and coordinate with your adjuster by the book. Texas law doesn't allow a roofer to negotiate your claim or waive your deductible, and we never do either. Doing it right protects you.`,
+      a: `We document the damage, photos, measurements, a written scope, and coordinate with your adjuster by the book. Texas law doesn't allow a roofer to negotiate your claim or waive your deductible, and we never do either. Doing it right protects you.`,
     },
   ];
 }
@@ -103,7 +103,7 @@ export default async function CityPage({
           <SectionHeading
             kicker={`Serving ${c.name}`}
             title={`Roof repair, replacement & storm claims in ${c.name}.`}
-            intro={`The same crew and the same standard across ${c.county}: evidence-based inspections, claims documented by the book, and honest answers — even when the answer is "your roof is fine."`}
+            intro={`The same crew and the same standard across ${c.county}: evidence-based inspections, claims documented by the book, and honest answers, even when the answer is "your roof is fine."`}
           />
           <div className="mt-10 grid gap-5 sm:grid-cols-2">
             {services.map((s) => (
@@ -126,7 +126,7 @@ export default async function CityPage({
           <div className="mt-12">
             <FeatureList
               items={[
-                `Free roof inspections across ${c.name} — verdict in writing`,
+                `Free roof inspections across ${c.name}, verdict in writing`,
                 "Deductible financing from $250 down, paid in full over time",
                 `Storm & hail insurance claims documented by the book`,
                 `Rated ${site.googleRating}★ by North Texas homeowners`,
@@ -162,7 +162,7 @@ export default async function CityPage({
 
       <CtaBand
         heading={`Storm damage in ${c.name}? Get eyes on it free.`}
-        sub="Free inspection, documented for your claim, deductible financing from $250 down — and a straight answer either way."
+        sub="Free inspection, documented for your claim, deductible financing from $250 down, and a straight answer either way."
       />
     </>
   );

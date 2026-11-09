@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
  * Free NWS/IEM Local Storm Reports (FWD office), last 12 months (an
  * insurance-relevant window ≈ the Texas filing period). The hail dataset is
  * cached daily; we then localize per request:
- *   - Geolocate the visitor's IP (coarse, city-level — not stored).
+ *   - Geolocate the visitor's IP (coarse, city-level, not stored).
  *   - If they're in/near DFW, count hail within ~25mi of them ("near {city}").
  *   - Otherwise (or if a local area is sparse) fall back to metro-wide so the
  *     number is always meaningful and never zero.
@@ -120,7 +120,7 @@ export async function GET(req: Request) {
         });
       }
     }
-    // Metro fallback — always meaningful, never zero.
+    // Metro fallback, always meaningful, never zero.
     const metro = summarize(feats, DFW, METRO_MI);
     return NextResponse.json({
       ok: true,

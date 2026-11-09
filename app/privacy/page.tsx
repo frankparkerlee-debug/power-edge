@@ -30,7 +30,7 @@ export default function PrivacyPage() {
             <h2>Information we collect</h2>
             <p>
               We collect the information you give us through our forms, phone
-              calls, and text messages — typically your name, phone number,
+              calls, and text messages, typically your name, phone number,
               email address, property address, and details about the service you
               need. We may also collect basic analytics about how the site is
               used.

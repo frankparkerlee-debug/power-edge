@@ -137,7 +137,7 @@ export function StormDashboard({
         }
       }
 
-      // Self-checked addresses — people who ran the claim check.
+      // Self-checked addresses, people who ran the claim check.
       if (showChecks) {
         for (const c of checks) {
           if (c.lat == null || c.lon == null) continue;
@@ -173,7 +173,7 @@ export function StormDashboard({
           <option value="all">All storm days (90d)</option>
           {days.map((d) => (
             <option key={d.date} value={d.date}>
-              {d.date} — {d.hail} hail{d.maxHail ? ` (max ${d.maxHail}″)` : ""}, {d.wind} wind
+              {d.date}, {d.hail} hail{d.maxHail ? ` (max ${d.maxHail}″)` : ""}, {d.wind} wind
             </option>
           ))}
         </select>
@@ -199,7 +199,7 @@ export function StormDashboard({
         aria-label="Storm activity map"
       />
 
-      {/* Timeline strip — click a bar to filter the map to that day */}
+      {/* Timeline strip, click a bar to filter the map to that day */}
       {days.length > 0 && (
         <div className="mt-4">
           <div className="flex items-end gap-1 overflow-x-auto pb-1" style={{ height: 72 }}>
@@ -210,7 +210,7 @@ export function StormDashboard({
               return (
                 <button
                   key={d.date}
-                  title={`${d.date} — ${d.hail} hail, ${d.wind} wind${d.maxHail ? `, max ${d.maxHail}″` : ""}`}
+                  title={`${d.date}, ${d.hail} hail, ${d.wind} wind${d.maxHail ? `, max ${d.maxHail}″` : ""}`}
                   onClick={() => setDay(active ? "all" : d.date)}
                   className="shrink-0 rounded-sm transition-opacity hover:opacity-80"
                   style={{

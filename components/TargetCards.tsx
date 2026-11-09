@@ -4,7 +4,7 @@
 
 // Mobile knock cards + NATIVE map mode (no app-switching):
 //  • "Near me" queries the server for every target within 15mi of the rep's
-//    GPS position (full DB, true distance sort) — honest empty state.
+//    GPS position (full DB, true distance sort), honest empty state.
 //  • List ⇄ Map toggle: tapping an address shows that door on the in-app
 //    Leaflet map (rep's position as a blue dot) instead of launching Google
 //    Maps. A small "Directions ↗" stays in the popup for turn-by-turn.
@@ -192,7 +192,7 @@ function HouseSheet({
             </div>
           ) : (
             <p className="text-sm text-gray-500">
-              Satellite measurement unavailable for this roof — measure on-site.
+              Satellite measurement unavailable for this roof, measure on-site.
             </p>
           )}
           <p className="mt-1.5 text-xs text-gray-400">
@@ -246,7 +246,7 @@ function HouseSheet({
               </ul>
               <p className="mt-3 rounded-lg bg-gray-50 p-3 text-xs leading-relaxed text-gray-600">
                 Official NWS storm reports near this address. Reported hail nearby doesn&apos;t
-                guarantee damage here — the free documented inspection is how we find out, and
+                guarantee damage here, the free documented inspection is how we find out, and
                 if the roof is fine we say so in writing.
               </p>
             </>
@@ -430,7 +430,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
   const showing = [...added.map((t) => ({ t, mi: null })), ...base];
   const mappable = showing.filter(({ t }) => t.lat != null && t.lon != null);
 
-  // Map lifecycle — init when entering map view, redraw on data/focus change.
+  // Map lifecycle, init when entering map view, redraw on data/focus change.
   useEffect(() => {
     if (view !== "map") return;
     let cancelled = false;
@@ -493,7 +493,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
       } else if (me) {
         map.setView([me.lat, me.lon], 13);
       }
-      // Open the focused popup AFTER the container has its real size —
+      // Open the focused popup AFTER the container has its real size, 
       // opening while the map is 0×0 silently no-ops.
       setTimeout(() => {
         map.invalidateSize();
@@ -530,7 +530,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
       .catch(() => setHouseData({ loading: false, roof: null, storms: [] }));
   };
 
-  // Map popups are plain HTML — delegate their "roof & storms" links here.
+  // Map popups are plain HTML, delegate their "roof & storms" links here.
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       const el = (e.target as HTMLElement)?.closest?.("[data-house-id]");
@@ -559,12 +559,12 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
         {locState === "locating"
           ? "Finding doors near you…"
           : locState === "on"
-            ? `📍 ${nearTargets?.length ?? 0} doors within 15 mi — tap to reset`
+            ? `📍 ${nearTargets?.length ?? 0} doors within 15 mi, tap to reset`
             : locState === "denied"
-              ? "Location blocked — enable it in browser settings, then tap again"
+              ? "Location blocked, enable it in browser settings, then tap again"
               : locState === "error"
-                ? "Couldn't load nearby doors — tap to retry"
-                : "📍 Near me — show doors around where I'm standing"}
+                ? "Couldn't load nearby doors, tap to retry"
+                : "📍 Near me, show doors around where I'm standing"}
       </button>
 
       {/* Add a house that isn't in the storm data */}
@@ -616,7 +616,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
             ))}
             {addState === "idle" && candidates.length === 0 && added.length === 0 && (
               <p className="text-xs text-gray-500">
-                No parcels found here — you may be outside the 11 covered counties.
+                No parcels found here, you may be outside the 11 covered counties.
               </p>
             )}
           </div>
@@ -725,7 +725,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
                   </span>
                 ) : null}
               </div>
-              {/* Phone row — only when skip-traced and callable */}
+              {/* Phone row, only when skip-traced and callable */}
               {t.phone && !t.phone_dnc && (
                 <a
                   href={`tel:${t.phone}`}
@@ -736,10 +736,10 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
               )}
               {t.phone && t.phone_dnc && (
                 <p className="mt-2 rounded-lg bg-red-50 px-3 py-1.5 text-center text-xs font-semibold text-red-700">
-                  ⛔ Do-Not-Call list — knock or mail only
+                  ⛔ Do-Not-Call list, knock or mail only
                 </p>
               )}
-              {/* Knock disposition — the thing that stops two reps working
+              {/* Knock disposition, the thing that stops two reps working
                   the same door and makes the campaign measurable. */}
               {(() => {
                 const lk = lastKnock(t);
@@ -790,7 +790,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
                     : convertState(t) === "working"
                       ? "Converting…"
                       : convertState(t) === "error"
-                        ? "Failed — tap to retry"
+                        ? "Failed, tap to retry"
                         : "Convert to lead"}
                 </button>
                 {t.lat != null && (

@@ -5,7 +5,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/about` },
-  title: "About — Insured & Accountable Roofing & Home Repair in Texas",
+  title: "About: Insured & Accountable Roofing & Home Repair in Texas",
   description:
     "PowerEdge is an insured, accountable company doing roofing and home repair across DFW. Meet the team behind the work.",
 };
@@ -16,7 +16,7 @@ export default function AboutPage() {
       <PageHero
         kicker="About PowerEdge"
         title="Built on real credentials."
-        intro="Texas doesn't license roofers — so the bar to call yourself one is a magnet sign. We built PowerEdge on the opposite idea: real credentials, real people, and the receipts to prove it."
+        intro="Texas doesn't license roofers, so the bar to call yourself one is a magnet sign. We built PowerEdge on the opposite idea: real credentials, real people, and the receipts to prove it."
         badge="Work with us"
       />
 
@@ -33,7 +33,7 @@ export default function AboutPage() {
                 PowerEdge serves the Dallas–Fort Worth metroplex as an
                 insured, accountable roofing and home repair contractor.
                 Texas doesn&apos;t require a state license to call yourself a
-                roofer — so we hold ourselves to a higher standard anyway.
+                roofer, so we hold ourselves to a higher standard anyway.
               </p>
               <p>
                 Every job runs under the same accountable company: a

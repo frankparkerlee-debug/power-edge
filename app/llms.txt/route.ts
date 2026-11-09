@@ -1,7 +1,7 @@
 import { site } from "@/lib/site";
 
 /**
- * llms.txt — a plain-text brief for AI answer engines.
+ * llms.txt, a plain-text brief for AI answer engines.
  *
  * Worth having here specifically: a lead has already arrived from chatgpt.com,
  * and robots.txt already welcomes the AI crawlers. This gives them the facts

@@ -1,5 +1,5 @@
 // Rich storm-report visuals shown after an address check. All derived from the
-// free NWS data /api/storm-check already returns — no extra APIs.
+// free NWS data /api/storm-check already returns, no extra APIs.
 import { HailMap } from "./HailMap";
 import { DeductibleFinancing } from "./DeductibleFinancing";
 
@@ -64,7 +64,7 @@ function damageTier(size: number) {
     return {
       label: "Damage possible",
       tone: "var(--color-bolt)",
-      note: "Quarter-to-golf-ball hail can bruise shingles — damage is often invisible from the ground.",
+      note: "Quarter-to-golf-ball hail can bruise shingles, damage is often invisible from the ground.",
     };
   return {
     label: "Lower risk",
@@ -151,7 +151,7 @@ export function StormReport({ data }: { data: StormData }) {
         </p>
       )}
 
-      {/* Claim-window urgency — the real clock, up top */}
+      {/* Claim-window urgency, the real clock, up top */}
       {sigRecent &&
         (() => {
           const ago = Math.max(1, Math.round(monthsAgo(sigRecent.date)));
@@ -168,9 +168,9 @@ export function StormReport({ data }: { data: StormData }) {
               </div>
               <p className="mt-2 text-sm leading-relaxed text-fg-inv">
                 A {sigRecent.size}&quot; hail event hit your area on{" "}
-                {fmtDate(sigRecent.date)} — about {ago} month{ago === 1 ? "" : "s"} ago.
+                {fmtDate(sigRecent.date)}, about {ago} month{ago === 1 ? "" : "s"} ago.
                 Most Texas policies only give you ~12 months from the date of loss
-                to file. {left > 0 ? "Don't let the window close and end up paying for the roof yourself." : "It may not be too late — but get it inspected now."}
+                to file. {left > 0 ? "Don't let the window close and end up paying for the roof yourself." : "It may not be too late, but get it inspected now."}
               </p>
             </div>
           );
@@ -212,14 +212,14 @@ export function StormReport({ data }: { data: StormData }) {
             {tier.label}
           </span>
           <span className="text-sm text-fg-inv-dim">
-            — largest reported hail was {largestSize}&quot;
+, largest reported hail was {largestSize}&quot;
           </span>
         </div>
         <p className="mt-1.5 text-sm text-fg-inv-dim">{tier.note}</p>
         <HailScale size={largestSize} />
       </div>
 
-      {/* Deductible financing — the selling feature (compliant framing) */}
+      {/* Deductible financing, the selling feature (compliant framing) */}
       <DeductibleFinancing className="mt-4" />
 
       {/* Recent timeline */}
@@ -246,7 +246,7 @@ export function StormReport({ data }: { data: StormData }) {
           </ul>
           <p className="mt-2 text-[11px] text-fg-inv-dim">
             Source: National Weather Service storm reports. Hail near you
-            doesn&apos;t guarantee roof damage — a free inspection confirms it.
+            doesn&apos;t guarantee roof damage, a free inspection confirms it.
           </p>
         </div>
       )}

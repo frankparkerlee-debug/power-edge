@@ -5,9 +5,9 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/claim-prep` },
-  title: "Prep Your Roof Claim — PowerEdge",
+  title: "Prep Your Roof Claim: PowerEdge",
   description:
-    "Share your claim details ahead of your inspection so our crew arrives ready to inspect, document, and get you moving — not do paperwork on your doorstep.",
+    "Share your claim details ahead of your inspection so our crew arrives ready to inspect, document, and get you moving, not do paperwork on your doorstep.",
   robots: { index: false, follow: false },
 };
 
@@ -22,7 +22,7 @@ export default function ClaimPrepPage() {
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-fg-inv-dim">
           Fill in a few details now and your crew shows up already knowing the
-          scope — so the visit is about your roof and getting you scheduled, not
+          scope, so the visit is about your roof and getting you scheduled, not
           paperwork on the doorstep. All optional except your name and phone.
         </p>
         <div className="mt-8 rounded-card border border-line bg-ink-2 p-6 shadow-2xl sm:p-8">

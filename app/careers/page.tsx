@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 const faqs = [
   {
     q: "Is this commission-only?",
-    a: "Yes — 1099, commission-only, built for closers. But switching shops shouldn't cost you a month of income: proven closers get a $600/week ramp draw for the first 6 weeks, and if you close 4 approved roofs by week 8 the draw is forgiven — you keep it on top of your commissions. And every approved roof carries a floor, so a win never pays zero.",
+    a: "Yes, 1099, commission-only, built for closers. But switching shops shouldn't cost you a month of income: proven closers get a $600/week ramp draw for the first 6 weeks, and if you close 4 approved roofs by week 8 the draw is forgiven, you keep it on top of your commissions. And every approved roof carries a floor, so a win never pays zero.",
   },
   {
     q: "When do I get paid?",
@@ -22,7 +22,7 @@ const faqs = [
   },
   {
     q: "Do I get leads, or do I have to knock doors?",
-    a: "You work inbound leads only — free-inspection requests, referrals, and repeat customers — plus a protected territory so you're not fighting ten other reps for the same lead. PowerEdge doesn't do door-to-door canvassing; that's not how we build trust in this market.",
+    a: "You work inbound leads only, free-inspection requests, referrals, and repeat customers, plus a protected territory so you're not fighting ten other reps for the same lead. PowerEdge doesn't do door-to-door canvassing; that's not how we build trust in this market.",
   },
   {
     q: "What tools do I get?",
@@ -30,13 +30,13 @@ const faqs = [
   },
   {
     q: "Do I need experience?",
-    a: "This is a job for strong salespeople. Roofing experience is a plus but not required — if you've closed in HVAC, pest, alarms, or anywhere else, we'll teach you the roofing fast. Sales experience moves you to the front of the line.",
+    a: "This is a job for strong salespeople. Roofing experience is a plus but not required. If you've closed in HVAC, pest, alarms, or anywhere else, we'll teach you the roofing fast. Sales experience moves you to the front of the line.",
   },
 ];
 
 const perks = [
   {
-    h: "Get paid fast — and never at zero",
+    h: "Get paid fast: and never at zero",
     p: "Paid at the first check, weekly, no games. Every approved roof carries a floor, so a slow week still pays.",
   },
   {
@@ -53,7 +53,7 @@ const perks = [
   },
   {
     h: "Real earnings, real ceiling",
-    p: "50% of gross profit on your own deals against a fixed, published cost basis — and 55% from your 6th roof each month. No overhead skim, no moving redline, no cap.",
+    p: "50% of gross profit on your own deals against a fixed, published cost basis, and 55% from your 6th roof each month. No overhead skim, no moving redline, no cap.",
   },
   {
     h: "A ramp that respects closers",
@@ -80,7 +80,7 @@ export default function CareersPage() {
               <span className="bolt-underline">hustle actually pays.</span>
             </h1>
             <p className="mt-6 max-w-md text-lg leading-relaxed text-fg-inv-dim">
-              Tired of chasing commissions that show up late — or not at all? We
+              Tired of chasing commissions that show up late, or not at all? We
               pay you at the first check, put a floor under every approved roof,
               back you with verified storm data instead of guesswork, and hand you
               the tools to close on the spot. New company, better deal for reps.
@@ -88,10 +88,10 @@ export default function CareersPage() {
 
             <ul className="mt-8 space-y-3 text-fg-inv-dim">
               {[
-                "50% of gross profit — 55% from your 6th roof each month",
+                "50% of gross profit, 55% from your 6th roof each month",
                 "$600/wk forgivable ramp draw for proven closers",
                 "Paid weekly at the first check, plus a floor on every approved roof",
-                "Inbound leads from free inspections and referrals, plus satellite roof measurement — no cold-knocking required",
+                "Inbound leads from free inspections and referrals, plus satellite roof measurement, no cold-knocking required",
               ].map((b) => (
                 <li key={b} className="flex gap-3">
                   <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bolt">
@@ -139,7 +139,7 @@ export default function CareersPage() {
           <p className="mx-auto mt-8 max-w-2xl text-center text-xs text-fg-dim">
             Commission-only, 1099 independent contractor. Earnings depend on
             production and aren&apos;t guaranteed; the per-roof floor applies to
-            approved roofs. Bring a valid non-compete-free status — we don&apos;t
+            approved roofs. Bring a valid non-compete-free status. We don&apos;t
             take another company&apos;s customers or data.
           </p>
         </Container>
@@ -153,7 +153,7 @@ export default function CareersPage() {
             Ready to actually get paid for closing?
           </h2>
           <p className="mx-auto mt-4 max-w-md text-lg text-fg-inv-dim">
-            Apply in 60 seconds — no résumé. Our sales lead will call you to talk
+            Apply in 60 seconds, no résumé. Our sales lead will call you to talk
             territory and numbers.
           </p>
           <div className="mt-8 flex justify-center">

@@ -4,7 +4,7 @@ import { site } from "@/lib/site";
 import { services } from "@/lib/services";
 import type { Step, Faq } from "@/lib/serviceContent";
 
-/** Compact trust strip — sits right under a service-page hero so a cold
+/** Compact trust strip, sits right under a service-page hero so a cold
  *  visitor sees credentials before scrolling. Dark, to continue the hero. */
 export function ServiceTrustBar() {
   return (
@@ -119,7 +119,7 @@ export function FaqSection({
   );
 }
 
-/** Cross-links to the other services — keeps marketing visitors on-site. */
+/** Cross-links to the other services, keeps marketing visitors on-site. */
 export function RelatedServices({ currentSlug }: { currentSlug: string }) {
   const others = services.filter((s) => s.slug !== currentSlug);
   return (

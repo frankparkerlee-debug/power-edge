@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { leadSequence, type LeadEmailCtx } from "@/lib/emails";
 
-// Internal preview of the lead email funnel — NOT indexed. Renders each email
+// Internal preview of the lead email funnel, NOT indexed. Renders each email
 // in the sequence exactly as it sends, so the design can be reviewed live.
 export const metadata: Metadata = {
   title: "Email Funnel Preview",
@@ -27,7 +27,7 @@ export default function EmailPreviewPage() {
             fontWeight: 800,
           }}
         >
-          Lead email funnel — {leadSequence.length} touches
+          Lead email funnel, {leadSequence.length} touches
         </h1>
         <p style={{ color: "#9aa3b0", fontFamily: "Inter, sans-serif", fontSize: 14 }}>
           Sample lead: solar + financing flags on, so the conditional blocks show.

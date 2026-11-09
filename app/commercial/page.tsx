@@ -28,7 +28,7 @@ export default function CommercialPage() {
       <PageHero
         kicker="Commercial · Property managers"
         title="One insured, accountable partner for your roof."
-        intro="Property managers and business owners shouldn't have to chase down a contractor. PowerEdge covers commercial roofing under one accountable team — scheduled around your operation and documented for your records."
+        intro="Property managers and business owners shouldn't have to chase down a contractor. PowerEdge covers commercial roofing under one accountable team, scheduled around your operation and documented for your records."
         badge="Request a commercial quote"
         withForm
       />

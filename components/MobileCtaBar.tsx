@@ -2,7 +2,7 @@ import Link from "next/link";
 import { site } from "@/lib/site";
 
 /**
- * Persistent bottom action bar on mobile — Call · Text · Free Quote always one
+ * Persistent bottom action bar on mobile, Call · Text · Free Quote always one
  * thumb-tap away. Most contractor traffic is mobile, so this is the single
  * biggest on-site lead-capture lever. Hidden on desktop (the floating Text
  * button + sticky header CTA cover desktop).

@@ -9,7 +9,7 @@ import { pushLeadToHubspot } from "@/lib/hubspot";
  *
  * Routes every web lead two ways (per the chosen "Email + Jobber" setup):
  *   1. Emails the team instantly (via Resend if RESEND_API_KEY is set).
- *   2. Creates a request in Jobber (via JOBBER_* env vars — see TODO below).
+ *   2. Creates a request in Jobber (via JOBBER_* env vars, see TODO below).
  *
  * Until those env vars are populated it still accepts the lead and logs it,
  * so the form works in dev and never drops a customer.
@@ -18,7 +18,7 @@ import { pushLeadToHubspot } from "@/lib/hubspot";
  *   RESEND_API_KEY        - Resend API key for transactional email
  *   LEAD_TO_EMAIL         - where leads are emailed (defaults to site.email)
  *   JOBBER_API_TOKEN      - Jobber GraphQL API access token (OAuth)
- *   (Jobber wiring is stubbed below — drop in the GraphQL mutation when ready.)
+ *   (Jobber wiring is stubbed below, drop in the GraphQL mutation when ready.)
  */
 
 export async function POST(req: Request) {
@@ -54,10 +54,10 @@ export async function POST(req: Request) {
     // Which on-site form/tool produced this (e.g. roof-claim-check). From
     // leadContext({tool}); shown in the dashboard so you know where they signed up.
     tool: (body.tool || "").trim(),
-    // Solar flag — informational only (panels aren't a service we offer);
+    // Solar flag, informational only (panels aren't a service we offer);
     // set by the "I have solar panels" qualifier on some forms.
     solar: body.solar === "yes" ? "yes" : "",
-    // Attribution — so you know which page/campaign produced the lead.
+    // Attribution, so you know which page/campaign produced the lead.
     page_path: (body.page_path || "").trim(),
     referrer: (body.referrer || "").trim(),
     utm_source: (body.utm_source || "").trim(),
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
     [lead.utm_source, lead.utm_medium, lead.utm_campaign].filter(Boolean).join(" / ") ||
     lead.referrer ||
     "direct";
-  // Where on the SITE they signed up — the form/tool or page path. This is what
+  // Where on the SITE they signed up, the form/tool or page path. This is what
   // the team wants to see; marketing source is appended only when it's not direct.
   const origin = lead.tool || lead.page_path || "";
   const sourceLine = origin
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
       : `${origin} · ${marketing}`
     : marketing;
 
-  // --- 0. Durable capture (Supabase) — first, so no lead is lost to an email
+  // --- 0. Durable capture (Supabase), first, so no lead is lost to an email
   // hiccup. No-ops until SUPABASE_* env is set. Best-effort (never throws).
   await insertLead({
     name: lead.name,
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
     gclid: lead.gclid,
   });
 
-  // --- 0b. HubSpot CRM (env-gated HUBSPOT_ACCESS_TOKEN) — fire-and-forget so
+  // --- 0b. HubSpot CRM (env-gated HUBSPOT_ACCESS_TOKEN), fire-and-forget so
   // the form returns fast; contact + timeline note. Best-effort, never throws.
   void pushLeadToHubspot({
     name: lead.name,
@@ -129,21 +129,21 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           from: `PowerEdge Site <leads@${site.domain}>`,
           to: [to],
-          subject: `New lead: ${lead.name} — ${lead.service || "general"}${
+          subject: `New lead: ${lead.name}, ${lead.service || "general"}${
             lead.solar === "yes" ? " ☀️ SOLAR" : ""
           }`,
           html: `
             <h2>New website lead</h2>
             <p><strong>Name:</strong> ${escapeHtml(lead.name)}</p>
             <p><strong>Phone:</strong> ${escapeHtml(lead.phone)}</p>
-            <p><strong>Email:</strong> ${escapeHtml(lead.email) || "—"}</p>
-            <p><strong>Address:</strong> ${escapeHtml(lead.address) || "—"}</p>
-            <p><strong>Service:</strong> ${escapeHtml(lead.service) || "—"}</p>
-            <p><strong>Solar:</strong> ${lead.solar === "yes" ? "Yes — has panels" : "—"}</p>
-            <p><strong>Message:</strong> ${escapeHtml(lead.message) || "—"}</p>
+            <p><strong>Email:</strong> ${escapeHtml(lead.email) || ", "}</p>
+            <p><strong>Address:</strong> ${escapeHtml(lead.address) || ", "}</p>
+            <p><strong>Service:</strong> ${escapeHtml(lead.service) || ", "}</p>
+            <p><strong>Solar:</strong> ${lead.solar === "yes" ? "Yes, has panels" : ", "}</p>
+            <p><strong>Message:</strong> ${escapeHtml(lead.message) || ", "}</p>
             <hr/>
             <p><strong>Source:</strong> ${escapeHtml(sourceLine)}</p>
-            <p><strong>Page:</strong> ${escapeHtml(lead.page_path) || "—"}</p>
+            <p><strong>Page:</strong> ${escapeHtml(lead.page_path) || ", "}</p>
             <p style="color:#888">Received ${lead.receivedAt}</p>
           `,
         }),
@@ -152,10 +152,10 @@ export async function POST(req: Request) {
       console.error("[lead] email send failed", err);
     }
 
-    // 1b. Kick off the CUSTOMER nurture funnel — a designed 5-touch sequence
+    // 1b. Kick off the CUSTOMER nurture funnel, a designed 5-touch sequence
     // (instant confirmation + 4 follow-ups) enqueued via Resend scheduled
     // sends. Speed-to-lead + nurture in one shot, no DB/cron. Only when they
-    // gave an email. Rep applications are NOT homeowners — they get the team
+    // gave an email. Rep applications are NOT homeowners, they get the team
     // notification only, never the storm-claim nurture or marketing audience.
     const isRepApplication = /sales rep application/i.test(lead.service);
     if (lead.email && !isRepApplication) {
@@ -198,7 +198,7 @@ export async function POST(req: Request) {
       }
     }
   } else {
-    console.log("[lead] (no RESEND_API_KEY — logging only)", lead);
+    console.log("[lead] (no RESEND_API_KEY, logging only)", lead);
   }
 
   // --- 2. Jobber request -----------------------------------------------------

@@ -5,7 +5,7 @@ import { services } from "@/lib/services";
 /**
  * LocalBusiness structured data (JSON-LD). Uses the precise schema.org subtypes
  * (RoofingContractor under HomeAndConstructionBusiness) carrying
- * NAP, areaServed, rating, and a service catalog — the markup that aids normal
+ * NAP, areaServed, rating, and a service catalog, the markup that aids normal
  * SEO rich-result eligibility and gives engines clean entity data.
  * Rendered once in the root layout.
  */

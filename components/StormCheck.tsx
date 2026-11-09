@@ -70,7 +70,7 @@ export function StormCheck() {
             ? "Storm inspection (roof, has solar panels)"
             : "Storm inspection (hail check)",
           solar: fd.solar ? "yes" : "",
-          message: `[Storm Check] address: ${result?.matched || address} — ${summary}`,
+          message: `[Storm Check] address: ${result?.matched || address}, ${summary}`,
           company_website: fd.company_website,
           ...leadContext({ tool: "storm-check" }),
         }),
@@ -96,7 +96,7 @@ export function StormCheck() {
         </h2>
         <p className="mt-2 text-sm text-fg-inv-dim">
           We&apos;ll pull reported hail activity near your home from National
-          Weather Service storm data — free, instant, no obligation.
+          Weather Service storm data, free, instant, no obligation.
         </p>
         <form
           onSubmit={(e) => {
@@ -122,7 +122,7 @@ export function StormCheck() {
         </form>
         <p className="mt-3 text-center text-xs text-fg-inv-dim">
           Data from NWS / NOAA storm reports. Hail near you doesn&apos;t
-          guarantee roof damage — an inspection confirms it.
+          guarantee roof damage, an inspection confirms it.
         </p>
       </div>
     );
@@ -144,8 +144,8 @@ export function StormCheck() {
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-fg-inv-dim">
                 {result?.matched
-                  ? "We didn't find major hail reports right at your address in our recent data — but reports are sparse, and North Texas gets hit often. "
-                  : "We couldn't auto-pull storm history for that address — but North Texas gets hit often. "}
+                  ? "We didn't find major hail reports right at your address in our recent data, but reports are sparse, and North Texas gets hit often. "
+                  : "We couldn't auto-pull storm history for that address, but North Texas gets hit often. "}
                 A free inspection is the only way to know for sure if your roof
                 has storm damage worth claiming.
               </p>
@@ -174,7 +174,7 @@ export function StormCheck() {
                 value="yes"
                 className="h-4 w-4 accent-bolt"
               />
-              I have solar panels — check those for hail damage too
+              I have solar panels, check those for hail damage too
             </label>
             <button
               type="submit"
@@ -185,7 +185,7 @@ export function StormCheck() {
             </button>
             {sub === "error" && (
               <p className="text-sm text-ember">
-                Something went wrong — please call us instead.
+                Something went wrong, please call us instead.
               </p>
             )}
             <button

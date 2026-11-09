@@ -1,4 +1,4 @@
-// Featured reviews — REAL, verbatim (lightly trimmed with ellipses) from the
+// Featured reviews, REAL, verbatim (lightly trimmed with ellipses) from the
 // company's Google profile. Names shown as first name + last initial. Do not
 // fabricate quotes, names, locations, or services.
 

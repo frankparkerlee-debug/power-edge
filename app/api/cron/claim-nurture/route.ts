@@ -7,7 +7,7 @@ import { runStormContactTasks } from "@/lib/hubspotStorm";
 import { runSkipTrace } from "@/lib/skiptrace";
 
 /**
- * Drop-off nurture for claim-prep. Run on a schedule (e.g. hourly) — a Render
+ * Drop-off nurture for claim-prep. Run on a schedule (e.g. hourly), a Render
  * Cron Job or any external cron hitting:
  *   POST /api/cron/claim-nurture   header: x-admin-token: <ADMIN_TOKEN>
  *

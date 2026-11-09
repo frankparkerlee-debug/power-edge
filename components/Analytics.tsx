@@ -5,7 +5,7 @@ import Script from "next/script";
  * added (no errors, nothing loads).
  *   NEXT_PUBLIC_GA_ID         - GA4 measurement ID (e.g. G-XXXXXXX)
  *   NEXT_PUBLIC_META_PIXEL_ID - Meta (Facebook) Pixel ID for a PowerEdge pixel
- *                               (NOT the Merit peptide pixel — keep brands separate)
+ *                               (NOT the Merit peptide pixel, keep brands separate)
  *   NEXT_PUBLIC_CALLRAIL_SRC  - CallRail DNI swap script src (from CallRail JS
  *                               snippet, e.g. //cdn.callrail.com/companies/123/abc/12/swap.js)
  */
@@ -14,7 +14,7 @@ export function Analytics() {
   // Default = the dedicated PowerEdge pixel (created 2026-07-13; never the
   // Merit pixel). Env var still wins if a different pixel is ever needed.
   const metaPixel = process.env.NEXT_PUBLIC_META_PIXEL_ID || "1558017522528004";
-  // CallRail JS — required for BOTH dynamic number insertion (call source
+  // CallRail JS, required for BOTH dynamic number insertion (call source
   // tracking) AND native form capture (CallTrk.captureForm → Message Flow
   // auto-text). Public client script, safe to ship; env can override.
   const callrail =

@@ -1,5 +1,5 @@
 // Storm → HubSpot call tasks. When fresh 1″+ hail lands near an EXISTING
-// HubSpot contact, create a HIGH-priority task ("Call X — hail hit their
+// HubSpot contact, create a HIGH-priority task ("Call X, hail hit their
 // area") and stamp the contact's storm properties. Runs from the hourly cron;
 // workflow-grade automation with no paid HubSpot tier.
 //
@@ -136,7 +136,7 @@ export async function runStormContactTasks(): Promise<{
             hs_task_body:
               `${hit.magnitude}″ hail reported near ${hit.city} on ${stormDate}, ` +
               `~${NEAR_MI}mi or less from ${name}'s zip (${zip}). ` +
-              `They already know us — call before the door-knockers get there.` +
+              `They already know us, call before the door-knockers get there.` +
               `${p.phone ? ` Phone: ${p.phone}.` : ""} Map: ${mapLink}`,
             hs_task_status: "NOT_STARTED",
             hs_task_priority: "HIGH",
