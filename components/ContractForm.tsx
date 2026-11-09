@@ -31,6 +31,8 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
   const [total, setTotal] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ cancelBy: string; emailed: boolean } | null>(null);
+  const [sent, setSent] = useState<string | null>(null);
+  const [gaveNotices, setGaveNotices] = useState(false);
   const [error, setError] = useState("");
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -71,6 +73,48 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
     hasInk.current = false;
   }
 
+  async function sendForSignature() {
+    setError("");
+    if (!owner.trim() || !address.trim()) {
+      setError("Homeowner name and property address are needed before sending.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/contract", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-token": new URLSearchParams(window.location.search).get("key") || "",
+        },
+        body: JSON.stringify({
+          mode: "send",
+          rep,
+          owner_names: owner,
+          owner_phone: phone,
+          owner_email: email,
+          property_address: address,
+          claim_based: claimBased,
+          carrier,
+          claim_number: claimNo,
+          deductible,
+          scope: lines.filter((l) => l.description.trim()),
+          total_price: total,
+        }),
+      });
+      const d = await res.json();
+      if (!res.ok || !d.ok) {
+        setError(d.error || "Could not create the link.");
+        return;
+      }
+      setSent(d.signUrl);
+    } catch {
+      setError("Network problem. Nothing was sent.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -100,6 +144,7 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
           total_price: total,
           signer_name: owner,
           signature_png: canvasRef.current!.toDataURL("image/png"),
+          notices_delivered: gaveNotices,
         }),
       });
       const d = await res.json();
@@ -118,6 +163,45 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
   const input =
     "w-full rounded-md border border-gray-300 px-3 py-2.5 text-[16px] focus:border-[#0c7a40] focus:outline-none";
   const label = "block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1";
+
+  if (sent) {
+    return (
+      <div className="rounded-lg border border-[#0c7a40] bg-[#f0fbf4] p-6">
+        <h2 className="font-display text-xl font-extrabold">Link ready to send.</h2>
+        <p className="mt-2 text-sm">
+          Text or email this to the homeowner. They read the agreement and sign on
+          their own device, and their cancellation window starts when they sign,
+          not now.
+        </p>
+        <input
+          readOnly
+          value={sent}
+          onFocus={(e) => e.currentTarget.select()}
+          className="mt-3 w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-[13px]"
+        />
+        <div className="mt-3 flex flex-wrap gap-2">
+          <a
+            href={`sms:?&body=${encodeURIComponent(`Your PowerEdge agreement is ready to review and sign: ${sent}`)}`}
+            className="rounded-md bg-[#0c7a40] px-4 py-2.5 font-bold text-white"
+          >
+            Text it
+          </a>
+          <button
+            onClick={() => navigator.clipboard?.writeText(sent)}
+            className="rounded-md border border-gray-300 px-4 py-2.5 font-bold"
+          >
+            Copy link
+          </button>
+          <button
+            onClick={() => window.location.reload()}
+            className="rounded-md border border-gray-300 px-4 py-2.5 font-bold"
+          >
+            Start another
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (done) {
     return (
@@ -258,6 +342,19 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
         </button>
       </div>
 
+      <label className="flex items-start gap-3 rounded-lg border border-gray-200 p-4 text-sm">
+        <input
+          type="checkbox"
+          checked={gaveNotices}
+          onChange={(e) => setGaveNotices(e.target.checked)}
+          className="mt-0.5 h-4 w-4"
+        />
+        <span>
+          I gave the homeowner <strong>both printed cancellation notices</strong>.
+          The email is a copy, not a replacement, so hand them the paper.
+        </span>
+      </label>
+
       {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
 
       <button
@@ -265,7 +362,15 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
         disabled={busy}
         className="w-full rounded-md bg-[#0c7a40] px-6 py-4 font-display text-lg font-bold text-white disabled:opacity-60"
       >
-        {busy ? "Saving…" : "Sign and send the copy"}
+        {busy ? "Saving…" : "They are signing now"}
+      </button>
+      <button
+        type="button"
+        onClick={sendForSignature}
+        disabled={busy}
+        className="w-full rounded-md border-2 border-[#0c7a40] px-6 py-3.5 font-display font-bold text-[#0c7a40] disabled:opacity-60"
+      >
+        Send them a link to sign later
       </button>
     </form>
   );

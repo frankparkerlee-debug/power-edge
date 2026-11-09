@@ -133,3 +133,129 @@ export async function markEmailed(id: string) {
     /* non-fatal */
   }
 }
+
+
+/** Opaque, unguessable link id for remote signing. */
+function signToken() {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Save a draft the rep prefilled, assigned to a prospect, without a signature
+ * yet. Returns the signing link to send.
+ */
+export async function createDraft(
+  input: Omit<ContractInput, "signature_png" | "signer_name"> & { target_id?: number },
+): Promise<{ ok: true; id: string; token: string } | { ok: false; error: string }> {
+  if (!dbOn()) return { ok: false, error: "Not configured." };
+  if (!input.owner_names?.trim() || !input.property_address?.trim()) {
+    return { ok: false, error: "Owner name and property address are required." };
+  }
+  const token = signToken();
+  try {
+    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/contracts`, {
+      method: "POST",
+      headers: { ...authHeaders(), Prefer: "return=representation" },
+      body: JSON.stringify({
+        rep: input.rep || null,
+        owner_names: input.owner_names.trim(),
+        owner_phone: input.owner_phone?.trim() || null,
+        owner_email: input.owner_email?.trim() || null,
+        property_address: input.property_address.trim(),
+        scope: input.scope.filter((s) => s.description?.trim()),
+        total_price: input.total_price?.trim() || null,
+        claim_based: input.claim_based,
+        carrier: input.carrier?.trim() || null,
+        claim_number: input.claim_number?.trim() || null,
+        deductible: input.deductible?.trim() || null,
+        target_id: input.target_id ?? null,
+        status: "sent",
+        sign_token: token,
+        sent_at: new Date().toISOString(),
+        ip: input.ip || null,
+      }),
+    });
+    if (!res.ok) return { ok: false, error: "Could not create the draft." };
+    const rows = (await res.json()) as Array<{ id: string }>;
+    return { ok: true, id: rows[0].id, token };
+  } catch {
+    return { ok: false, error: "Could not create the draft." };
+  }
+}
+
+/** The agreement behind a signing link, for the homeowner to read. */
+export async function getByToken(token: string) {
+  if (!dbOn() || !/^[0-9a-f]{48}$/.test(token)) return null;
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/contracts?select=*&sign_token=eq.${token}`,
+      { headers: authHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return null;
+    const rows = (await res.json()) as Array<Record<string, unknown>>;
+    return rows[0] || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Homeowner signs a sent agreement. The deadline is computed HERE, at signing,
+ * because that is the date the statute runs from, not the date the rep drafted
+ * it. Only a contract still in 'sent' can be signed, so a replayed link cannot
+ * overwrite a signature or restart the clock.
+ */
+export async function signByToken(
+  token: string,
+  signature_png: string,
+  signer_name: string,
+  ip?: string,
+): Promise<{ ok: true; id: string; deadline: Date } | { ok: false; error: string }> {
+  if (!dbOn()) return { ok: false, error: "Not configured." };
+  if (!signature_png) return { ok: false, error: "A signature is required." };
+  if (!/^[0-9a-f]{48}$/.test(token)) return { ok: false, error: "Not found." };
+
+  const deadline = cancelDeadline();
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/contracts?sign_token=eq.${token}&status=eq.sent`,
+      {
+        method: "PATCH",
+        headers: { ...authHeaders(), Prefer: "return=representation" },
+        body: JSON.stringify({
+          status: "signed",
+          signature_png,
+          signer_name: signer_name?.trim() || null,
+          signed_at: new Date().toISOString(),
+          signed_remotely: true,
+          cancel_deadline: deadline.toISOString().slice(0, 10),
+          ip: ip || null,
+        }),
+      },
+    );
+    if (!res.ok) return { ok: false, error: "Could not record the signature." };
+    const rows = (await res.json()) as Array<{ id: string }>;
+    if (rows.length === 0) {
+      return { ok: false, error: "This agreement has already been signed or withdrawn." };
+    }
+    return { ok: true, id: rows[0].id, deadline };
+  } catch {
+    return { ok: false, error: "Could not record the signature." };
+  }
+}
+
+/** Rep attests they handed over the two printed cancellation notices. */
+export async function markNoticesDelivered(id: string) {
+  if (!dbOn()) return;
+  try {
+    await fetch(`${process.env.SUPABASE_URL}/rest/v1/contracts?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { ...authHeaders(), Prefer: "return=minimal" },
+      body: JSON.stringify({ notices_delivered: true }),
+    });
+  } catch {
+    /* non-fatal */
+  }
+}

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { saveContract, fmtDate, type ScopeLine } from "@/lib/contracts";
+import { saveContract, createDraft, markNoticesDelivered, fmtDate, type ScopeLine } from "@/lib/contracts";
 import { markEmailed } from "@/lib/contracts";
 import { sendSignedAgreement } from "@/lib/emails";
 import { clientIp } from "@/lib/rateLimit";
@@ -20,6 +20,36 @@ export async function POST(req: Request) {
   }
 
   const scope = Array.isArray(body.scope) ? (body.scope as ScopeLine[]) : [];
+
+  // Two paths. "send" prefills and issues a signing link for the homeowner to
+  // sign later on their own device; the default signs on the rep's phone now.
+  if (body.mode === "send") {
+    const draft = await createDraft({
+      rep: String(body.rep || ""),
+      owner_names: String(body.owner_names || ""),
+      owner_phone: String(body.owner_phone || ""),
+      owner_email: String(body.owner_email || ""),
+      property_address: String(body.property_address || ""),
+      scope,
+      total_price: String(body.total_price || ""),
+      claim_based: body.claim_based !== false,
+      carrier: String(body.carrier || ""),
+      claim_number: String(body.claim_number || ""),
+      deductible: String(body.deductible || ""),
+      target_id: Number(body.target_id) || undefined,
+      ip: clientIp(req),
+    });
+    if (!draft.ok) {
+      return NextResponse.json({ ok: false, error: draft.error }, { status: 400 });
+    }
+    const base = process.env.NEXT_PUBLIC_SITE_URL || "https://poweredgetx.com";
+    return NextResponse.json({
+      ok: true,
+      mode: "send",
+      id: draft.id,
+      signUrl: `${base}/sign/${draft.token}`,
+    });
+  }
 
   const saved = await saveContract({
     rep: String(body.rep || ""),
@@ -63,6 +93,11 @@ export async function POST(req: Request) {
     emailed = !!r?.ok;
     if (emailed) await markEmailed(saved.id);
   }
+
+  // The rep confirms they handed over the two printed cancellation notices.
+  // Chapter 601 wants them furnished in duplicate with the contract; the email
+  // is strong evidence but not clearly a substitute, so we record the paper too.
+  if (body.notices_delivered === true) await markNoticesDelivered(saved.id);
 
   return NextResponse.json({
     ok: true,
