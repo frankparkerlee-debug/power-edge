@@ -104,7 +104,7 @@ export async function POST(req: Request) {
   if (completed && stage === 2) {
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey) {
-      const to = process.env.LEAD_TO_EMAIL || site.email;
+      const to = site.email;
       const row = (l: string, v: string) =>
         `<p style="margin:2px 0"><strong>${l}:</strong> ${esc(v) || ", "}</p>`;
       // Team notification (full intake).

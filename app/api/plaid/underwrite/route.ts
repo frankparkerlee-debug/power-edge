@@ -109,7 +109,7 @@ export async function POST(req: Request) {
     // --- Team intel email (account numbers masked) ------------------------
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey) {
-      const to = process.env.LEAD_TO_EMAIL || site.email;
+      const to = site.email;
       const mask = (acc: string) => (acc ? `••••${acc.slice(-4)}` : ", ");
       const routingFor = (id: string) =>
         ach.find((n) => n.account_id === id)?.routing?.slice(-4) || ", ";

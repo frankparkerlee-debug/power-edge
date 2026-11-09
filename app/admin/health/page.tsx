@@ -109,10 +109,10 @@ export default async function HealthPage({
   const mailState = failuresToday.length === 0 ? "ok" : "bad";
 
   // Where team notifications actually land. Worth showing: the code falls back
-  // to site.email, but LEAD_TO_EMAIL silently overrides it, so changing
-  // site.email alone may change nothing.
-  const notifyTo = process.env.LEAD_TO_EMAIL || site.email;
-  const overridden = !!process.env.LEAD_TO_EMAIL;
+  // site.email is authoritative. If LEAD_TO_EMAIL is still set in Render
+  // it is ignored, and the row below says so.
+  const notifyTo = site.email;
+  const stale = process.env.LEAD_TO_EMAIL;
 
   return (
     <div className={wrap}>
@@ -129,9 +129,9 @@ export default async function HealthPage({
               value={notifyTo}
               state={notifyTo.includes("@") ? "ok" : "bad"}
               note={
-                overridden
-                  ? "Set by LEAD_TO_EMAIL, which overrides site.email in the code."
-                  : "From site.email. Set LEAD_TO_EMAIL in Render to send somewhere else."
+                stale
+                  ? `LEAD_TO_EMAIL is still set to ${stale} in Render but is no longer used. Safe to delete it.`
+                  : "From site.email, the only place this address lives."
               }
             />
             <Row

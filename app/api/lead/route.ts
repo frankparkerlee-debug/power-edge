@@ -17,7 +17,7 @@ import { pushLeadToHubspot } from "@/lib/hubspot";
  *
  * Required env (set in .env.local / hosting dashboard):
  *   RESEND_API_KEY        - Resend API key for transactional email
- *   LEAD_TO_EMAIL         - where leads are emailed (defaults to site.email)
+ *   (team notifications go to site.email; there is no env override)
  *   JOBBER_API_TOKEN      - Jobber GraphQL API access token (OAuth)
  *   (Jobber wiring is stubbed below, drop in the GraphQL mutation when ready.)
  */
@@ -118,7 +118,9 @@ export async function POST(req: Request) {
 
   // --- 1. Email notification -------------------------------------------------
   const resendKey = process.env.RESEND_API_KEY;
-  const to = process.env.LEAD_TO_EMAIL || site.email;
+  // site.email is the single source of truth. LEAD_TO_EMAIL used to
+  // override it and silently sent months of leads to a suppressed inbox.
+  const to = site.email;
   if (resendKey) {
     await sendMail({
       resendKey,
