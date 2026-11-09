@@ -423,14 +423,15 @@ export async function withLastKnock<T extends { id: string | number }>(
   const url = process.env.SUPABASE_URL;
   if (!url || !process.env.SUPABASE_SERVICE_ROLE_KEY || rows.length === 0) return rows;
   try {
-    const ids = rows.map((r) => r.id).join(",");
+    // uuids must be quoted inside PostgREST's in.() list.
+    const ids = rows.map((r) => `"${String(r.id)}"`).join(",");
     const res = await fetch(
       `${url}/rest/v1/target_last_knock?select=target_id,outcome,rep,created_at&target_id=in.(${ids})`,
       { headers: dbHeaders(), cache: "no-store" },
     );
     if (!res.ok) return rows;
     const knocks = (await res.json()) as Array<{
-      target_id: number; outcome: string; rep: string | null; created_at: string;
+      target_id: string; outcome: string; rep: string | null; created_at: string;
     }>;
     const byId = new Map(knocks.map((k) => [String(k.target_id), k]));
     return rows.map((r) => {

@@ -35,9 +35,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const targetId = Number(body.target_id);
+  // storm_targets.id is a uuid. This used to run it through Number(), which
+  // yields NaN, so every disposition a rep tapped was rejected here and the
+  // feature never once worked in production.
+  const targetId = String(body.target_id || "");
   const outcome = String(body.outcome || "");
-  if (!Number.isFinite(targetId) || targetId <= 0) {
+  if (!/^[0-9a-f-]{36}$/i.test(targetId)) {
     return NextResponse.json({ error: "Bad target_id" }, { status: 422 });
   }
   if (!(OUTCOMES as readonly string[]).includes(outcome)) {
