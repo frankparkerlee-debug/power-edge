@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Container, Kicker, SectionHeading } from "@/components/ui";
-import { LeadForm } from "@/components/LeadForm";
+import { InspectionCapture } from "@/components/InspectionCapture";
 import { HonestyStandard } from "@/components/HonestyStandard";
 import { FaqSection } from "@/components/service-blocks";
 import { Reviews } from "@/components/Reviews";
@@ -125,11 +125,11 @@ export default function FreeInspectionPage() {
                 Book your free inspection
               </h2>
               <p className="mt-1.5 text-sm text-fg-inv-dim">
-                A real person calls you back fast — usually within the hour
-                during business hours.
+                Pick a two-hour arrival window and it&apos;s on our board right
+                away — or have a real person call you back instead.
               </p>
               <div className="mt-5">
-                <LeadForm compact defaultService="Free roof inspection" />
+                <InspectionCapture source="free-inspection" />
               </div>
             </div>
 

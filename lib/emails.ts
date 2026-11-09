@@ -568,3 +568,74 @@ export async function enqueueLeadSequence(opts: {
     await sleep(600); // ~1.6/s — under Resend's 2/s free-tier limit
   }
 }
+
+/**
+ * Inspection booked — confirmation to the homeowner, notification to the team.
+ * Sent after the slot is already persisted, so a mail failure never costs the
+ * booking (the caller swallows throws).
+ */
+export async function sendAppointmentConfirmation(
+  resendKey: string,
+  a: {
+    name: string;
+    phone: string;
+    email?: string;
+    address?: string;
+    notes?: string;
+    dayLabel: string;
+    timeLabel: string;
+  },
+) {
+  const first = (a.name || "there").split(" ")[0];
+  const when = `${a.dayLabel}, ${a.timeLabel}`;
+
+  // Homeowner confirmation.
+  if (a.email) {
+    await sendEmail(
+      resendKey,
+      a.email,
+      `You're booked: roof inspection ${a.dayLabel}`,
+      shell({
+        preheader: `${when} — free, documented, no obligation.`,
+        body:
+          h1(`You're booked, ${first}.`) +
+          p(
+            `Your free roof inspection is set for <strong>${when}</strong>${
+              a.address ? ` at <strong>${a.address}</strong>` : ""
+            }. That's an arrival window, not a fixed minute — we'll call before we head over.`,
+          ) +
+          steps([
+            "We photograph and measure the roof, top to bottom.",
+            "You get a written assessment — including &ldquo;your roof is fine&rdquo; if that's the answer.",
+            "If it's worth filing, we document the damage so your claim stands on evidence.",
+          ]) +
+          p(
+            `You don't need to be home for the roof itself, but it helps to be there for the walkthrough. Need to move it? Call or text <strong>${site.phone}</strong>.`,
+          ) +
+          button(`Call ${site.phone}`, site.phoneHref) +
+          verifyChip(),
+      }),
+    );
+  }
+
+  // Team notification.
+  const row = (k: string, v?: string) =>
+    v
+      ? `<tr><td style="padding:4px 10px 4px 0;color:${MUTED};font:13px ${FONT};">${k}</td><td style="padding:4px 0;color:${TEXT};font:600 13px ${FONT};">${v}</td></tr>`
+      : "";
+  await sendEmail(
+    resendKey,
+    site.email,
+    `NEW INSPECTION BOOKED — ${a.dayLabel} ${a.timeLabel} — ${a.name}`,
+    shell({
+      preheader: `${a.name} · ${a.phone} · ${when}`,
+      body:
+        h1("New inspection booked") +
+        `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
+          ${row("When", when)}${row("Name", a.name)}${row("Phone", a.phone)}
+          ${row("Email", a.email)}${row("Address", a.address)}${row("Notes", a.notes)}
+        </table>` +
+        p(`Booked from the website. It's already on the board at <a href="${site.url}/admin/appointments">/admin/appointments</a>.`),
+    }),
+  );
+}
