@@ -7,6 +7,7 @@ import { HailMap } from "./HailMap";
 import { leadContext } from "@/lib/leadContext";
 import { track } from "@/lib/analytics";
 import { site } from "@/lib/site";
+import { BookInspection } from "./BookInspection";
 import type { StormData } from "./StormReport";
 
 /**
@@ -200,21 +201,37 @@ export function RoofClaimCheck() {
             </svg>
           </div>
           <h2 className="font-display text-2xl font-bold text-fg-inv">
-            You&apos;re booked in.
+            Got it. Now pick your time.
           </h2>
           <p className="mt-2 text-fg-inv-dim">
-            We&apos;ll call or text you fast to lock in your free inspection.
-          </p>
-          <p className="mt-3 text-sm text-fg-inv-dim">
-            Want a head start?{" "}
-            <a href={site.textHref} className="font-bold text-bolt hover:text-bolt-hi">
-              Text photos
-            </a>{" "}
-            of your roof, ceiling stains, or gutters to{" "}
-            <strong className="text-fg-inv">{site.textNumber}</strong> and
-            we&apos;ll look before we arrive.
+            We have your details. Choose a two-hour arrival window below and
+            it&apos;s on our board right away, or we&apos;ll call you to set one.
           </p>
         </div>
+
+        {/* The whole point of the claim check is the next step. Sending people
+            away to wait for a callback was dropping the warmest moment we get. */}
+        <div className="border-t border-line pt-5">
+          <BookInspection
+            source="roof-claim-check"
+            prefill={{
+              name: booked.name,
+              phone: booked.phone,
+              email: booked.email,
+              address: result?.matched || address,
+            }}
+          />
+        </div>
+
+        <p className="mt-4 text-center text-sm text-fg-inv-dim">
+          Want a head start?{" "}
+          <a href={site.textHref} className="font-bold text-bolt hover:text-bolt-hi">
+            Text photos
+          </a>{" "}
+          of your roof, ceiling stains, or gutters to{" "}
+          <strong className="text-fg-inv">{site.textNumber}</strong> and
+          we&apos;ll look before we arrive.
+        </p>
         <a
           href={`/claim-prep?name=${encodeURIComponent(booked.name)}&phone=${encodeURIComponent(booked.phone)}&email=${encodeURIComponent(booked.email)}&address=${encodeURIComponent(result?.matched || address)}`}
           className="mt-2 flex items-center justify-between rounded-card border-2 border-bolt/50 bg-bolt/10 p-5 transition-colors hover:border-bolt"
