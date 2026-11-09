@@ -117,11 +117,8 @@ export default function RoofingPage() {
       <section className="bg-paper py-16">
         <Container className="grid gap-6 text-center sm:grid-cols-3">
           {[
-            { big: `${site.capacity.crews}`, small: "roofing crews" },
-            {
-              big: `~${site.capacity.roofsPerMonth}`,
-              small: "roofs / month capacity",
-            },
+            { big: site.liabilityCoverage, small: "liability coverage" },
+            { big: `${site.googleRating}★`, small: `${site.googleReviewCount} Google reviews` },
             { big: "20 yrs", small: "PM experience (Ernesto Sandoval)" },
           ].map((s) => (
             <div key={s.small} className="rounded-card bg-white p-8 shadow-sm">

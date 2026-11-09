@@ -57,7 +57,13 @@ export const site = {
     },
   ],
 
-  // Capacity / scale — a real differentiator vs. a two-truck operation.
+  // Capacity. NOT rendered publicly as of 2026-11-08: "four crews, ~100 roofs
+  // a month" was on nine pages and in the email engine, and on a site whose
+  // whole argument is that a homeowner can verify us, it is the one number a
+  // homeowner could test and find wanting. Parker had already pulled it from
+  // the email signature. Public copy now says "our own crews" instead, which
+  // is true at any crew count. Restore the numbers here only if they are
+  // currently accurate and you want them back on the site.
   capacity: {
     crews: 4,
     roofsPerMonth: 100,

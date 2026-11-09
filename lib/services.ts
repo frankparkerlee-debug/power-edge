@@ -40,7 +40,7 @@ export const services: Service[] = [
       "Free, no-pressure roof inspection with photo documentation",
       "Residential re-roofs and commercial systems",
       "Storm & hail insurance claims documented to the letter of Texas law",
-      "4 crews — capacity for up to 100 roofs a month, so you're not waiting weeks",
+      "Our own crews, so you're not waiting weeks for a subcontractor",
     ],
   },
   {

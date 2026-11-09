@@ -59,7 +59,7 @@ export default function AboutPage() {
                   Capacity
                 </div>
                 <div className="mt-1 font-display text-2xl font-extrabold text-bolt">
-                  {site.capacity.crews} crews · {site.capacity.roofsPerMonth} roofs/mo
+                  Our own crews · Dallas–Fort Worth
                 </div>
               </div>
               <div className="rounded-md border border-line bg-ink-2 p-5">

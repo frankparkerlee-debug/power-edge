@@ -27,9 +27,9 @@ The math, straight: reps closing 2-3 roofs a month typically earn **$9K-$13K/mon
 
 ### Why experienced reps move here
 - **Supplementing is dialed in.** Your commission is 50% of gross profit, so we fight for the full scope, not the adjuster's first offer. Starter, drip edge, I&W, ridge vent: documented and claimed. Your GP reflects the real job.
-- **Builds run fast.** Four crews, capacity for ~100 roofs a month. Fast builds mean your back-half commissions release fast. No six-month pipeline of unpaid deals.
+- **Builds run fast.** Our own crews, not subcontractors we chase. Fast builds mean your back-half commissions release fast. No six-month pipeline of unpaid deals.
 - **No games.** No house-account skimming, no surprise chargebacks, no "the check's coming." Weekly means weekly.
-- **A brand that protects your name.** Licensed and insured, 4.7★ on Google, and known for telling homeowners the truth, even "your roof is fine." Your customers refer; your commissions stay clean.
+- **A brand that protects your name.** Insured, accountable, 4.7★ on Google, and known for telling homeowners the truth, even "your roof is fine." Your customers refer; your commissions stay clean.
 
 ### The role
 Door-to-door storm restoration sales across DFW: canvass storm-hit neighborhoods guided by our hail data, open honest conversations with the claim-check tool, run free documented inspections (we train the roof work), walk homeowners through the claim the legal way (we document and coordinate with adjusters, never pose as them, never touch deductibles), present financing, attend adjuster meetings on your deals, and follow your builds through to referrals.
@@ -56,17 +56,17 @@ DFW closers 👋 — new storm-restoration shop, built by people tired of watchi
 
 Here's the deal: paid at the FIRST check (weekly), a floor on every approved roof so you're never at zero on a win, storm-data that tells you which streets just took hail, protected turf, and closing tools (instant claim check + satellite measurement + deductible financing) that do half the objection-handling for you.
 
-Licensed & insured, 4.7★ on Google, real production capacity (4 crews, ~100 roofs/month). Commission-only 1099. Strong closers only — leaders who bring a team, let's talk overrides.
+Insured and accountable, 4.7★ on Google, and the work is done by our own crews. Commission-only 1099. Strong closers only — leaders who bring a team, let's talk overrides.
 
 60-second apply: poweredgetx.com/careers
 
 ---
 
 ## 3. Direct DM script (for poaching a specific rep)
-> Hey [name] — saw you're crushing it in roofing sales around DFW. We're PowerEdge, a licensed & insured DFW storm-restoration shop building a rep team the opposite way most shops do: paid at first check weekly, a per-roof floor so no deal pays zero, storm-mapped knock lists, protected territory, and tech that closes at the door (instant claim check, satellite measure, deductible financing). If your current shop is slow-paying you or stacking reps on the same streets, worth a 10-minute call? poweredgetx.com/careers
+> Hey [name] — saw you're crushing it in roofing sales around DFW. We're PowerEdge, an insured DFW storm-restoration shop building a rep team the opposite way most shops do: paid at first check weekly, a per-roof floor so no deal pays zero, storm-mapped knock lists, protected territory, and tech that closes at the door (instant claim check, satellite measure, deductible financing). If your current shop is slow-paying you or stacking reps on the same streets, worth a 10-minute call? poweredgetx.com/careers
 
 ## 4. Sales-leader DM script (the priority hire)
-> Hey [name] — quick one. We're PowerEdge (licensed & insured DFW storm restoration, 4 crews / ~100-roof monthly capacity) and we're hiring a sales leader to build the knock team from day one: base + override on team gross profit, real input on comp and territory, and a marketing engine already producing inbound (claim-check funnel, ads, tracked door-hanger QRs). If you've got a downline that trusts you and a shop that doesn't deserve you, let's talk. poweredgetx.com/careers
+> Hey [name] — quick one. We're PowerEdge (insured DFW storm restoration, our own crews) and we're hiring a sales leader to build the knock team from day one: base + override on team gross profit, real input on comp and territory, and a marketing engine already producing inbound (claim-check funnel, ads, tracked door-hanger QRs). If you've got a downline that trusts you and a shop that doesn't deserve you, let's talk. poweredgetx.com/careers
 
 ## 5. Rep-refers-rep bounty blurb (internal, once bounty amount is set)
 > Know a closer? Bring them. $[___] per producing hire (paid after their [3rd] approved roof). Send them to poweredgetx.com/careers and have them put your name in the "Anything we should know?" box.

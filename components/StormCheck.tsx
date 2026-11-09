@@ -67,7 +67,7 @@ export function StormCheck() {
           email: fd.email,
           zip: fd.zip,
           service: fd.solar
-            ? "Storm inspection (roof + solar)"
+            ? "Storm inspection (roof, has solar panels)"
             : "Storm inspection (hail check)",
           solar: fd.solar ? "yes" : "",
           message: `[Storm Check] address: ${result?.matched || address} — ${summary}`,

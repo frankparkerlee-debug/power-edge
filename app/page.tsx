@@ -169,8 +169,8 @@ function TrustBar() {
       small: "& accountable Texas contractor",
     },
     {
-      big: <CountUp to={site.capacity.crews} suffix=" crews" />,
-      small: `~${site.capacity.roofsPerMonth} roofs / month capacity`,
+      big: <>In&#8209;house</>,
+      small: "Our own crews, not subcontractors",
     },
     {
       big: (
@@ -213,7 +213,7 @@ function Wedge() {
     },
     {
       h: "Built to show up, not just sign you up",
-      p: "Four crews and capacity for up to 100 roofs a month mean we can actually be there this week — not in a month.",
+      p: "Our own crews, scheduled by us, so you can usually get on the calendar this week instead of next month.",
     },
     {
       h: "We'll tell you if your roof is fine",

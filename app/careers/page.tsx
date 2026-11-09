@@ -49,7 +49,7 @@ const perks = [
   },
   {
     h: "A company that delivers",
-    p: `Insured & accountable, ${site.googleRating}★ rated, four crews and the capacity for ~${site.capacity.roofsPerMonth} roofs a month. Your customers get taken care of — your reputation is safe.`,
+    p: `Insured and accountable, ${site.googleRating}★ rated, and the work is done by our own crews. Your customers get taken care of, so your reputation is safe.`,
   },
   {
     h: "Real earnings, real ceiling",

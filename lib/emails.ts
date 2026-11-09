@@ -264,7 +264,7 @@ export const leadSequence: SequenceEmail[] = [
               ],
               [
                 "Capacity to actually show up",
-                "Four crews and the scale to be there this week, not next month.",
+                "Our own crews, so we can be there this week, not next month.",
               ],
             ]
               .map(

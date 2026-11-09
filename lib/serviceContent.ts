@@ -23,7 +23,7 @@ export const serviceContent: Record<string, Content> = {
       },
       {
         title: "Fast, clean install",
-        desc: "One of our four crews handles tear-off and replacement — usually in a day or two — and leaves the site clean.",
+        desc: "Our own crew handles tear-off and replacement, usually in a day or two, and leaves the site clean.",
       },
       {
         title: "Final walk & warranty",
@@ -41,7 +41,7 @@ export const serviceContent: Record<string, Content> = {
       },
       {
         q: "How fast can you replace my roof?",
-        a: "With four crews and capacity for around 100 roofs a month, we can usually schedule within days, not weeks.",
+        a: "Because the work is done by our own crews rather than subcontractors we chase, we can usually schedule within days, not weeks.",
       },
       {
         q: "How much does a new roof cost?",

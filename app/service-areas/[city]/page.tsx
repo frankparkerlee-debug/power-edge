@@ -41,7 +41,7 @@ function cityFaqs(c: City) {
     },
     {
       q: `How fast can you get to my roof in ${c.name}?`,
-      a: `Fast. We run four crews across Dallas–Fort Worth with capacity for roughly ${site.capacity.roofsPerMonth} roofs a month, so inspections in ${c.name} usually happen within days — sooner right after a storm if you book early.`,
+      a: `Fast. We run our own crews across Dallas–Fort Worth, so inspections in ${c.name} usually happen within days, and sooner right after a storm if you book early.`,
     },
     {
       q: `Do you handle the insurance claim for me?`,
