@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     q: "What payment plans do you offer?",
-    a: "Two in-house plans, subject to approval: a 4-month plan at 0% interest, or a longer plan with your rate set by credit and payment history, up to the maximum allowed under Texas law. Final terms and required disclosures are provided in writing before you sign.",
+    a: "Two in-house plans, subject to approval, and both at 0% interest: pay in 4 monthly payments, or spread it over 12. No finance charge either way, so the amount you finance is the amount you pay. Final terms are provided in writing before you sign.",
   },
   {
     q: "Do I need money down?",

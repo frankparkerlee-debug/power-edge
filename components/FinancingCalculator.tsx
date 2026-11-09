@@ -5,31 +5,27 @@ import Link from "next/link";
 import { track } from "@/lib/analytics";
 
 /**
- * Deductible / project financing calculator, reflects PowerEdge's two IN-HOUSE
- * (self-funded) payment plans:
- *   • Pay-in-4, 4 monthly payments, 0% interest
- *   • 12-month, rate set by credit and payment history, up to the maximum
- *     allowed under Texas law (decision #55: no flat APR is quoted anywhere
- *     on site; ILLUSTRATIVE_RATE_12 below is a representative mid-range
- *     example used only to compute the sample monthly payment shown, never
- *     displayed as a stated or quoted rate).
+ * Deductible / project financing calculator for PowerEdge's two IN-HOUSE
+ * (self-funded) payment plans. Parker, 2026-11-09: NO INTEREST on any plan.
+ *   • Pay-in-4, 4 monthly payments, 0%
+ *   • 12-month, 0%
+ *
+ * This used to compute the 12-month payment from a hidden 12.99% rate while
+ * labelling it "rate set by credit". On an $8,000 deductible that quoted about
+ * $714/mo against a true $667, so the site was advertising a worse deal than
+ * the business actually gives, and the rate behind the number was never shown.
+ * Both plans are now a straight division.
  *
  * COMPLIANCE: illustrative estimate only, NOT a financing offer. The homeowner
- * always pays their full deductible over time, we never waive it (illegal in
- * Texas, HB 2102 / §27.02). The 12-month interest-bearing plan is consumer
- * credit: final terms + TILA disclosures are provided in writing before signing,
- * and the program itself requires counsel/licensing review before it runs.
+ * always pays their full deductible over time; we never waive it (illegal in
+ * Texas, HB 2102 / §27.02). Because no finance charge is added, these plans
+ * are not interest-bearing consumer credit, which is also what keeps them
+ * outside the Texas Finance Code Ch. 345 registration that applies to retail
+ * installment sales WITH a finance charge. If an interest-bearing plan is ever
+ * introduced, that registration question comes straight back.
  */
 
-const ILLUSTRATIVE_RATE_12 = 0.1299; // representative example only, never shown as a quoted rate
-
 const PRESETS = [1000, 2500, 5000, 8000, 10000, 15000];
-
-function amortized(principal: number, annualRate: number, n: number) {
-  const r = annualRate / 12;
-  if (r === 0) return principal / n;
-  return (principal * r) / (1 - Math.pow(1 + r, -n));
-}
 
 const usd = (n: number) =>
   n.toLocaleString("en-US", {
@@ -49,7 +45,7 @@ export function FinancingCalculator({
   const [plan, setPlan] = useState<"pay4" | "m12">("m12");
 
   const pay4 = amount > 0 ? amount / 4 : 0;
-  const pay12 = amount > 0 ? amortized(amount, ILLUSTRATIVE_RATE_12, 12) : 0;
+  const pay12 = amount > 0 ? amount / 12 : 0;
 
   return (
     <div
@@ -132,7 +128,7 @@ export function FinancingCalculator({
             <span className="text-sm font-bold text-fg-inv-dim">/mo</span>
           </div>
           <div className="mt-1 text-xs text-fg-inv-dim">
-            12 payments · rate set by credit, up to TX max
+            12 payments · <span className="text-bolt">0% interest</span>
           </div>
         </button>
       </div>
