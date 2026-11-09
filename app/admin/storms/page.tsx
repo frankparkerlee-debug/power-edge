@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { listStormEvents, type StormEventRow } from "@/lib/storm";
 import { listRoofChecks } from "@/lib/db";
 import { StormDashboard } from "@/components/StormDashboard";
-import { listStormTargets, listTargetDays, listTargetCities } from "@/lib/parcels";
+import { listStormTargets, listTargetDays, listTargetCities, withLastKnock } from "@/lib/parcels";
 import { TargetCards } from "@/components/TargetCards";
 
 // Storm engine command view — NOT indexed. Gated by ?key=<ADMIN_TOKEN>, same
@@ -116,6 +116,7 @@ export default async function AdminStormsPage({
     ),
     listTargetCities(),
   ]);
+  const topTargetsWithKnocks = await withLastKnock(topTargets);
   const days = clusterByDay(events);
   const bigDays = days.filter((d) => d.maxHail >= 1 || d.maxGust >= 60 || d.windDmg >= 3);
 
@@ -346,7 +347,7 @@ export default async function AdminStormsPage({
                 </div>
             {/* Mobile: knock cards w/ GPS near-me sorting (client component) */}
             <TargetCards
-              targets={topTargets.map((t) => ({
+              targets={topTargetsWithKnocks.map((t) => ({
                 id: t.id,
                 owner_name: t.owner_name,
                 address: t.address,
@@ -362,6 +363,7 @@ export default async function AdminStormsPage({
                 phone: t.phone ?? null,
                 phone_dnc: t.phone_dnc ?? null,
                 status: t.status,
+                knock: t.knock,
               }))}
             />
             {/* Desktop: full table */}

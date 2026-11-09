@@ -28,12 +28,46 @@ export type TargetCard = {
   phone?: string | null;
   phone_dnc?: boolean | null;
   status?: string;
+  knock?: { outcome: string; rep: string | null; created_at: string };
 };
 
 type NearTarget = TargetCard & { distance_mi: number };
 
 function adminKey() {
   return new URLSearchParams(window.location.search).get("key") || "";
+}
+
+/** Who is knocking. Same ?rep=Name convention the QR kit already uses, so a
+ *  rep bookmarks one URL and every door they mark carries their name. */
+function repName() {
+  return (new URLSearchParams(window.location.search).get("rep") || "")
+    .replace(/[^\w .'-]/g, "")
+    .slice(0, 40);
+}
+
+const KNOCK_OUTCOMES: Array<{ key: string; label: string; tone: string }> = [
+  { key: "not_home", label: "Not home", tone: "border-gray-300 text-gray-700" },
+  { key: "come_back", label: "Come back", tone: "border-amber-400 text-amber-700" },
+  { key: "not_interested", label: "Not interested", tone: "border-gray-300 text-gray-500" },
+  { key: "appointment_set", label: "Appt set", tone: "border-emerald-500 text-emerald-700 font-bold" },
+];
+
+const KNOCK_LABEL: Record<string, string> = {
+  not_home: "Not home",
+  come_back: "Come back",
+  not_interested: "Not interested",
+  appointment_set: "Appointment set",
+  inspected: "Inspected",
+  already_done: "Already done",
+  do_not_knock: "Do not knock",
+};
+
+function knockAgo(iso: string) {
+  const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (d <= 0) return "today";
+  if (d === 1) return "yesterday";
+  if (d < 30) return `${d}d ago`;
+  return `${Math.floor(d / 30)}mo ago`;
 }
 
 function fmtMi(mi: number) {
@@ -220,6 +254,9 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
   const [house, setHouse] = useState<TargetCard | null>(null);
   const [houseData, setHouseData] = useState<HouseData>({ loading: false, roof: null, storms: [] });
   const [converted, setConverted] = useState<Record<string, "working" | "done" | "error">>({});
+  // Local echo of dispositions so a rep sees the door change the instant they
+  // tap it, without a refetch in a driveway on bad signal.
+  const [knocked, setKnocked] = useState<Record<string, { outcome: string; at: string }>>({});
   // Ad-hoc "add a house" (bad roof not in the storm data)
   const [addOpen, setAddOpen] = useState(false);
   const [addState, setAddState] = useState<"idle" | "locating" | "listing" | "error">("idle");
@@ -298,6 +335,34 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
     } catch {
       setConverted((c) => ({ ...c, [t.id]: "error" }));
     }
+  };
+
+  async function mark(t: TargetCard, outcome: string) {
+    const prev = knocked[t.id];
+    setKnocked((k) => ({ ...k, [t.id]: { outcome, at: new Date().toISOString() } }));
+    try {
+      const res = await fetch("/api/admin/knock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-token": adminKey() },
+        body: JSON.stringify({ target_id: t.id, outcome, rep: repName() }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+    } catch {
+      // Put it back rather than show a door as worked when it was not saved.
+      setKnocked((k) => {
+        const next = { ...k };
+        if (prev) next[t.id] = prev;
+        else delete next[t.id];
+        return next;
+      });
+    }
+  }
+
+  const lastKnock = (t: TargetCard) => {
+    const local = knocked[t.id];
+    if (local) return { outcome: local.outcome, at: local.at, rep: repName() || null };
+    if (t.knock) return { outcome: t.knock.outcome, at: t.knock.created_at, rep: t.knock.rep };
+    return null;
   };
 
   const convertState = (t: TargetCard): "idle" | "working" | "done" | "error" =>
@@ -661,6 +726,37 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
                   ⛔ Do-Not-Call list — knock or mail only
                 </p>
               )}
+              {/* Knock disposition — the thing that stops two reps working
+                  the same door and makes the campaign measurable. */}
+              {(() => {
+                const lk = lastKnock(t);
+                return (
+                  <div className="mt-2">
+                    {lk && (
+                      <p className="mb-1.5 text-xs font-semibold text-gray-600">
+                        {KNOCK_LABEL[lk.outcome] || lk.outcome} · {knockAgo(lk.at)}
+                        {lk.rep ? ` · ${lk.rep}` : ""}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-1.5">
+                      {KNOCK_OUTCOMES.map((o) => (
+                        <button
+                          key={o.key}
+                          onClick={() => mark(t, o.key)}
+                          className={`rounded-lg border px-2.5 py-1.5 text-xs ${
+                            lk?.outcome === o.key
+                              ? "border-[#0b0e13] bg-[#0b0e13] text-white"
+                              : `bg-white ${o.tone}`
+                          }`}
+                        >
+                          {o.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Actions */}
               <div className="mt-2 flex items-center gap-2 text-xs">
                 <button
