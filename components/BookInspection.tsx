@@ -19,13 +19,17 @@ export function BookInspection({
   claimIntakeId,
   prefill,
   onBooked,
+  initialDays,
 }: {
   source?: string;
   claimIntakeId?: string;
   prefill?: { name?: string; phone?: string; email?: string; address?: string };
   onBooked?: () => void;
+  /** Server-rendered slots. Without these the picker shows a loading box,
+   *  which on a phone in a driveway is just an empty card. */
+  initialDays?: Day[];
 }) {
-  const [days, setDays] = useState<Day[] | null>(null);
+  const [days, setDays] = useState<Day[] | null>(initialDays ?? null);
   const [dayIdx, setDayIdx] = useState(0);
   const [slot, setSlot] = useState<Slot | null>(null);
   const [form, setForm] = useState({
@@ -41,13 +45,15 @@ export function BookInspection({
   const [done, setDone] = useState<{ dayLabel: string; timeLabel: string } | null>(null);
 
   useEffect(() => {
+    // Refresh in the background even when the server gave us slots: the page
+    // may have been cached, and a stale window is worse than a slow one.
     let live = true;
     fetch("/api/appointments")
       .then((r) => r.json())
       .then((d) => { if (live) setDays(d.days || []); })
-      .catch(() => { if (live) setDays([]); });
+      .catch(() => { if (live && !initialDays) setDays([]); });
     return () => { live = false; };
-  }, []);
+  }, [initialDays]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();

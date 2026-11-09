@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Container, Kicker, SectionHeading } from "@/components/ui";
 import { InspectionCapture } from "@/components/InspectionCapture";
+import { availableSlots } from "@/lib/scheduling";
 import { HonestyStandard } from "@/components/HonestyStandard";
 import { FaqSection } from "@/components/service-blocks";
 import { Reviews } from "@/components/Reviews";
@@ -58,7 +59,10 @@ const steps = [
   },
 ];
 
-export default function FreeInspectionPage() {
+export const dynamic = "force-dynamic";
+
+export default async function FreeInspectionPage() {
+  const days = await availableSlots();
   return (
     <>
       {/* Hero + form */}
@@ -129,7 +133,7 @@ export default function FreeInspectionPage() {
                 away — or have a real person call you back instead.
               </p>
               <div className="mt-5">
-                <InspectionCapture source="free-inspection" />
+                <InspectionCapture source="free-inspection" initialDays={days} />
               </div>
             </div>
 

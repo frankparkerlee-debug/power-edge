@@ -10,7 +10,15 @@ import { LeadForm } from "@/components/LeadForm";
  * talk to a person first. Keeping both behind one visible choice avoids the
  * usual mistake of burying the self-serve path under a contact form.
  */
-export function InspectionCapture({ source = "free-inspection" }: { source?: string }) {
+type Day = { date: string; dayLabel: string; slots: { start: string; timeLabel: string }[] };
+
+export function InspectionCapture({
+  source = "free-inspection",
+  initialDays,
+}: {
+  source?: string;
+  initialDays?: Day[];
+}) {
   const [mode, setMode] = useState<"book" | "call">("book");
 
   const tab = (on: boolean) =>
@@ -30,7 +38,7 @@ export function InspectionCapture({ source = "free-inspection" }: { source?: str
       </div>
 
       {mode === "book" ? (
-        <BookInspection source={source} />
+        <BookInspection source={source} initialDays={initialDays} />
       ) : (
         <LeadForm compact defaultService="Free roof inspection" />
       )}

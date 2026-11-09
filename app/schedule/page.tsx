@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Container, Kicker } from "@/components/ui";
 import { BookInspection } from "@/components/BookInspection";
+import { availableSlots } from "@/lib/scheduling";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -10,7 +11,10 @@ export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/schedule` },
 };
 
-export default function SchedulePage() {
+export const dynamic = "force-dynamic";
+
+export default async function SchedulePage() {
+  const days = await availableSlots();
   return (
     <section className="relative overflow-hidden bg-ink py-14 sm:py-20">
       <div className="absolute inset-0 grid-texture opacity-40" />
@@ -58,7 +62,7 @@ export default function SchedulePage() {
           <p className="mt-1 mb-5 text-sm text-fg-inv-dim">
             Takes about 30 seconds.
           </p>
-          <BookInspection source="schedule-page" />
+          <BookInspection source="schedule-page" initialDays={days} />
         </div>
       </Container>
     </section>
