@@ -79,14 +79,19 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "/admin";
   const router = useRouter();
   const [me, setMe] = useState<Me | null>(null);
+  const [signedOut, setSignedOut] = useState(false);
   const [menu, setMenu] = useState(false);
 
   useEffect(() => {
     let live = true;
     fetch("/api/me")
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (live && d?.ok) setMe(d); })
-      .catch(() => {});
+      .then((d) => {
+        if (!live) return;
+        if (d?.ok) setMe(d);
+        else setSignedOut(true);
+      })
+      .catch(() => { if (live) setSignedOut(true); });
     return () => { live = false; };
   }, []);
 
@@ -98,6 +103,12 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
   async function signOut() {
     await fetch("/api/auth/signout", { method: "POST" });
     router.push("/login");
+  }
+
+  // Signed out: show the page's own prompt with no chrome. Rendering tabs
+  // nobody can use, above a user chip reading "?", is worse than nothing.
+  if (signedOut) {
+    return <main className="min-h-screen bg-[#f4f5f7]">{children}</main>;
   }
 
   return (

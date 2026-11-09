@@ -21,6 +21,10 @@ import { PortalShell } from "./PortalShell";
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "/";
   const portal = pathname.startsWith("/admin") || pathname.startsWith("/sales");
+  // Sign-in is a team page. It gets neither marketing CTAs nor portal nav,
+  // because there is nothing to navigate to until you are signed in.
+  const bare = pathname.startsWith("/login") || pathname.startsWith("/auth");
+  if (bare) return <main className="flex-1">{children}</main>;
 
   if (portal) {
     return <PortalShell>{children}</PortalShell>;

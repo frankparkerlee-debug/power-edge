@@ -8,5 +8,7 @@ export async function GET(req: Request) {
   const member = await redeemLoginToken(token);
   if (!member) redirect("/login?e=expired");
   await startSession(member);
-  redirect(member.role === "admin" ? "/sales" : "/admin/storms");
+  // Everyone lands on Today. Dropping an admin on the playbook was the
+  // "signing in lands on a document list" problem.
+  redirect("/admin");
 }
