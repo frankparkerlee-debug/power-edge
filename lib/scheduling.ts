@@ -3,7 +3,7 @@
 //
 // Slots are generated, not stored: a fixed weekly template (Mon–Sat, four
 // two-hour windows) projected forward, minus anything already booked. That
-// keeps it zero-maintenance — no one has to seed a calendar — while the
+// keeps it zero-maintenance (no one has to seed a calendar) while the
 // `appointments` table stays the single source of truth for what's taken.
 //
 // All slot math runs in America/Chicago (DFW) regardless of server timezone.
@@ -19,7 +19,7 @@ const DAYS_AHEAD = 14;
 const MIN_LEAD_MINUTES = 120;
 
 export type Slot = {
-  /** ISO instant the window opens — the booking key. */
+  /** ISO instant the window opens: the booking key. */
   start: string;
   end: string;
   /** "Thu, Nov 13" */
@@ -146,7 +146,7 @@ export type BookingResult =
 
 /**
  * Book a slot. The unique partial index on (slot_start) where status='booked'
- * is what actually prevents double-booking — two homeowners hitting the same
+ * is what actually prevents double-booking. Two homeowners hitting the same
  * window at once means the second insert fails at the DB, not in a race-prone
  * "check then write".
  */
@@ -176,7 +176,7 @@ export async function bookSlot(input: BookingInput): Promise<BookingResult> {
       }),
     });
     if (res.status === 409)
-      return { ok: false, error: "Someone just took that window — pick another.", code: "taken" };
+      return { ok: false, error: "Someone just took that window. Pick another.", code: "taken" };
     if (!res.ok) return { ok: false, error: "Could not save that booking.", code: "db" };
     return { ok: true, slot };
   } catch {

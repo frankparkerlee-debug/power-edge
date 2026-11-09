@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { listAppointments } from "@/lib/scheduling";
 
-// Internal inspection board — NOT indexed. Gated by ?key=<ADMIN_TOKEN>.
+// Internal inspection board. NOT indexed. Gated by ?key=<ADMIN_TOKEN>.
 export const metadata: Metadata = {
   title: "Inspections",
   robots: { index: false, follow: false },

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/site";
 
-// Internal sales repo — NOT indexed. Gated by ?key=<SALES_KEY or ADMIN_TOKEN>.
+// Internal sales repo. NOT indexed. Gated by ?key=<SALES_KEY or ADMIN_TOKEN>.
 // Reps open this on a phone in a driveway, so it has to work at 375px and load
 // without a login round-trip. Everything here is also a PDF they can print.
 export const metadata: Metadata = {

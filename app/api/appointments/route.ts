@@ -4,13 +4,13 @@ import { sendAppointmentConfirmation } from "@/lib/emails";
 
 export const dynamic = "force-dynamic";
 
-/** GET /api/appointments — open inspection windows, grouped by day. */
+/** GET /api/appointments: open inspection windows, grouped by day. */
 export async function GET() {
   const days = await availableSlots();
   return NextResponse.json({ ok: true, days });
 }
 
-/** POST /api/appointments — book one window. */
+/** POST /api/appointments: book one window. */
 export async function POST(req: Request) {
   let body: Record<string, string>;
   try {
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // Confirmations are best-effort — a mail hiccup must never lose the booking.
+  // Confirmations are best-effort. A mail hiccup must never lose the booking.
   try {
     const key = process.env.RESEND_API_KEY;
     if (key) {

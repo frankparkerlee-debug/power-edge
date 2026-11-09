@@ -130,7 +130,7 @@ export default async function FreeInspectionPage() {
               </h2>
               <p className="mt-1.5 text-sm text-fg-inv-dim">
                 Pick a two-hour arrival window and it&apos;s on our board right
-                away — or have a real person call you back instead.
+                away, or have a real person call you back instead.
               </p>
               <div className="mt-5">
                 <InspectionCapture source="free-inspection" initialDays={days} />
