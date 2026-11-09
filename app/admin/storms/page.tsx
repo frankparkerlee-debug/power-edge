@@ -82,22 +82,13 @@ export default async function AdminStormsPage({
       <div className={wrap}>
         <div className="mx-auto max-w-sm">
           <h1 className="font-display text-2xl font-extrabold">Storm Engine</h1>
-          <p className="mt-1 text-sm text-gray-600">Enter your access key.</p>
-          <form method="get" className="mt-4 flex gap-2">
-            <input
-              name="key"
-              type="password"
-              placeholder="Access key"
-              className="flex-1 rounded-md border border-gray-300 px-4 py-2.5"
-              autoFocus
-            />
-            <button
-              type="submit"
-              className="rounded-md bg-[#0b0e13] px-5 py-2.5 font-display font-bold text-white"
-            >
-              View
-            </button>
-          </form>
+          <p className="mt-2 text-sm text-gray-600">
+            This is the knock tool.{" "}
+            <a href="/login" className="font-semibold text-[#0c7a40] underline">
+              Sign in
+            </a>{" "}
+            with your work email and it opens on your own territory.
+          </p>
         </div>
       </div>
     );
