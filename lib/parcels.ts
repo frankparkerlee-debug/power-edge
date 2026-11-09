@@ -475,3 +475,72 @@ export async function listTargetDays(): Promise<
     return [];
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Territory
+ *
+ * One area has one owner. The unique index is on the area, not the rep, which
+ * is the entire point: two reps knocking Arlington on the same morning is the
+ * problem this solves. A rep may hold many areas.
+ * ------------------------------------------------------------------------ */
+
+export type RepArea = { id: number; rep: string; area_kind: "city" | "county"; area_value: string };
+
+export async function listRepAreas(): Promise<RepArea[]> {
+  const url = process.env.SUPABASE_URL;
+  if (!url || !process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
+  try {
+    const res = await fetch(
+      `${url}/rest/v1/rep_areas?select=id,rep,area_kind,area_value&order=rep.asc,area_value.asc&limit=500`,
+      { headers: dbHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+/** The areas one rep owns. Case-insensitive so ?rep=marcus matches "Marcus". */
+export async function areasForRep(rep: string): Promise<RepArea[]> {
+  if (!rep) return [];
+  const all = await listRepAreas();
+  return all.filter((a) => a.rep.toLowerCase() === rep.toLowerCase());
+}
+
+export async function assignArea(
+  rep: string,
+  areaKind: "city" | "county",
+  areaValue: string,
+): Promise<boolean> {
+  const url = process.env.SUPABASE_URL;
+  if (!url || !process.env.SUPABASE_SERVICE_ROLE_KEY) return false;
+  try {
+    // Upsert on the area so reassigning simply moves ownership.
+    const res = await fetch(`${url}/rest/v1/rep_areas?on_conflict=area_kind,area_value`, {
+      method: "POST",
+      headers: {
+        ...dbHeaders(),
+        Prefer: "resolution=merge-duplicates,return=minimal",
+      },
+      body: JSON.stringify({ rep: rep.trim(), area_kind: areaKind, area_value: areaValue.trim() }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function unassignArea(id: number): Promise<boolean> {
+  const url = process.env.SUPABASE_URL;
+  if (!url || !process.env.SUPABASE_SERVICE_ROLE_KEY) return false;
+  try {
+    const res = await fetch(`${url}/rest/v1/rep_areas?id=eq.${id}`, {
+      method: "DELETE",
+      headers: dbHeaders(),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}

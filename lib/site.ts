@@ -35,8 +35,8 @@ export const site = {
   // "Ask for reviews" → copy link; looks like https://g.page/r/XXXXXXXX/review).
   // Powers the /review short link your team texts to customers.
   googleWriteReviewUrl: "#",
-  // TODO(parker): paste the Jobber "Request work" / booking URL the current site uses.
-  jobberBookingUrl: "#",
+  // jobberBookingUrl removed 2026-11-08: nothing read it, and /schedule now
+  // books inspections natively rather than handing people to Jobber.
 
   // Workmanship guarantee from current site FAQ.
   workmanshipGuarantee: "1-year workmanship guarantee",

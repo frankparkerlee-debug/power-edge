@@ -55,6 +55,7 @@ const DOCS: Doc[] = [
 const TOOLS = [
   { href: "/admin/storms", name: "Storm tool", what: "The knock map. Addresses, owners, hail size, tap to call, convert to lead." },
   { href: "/admin/appointments", name: "Inspection board", what: "Everything booked from the website." },
+  { href: "/admin/territories", name: "Territories", what: "Who owns which city. One city, one rep." },
   { href: "/schedule", name: "Book an inspection", what: "Send this link to a homeowner. They pick their own window." },
   { href: "/roof-claim-check", name: "Claim check", what: "60-second address check. Good door opener." },
   { href: "/review", name: "Review link", what: "Text this after a finished job." },

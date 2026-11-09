@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { listStormEvents, type StormEventRow } from "@/lib/storm";
 import { listRoofChecks } from "@/lib/db";
 import { StormDashboard } from "@/components/StormDashboard";
-import { listStormTargets, listTargetDays, listTargetCities, withLastKnock } from "@/lib/parcels";
+import { listStormTargets, listTargetDays, listTargetCities, withLastKnock, areasForRep } from "@/lib/parcels";
 import { TargetCards } from "@/components/TargetCards";
 
 // Storm engine command view, NOT indexed. Gated by ?key=<ADMIN_TOKEN>, same
@@ -67,9 +67,10 @@ export default async function AdminStormsPage({
     county?: string;
     city?: string;
     days?: string;
+    rep?: string;
   }>;
 }) {
-  const { key, targets: targetDate, county, city, days: daysParam } = await searchParams;
+  const { key, targets: targetDate, county, city, days: daysParam, rep } = await searchParams;
   const adminToken = process.env.ADMIN_TOKEN;
   const authed = !!adminToken && key === adminToken;
 
@@ -106,12 +107,18 @@ export default async function AdminStormsPage({
   const safeCounty = county && /^[a-z]{3,20}$/.test(county) ? county : undefined;
   const safeCity = city && /^[A-Za-z .'-]{2,40}$/.test(city) ? city : undefined;
   const safeDays = ["10", "30", "90"].includes(daysParam || "") ? Number(daysParam) : undefined;
+  // A rep opening their own link lands on their own territory. Without this,
+  // every rep opens the same top-of-list and three of them knock one street.
+  const safeRep = rep && /^[\w .'-]{2,40}$/.test(rep) ? rep : undefined;
+  const myAreas = safeRep ? await areasForRep(safeRep) : [];
+  const myCities = myAreas.filter((a) => a.area_kind === "city").map((a) => a.area_value);
+  const effectiveCity = safeCity || (myCities.length > 0 ? myCities[0] : undefined);
   const [events, checks, targetDays, topTargets, targetCities] = await Promise.all([
     listStormEvents(90),
     listRoofChecks(40),
     listTargetDays(),
     listStormTargets(
-      { date: safeTargetDate, county: safeCounty, city: safeCity, days: safeDays },
+      { date: safeTargetDate, county: safeCounty, city: effectiveCity, days: safeDays },
       300,
     ),
     listTargetCities(),
@@ -123,6 +130,27 @@ export default async function AdminStormsPage({
   return (
     <div className={wrap}>
       <div className="mx-auto max-w-6xl">
+        {safeRep && (
+          <div className="mb-4 rounded-lg border border-[#0c7a40] bg-[#f0fbf4] px-4 py-3">
+            <span className="font-bold">{safeRep}</span>
+            {myCities.length > 0 ? (
+              <>
+                {" "}· your territory: <strong>{myCities.join(", ")}</strong>
+                {!safeCity && myCities.length > 1 && (
+                  <span className="text-gray-600">
+                    {" "}(showing {myCities[0]}; switch city below)
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="text-gray-600">
+                {" "}· no territory assigned yet, so you are seeing the whole list. Ask the
+                office to assign your cities.
+              </span>
+            )}
+            <span className="ml-2 text-gray-500">Doors you mark carry your name.</span>
+          </div>
+        )}
         <div className="flex items-end justify-between border-b border-gray-200 pb-4">
           <h1 className="font-display text-2xl font-extrabold">
             Storm Engine{" "}
