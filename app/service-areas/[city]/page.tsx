@@ -21,7 +21,7 @@ export async function generateMetadata({
   const c = getCity(city);
   if (!c) return {};
   return {
-    title: `Roofing Company in ${c.name}, TX: Storm & Hail Roof Repair`,
+    title: `${c.name} Roofing: Storm & Hail Repair`,
     description: `Storm and hail roof repair, replacement, and insurance-claim roofing in ${c.name}. Free inspection, honest verdict in writing, rated ${site.googleRating}★.`,
     alternates: { canonical: `${site.url}/service-areas/${c.slug}` },
   };
