@@ -584,6 +584,7 @@ export async function sendAppointmentConfirmation(
     notes?: string;
     dayLabel: string;
     timeLabel: string;
+    id?: string;
   },
 ) {
   const first = (a.name || "there").split(" ")[0];
@@ -610,8 +611,13 @@ export async function sendAppointmentConfirmation(
             "If it's worth filing, we document the damage so your claim stands on evidence.",
           ]) +
           p(
-            `You don't need to be home for the roof itself, but it helps to be there for the walkthrough. Need to move it? Call or text <strong>${site.phone}</strong>.`,
+            `You don't need to be home for the roof itself, but it helps to be there for the walkthrough.`,
           ) +
+          (a.id
+            ? p(
+                `Need to change or cancel it? <a href="${site.url}/appointment/${a.id}" style="color:${LIME_DEEP};font-weight:600;">Manage your inspection</a>, or call <strong>${site.phone}</strong>.`,
+              )
+            : p(`Need to move it? Call or text <strong>${site.phone}</strong>.`)) +
           button(`Call ${site.phone}`, site.phoneHref) +
           verifyChip(),
       }),

@@ -164,7 +164,7 @@ export type BookingInput = {
 };
 
 export type BookingResult =
-  | { ok: true; slot: Slot }
+  | { ok: true; slot: Slot; id?: string }
   | { ok: false; error: string; code: "taken" | "invalid" | "db" };
 
 /**
@@ -194,7 +194,7 @@ export async function bookSlot(input: BookingInput): Promise<BookingResult> {
   try {
     const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/appointments`, {
       method: "POST",
-      headers: { ...authHeaders(), Prefer: "return=minimal" },
+      headers: { ...authHeaders(), Prefer: "return=representation" },
       body: JSON.stringify({
         slot_start: slot.start,
         slot_end: slot.end,
@@ -211,7 +211,8 @@ export async function bookSlot(input: BookingInput): Promise<BookingResult> {
     if (res.status === 409)
       return { ok: false, error: "Someone just took that window. Pick another.", code: "taken" };
     if (!res.ok) return { ok: false, error: "Could not save that booking.", code: "db" };
-    return { ok: true, slot };
+    const rows = (await res.json()) as Array<{ id?: string }>;
+    return { ok: true, slot, id: rows?.[0]?.id };
   } catch {
     return { ok: false, error: "Could not save that booking.", code: "db" };
   }
@@ -229,5 +230,58 @@ export async function listAppointments(limit = 100) {
     return (await res.json()) as Record<string, string>[];
   } catch {
     return [];
+  }
+}
+
+/**
+ * Cancel a booking and free the window.
+ *
+ * Flipping status off 'booked' is what releases the slot: the unique index
+ * that prevents double-booking is partial on status='booked', so a cancelled
+ * row stops blocking without being deleted. Keeping the row means a no-show
+ * or a serial canceller is still visible.
+ */
+export async function cancelAppointment(
+  id: string,
+  by: "homeowner" | "office",
+): Promise<{ ok: boolean; error?: string }> {
+  if (!dbOn()) return { ok: false, error: "Scheduling is not configured." };
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return { ok: false, error: "Not found." };
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/appointments?id=eq.${id}&status=eq.booked`,
+      {
+        method: "PATCH",
+        headers: { ...authHeaders(), Prefer: "return=representation" },
+        body: JSON.stringify({
+          status: by === "homeowner" ? "canceled_by_homeowner" : "canceled_by_office",
+          canceled_at: new Date().toISOString(),
+        }),
+      },
+    );
+    if (!res.ok) return { ok: false, error: "Could not cancel." };
+    const rows = (await res.json()) as unknown[];
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return { ok: false, error: "That booking is already cancelled." };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Could not cancel." };
+  }
+}
+
+/** One booking by id, for the manage-link page. */
+export async function getAppointment(id: string) {
+  if (!dbOn() || !/^[0-9a-f-]{36}$/i.test(id)) return null;
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/appointments?select=id,slot_start,slot_end,name,address,status&id=eq.${id}`,
+      { headers: authHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return null;
+    const rows = (await res.json()) as Array<Record<string, string>>;
+    return rows[0] || null;
+  } catch {
+    return null;
   }
 }

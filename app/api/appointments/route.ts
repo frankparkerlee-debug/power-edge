@@ -80,6 +80,7 @@ export async function POST(req: Request) {
         notes: String(body.notes || ""),
         dayLabel: result.slot.dayLabel,
         timeLabel: result.slot.timeLabel,
+        id: result.id,
       });
     }
   } catch {
