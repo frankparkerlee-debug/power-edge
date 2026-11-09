@@ -1,4 +1,5 @@
 import { cities } from "@/lib/cities";
+import { site } from "@/lib/site";
 
 // Shared, layered address → coordinates geocoder used by the storm and roof
 // tools. All free, no API keys. Resolves clean addresses, partial/typo'd ones,
@@ -46,7 +47,7 @@ export async function geocode(address: string): Promise<Geo | null> {
       encodeURIComponent(q);
     const res = await fetch(nUrl, {
       signal: AbortSignal.timeout(8000),
-      headers: { "User-Agent": "poweredgetx.com/1.0 (info@poweredgetx.com)" },
+      headers: { "User-Agent": `poweredgetx.com/1.0 (${site.email})` },
     });
     if (res.ok) {
       const arr = await res.json();

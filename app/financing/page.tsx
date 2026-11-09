@@ -53,8 +53,8 @@ export default function FinancingPage() {
     <>
       <PageHero
         kicker="Roof & deductible financing · Dallas–Fort Worth"
-        title="Can't cover your deductible? We still start now."
-        intro="Your roof can't be replaced until the deductible's handled, but you don't have to pay it in one lump sum. Finance it from as little as $250 down and we get the work going right away, while you pay the rest in low monthly payments. You always pay your full deductible over time; we never waive it (that's illegal in Texas)."
+        title="Can't cover your deductible? We finance it ourselves."
+        intro="Your roof can't be replaced until the deductible's handled, but you don't have to pay it in one lump sum. We finance it ourselves, in house, rather than handing you to a lender: from as little as $250 down, with the rest in low monthly payments while the work gets going. You always pay your full deductible over time; we never waive it (that's illegal in Texas)."
         badge="See my payment, no credit impact"
         badgeHref="#prequal"
       />

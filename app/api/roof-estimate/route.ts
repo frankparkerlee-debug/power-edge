@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { geocode } from "@/lib/geocode";
 import { burst, clientIp, tooMany } from "@/lib/rateLimit";
+import { site } from "@/lib/site";
 
 /**
  * Instant roof estimate. Geocodes the address, measures the building footprint
@@ -59,7 +60,7 @@ async function footprintSqft(lat: number, lon: number): Promise<number | null> {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": "poweredgetx.com/1.0 (info@poweredgetx.com)",
+        "User-Agent": `poweredgetx.com/1.0 (${site.email})`,
       },
       body: "data=" + encodeURIComponent(q),
       signal: AbortSignal.timeout(15000),

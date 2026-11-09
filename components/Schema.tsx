@@ -24,11 +24,18 @@ export function Schema() {
     email: site.email,
     priceRange: "$$",
     description:
-      "Storm-first Dallas–Fort Worth roofing company: roof repair, replacement, and hail/storm insurance-claim documentation, with an honest verdict in writing on every inspection.",
-    areaServed: cities.map((c) => ({
-      "@type": "City",
-      name: `${c.name}, TX`,
-    })),
+      "Storm-first roofing company serving North Texas and the Dallas–Fort Worth metroplex: roof repair, replacement, and hail/storm insurance-claim documentation, with in-house deductible financing and an honest verdict in writing on every inspection.",
+    // Counties first, then the cities we have pages for. Stating the counties
+    // is how an engine answers "do they cover Weatherford" when there is no
+    // Weatherford page. These are the 11 counties the storm engine already
+    // ingests, so the claim matches what we can actually act on.
+    areaServed: [
+      ...[
+        "Tarrant", "Dallas", "Denton", "Collin", "Parker", "Johnson",
+        "Wise", "Rockwall", "Ellis", "Kaufman", "Hunt",
+      ].map((c) => ({ "@type": "AdministrativeArea", name: `${c} County, TX` })),
+      ...cities.map((c) => ({ "@type": "City", name: `${c.name}, TX` })),
+    ],
     address: {
       "@type": "PostalAddress",
       addressLocality: "Dallas",
@@ -37,6 +44,7 @@ export function Schema() {
     },
     // Entity resolution: without sameAs, Google and the AI engines can't tie
     // this markup to the Google Business Profile that actually ranks locally.
+    // Confirmed profile 2026-11-09 (knowledge graph id /g/11w7qkc808).
     // TODO(parker): add Facebook / BBB / Yelp URLs here as they go live.
     sameAs: [site.googleReviewsUrl as string],
     geo: {
@@ -77,7 +85,7 @@ export function Schema() {
       "Roof repair",
       "Hail damage roof insurance claims",
       "Storm damage restoration",
-      "Roof deductible financing",
+      "In-house roof deductible financing",
       "Commercial roofing",
     ],
   };

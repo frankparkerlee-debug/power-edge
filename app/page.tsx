@@ -521,7 +521,7 @@ function ServiceAreas() {
           ))}
         </div>
         <p className="mt-8 text-center text-fg-inv-dim">
-          Don&apos;t see your town? We cover all of {site.serviceArea}.{" "}
+          Don&apos;t see your town? We cover {site.serviceArea}.{" "}
           <Link href="/contact" className="text-bolt hover:underline">
             Just ask.
           </Link>
