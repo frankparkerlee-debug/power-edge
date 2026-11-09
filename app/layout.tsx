@@ -21,7 +21,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.legalName} | DFW Roofing Company, Storm & Hail Restoration`,
+    default: "DFW Roofing & Storm Restoration | PowerEdge",
     template: `%s | ${site.name}`,
   },
   description:

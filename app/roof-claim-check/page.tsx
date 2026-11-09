@@ -10,7 +10,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/roof-claim-check` },
-  title: "Do You Have a Roof Insurance Claim? Free Check: DFW",
+  title: "Do You Have a Roof Claim? Free DFW Check",
   description:
     "Enter your address and see in seconds whether your roof likely qualifies for a hail claim. Free, no obligation, from the NWS storm record.",
 };

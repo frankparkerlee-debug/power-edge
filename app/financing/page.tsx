@@ -9,7 +9,7 @@ import { Reviews } from "@/components/Reviews";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/financing` },
-  title: "Roof & Deductible Financing in DFW: From $250 Down",
+  title: "Roof & Deductible Financing in DFW",
   description:
     "Can't cover your roof deductible up front? Finance it from $250 down and get the work scheduled now, across Dallas–Fort Worth.",
 };

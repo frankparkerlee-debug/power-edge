@@ -5,7 +5,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/roof-check` },
-  title: "Free Roof Coverage Check: Is Your Roof Still Covered?",
+  title: "Free Roof Coverage Check for Texas Homes",
   description:
     "Free 60-second check: find out whether your Texas roof is still on full replacement-cost coverage, before a storm makes it matter.",
 };

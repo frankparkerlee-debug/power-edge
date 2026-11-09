@@ -6,7 +6,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/careers` },
-  title: "Roofing Sales Jobs in DFW: Real Leads, Fast Pay | PowerEdge",
+  title: "Roofing Sales Jobs in DFW: Real Leads, Fast Pay",
   description:
     "Sell storm-restoration roofs in DFW. Paid weekly at the first check, a floor on every approved roof, and storm-mapped leads instead of guesswork.",
 };

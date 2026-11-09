@@ -12,7 +12,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/free-inspection` },
-  title: "Free Roof Inspection in DFW: Documented for Your Claim",
+  title: "Free Roof Inspection in DFW, Documented",
   description:
     "Book a free roof inspection anywhere in Dallas–Fort Worth. Photos, measurements, and an honest verdict in writing, even if your roof is fine.",
 };
