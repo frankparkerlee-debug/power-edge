@@ -3,6 +3,7 @@ import { plaid, plaidConfig } from "@/lib/plaid";
 import { enqueueLeadSequence } from "@/lib/emails";
 import { insertLead } from "@/lib/db";
 import { site } from "@/lib/site";
+import { sendMail } from "@/lib/sendMail";
 
 // Phase 1 underwrite: exchange the Link public_token, pull identity + balances +
 // auth, and return an instant structure-based decision (no credit pull). Emails
@@ -130,17 +131,13 @@ export async function POST(req: Request) {
         .flatMap((o) => o.names || [])
         .slice(0, 4)
         .join(", ");
-      fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: `PowerEdge Site <leads@${site.domain}>`,
-          to: [to],
-          subject: `Financing pre-qual (${decision.toUpperCase()}): ${body.name}, $${requested.toLocaleString()}`,
-          html: `
+      void sendMail({
+        resendKey,
+        kind: "financing-prequal",
+        to,
+        subject: `Financing pre-qual (${decision.toUpperCase()}): ${body.name}, $${requested.toLocaleString()}`,
+        from: `PowerEdge Site <leads@${site.domain}>`,
+        html: `
             <h2>Plaid pre-qualification, ${decision.toUpperCase()}</h2>
             <p><strong>${escapeHtml(body.name || "")}</strong> · ${escapeHtml(body.phone || "")} · ${escapeHtml(body.email || "")}</p>
             <p>Property: ${escapeHtml(body.address || ", ")} ${escapeHtml(body.zip || "")}</p>
@@ -154,8 +151,7 @@ export async function POST(req: Request) {
             </table>
             <p style="color:#888;font-size:12px">Sandbox/Phase-1 decision, structure-based, no credit pull. Token not stored; set up the debit via Plaid Transfer (Phase 2).</p>
           `,
-        }),
-      }).catch((e) => console.error("[plaid] intel email failed", e));
+      });
 
       // Enroll the (high-intent) lead in the financing nurture.
       if (body.email) {

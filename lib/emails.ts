@@ -8,6 +8,7 @@
 // All templates are table-based, inline-styled HTML for email-client safety.
 
 import { site } from "./site";
+import { sendMail } from "@/lib/sendMail";
 
 // ---- Brand tokens (email-safe) -------------------------------------------
 const INK = "#0b0e13";
@@ -415,23 +416,19 @@ async function sendEmail(
   to: string,
   subject: string,
   html: string,
+  kind = "transactional",
 ) {
-  return fetch("https://api.resend.com/emails", {
-    method: "POST",
+  return sendMail({
+    resendKey,
+    kind,
+    to,
+    subject,
+    html,
+    from: `PowerEdge <hello@${site.domain}>`,
+    replyTo: site.email,
     headers: {
-      Authorization: `Bearer ${resendKey}`,
-      "Content-Type": "application/json",
+      "List-Unsubscribe": `<mailto:${site.email}?subject=Unsubscribe>`,
     },
-    body: JSON.stringify({
-      from: `PowerEdge <hello@${site.domain}>`,
-      to: [to],
-      replyTo: site.email,
-      subject,
-      html,
-      headers: {
-        "List-Unsubscribe": `<mailto:${site.email}?subject=Unsubscribe>`,
-      },
-    }),
   });
 }
 
@@ -542,29 +539,19 @@ export async function enqueueLeadSequence(opts: {
       email.delayDays > 0
         ? new Date(now + email.delayDays * 86400000).toISOString()
         : undefined;
-    try {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from,
-          to: [to],
-          replyTo: site.email,
-          subject: email.subject(ctx),
-          html: email.html(ctx),
-          ...(scheduledAt ? { scheduled_at: scheduledAt } : {}),
-          headers: {
-            "List-Unsubscribe": `<mailto:${site.email}?subject=Unsubscribe>`,
-          },
-          tags: [{ name: "sequence", value: email.key }],
-        }),
-      });
-    } catch (err) {
-      console.error(`[emails] failed to enqueue ${email.key} for ${to}`, err);
-    }
+    await sendMail({
+      resendKey,
+      kind: `sequence:${email.key}`,
+      to,
+      subject: email.subject(ctx),
+      html: email.html(ctx),
+      from,
+      replyTo: site.email,
+      scheduledAt,
+      headers: {
+        "List-Unsubscribe": `<mailto:${site.email}?subject=Unsubscribe>`,
+      },
+    });
     await sleep(600); // ~1.6/s, under Resend's 2/s free-tier limit
   }
 }

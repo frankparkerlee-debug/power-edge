@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { site } from "@/lib/site";
+import { sendMail } from "@/lib/sendMail";
 import { enqueueLeadSequence } from "@/lib/emails";
 import { insertLead } from "@/lib/db";
 import { pushLeadToHubspot } from "@/lib/hubspot";
@@ -119,20 +120,13 @@ export async function POST(req: Request) {
   const resendKey = process.env.RESEND_API_KEY;
   const to = process.env.LEAD_TO_EMAIL || site.email;
   if (resendKey) {
-    try {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: `PowerEdge Site <leads@${site.domain}>`,
-          to: [to],
-          subject: `New lead: ${lead.name}, ${lead.service || "general"}${
-            lead.solar === "yes" ? " ☀️ SOLAR" : ""
-          }`,
-          html: `
+    await sendMail({
+      resendKey,
+      kind: "lead",
+      to,
+      subject: `New lead: ${lead.name}, ${lead.service || "general"}${lead.solar === "yes" ? " \u2600\ufe0f SOLAR" : ""}`,
+      from: `PowerEdge Site <leads@${site.domain}>`,
+      html: `
             <h2>New website lead</h2>
             <p><strong>Name:</strong> ${escapeHtml(lead.name)}</p>
             <p><strong>Phone:</strong> ${escapeHtml(lead.phone)}</p>
@@ -146,11 +140,7 @@ export async function POST(req: Request) {
             <p><strong>Page:</strong> ${escapeHtml(lead.page_path) || ", "}</p>
             <p style="color:#888">Received ${lead.receivedAt}</p>
           `,
-        }),
-      });
-    } catch (err) {
-      console.error("[lead] email send failed", err);
-    }
+    });
 
     // 1b. Kick off the CUSTOMER nurture funnel, a designed 5-touch sequence
     // (instant confirmation + 4 follow-ups) enqueued via Resend scheduled

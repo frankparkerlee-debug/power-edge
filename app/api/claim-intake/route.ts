@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { upsertClaimIntake, type ClaimIntake } from "@/lib/db";
 import { sendClaimComplete } from "@/lib/emails";
 import { site } from "@/lib/site";
+import { sendMail } from "@/lib/sendMail";
 
 // Homeowner "claim prep" intake, progressive save. The wizard upserts one row
 // (by id) as the homeowner advances, so partial progress persists and the
@@ -107,17 +108,13 @@ export async function POST(req: Request) {
       const row = (l: string, v: string) =>
         `<p style="margin:2px 0"><strong>${l}:</strong> ${esc(v) || ", "}</p>`;
       // Team notification (full intake).
-      fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: `PowerEdge Site <leads@${site.domain}>`,
-          to: [to],
-          subject: `Claim prep COMPLETE: ${intake.name}${intake.solar ? " ☀️ SOLAR" : ""}`,
-          html: `
+      void sendMail({
+        resendKey,
+        kind: "claim-intake",
+        to,
+        subject: `Claim prep COMPLETE: ${intake.name}${intake.solar ? " \u2600\ufe0f SOLAR" : ""}`,
+        from: `PowerEdge Site <leads@${site.domain}>`,
+        html: `
             <h2>Homeowner completed claim prep, crew can inspect &amp; close on-site</h2>
             ${row("Name", intake.name)}${row("Phone", intake.phone)}${row("Email", intake.email)}
             ${row("Property", intake.address)}
@@ -131,8 +128,7 @@ export async function POST(req: Request) {
             ${row("Areas of concern", intake.concerns)}
             <p style="margin:2px 0"><strong>Solar:</strong> ${intake.solar ? "Yes, panels" : ", "}</p>
           `,
-        }),
-      }).catch((e) => console.error("[claim-intake] team email failed", e));
+      });
 
       // Customer confirmation.
       if (intake.email) {
