@@ -4,9 +4,9 @@ import { BookInspection } from "@/components/BookInspection";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Book Your Free Roof Inspection — Pick Your Time",
+  title: "Book Your Free Roof Inspection: Pick Your Time",
   description:
-    "Pick a two-hour arrival window for a free, documented roof inspection anywhere in Dallas–Fort Worth. Photos, measurements, and an honest verdict in writing — claim or no claim.",
+    "Pick a two-hour arrival window for a free, documented roof inspection anywhere in Dallas–Fort Worth. Photos, measurements, and an honest verdict in writing, claim or no claim.",
   alternates: { canonical: `${site.url}/schedule` },
 };
 
@@ -29,7 +29,7 @@ export default function SchedulePage() {
 
           <ul className="mt-8 space-y-3 text-fg-inv-dim">
             {[
-              "Photos, measurements, and a written assessment — free",
+              "Photos, measurements, and a written assessment, free",
               "An honest verdict, including “your roof is fine”",
               "Documented properly if it is worth filing a claim",
               "No high-pressure pitch at your door",

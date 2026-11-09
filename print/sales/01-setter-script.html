@@ -1,0 +1,109 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Setter Call Script</title><link rel="stylesheet" href="_base.css"></head><body>
+
+<header class="doc">
+  <img class="wm" src="../logos/wordmark-black.png" alt="PowerEdge">
+  <div class="meta">Setter call script · Internal use only<br>Rev. Nov 2026</div>
+</header>
+
+<h1>The setter call.</h1>
+<p class="sub">You are not selling a roof. You are booking a free inspection on a house
+the National Weather Service already told us got hit.</p>
+
+<div class="ok">
+  <strong>The whole edge in one line:</strong> every name on your list is a house inside a
+  confirmed hail footprint. You know the date. You know the stone size. They usually don't.
+  That is the only reason this call works, so lead with it.
+</div>
+
+<h2>Before you dial</h2>
+<ul class="tight">
+  <li>Pull the record: <strong>storm date, hail size, city</strong>. Have it on screen.</li>
+  <li>Check the DNC flag in the tool. Flagged red, you do not dial. No exceptions.</li>
+  <li>Calling window: 8am–8pm local. Texas and federal rules both.</li>
+</ul>
+
+<h2>The open (first 10 seconds)</h2>
+<div class="say">
+  <strong>You:</strong> "Hi, is this {{NAME}}? … {{NAME}}, this is {{REP}} with PowerEdge
+  here in {{CITY}}. I'm calling about the hail that came through your area on
+  <strong>{{DATE}}</strong>. The weather service logged <strong>{{SIZE}}-inch</strong> stones
+  right around your street. Did you ever get your roof looked at after that one?"
+</div>
+<p class="note">Stop talking. The question does the work. Most people answer honestly because
+you gave them a real date instead of "storms in the area."</p>
+
+<h2>Where it goes from there</h2>
+
+<h3>"No, nobody's looked at it."</h3>
+<div class="say">
+  <strong>You:</strong> "That's most people. Hail damage doesn't leak right away. It bruises
+  the shingle and the roof fails a couple years later, usually after the claim window has closed.
+  We're out in {{CITY}} this week doing free inspections. We get up there, photograph everything,
+  and you get it in writing either way. If your roof is fine, I'd rather tell you that than
+  sell you something. Want me to put you down for {{DAY}} morning or {{DAY}} afternoon?"
+</div>
+
+<h3>"Somebody already looked at it."</h3>
+<div class="say">
+  <strong>You:</strong> "Good. Who'd you have out? … And did they give you anything in writing,
+  photos and measurements? … That's the part that matters. A lot of guys eyeball it from the
+  driveway. If you've got a written report you're set, and I'll leave you alone. If you don't,
+  it costs you nothing to have ours."
+</div>
+
+<h3>"I already filed / already got a roof."</h3>
+<div class="say">
+  <strong>You:</strong> "Then you're ahead of everybody. Did they do the whole roof or just a
+  repair? … Any issue with the work? … Alright, I'll make a note so we stop calling you.
+  One thing. If anybody knocks claiming they can get your deductible waived, that's a crime
+  in Texas and it'll come back on you, not them. Just so you know."
+</div>
+<p class="note">That last line costs nothing and it is the reason people remember us. Say it.</p>
+
+<h2>Objections</h2>
+<table>
+  <tr><th style="width:32%">They say</th><th>You say</th></tr>
+  <tr><td>"I'm not interested."</td>
+      <td>"Fair enough. Can I ask, is that because you've already had it checked, or because you're tired of roofers calling?" <em>(Both answers give you somewhere to go. The second one, agree with them: "I'd be tired of it too. That's why we send the report whether we get the job or not.")</em></td></tr>
+  <tr><td>"How much does it cost?"</td>
+      <td>"Inspection is free, and that's not a hook. There's nothing to buy at the inspection. You get photos and a written assessment, and then you decide what you want to do."</td></tr>
+  <tr><td>"My roof's fine."</td>
+      <td>"It might be. Hail damage you can see from the ground is already a bad roof. What we're looking for is bruising you can only find up top. Twenty minutes and you'll know for sure."</td></tr>
+  <tr><td>"My insurance will drop me if I file."</td>
+      <td>"That's a real concern and I'm not going to tell you it can't happen. What I'd say is: an inspection isn't a claim. Find out what you've got first, then decide whether filing makes sense. Plenty of people get our report and sit on it."</td></tr>
+  <tr><td>"I'll call you back."</td>
+      <td>"Sure. One thing worth knowing. Most Texas policies put a deadline on filing from the date of the storm, and yours was {{DATE}}. Not trying to rush you, just don't want you to find out in two years. Want me to hold {{DAY}} and you call me if it doesn't work?"</td></tr>
+  <tr><td>"Are you going door to door?"</td>
+      <td>"No, I'm calling from our office in DFW. We pulled the weather service hail reports for {{CITY}} and your street was inside the footprint on {{DATE}}."</td></tr>
+  <tr><td>"How'd you get my number?"</td>
+      <td>"Public property records plus the storm map. Nothing fancy, and if you'd rather not hear from us I'll take you off right now."</td></tr>
+</table>
+
+<h2>Locking the appointment</h2>
+<ul class="tight">
+  <li>Offer two windows, never "when are you free." <strong>"{{DAY}} 8–10, or {{DAY}} 1–3?"</strong></li>
+  <li>Confirm the address out loud and spell the street back.</li>
+  <li>Get an email. "I'll send you the confirmation so you've got our name and license info in writing."</li>
+  <li>Tell them what happens: <em>"{{CLOSER}} will call you before he heads over. He'll be in a PowerEdge truck. Takes about 30–45 minutes and you don't have to be on the roof with him."</em></li>
+  <li>Book it in the tool before the next dial. An appointment in your notebook is not an appointment.</li>
+</ul>
+
+<div class="danger">
+  <strong>Never say any of this:</strong> that we'll waive, cover, eat, or "work with" the
+  deductible. That we can get the claim approved. That we handle or negotiate the claim.
+  That we're licensed by the state for roofing. Texas doesn't license roofers.
+  Any of those can end the company, not just the call. See the Texas Compliance Card.
+</div>
+
+<h2>What good looks like</h2>
+<table>
+  <tr><th>Metric</th><th>Target</th><th>Why</th></tr>
+  <tr><td>Dials per hour</td><td>35–45</td><td>Below 30 means you're talking too long to people who already said no.</td></tr>
+  <tr><td>Contacts per hour</td><td>5–8</td><td>Aged lists pick up less. Normal.</td></tr>
+  <tr><td>Appointments per contact</td><td>1 in 5</td><td>With a real storm date in the open. Without it, 1 in 15.</td></tr>
+  <tr><td>Sit rate</td><td>70%+</td><td>If they're not home when the closer arrives, your confirm was weak.</td></tr>
+</table>
+
+<footer class="doc"><span>PowerEdge · Internal sales document · Not for distribution</span><span>poweredgetx.com · 469-277-9594</span></footer>
+</body></html>

@@ -1,0 +1,113 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Closer Field Script</title><link rel="stylesheet" href="_base.css"></head><body>
+
+<header class="doc">
+  <img class="wm" src="../logos/wordmark-black.png" alt="PowerEdge">
+  <div class="meta">Closer field script · Internal use only<br>Rev. Nov 2026</div>
+</header>
+
+<h1>The door, the roof, the verdict.</h1>
+<p class="sub">Two situations: a booked inspection, or a cold door in a storm neighborhood.
+Both end the same way. You get on the roof and you tell them the truth in writing.</p>
+
+<h2>A. Booked inspection</h2>
+<p>They already said yes. Do not re-sell it. Your only job is to show up on time and be the
+person the setter described.</p>
+<div class="say">
+  <strong>You:</strong> "{{NAME}}? {{REP}} with PowerEdge. We talked about the hail on
+  {{DATE}}. I'm going to get up there, shoot photos of all four slopes, the vents, the gutters,
+  and your soft metals. Takes me about half an hour. Then I'll come down and walk you through
+  what I found on my phone, and you'll get it in writing either way. Anything you've already
+  noticed I should look at first?"
+</div>
+
+<h2>B. Cold door in a storm area</h2>
+<div class="say">
+  <strong>You:</strong> "Hi, I'm {{REP}} with PowerEdge. I'm not selling anything at the door,
+  I promise. The weather service logged <strong>{{SIZE}}-inch hail</strong> on this street on
+  <strong>{{DATE}}</strong>, and I'm checking the roofs on this block this week. Has anybody been
+  up on yours since then?"
+</div>
+<p class="note">Then stop. The pause is the script. If they engage, go to the roof ask. If they
+say they're busy: "No problem. Can I leave you the storm report for your address? It's got the
+date and the hail size on it." Hand the door hanger. Walk away. That is a win.</p>
+
+<h3>The roof ask</h3>
+<div class="say">
+  <strong>You:</strong> "I've got twenty minutes right now. I'll get up there, photograph it,
+  and show you what I find. Costs nothing and there's nothing to sign. If it's fine, I'll tell
+  you it's fine and you'll have that in writing for your records."
+</div>
+
+<h2>On the roof: document everything, every time</h2>
+<p>Whether you think there's a claim or not. The written report is the product.</p>
+<ul class="tight">
+  <li>Chalk and photograph a <strong>10&times;10 test square</strong> on each slope. Count hits.</li>
+  <li>Photograph soft metals first: gutters, vents, flashing, A/C fins. They bruise before shingles and they date the storm.</li>
+  <li>Photograph the address and the street sign. Every photo file needs to prove where it was taken.</li>
+  <li>Measure. Squares, pitch, layers, penetrations.</li>
+  <li>Note anything not storm related: age, prior repairs, ventilation, decking.</li>
+</ul>
+
+<h2>The verdict conversation</h2>
+<p>This is the whole company. Give the honest answer first, then the options.</p>
+
+<h3>If there's no claim</h3>
+<div class="say">
+  <strong>You:</strong> "Good news. I don't think you've got a claim here. I found {{N}} hits
+  in my test square and carriers generally want to see more than that before they'll total a
+  slope. Your roof's got maybe {{YEARS}} years left. I'll send you the photos and the write-up
+  so you've got it on file, and if we get another storm you've got a dated baseline to compare to."
+</div>
+<p class="note">Then ask for the referral and the review. The no-claim homeowner is the best
+review you will ever get, because they were expecting a pitch.</p>
+
+<h3>If there is a claim</h3>
+<div class="say">
+  <strong>You:</strong> "You've got damage worth filing. Here's what I found. {{SHOW PHOTOS}}.
+  Now I want to be straight with you about how this works, because the guys who knock after a
+  storm usually aren't. <strong>You</strong> file the claim with your carrier. I can't do that
+  for you and anybody who says they will is breaking state law. When your adjuster comes out,
+  I'll be here with my photos and measurements so nothing legitimate gets missed. What your
+  policy covers and what you owe is between you and your insurance company. And your deductible
+  is yours to pay. In Texas it's a crime for me to eat it, and honestly, anybody offering to
+  is telling you exactly what kind of work you're about to get."
+</div>
+
+<h2>Objections</h2>
+<table>
+  <tr><th style="width:30%">They say</th><th>You say</th></tr>
+  <tr><td>"The other guy says he'll cover my deductible."</td>
+      <td>"He's telling you he'll commit a crime for you. Texas Business and Commerce Code 27.02. It's a misdemeanor, and insurers prosecute it. It also means he's padding the estimate somewhere to make it back. I'd keep the paperwork he gave you."</td></tr>
+  <tr><td>"I want to think about it."</td>
+      <td>"You should. It's your roof and your money. What's the part you want to think on: whether to file, or whether to use us?" <em>(Then answer that actual thing.)</em></td></tr>
+  <tr><td>"I need to talk to my spouse."</td>
+      <td>"Of course. Is she home? I'd rather show her the photos myself than have you try to explain hail bruising secondhand." <em>(If not: book the time, don't leave it open.)</em></td></tr>
+  <tr><td>"I'm getting three bids."</td>
+      <td>"Smart. On a claim job, bids matter less than people think. The carrier sets the scope and the price. What you're really choosing is who shows up and who finishes. Ask all three for their liability certificate and their workmanship warranty in writing. We're insured for $2 million and we warranty our workmanship for a year."</td></tr>
+  <tr><td>"My rates will go up."</td>
+      <td>"They might. Hail is usually treated as a non-fault weather loss, but carriers vary and I'm not going to promise you something I can't control. Here's what I know: a bruised roof fails eventually, and once the filing window closes you're paying for it yourself."</td></tr>
+  <tr><td>"How do I know you'll still be here?"</td>
+      <td>"Fair question. A lot of storm crews won't be. We're a DFW company with a Google profile, 48 reviews, and $2 million in liability you can ask me to prove right now. Call the number on my card in six months and I'll pick up."</td></tr>
+  <tr><td>"Can you start tomorrow?"</td>
+      <td>"Not until your carrier approves scope, and you don't want me to. Work done before the adjuster sees it is work you might pay for yourself."</td></tr>
+</table>
+
+<h2>Paper, before you leave</h2>
+<ul class="tight">
+  <li>Inspection report filled out and signed. Leave a copy with them. Always.</li>
+  <li>Claim intake form if they're filing: carrier, policy number, deductible, date of loss.</li>
+  <li>The homeowner leave-behind, "How your claim actually works."</li>
+  <li>Agreement only if they're ready. Deductible notice in 12-point bold and the cancellation notice are on it. Point to both and say what they mean.</li>
+  <li>Photos uploaded the same day. A report you didn't send is a job you didn't earn.</li>
+</ul>
+
+<div class="danger">
+  <strong>The lines you do not cross.</strong> You don't adjust, negotiate, interpret, or file
+  the claim. You don't quote what the policy covers. You don't touch the deductible. You don't
+  say "licensed" about roofing. You don't inspect a roof you'd have to lie about.
+  Read the Texas Compliance Card and keep it in the truck.
+</div>
+
+<footer class="doc"><span>PowerEdge · Internal sales document · Not for distribution</span><span>poweredgetx.com · 469-277-9594</span></footer>
+</body></html>

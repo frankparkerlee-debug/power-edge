@@ -570,7 +570,7 @@ export async function enqueueLeadSequence(opts: {
 }
 
 /**
- * Inspection booked — confirmation to the homeowner, notification to the team.
+ * Inspection booked: confirmation to the homeowner, notification to the team.
  * Sent after the slot is already persisted, so a mail failure never costs the
  * booking (the caller swallows throws).
  */
@@ -596,17 +596,17 @@ export async function sendAppointmentConfirmation(
       a.email,
       `You're booked: roof inspection ${a.dayLabel}`,
       shell({
-        preheader: `${when} — free, documented, no obligation.`,
+        preheader: `${when}. Free, documented, no obligation.`,
         body:
           h1(`You're booked, ${first}.`) +
           p(
             `Your free roof inspection is set for <strong>${when}</strong>${
               a.address ? ` at <strong>${a.address}</strong>` : ""
-            }. That's an arrival window, not a fixed minute — we'll call before we head over.`,
+            }. That's an arrival window, not a fixed minute, so we'll call before we head over.`,
           ) +
           steps([
             "We photograph and measure the roof, top to bottom.",
-            "You get a written assessment — including &ldquo;your roof is fine&rdquo; if that's the answer.",
+            "You get a written assessment, including &ldquo;your roof is fine&rdquo; if that's the answer.",
             "If it's worth filing, we document the damage so your claim stands on evidence.",
           ]) +
           p(
@@ -626,7 +626,7 @@ export async function sendAppointmentConfirmation(
   await sendEmail(
     resendKey,
     site.email,
-    `NEW INSPECTION BOOKED — ${a.dayLabel} ${a.timeLabel} — ${a.name}`,
+    `NEW INSPECTION BOOKED · ${a.dayLabel} ${a.timeLabel} · ${a.name}`,
     shell({
       preheader: `${a.name} · ${a.phone} · ${when}`,
       body:

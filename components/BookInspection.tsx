@@ -62,7 +62,7 @@ export function BookInspection({
       const d = await res.json();
       if (!res.ok || !d.ok) {
         setError(d.error || "Something went wrong. Call us and we'll book it by hand.");
-        // Slot was taken out from under them — refresh what's open.
+        // Slot was taken out from under them: refresh what's open.
         if (res.status === 409) {
           setSlot(null);
           fetch("/api/appointments").then((r) => r.json()).then((x) => setDays(x.days || []));
@@ -91,7 +91,7 @@ export function BookInspection({
         <h3 className="font-display text-2xl font-bold text-fg-inv">You&apos;re booked.</h3>
         <p className="mt-2 text-fg-inv-dim">
           <strong className="text-fg-inv">{done.dayLabel}</strong>, {done.timeLabel}. That&apos;s an
-          arrival window — we&apos;ll call before we head over.
+          arrival window, so we&apos;ll call before we head over.
         </p>
         <p className="mt-4 text-sm text-fg-inv-dim">
           Check your email for the confirmation. Need to move it? Call or text us.
