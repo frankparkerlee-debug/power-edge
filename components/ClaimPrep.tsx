@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AddressAutocomplete } from "./AddressAutocomplete";
+import { BookInspection } from "./BookInspection";
 import { track } from "@/lib/analytics";
 import { site } from "@/lib/site";
 
@@ -165,25 +166,38 @@ export function ClaimPrep() {
         </div>
         <h3 className="font-display text-2xl font-bold text-fg-inv">You&apos;re all set.</h3>
         <p className="mt-2 text-fg-inv-dim">
-          A member of our team will call you <strong className="text-fg-inv">right away</strong> to
-          lock in your inspection — and we&apos;ll arrive ready to get on the roof, not do paperwork.
+          Your claim details are saved, so we arrive ready to get on the roof instead of
+          doing paperwork. If you haven&apos;t picked an inspection time yet, grab one at{" "}
+          <a href="/schedule" className="font-semibold text-bolt">poweredgetx.com/schedule</a>.
         </p>
         <p className="mt-3 text-sm text-fg-inv-dim">Need us now? Call or text {site.phone}.</p>
       </div>
     );
   }
 
-  // ---- BOOKED (interstitial after stage 2) --------------------------------
+  // ---- SCHEDULE (after stage 2) ------------------------------------------
+  // This step used to say "You're booked in. We'll call you right away" while
+  // nothing had actually been booked. On a site whose whole promise is that we
+  // tell homeowners the truth, that was the wrong screen. Now they book a real
+  // window, and the policy-details upsell comes after.
   if (step === "booked") {
     return (
-      <div className="py-2 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-bolt">
-          <svg viewBox="0 0 24 24" className="h-6 w-6 fill-ink"><path d="M9 16.2l-3.5-3.5L4 14.2 9 19.2l11-11-1.4-1.4z" /></svg>
-        </div>
-        <h3 className="font-display text-2xl font-bold text-fg-inv">You&apos;re booked in.</h3>
-        <p className="mt-2 text-fg-inv-dim">
-          We&apos;ll call you <strong className="text-fg-inv">right away</strong> to confirm your time.
+      <div className="py-2">
+        <h3 className="font-display text-2xl font-bold text-fg-inv">
+          Now pick your inspection time.
+        </h3>
+        <p className="mt-2 text-sm text-fg-inv-dim">
+          Your claim details are saved. Choose a two-hour arrival window and
+          it&apos;s on our board right away.
         </p>
+        <div className="mt-5">
+          <BookInspection
+            source="claim-prep"
+            claimIntakeId={id}
+            prefill={{ name: d.name, phone: d.phone, email: d.email, address: d.address }}
+            onBooked={() => track("claim_step", { step: "2_scheduled" })}
+          />
+        </div>
         <div className="mt-6 rounded-card border border-line bg-ink p-5 text-left">
           <p className="font-display text-base font-bold text-fg-inv">
             Want us in and out even faster?
@@ -193,7 +207,7 @@ export function ClaimPrep() {
           </p>
           <button
             onClick={() => setStep("3")}
-            className="mt-4 w-full rounded-md bg-bolt px-6 py-3 font-display font-bold text-ink transition-colors hover:bg-bolt-hi"
+            className="mt-4 w-full rounded-md border border-bolt px-6 py-3 font-display font-bold text-bolt transition-colors hover:bg-bolt/10"
           >
             Add policy details →
           </button>
@@ -201,7 +215,7 @@ export function ClaimPrep() {
             onClick={() => setStep("done")}
             className="mt-2 w-full text-center text-xs text-fg-inv-dim hover:text-fg-inv"
           >
-            Skip — I&apos;ll bring them to the visit
+            Skip, I&apos;ll bring them to the visit
           </button>
         </div>
         <Disclaimer />
