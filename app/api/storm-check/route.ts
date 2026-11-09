@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { geocode } from "@/lib/geocode";
 import { insertRoofCheck } from "@/lib/db";
+import { burst, clientIp, tooMany } from "@/lib/rateLimit";
 
 /**
  * Storm check: given a street address, returns reported hail activity near it.
@@ -85,6 +86,11 @@ async function fetchHailReports() {
 }
 
 export async function POST(req: Request) {
+  // Free upstreams (Census geocoder + IEM), but they are third parties we do
+  // not want to hammer, and the route writes a roof_checks row per call.
+  const rl = burst(`check:${clientIp(req)}`, 20, 60000);
+  if (rl) return tooMany(rl, "Too many address checks. Give it a minute.");
+
   let body: { address?: string };
   try {
     body = await req.json();

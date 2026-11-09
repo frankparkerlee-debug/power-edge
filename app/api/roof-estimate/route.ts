@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { geocode } from "@/lib/geocode";
+import { burst, clientIp, tooMany } from "@/lib/rateLimit";
 
 /**
  * Instant roof estimate. Geocodes the address, measures the building footprint
@@ -164,6 +165,11 @@ async function measureSatellite(
 }
 
 export async function POST(req: Request) {
+  // Billable Google API behind a public route. Cap it so a script
+  // cannot run up the bill.
+  const rl = burst(`roof:${clientIp(req)}`, 12, 60000);
+  if (rl) return tooMany(rl, "Too many measurements. Give it a minute.");
+
   let body: {
     address?: string;
     manualSqft?: number;

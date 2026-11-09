@@ -129,6 +129,28 @@ export async function availableSlots() {
   return days;
 }
 
+/**
+ * How many windows this address has already taken today. A booked slot is a
+ * window a real homeowner can no longer have, so this is checked against the
+ * database rather than process memory: it has to hold across instances and
+ * restarts.
+ */
+export async function bookingsFromIpToday(ip: string): Promise<number> {
+  if (!dbOn() || !ip || ip === "unknown") return 0;
+  try {
+    const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/appointments?select=id&ip=eq.${encodeURIComponent(ip)}&created_at=gte.${since}&status=eq.booked`,
+      { headers: { ...authHeaders(), Prefer: "count=exact" }, cache: "no-store" },
+    );
+    if (!res.ok) return 0;
+    const rows = (await res.json()) as unknown[];
+    return Array.isArray(rows) ? rows.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
 export type BookingInput = {
   slot_start: string;
   name: string;
@@ -138,6 +160,7 @@ export type BookingInput = {
   notes?: string;
   source?: string;
   claim_intake_id?: string;
+  ip?: string;
 };
 
 export type BookingResult =
@@ -157,6 +180,15 @@ export async function bookSlot(input: BookingInput): Promise<BookingResult> {
   if (!slot) return { ok: false, error: "That time is no longer available.", code: "invalid" };
   if (!input.name?.trim() || !input.phone?.trim())
     return { ok: false, error: "Name and phone are required.", code: "invalid" };
+  // A crew drives to this. Require something that could actually be dialled:
+  // 10 digits, or 11 starting with a US country code.
+  const digits = input.phone.replace(/\D/g, "");
+  if (digits.length < 10 || digits.length > 11 || (digits.length === 11 && digits[0] !== "1")) {
+    return { ok: false, error: "Enter a 10-digit phone number so we can confirm.", code: "invalid" };
+  }
+  if (!/^[A-Za-z]/.test(input.name.trim()) || input.name.trim().length < 2) {
+    return { ok: false, error: "Enter the name we should ask for.", code: "invalid" };
+  }
   if (!dbOn()) return { ok: false, error: "Scheduling is not configured.", code: "db" };
 
   try {
@@ -173,6 +205,7 @@ export async function bookSlot(input: BookingInput): Promise<BookingResult> {
         notes: input.notes?.trim() || null,
         source: input.source || null,
         claim_intake_id: input.claim_intake_id || null,
+        ip: input.ip || null,
       }),
     });
     if (res.status === 409)
