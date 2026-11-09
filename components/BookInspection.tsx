@@ -207,6 +207,11 @@ export function BookInspection({
           </button>
           <p className="text-center text-xs leading-relaxed text-fg-inv-dim">
             Free inspection, no obligation. If your roof is fine, we tell you that in writing.
+            Booking accepts our{" "}
+            <a href="/agreement" target="_blank" rel="noopener" className="font-semibold text-bolt underline">
+              inspection terms
+            </a>
+            , which authorize no work and no payment.
           </p>
         </div>
       )}

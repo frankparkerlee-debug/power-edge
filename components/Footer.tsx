@@ -123,6 +123,10 @@ export function Footer() {
             ·{" "}
             <Link href="/terms" className="hover:text-bolt">
               Terms
+            </Link>{" "}
+            ·{" "}
+            <Link href="/agreement" className="hover:text-bolt">
+              Inspection Agreement
             </Link>
           </p>
           <p>

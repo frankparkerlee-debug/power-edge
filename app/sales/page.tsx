@@ -48,7 +48,7 @@ const DOCS: Doc[] = [
   },
   {
     file: "08-agreement-draft.pdf", name: "Inspection & repair agreement", who: "Closer",
-    what: "DRAFT pending attorney review. Carries the required deductible notice and the cancellation notice. Do not use in the field until it is cleared.",
+    what: "The REPAIR contract, draft pending attorney review. Different document from the live inspection agreement: this one has scope, price and the statutory notices. Do not use in the field until it is cleared.",
   },
 ];
 
@@ -60,6 +60,7 @@ const TOOLS = [
   { href: "/roof-claim-check", name: "Claim check", what: "60-second address check. Good door opener." },
   { href: "/review", name: "Review link", what: "Text this after a finished job." },
   { href: "/kit", name: "Door-knock QR kit", what: "Printable QR cards with per-rep tracking. Add ?rep=YourName." },
+  { href: "/agreement", name: "Inspection agreement (live)", what: "The public terms a homeowner accepts when they book online. Authorizes no work and no payment. Send it to anyone who asks what they are signing." },
 ];
 
 export default async function SalesRepoPage({
