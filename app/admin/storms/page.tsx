@@ -363,6 +363,7 @@ export default async function AdminStormsPage({
                 phone: t.phone ?? null,
                 phone_dnc: t.phone_dnc ?? null,
                 status: t.status,
+                county: t.county ?? null,
                 knock: t.knock,
               }))}
             />

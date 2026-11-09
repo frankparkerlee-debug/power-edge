@@ -28,7 +28,7 @@ async function bboxTargets(lat: number, lon: number, halfMi: number, days?: numb
     q += `&storm_date=gte.${from}`;
   }
   const res = await fetch(
-    `${url}/rest/v1/storm_targets?select=id,owner_name,address,city,zip,hail_size_in,absentee,year_built,value,score,storm_date,lat,lon,phone,phone_dnc,status${q}&limit=3000`,
+    `${url}/rest/v1/storm_targets?select=id,owner_name,address,city,county,zip,hail_size_in,absentee,year_built,value,score,storm_date,lat,lon,phone,phone_dnc,status${q}&limit=3000`,
     { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
   );
   if (!res.ok) return [];
@@ -49,6 +49,7 @@ async function bboxTargets(lat: number, lon: number, halfMi: number, days?: numb
     phone: string | null;
     phone_dnc: boolean | null;
     status: string;
+    county: string | null;
   }>;
 }
 

@@ -28,6 +28,7 @@ export type TargetCard = {
   phone?: string | null;
   phone_dnc?: boolean | null;
   status?: string;
+  county?: string | null;
   knock?: { outcome: string; rep: string | null; created_at: string };
 };
 
@@ -70,6 +71,18 @@ function knockAgo(iso: string) {
   return `${Math.floor(d / 30)}mo ago`;
 }
 
+/** What to call this location. 38% of targets have no city: the appraisal
+ *  districts for Johnson and Parker counties simply do not publish one, and
+ *  "Dallas County" was a district label we were printing as if it were a city.
+ *  County is populated on every row, so it is the honest fallback. */
+function placeLabel(t: { city?: string | null; county?: string | null }) {
+  const city = (t.city || "").trim();
+  if (city) return city;
+  const county = (t.county || "").trim();
+  if (county) return `${county.charAt(0).toUpperCase()}${county.slice(1)} County`;
+  return "";
+}
+
 function fmtMi(mi: number) {
   if (mi < 0.19) return `${Math.round(mi * 5280)} ft`;
   return `${mi.toFixed(1)} mi`;
@@ -77,7 +90,7 @@ function fmtMi(mi: number) {
 
 function gmapsHref(t: TargetCard) {
   return `https://maps.google.com/?q=${encodeURIComponent(
-    `${t.address}, ${t.city || ""} TX ${t.zip || ""}`,
+    `${t.address}, ${t.city || placeLabel(t)} TX ${t.zip || ""}`.replace(/\s+/g, " "),
   )}`;
 }
 
@@ -677,7 +690,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
                       className="text-sm font-medium text-[#0c7a40] underline"
                     >
                       {t.address}
-                      {t.city ? `, ${t.city}` : ""} ↗
+                      {placeLabel(t) ? `, ${placeLabel(t)}` : ""} ↗
                     </a>
                   )}
                 </div>
