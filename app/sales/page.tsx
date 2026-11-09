@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/site";
+import { currentUser } from "@/lib/auth";
 
-// Internal sales repo. NOT indexed. Gated by ?key=<SALES_KEY or ADMIN_TOKEN>.
+// Internal sales repo. NOT indexed. Requires a signed-in admin.
 // Reps open this on a phone in a driveway, so it has to work at 375px and load
 // without a login round-trip. Everything here is also a PDF they can print.
 export const metadata: Metadata = {
@@ -71,8 +72,8 @@ export default async function SalesRepoPage({
   searchParams: Promise<{ key?: string }>;
 }) {
   const { key } = await searchParams;
-  const gate = process.env.SALES_KEY || process.env.ADMIN_TOKEN;
-  const authed = !!gate && key === gate;
+  const user = await currentUser(key);
+  const authed = user?.role === "admin";
 
   if (!authed) {
     return (
@@ -80,8 +81,9 @@ export default async function SalesRepoPage({
         <div className="mx-auto max-w-sm text-center">
           <h1 className="font-display text-2xl font-extrabold text-fg-inv">Sales repo</h1>
           <p className="mt-3 text-sm text-fg-inv-dim">
-            This page is for the PowerEdge team. Ask Parker for the link with the
-            access key on the end, then bookmark it.
+            This page is for the PowerEdge team.{" "}
+            <a href="/login" className="font-semibold text-bolt underline">Sign in</a>{" "}
+            to open it.
           </p>
         </div>
       </div>
@@ -111,7 +113,7 @@ export default async function SalesRepoPage({
           {DOCS.map((d) => (
             <a
               key={d.file}
-              href={`/sales/doc/${d.file}?key=${encodeURIComponent(key ?? "")}`}
+              href={`/sales/doc/${d.file}`}
               target="_blank"
               rel="noopener"
               className="block rounded-card border border-line bg-ink-2 p-5 transition-colors hover:border-bolt"
@@ -137,7 +139,7 @@ export default async function SalesRepoPage({
           {TOOLS.map((t) => (
             <Link
               key={t.href}
-              href={t.href.startsWith("/admin") ? `${t.href}?key=${encodeURIComponent(key ?? "")}` : t.href}
+              href={t.href}
               className="rounded-card border border-line bg-ink-2 p-4 transition-colors hover:border-bolt"
             >
               <span className="font-display font-bold text-fg-inv">{t.name}</span>
@@ -146,8 +148,7 @@ export default async function SalesRepoPage({
           ))}
         </div>
         <p className="mt-3 text-xs text-fg-inv-dim">
-          The admin links above already carry your access key. Bookmark them from here
-          and they just open.
+          You are signed in, so these just open. Bookmark the ones you use.
         </p>
 
         <h2 className="mt-12 text-xs font-bold uppercase tracking-widest text-fg-inv-dim">

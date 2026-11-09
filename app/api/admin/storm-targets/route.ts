@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { listStormTargets } from "@/lib/parcels";
+import { apiUser } from "@/lib/auth";
 
 const NEAR_RADIUS_MI = 15;
 
@@ -61,8 +62,8 @@ async function bboxTargets(lat: number, lon: number, halfMi: number, days?: numb
  */
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const key = url.searchParams.get("key");
-  if (!process.env.ADMIN_TOKEN || key !== process.env.ADMIN_TOKEN) {
+  const u = await apiUser(req);
+  if (u?.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   // Near-me mode: ?near=lat,lon → everything within 15mi sorted by distance;

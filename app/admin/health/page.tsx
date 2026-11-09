@@ -4,9 +4,10 @@ import { listStormEvents } from "@/lib/storm";
 import { listAppointments } from "@/lib/scheduling";
 import { listLeads } from "@/lib/db";
 import { site } from "@/lib/site";
+import { currentUser } from "@/lib/auth";
 
 /**
- * Operations health. NOT indexed. Gated by ?key=<ADMIN_TOKEN>.
+ * Operations health. NOT indexed. requires a signed-in team member.
  *
  * This page exists because of a specific failure: lead notification emails
  * stopped arriving for months and nothing anywhere said so. Resend returns an
@@ -59,8 +60,8 @@ export default async function HealthPage({
   searchParams: Promise<{ key?: string }>;
 }) {
   const { key } = await searchParams;
-  const adminToken = process.env.ADMIN_TOKEN;
-  const authed = !!adminToken && key === adminToken;
+  const user = await currentUser(key);
+  const authed = user?.role === "admin";
   const wrap = "min-h-screen bg-white px-6 py-10 text-[#0b0e13]";
 
   if (!authed) {
@@ -69,7 +70,7 @@ export default async function HealthPage({
         <div className="mx-auto max-w-md">
           <h1 className="font-display text-2xl font-extrabold">Health</h1>
           <p className="mt-2 text-sm text-gray-600">
-            Add <code className="rounded bg-gray-100 px-1">?key=…</code> to view.
+            Sign in to open this.
           </p>
         </div>
       </div>

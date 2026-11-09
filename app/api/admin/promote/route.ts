@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiUser } from "@/lib/auth";
 
 /**
  * Convert a storm target into a real lead: HubSpot contact + deal in the
@@ -34,7 +35,8 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
-  if (!process.env.ADMIN_TOKEN || body.key !== process.env.ADMIN_TOKEN) {
+  const u = await apiUser(req);
+  if (!u) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   if (!process.env.HUBSPOT_ACCESS_TOKEN) {

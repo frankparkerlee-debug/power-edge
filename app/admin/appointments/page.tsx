@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { listAppointments } from "@/lib/scheduling";
+import { currentUser } from "@/lib/auth";
 
-// Internal inspection board. NOT indexed. Gated by ?key=<ADMIN_TOKEN>.
+// Internal inspection board. NOT indexed. requires a signed-in team member.
 export const metadata: Metadata = {
   title: "Inspections",
   robots: { index: false, follow: false },
@@ -23,8 +24,8 @@ export default async function AdminAppointmentsPage({
   searchParams: Promise<{ key?: string }>;
 }) {
   const { key } = await searchParams;
-  const adminToken = process.env.ADMIN_TOKEN;
-  const authed = !!adminToken && key === adminToken;
+  const user = await currentUser(key);
+  const authed = user?.role === "admin";
   const wrap = "min-h-screen bg-white px-6 py-10 text-[#0b0e13]";
 
   if (!authed) {
@@ -33,7 +34,7 @@ export default async function AdminAppointmentsPage({
         <div className="mx-auto max-w-md">
           <h1 className="font-display text-2xl font-extrabold">Inspections</h1>
           <p className="mt-2 text-sm text-gray-600">
-            Add <code className="rounded bg-gray-100 px-1">?key=…</code> to view the board.
+            Sign in to open this.
           </p>
         </div>
       </div>

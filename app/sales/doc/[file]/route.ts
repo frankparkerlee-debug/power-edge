@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { apiUser } from "@/lib/auth";
 
 /**
  * Gated PDF delivery for the sales repo.
@@ -19,9 +20,8 @@ export async function GET(
   req: Request,
   ctx: { params: Promise<{ file: string }> },
 ) {
-  const gate = process.env.SALES_KEY || process.env.ADMIN_TOKEN;
-  const key = new URL(req.url).searchParams.get("key");
-  if (!gate || key !== gate) {
+  const u = await apiUser(req);
+  if (u?.role !== "admin") {
     return new NextResponse("Not found", { status: 404 });
   }
 

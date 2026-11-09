@@ -4,8 +4,9 @@ import { listRoofChecks } from "@/lib/db";
 import { StormDashboard } from "@/components/StormDashboard";
 import { listStormTargets, listTargetDays, listTargetCities, withLastKnock, areasForRep } from "@/lib/parcels";
 import { TargetCards } from "@/components/TargetCards";
+import { currentUser } from "@/lib/auth";
 
-// Storm engine command view, NOT indexed. Gated by ?key=<ADMIN_TOKEN>, same
+// Storm engine command view, NOT indexed. requires a signed-in team member, same
 // pattern as /admin/leads. Shows storm days (100mi radius), scored homeowner
 // targets, and self-identified claim-check addresses (knock gold).
 export const metadata: Metadata = {
@@ -71,8 +72,8 @@ export default async function AdminStormsPage({
   }>;
 }) {
   const { key, targets: targetDate, county, city, days: daysParam, rep } = await searchParams;
-  const adminToken = process.env.ADMIN_TOKEN;
-  const authed = !!adminToken && key === adminToken;
+  const user = await currentUser(key);
+  const authed = !!user;
 
   const wrap = "min-h-screen bg-white px-4 py-6 text-[#0b0e13] sm:px-6 sm:py-10";
 
@@ -109,7 +110,11 @@ export default async function AdminStormsPage({
   const safeDays = ["10", "30", "90"].includes(daysParam || "") ? Number(daysParam) : undefined;
   // A rep opening their own link lands on their own territory. Without this,
   // every rep opens the same top-of-list and three of them knock one street.
-  const safeRep = rep && /^[\w .'-]{2,40}$/.test(rep) ? rep : undefined;
+  // Identity comes from the session. ?rep= is still honoured for an admin
+  // looking at someone else's board, but a rep can no longer claim to be
+  // another rep by editing the URL.
+  const typed = rep && /^[\w .'-]{2,40}$/.test(rep) ? rep : undefined;
+  const safeRep = user?.role === "admin" ? (typed ?? user?.name) : (user?.name || typed);
   const myAreas = safeRep ? await areasForRep(safeRep) : [];
   const myCities = myAreas.filter((a) => a.area_kind === "city").map((a) => a.area_value);
   const effectiveCity = safeCity || (myCities.length > 0 ? myCities[0] : undefined);
@@ -158,7 +163,7 @@ export default async function AdminStormsPage({
               100mi radius · last 90 days
             </span>
           </h1>
-          <a href={`/admin/leads?key=${key}`} className="text-sm text-[#0c7a40] hover:underline">
+          <a href="/admin/leads" className="text-sm text-[#0c7a40] hover:underline">
             Leads →
           </a>
         </div>
@@ -363,7 +368,7 @@ export default async function AdminStormsPage({
                     </button>
                   </form>
                   <a
-                    href={`/api/admin/storm-targets?key=${key}${
+                    href={`/api/admin/storm-targets?${
                       safeTargetDate ? `&date=${safeTargetDate}` : ""
                     }${safeDays && !safeTargetDate ? `&days=${safeDays}` : ""}${safeCounty ? `&county=${safeCounty}` : ""}${
                       safeCity ? `&city=${encodeURIComponent(safeCity)}` : ""

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiUser } from "@/lib/auth";
 
 /**
  * House dossier for the knock tools: given a target's coordinates, return
@@ -92,10 +93,8 @@ async function stormsNear(lat: number, lon: number) {
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  if (
-    !process.env.ADMIN_TOKEN ||
-    url.searchParams.get("key") !== process.env.ADMIN_TOKEN
-  ) {
+  const u = await apiUser(req);
+  if (!u) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const lat = parseFloat(url.searchParams.get("lat") || "");

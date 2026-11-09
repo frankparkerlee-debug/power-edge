@@ -6,6 +6,7 @@ import {
   type ParcelHit,
 } from "@/lib/parcels";
 import { haversineMi } from "@/lib/storm";
+import { apiUser } from "@/lib/auth";
 
 /**
  * Ad-hoc house capture for reps: a bad roof that isn't in the storm targets.
@@ -30,7 +31,8 @@ const normAddr = (s: string) =>
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  if (!process.env.ADMIN_TOKEN || url.searchParams.get("key") !== process.env.ADMIN_TOKEN) {
+  const u = await apiUser(req);
+  if (!u) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const m = (url.searchParams.get("near") || "").match(/^(-?\d+\.?\d*),(-?\d+\.?\d*)$/);
@@ -76,7 +78,8 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
-  if (!process.env.ADMIN_TOKEN || body.key !== process.env.ADMIN_TOKEN) {
+  const u = await apiUser(req);
+  if (!u) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const p = body.parcel;

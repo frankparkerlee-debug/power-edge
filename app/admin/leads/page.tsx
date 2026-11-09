@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { listLeads, dbEnabled } from "@/lib/db";
+import { currentUser } from "@/lib/auth";
 
-// Internal leads view, NOT indexed. Gated by ?key=<ADMIN_TOKEN>. It's a simple
+// Internal leads view, NOT indexed. requires a signed-in team member. It's a simple
 // internal tool; the token is the same ADMIN_TOKEN used for the backfill route.
 export const metadata: Metadata = {
   title: "Leads",
@@ -27,25 +28,12 @@ export default async function AdminLeadsPage({
   searchParams: Promise<{ key?: string }>;
 }) {
   const { key } = await searchParams;
-  const adminToken = process.env.ADMIN_TOKEN;
-  const authed = !!adminToken && key === adminToken;
+  const user = await currentUser(key);
+  const authed = user?.role === "admin";
 
   const wrap =
     "min-h-screen bg-white px-6 py-10 text-[#0b0e13]";
 
-  if (!adminToken) {
-    return (
-      <div className={wrap}>
-        <div className="mx-auto max-w-md">
-          <h1 className="font-display text-2xl font-extrabold">Leads</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Set an <code className="rounded bg-gray-100 px-1">ADMIN_TOKEN</code>{" "}
-            environment variable to enable this view.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   if (!authed) {
     return (

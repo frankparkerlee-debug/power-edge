@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { revalidatePath } from "next/cache";
 import { listRepAreas, listTargetCities, assignArea, unassignArea } from "@/lib/parcels";
+import { currentUser } from "@/lib/auth";
 
-// Territory board. NOT indexed. Gated by ?key=<ADMIN_TOKEN>.
+// Territory board. NOT indexed. requires a signed-in team member.
 export const metadata: Metadata = {
   title: "Territories",
   robots: { index: false, follow: false },
@@ -15,8 +16,8 @@ export default async function TerritoriesPage({
   searchParams: Promise<{ key?: string }>;
 }) {
   const { key } = await searchParams;
-  const adminToken = process.env.ADMIN_TOKEN;
-  const authed = !!adminToken && key === adminToken;
+  const user = await currentUser(key);
+  const authed = user?.role === "admin";
   const wrap = "min-h-screen bg-white px-6 py-10 text-[#0b0e13]";
 
   if (!authed) {
@@ -25,7 +26,7 @@ export default async function TerritoriesPage({
         <div className="mx-auto max-w-md">
           <h1 className="font-display text-2xl font-extrabold">Territories</h1>
           <p className="mt-2 text-sm text-gray-600">
-            Add <code className="rounded bg-gray-100 px-1">?key=…</code> to manage assignments.
+            Sign in to open this.
           </p>
         </div>
       </div>
@@ -68,9 +69,9 @@ export default async function TerritoriesPage({
         <h1 className="font-display text-2xl font-extrabold">Territories</h1>
         <p className="mt-1 text-sm text-gray-600">
           One city, one rep. Assigning a city that already has an owner moves it.
-          Reps open the knock tool as{" "}
-          <code className="rounded bg-gray-100 px-1">/admin/storms?key=…&amp;rep=Name</code>{" "}
-          and it opens on their cities.
+          Reps sign in and open the knock tool at{" "}
+          <code className="rounded bg-gray-100 px-1">/admin/storms</code>{" "}
+          and it opens on their own cities.
         </p>
 
         {byRep.size > 0 && (

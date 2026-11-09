@@ -3,13 +3,14 @@ import { saveContract, createDraft, markNoticesDelivered, fmtDate, type ScopeLin
 import { markEmailed } from "@/lib/contracts";
 import { sendSignedAgreement } from "@/lib/emails";
 import { clientIp } from "@/lib/rateLimit";
+import { apiUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const token = req.headers.get("x-admin-token");
-  if (!process.env.ADMIN_TOKEN || token !== process.env.ADMIN_TOKEN) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  const u = await apiUser(req);
+  if (!u) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   let body: Record<string, unknown>;

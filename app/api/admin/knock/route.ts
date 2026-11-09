@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiUser } from "@/lib/auth";
 
 /**
  * Door-knock dispositions.
@@ -22,8 +23,8 @@ const OUTCOMES = [
 ] as const;
 
 export async function POST(req: Request) {
-  const token = req.headers.get("x-admin-token");
-  if (!process.env.ADMIN_TOKEN || token !== process.env.ADMIN_TOKEN) {
+  const u = await apiUser(req);
+  if (!u) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

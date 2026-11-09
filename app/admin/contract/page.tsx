@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { ContractForm } from "@/components/ContractForm";
 import { listContracts } from "@/lib/contracts";
+import { currentUser } from "@/lib/auth";
 
-// Field agreement. NOT indexed. Gated by ?key=<ADMIN_TOKEN>.
+// Field agreement. NOT indexed. requires a signed-in team member.
 export const metadata: Metadata = {
   title: "Agreement",
   robots: { index: false, follow: false },
@@ -27,8 +28,8 @@ export default async function ContractPage({
   searchParams: Promise<{ key?: string; rep?: string }>;
 }) {
   const { key, rep } = await searchParams;
-  const adminToken = process.env.ADMIN_TOKEN;
-  const authed = !!adminToken && key === adminToken;
+  const user = await currentUser(key);
+  const authed = !!user;
   const wrap = "min-h-screen bg-white px-5 py-8 text-[#0b0e13] sm:px-6";
 
   if (!authed) {
@@ -37,7 +38,7 @@ export default async function ContractPage({
         <div className="mx-auto max-w-md">
           <h1 className="font-display text-2xl font-extrabold">Agreement</h1>
           <p className="mt-2 text-sm text-gray-600">
-            Add <code className="rounded bg-gray-100 px-1">?key=…</code> to use this.
+            Sign in to open this.
           </p>
         </div>
       </div>

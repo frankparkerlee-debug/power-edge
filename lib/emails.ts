@@ -732,3 +732,21 @@ export async function sendSignedAgreement(
     "signed-agreement",
   );
 }
+
+/** Sign-in link for the team. Short-lived and single use. */
+export async function sendLoginLink(resendKey: string, to: string, url: string) {
+  return sendEmail(
+    resendKey,
+    to,
+    "Your PowerEdge sign-in link",
+    shell({
+      preheader: "Expires in 20 minutes, works once.",
+      body:
+        h1("Sign in") +
+        p(`Tap below to open your PowerEdge tools. The link works once and expires in 20 minutes.`) +
+        button("Sign me in", url) +
+        p(`If you didn't ask for this, you can ignore it. Nobody can sign in without this email.`),
+    }),
+    "login-link",
+  );
+}
