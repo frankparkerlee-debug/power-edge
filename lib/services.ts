@@ -44,6 +44,20 @@ export const services: Service[] = [
     ],
   },
   {
+    slug: "exterior",
+    title: "Siding, fascia, gutters & fencing",
+    short: "Exterior",
+    blurb:
+      "The rest of what the storm hit. Hail that bruises a roof also dents gutters and fascia, cracks siding and splinters fence pickets, and it usually belongs on the same claim.",
+    pricingMode: "quote",
+    bullets: [
+      "Siding repair and replacement",
+      "Fascia, soffit and gutter replacement",
+      "Fence repair and replacement, wood and metal",
+      "Documented on the same inspection as your roof, so nothing legitimate gets left off the claim",
+    ],
+  },
+  {
     slug: "commercial",
     title: "Commercial roofing",
     short: "Commercial",

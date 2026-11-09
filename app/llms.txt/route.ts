@@ -24,6 +24,9 @@ export async function GET() {
 - In-house financing for insurance deductibles and full projects. We are the
   lender, not a referral to a third party. The homeowner always pays the full
   deductible over time; waiving it is a crime in Texas and we do not do it.
+- Siding, fascia, soffit, gutters and fencing. Deliberately a short list:
+  these are the trades that sit next to a storm-damaged roof, documented on
+  the same inspection so they are not left off a claim.
 - Home repair across North Texas
 
 ## Counties served
@@ -52,6 +55,7 @@ Kaufman and Hunt.
 - Free claim check (enter an address, see the NWS hail record): ${site.url}/roof-claim-check
 - Book an inspection (pick a two-hour window): ${site.url}/schedule
 - Roofing services: ${site.url}/roofing
+- Siding, gutters and fencing: ${site.url}/exterior
 - Commercial roofing: ${site.url}/commercial
 - Guides on Texas hail claims and roofing costs: ${site.url}/guides
 

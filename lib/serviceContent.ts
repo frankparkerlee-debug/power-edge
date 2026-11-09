@@ -54,6 +54,48 @@ export const serviceContent: Record<string, Content> = {
     ],
   },
 
+  exterior: {
+    process: [
+      {
+        title: "We inspect the whole exterior, not just the roof",
+        desc: "The same free inspection. We photograph gutters, fascia, soffit, siding and fence along with the roof, because hail hits all of it and the soft metals are usually what dates the storm.",
+      },
+      {
+        title: "Everything goes in one written assessment",
+        desc: "Measurements and photographs for each item, in the same report. A claim that leaves off the fence and the gutters is a claim that pays for half the damage.",
+      },
+      {
+        title: "You file; we meet your adjuster",
+        desc: "We present what we documented across the whole exterior. What the policy covers stays between you and your carrier.",
+      },
+      {
+        title: "One crew, one schedule",
+        desc: "Roof, siding, gutters and fence handled by us rather than three subcontractors you have to chase. Finished and walked before we call it done.",
+      },
+    ],
+    faqs: [
+      {
+        q: "Is fence damage really part of a hail claim?",
+        a: "Often, yes. Most Texas homeowners policies cover fences under other structures, and hail that splinters pickets or dents metal is the same event that hit your roof. Whether it is covered is your carrier's call, but it should at least be documented, and plenty of claims get filed without it because nobody photographed it.",
+      },
+      {
+        q: "Do you do siding and gutters without a roof job?",
+        a: "Yes. If the roof is fine and the gutters are not, we will tell you that and quote just the gutters. We would rather do the small job honestly than invent a reason to sell you a roof.",
+      },
+      {
+        q: "What kind of fencing do you do?",
+        a: "Wood and metal fence repair and replacement, residential. We are not doing ornamental ironwork or custom gates.",
+      },
+      {
+        q: "Is this a full home-improvement service?",
+        a: "No, deliberately. Siding, fascia, soffit, gutters and fencing is the whole list. These are the trades that sit next to a storm-damaged roof, so our crews already work on them and our inspections already document them. Anything beyond that we would be learning on your house.",
+      },
+      {
+        q: "How do you price it?",
+        a: "On a covered claim, the carrier sets the scope and you pay your deductible, which we can finance at 0%. Outside a claim, a written quote after the free inspection. No pressure either way.",
+      },
+    ],
+  },
   commercial: {
     process: [
       {

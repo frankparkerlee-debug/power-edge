@@ -89,6 +89,9 @@ export function Schema() {
       "Storm damage restoration",
       "In-house roof deductible financing",
       "Commercial roofing",
+      "Siding repair and replacement",
+      "Gutter and fascia replacement",
+      "Fence repair and replacement",
     ],
   };
 
