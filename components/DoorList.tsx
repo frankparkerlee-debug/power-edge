@@ -55,6 +55,18 @@ function reasonKind(r: string): Kind | "owner" {
   return "owner";
 }
 
+/** Storm-alert signup, prefilled with this door so the homeowner only adds name, number and signature. */
+function alertHref(d: Door) {
+  const city = d.city.endsWith(" County") ? "" : `, ${d.city}`;
+  const q = new URLSearchParams({
+    a: `${d.street}${city}, TX${d.zip ? ` ${d.zip}` : ""}`,
+    lat: String(d.lat),
+    lon: String(d.lon),
+  });
+  if (d.target_id) q.set("t", d.target_id);
+  return `/storm-alerts?${q}`;
+}
+
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
@@ -425,6 +437,9 @@ export default function DoorList({
                             className="text-sm font-medium text-gray-700 underline"
                           >
                             Directions
+                          </a>
+                          <a href={alertHref(d)} className="text-sm font-medium text-gray-700 underline">
+                            Storm alerts
                           </a>
                         </div>
                       </div>
