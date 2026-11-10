@@ -13,6 +13,21 @@ export const site = {
   textNumber: "469-277-9594",
   textHref: "sms:+14692779594",
   email: "contact@poweredgetx.com", // confirmed by Parker 2026-11-09
+
+  /**
+   * The mailing address a homeowner cancels to.
+   *
+   * This is not a nice-to-have. Tex. Bus. & Com. Code § 601.053(b)(2) says a
+   * merchant "may not fail to include on both copies" of the notice of
+   * cancellation the address of the merchant's place of business, and the
+   * statutory form itself reads "...TO (name of merchant), AT (address of
+   * merchant's place of business)". Until this is filled in, the printed form
+   * carries a blank line nobody fills in and the emailed copy carries nothing.
+   *
+   * NEEDED FROM PARKER. Any address that receives mail is fine; it does not
+   * have to be a storefront.
+   */
+  mailingAddress: "" as string,
   domain: "poweredgetx.com",
   url: "https://poweredgetx.com",
 

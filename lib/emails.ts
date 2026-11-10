@@ -716,11 +716,22 @@ export async function sendSignedAgreement(
               `This work is being done through your insurance claim. The carrier sets the scope and the price; you pay your deductible. We never waive it, because that is a crime in Texas.`,
             )
           : "") +
+        /*
+         * Tex. Bus. & Com. Code § 601.053(b) lists what a merchant "may not
+         * fail to include" on the notice: the merchant's name, the address of
+         * the merchant's place of business, the date of the transaction, and
+         * the deadline. The name, date and deadline were here. The address was
+         * not, so set site.mailingAddress.
+         */
         `<div style="border:2px solid ${INK};padding:14px;margin:18px 0;font:700 13px ${FONT};line-height:1.45;color:${TEXT};">
+           NOTICE OF CANCELLATION<br>
+           DATE OF TRANSACTION: ${c.signedOn}<br><br>
            YOU MAY CANCEL THIS TRANSACTION, WITHOUT ANY PENALTY OR OBLIGATION, WITHIN THREE
            BUSINESS DAYS FROM THE DATE ABOVE.<br><br>
-           TO CANCEL, MAIL OR DELIVER A SIGNED AND DATED NOTICE, OR ANY OTHER WRITTEN NOTICE,
-           TO POWER EDGE, LLC, OR REPLY TO THIS EMAIL, NOT LATER THAN MIDNIGHT OF
+           TO CANCEL THIS TRANSACTION, MAIL OR DELIVER A SIGNED AND DATED COPY OF THIS NOTICE,
+           OR ANY OTHER WRITTEN NOTICE, TO ${site.legalEntity.toUpperCase()}${
+             site.mailingAddress ? `, AT ${site.mailingAddress.toUpperCase()}` : ""
+           }, OR REPLY TO THIS EMAIL, NOT LATER THAN MIDNIGHT OF
            <span style="text-decoration:underline">${c.cancelBy}</span>.
          </div>` +
         p(
