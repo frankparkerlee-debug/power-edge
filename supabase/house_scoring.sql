@@ -31,7 +31,7 @@ create table if not exists public.cell_signals (
   hail12_date date,
   hail24_in real,             -- biggest radar hail 12 to 24 months ago
   hail24_date date,
-  big_hail_old_date date,     -- last 1.75 in+ hail older than 12 months: roof likely replaced after it
+  big_hail_old_date date,     -- last 2.0 in+ radar hail in the own cell older than 12 months: roof likely replaced after it
   big_hail_days smallint not null default 0,
   wind_date date,             -- strongest wind or tornado report within 1 mile, last 24 months
   wind_kind text,             -- tornado | wind_damage | wind_gust
@@ -250,7 +250,7 @@ select
   last_outcome, last_knock_at, score::int,
   array_remove(array[
     case when hail12_in >= 0.75 then
-      'About ' || to_char(hail12_in, 'FM9.0') || ' in hail on radar, ' || to_char(hail12_date, 'Mon FMDD') end,
+      'About ' || to_char(hail12_in, 'FM90.0') || ' in hail on radar, ' || to_char(hail12_date, 'Mon FMDD') end,
     case when wind_date >= current_date - 365 then
       case
         when wind_kind = 'tornado' then 'Tornado reported '
@@ -269,9 +269,9 @@ select
       when roof_basis = 'permit' then
         'Re-roofed ' || to_char(permit_date, 'Mon YYYY') || ' (city permit)'
       when roof_basis = 'hail' and big_hail_old_date >= date '2023-01-01' then
-        'Golf-ball hail ' || to_char(big_hail_old_date, 'Mon YYYY') || ': roof likely replaced since. Ask who did it'
+        'Golf-ball+ hail on radar ' || to_char(big_hail_old_date, 'Mon YYYY') || ': roof likely replaced since. Ask who did it'
       when roof_basis = 'hail' then
-        'Golf-ball hail ' || to_char(big_hail_old_date, 'Mon YYYY') || ': roof likely replaced since'
+        'Golf-ball+ hail on radar ' || to_char(big_hail_old_date, 'Mon YYYY') || ': roof likely replaced since'
       when roof_basis = 'built' and home_age between 15 and 30 then
         'Built ' || year_built || ', no big hail here since 2020: roof may be original'
       when roof_basis = 'built' and home_age > 30 then

@@ -20,7 +20,9 @@ for d in sorted(by_date):
         m = g3 > h12; h12[m] = g3[m]; h12d[m] = d
     elif day >= D24:
         m = g3 > h24; h24[m] = g3[m]; h24d[m] = d
-    big = g3 >= 1.75; big_n[big] += 1
+    # Roof-replacement inference uses the cell's OWN radar value (no padding) at
+    # 2.0 in+: MESH runs large, so that is roughly golf-ball hail on the ground.
+    big = np.round(g / 25.4, 2) >= 2.0; big_n[big] += 1  # same rounding as hail_days.mesh_in
     if day < D12: big_old[big] = d  # dates ascend, so this ends on the latest
 # wind: strongest report within 1 mile of each cell center, last 24 months
 rank = {"TORNADO": 4}
@@ -61,4 +63,4 @@ with open(f"{SP}/mesh/cell_signals.csv", "w", newline="") as fo:
             rows += 1
 print("cells written:", rows)
 print("cells with 1in+ hail last 12mo:", int((h12 >= 1).sum()), " 1.75in+:", int((h12 >= 1.75).sum()))
-print("cells with golf-ball hail older than 12mo (roof likely replaced since):", int((big_old != "").sum()))
+print("cells with 2.0in+ own-cell hail older than 12mo (roof likely replaced since):", int((big_old != "").sum()))
