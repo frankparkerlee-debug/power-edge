@@ -40,11 +40,21 @@ export default async function JobsPage({
   }
 
   const onlyMine = mine === "1" || user.role !== "admin";
-  const jobs = await listJobs({
-    rep: onlyMine ? user.name : undefined,
+  const all = await listJobs({
     stage: stage && STAGES.includes(stage as never) ? stage : undefined,
     limit: 400,
   });
+  /*
+   * "Mine" filtered on rep, and rep moves to the closer when an inspection is
+   * assigned, so a setter's jobs disappeared from their own list the moment
+   * they booked them. A job is yours if you set it, are closing it, or own it.
+   */
+  const me = user.name;
+  const jobs = onlyMine
+    ? all.filter((j) =>
+        user.role === "setter" ? j.setter === me : j.setter === me || j.closer === me || j.rep === me,
+      )
+    : all;
 
   const byStage = new Map<string, Job[]>();
   for (const j of jobs) {
