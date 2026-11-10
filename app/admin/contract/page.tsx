@@ -94,7 +94,14 @@ export default async function ContractPage({
     );
   }
 
-  const recent = await listContracts(10);
+  /*
+   * A closer sees their own agreements. This listed every agreement in the
+   * company to anyone who could write one, so a closer scrolling past the
+   * signature pad saw other homeowners' names, addresses and contract values.
+   */
+  const recent = (await listContracts(user.role === "admin" ? 10 : 50))
+    .filter((c) => user.role === "admin" || c.rep === user.name)
+    .slice(0, 10);
 
   /*
    * Opened from a job, the agreement starts filled in.

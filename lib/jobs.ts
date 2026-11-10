@@ -235,13 +235,24 @@ export type StageSlice = {
   unpriced: number;
 };
 
-export async function pipeline(rep?: string): Promise<{
+export async function pipeline(rep?: string) {
+  return pipelineOf(await listJobs({ rep, limit: 1000 }));
+}
+
+/**
+ * The pipeline over a given set of jobs.
+ *
+ * Today called pipeline() with no filter for everyone, so a setter opening
+ * their own page saw the company's revenue, "$20,000 at stake, $20,000 won",
+ * and a stage tracker full of jobs that were not theirs, directly above a list
+ * saying they had none. Pass the jobs a person is allowed to see.
+ */
+export function pipelineOf(jobs: Job[]): {
   slices: StageSlice[];
   openValue: number;
   openCount: number;
   wonValue: number;
-}> {
-  const jobs = await listJobs({ rep, limit: 1000 });
+} {
   const num = (v: unknown) => {
     const n = Number(String(v ?? "").replace(/[^0-9.]/g, ""));
     return Number.isFinite(n) ? n : 0;

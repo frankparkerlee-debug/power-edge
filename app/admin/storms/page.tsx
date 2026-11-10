@@ -154,9 +154,12 @@ export default async function AdminStormsPage({
               100mi radius · last 90 days
             </span>
           </h1>
-          <a href="/admin/leads" className="text-sm text-[#0c7a40] hover:underline">
-            Leads →
-          </a>
+          {/* Leads is an office page; setters were offered a link that refused them. */}
+          {user?.role === "admin" ? (
+            <a href="/admin/leads" className="text-sm text-[#0c7a40] hover:underline">
+              Leads →
+            </a>
+          ) : null}
         </div>
 
         {/* Summary chips */}
@@ -358,16 +361,23 @@ export default async function AdminStormsPage({
                       Filter
                     </button>
                   </form>
-                  <a
-                    href={`/api/admin/storm-targets?${
-                      safeTargetDate ? `&date=${safeTargetDate}` : ""
-                    }${safeDays && !safeTargetDate ? `&days=${safeDays}` : ""}${safeCounty ? `&county=${safeCounty}` : ""}${
-                      safeCity ? `&city=${encodeURIComponent(safeCity)}` : ""
-                    }&format=csv`}
-                    className="rounded-full bg-[#0c7a40] px-3 py-1.5 text-sm font-semibold text-white"
-                  >
-                    ⬇ CSV for dialer / skip trace
-                  </a>
+                  {/*
+                    The full homeowner export is office only, and the endpoint
+                    already refuses anyone else. The button was still shown to
+                    setters, who tapped it and got nothing.
+                  */}
+                  {user?.role === "admin" ? (
+                    <a
+                      href={`/api/admin/storm-targets?${
+                        safeTargetDate ? `&date=${safeTargetDate}` : ""
+                      }${safeDays && !safeTargetDate ? `&days=${safeDays}` : ""}${safeCounty ? `&county=${safeCounty}` : ""}${
+                        safeCity ? `&city=${encodeURIComponent(safeCity)}` : ""
+                      }&format=csv`}
+                      className="rounded-full bg-[#0c7a40] px-3 py-1.5 text-sm font-semibold text-white"
+                    >
+                      ⬇ CSV for dialer / skip trace
+                    </a>
+                  ) : null}
                 </div>
             {/* Mobile: knock cards w/ GPS near-me sorting (client component) */}
             <TargetCards

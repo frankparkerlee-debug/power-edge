@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AddressAutocomplete } from "./AddressAutocomplete";
 
 /**
  * Booking an inspection at the door, in one sheet.
@@ -44,6 +45,15 @@ function fullAddress(d: DoorForBooking) {
   return [base, d.city, d.zip ? `TX ${d.zip}` : ""].filter(Boolean).join(", ");
 }
 
+/**
+ * A closer can drive to it. County rows like "5252 N HWY 171 , TX" have no
+ * city or ZIP, and Highway 171 runs through several towns, so an inspection
+ * booked against that line sends the closer to the wrong place or nowhere.
+ */
+function hasZip(a: string) {
+  return /\b\d{5}\b/.test(a);
+}
+
 export function BookAtDoor({
   door,
   jobId,
@@ -68,6 +78,9 @@ export function BookAtDoor({
   const [phone, setPhone] = useState(prefill?.phone || door.phone || "");
   const [email, setEmail] = useState(prefill?.email || "");
   const [note, setNote] = useState("");
+  // The setter is standing at the house, so they can fix a county address
+  // that is missing its city or ZIP before a closer is sent to it.
+  const [addr, setAddr] = useState(fullAddress(door));
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -100,6 +113,7 @@ export function BookAtDoor({
     if (name.trim().length < 2) return setError("Who did you talk to?");
     const digits = phone.replace(/\D/g, "");
     if (digits.length < 10) return setError("Get a phone number so the closer can confirm.");
+    if (!hasZip(addr)) return setError("Add the city and ZIP so the closer can find the house.");
     setBusy(true);
     try {
       const res = await fetch("/api/admin/book", {
@@ -110,7 +124,7 @@ export function BookAtDoor({
           name: name.trim(),
           phone: phone.trim(),
           email: email.trim(),
-          address: fullAddress(door),
+          address: addr.trim(),
           note: note.trim(),
           target_id: door.id,
           job_id: jobId || "",
@@ -207,12 +221,29 @@ export function BookAtDoor({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="font-display text-xl font-extrabold">Book the inspection</h2>
-                <p className="mt-0.5 text-sm text-gray-600">{fullAddress(door)}</p>
+                <p className="mt-0.5 text-sm text-gray-600">{addr}</p>
               </div>
               <button onClick={onClose} className="text-sm font-semibold text-gray-500 underline">
                 Cancel
               </button>
             </div>
+
+            {/* Only when the record cannot be driven to. */}
+            {!hasZip(addr) ? (
+              <div className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3">
+                <p className="text-sm font-semibold text-[#0b0e13]">
+                  The county record has no city or ZIP. Confirm the address so the closer
+                  can find the house.
+                </p>
+                <AddressAutocomplete
+                  value={addr}
+                  onChange={setAddr}
+                  onSelect={setAddr}
+                  placeholder="Street, city, ZIP"
+                  className="mt-2 w-full rounded-lg border border-[#d7dbe0] bg-white px-3 py-3 text-[16px] focus:border-[#0c7a40] focus:outline-none"
+                />
+              </div>
+            ) : null}
 
             {/* When. First, because it is the only thing the homeowner is waiting on. */}
             <div className="mt-4">

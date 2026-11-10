@@ -97,6 +97,8 @@ export default async function JobPage({
         }),
         closer: (appt.closer as string | null) ?? null,
         status: String(appt.status || "booked"),
+        note: (appt.notes as string | null) ?? null,
+        setter: (appt.setter as string | null) ?? null,
       }
     : null;
   const sells = canSell(user.role);
@@ -104,18 +106,25 @@ export default async function JobPage({
   async function setStage(formData: FormData) {
     "use server";
     const next = String(formData.get("stage") || "");
-    const actor = String(formData.get("actor") || "");
-    if (next) await updateJob(id, { stage: next as never }, actor);
+    // Who is acting comes from the session, not the form, and only the office
+    // may set a stage that should come from a real agreement.
+    const me = await currentUser();
+    if (!me) return;
+    if (["agreement_sent", "signed"].includes(next) && me.role !== "admin") return;
+    if (next) await updateJob(id, { stage: next as never }, me.name);
     revalidatePath(`/admin/jobs/${id}`);
   }
 
   async function addNote(formData: FormData) {
     "use server";
     const text = String(formData.get("note") || "").trim();
-    const actor = String(formData.get("actor") || "");
+    // The author is whoever is signed in, not a hidden form field that anyone
+    // could edit to put words in someone else's name on the record.
+    const me = await currentUser();
+    if (!me) return;
     if (text) {
       const { logEvent } = await import("@/lib/jobs");
-      await logEvent(id, "note", text, actor);
+      await logEvent(id, "note", text, me.name);
     }
     revalidatePath(`/admin/jobs/${id}`);
   }
@@ -181,7 +190,13 @@ export default async function JobPage({
               the setter at the moment the job became worth money.
             */}
             {field("Set by", job.setter ?? job.rep)}
-            {job.closer ? field("Closed by", job.closer) : null}
+            {/* "Closed by" before anything was closed read as if the deal were done. */}
+            {job.closer
+              ? field(
+                  ["signed", "in_production", "complete"].includes(job.stage) ? "Closed by" : "Closer",
+                  job.closer,
+                )
+              : null}
             {field("Squares", job.squares)}
             {field("Carrier", job.carrier)}
             {field("Claim #", job.claim_number)}
@@ -213,7 +228,18 @@ export default async function JobPage({
             Move to
           </span>
           <div className="mt-2 flex flex-wrap gap-2">
-            {STAGES.filter((s) => s !== job.stage).map((s) => (
+            {/*
+              Agreement sent and Signed only come from a real agreement, so
+              they are not offered as buttons except to the office, which may
+              need to correct a record. A closer could otherwise tap Signed on
+              a job with no contract behind it and the pipeline would count
+              revenue that does not exist.
+            */}
+            {STAGES.filter(
+              (s) =>
+                s !== job.stage &&
+                (user.role === "admin" || !["agreement_sent", "signed"].includes(s)),
+            ).map((s) => (
               <button
                 key={s}
                 name="stage"

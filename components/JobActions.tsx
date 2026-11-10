@@ -22,6 +22,9 @@ export type Inspection = {
   when: string;
   closer: string | null;
   status: string;
+  /** What the setter told the closer: who decides, the gate code, the dog. */
+  note?: string | null;
+  setter?: string | null;
 } | null;
 
 export function JobActions({
@@ -128,6 +131,19 @@ export function JobActions({
               Directions
             </a>
           </div>
+          {/*
+            The setter's note, where the closer reads it on the way in. It
+            used to sit at the bottom of History, below the stage buttons, so a
+            closer at the gate scrolled past everything to find the code.
+          */}
+          {inspection.note ? (
+            <div className="mt-3 rounded-md bg-amber-50 p-3 text-sm text-[#0b0e13]">
+              <span className="font-bold">
+                {inspection.setter ? `From ${inspection.setter}: ` : "Setter's note: "}
+              </span>
+              {inspection.note}
+            </div>
+          ) : null}
         </div>
       ) : preInspection ? (
         <button

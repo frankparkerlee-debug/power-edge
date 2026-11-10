@@ -388,7 +388,7 @@ export async function getAppointment(id: string) {
   if (!dbOn() || !/^[0-9a-f-]{36}$/i.test(id)) return null;
   try {
     const res = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/appointments?select=id,slot_start,slot_end,name,address,status,closer,setter,job_id&id=eq.${id}`,
+      `${process.env.SUPABASE_URL}/rest/v1/appointments?select=id,slot_start,slot_end,name,address,status,closer,setter,job_id,notes&id=eq.${id}`,
       { headers: authHeaders(), cache: "no-store" },
     );
     if (!res.ok) return null;
@@ -527,7 +527,9 @@ export async function upsertJobForBooking(a: {
         setter: a.setter ?? null,
         closer: a.closer ?? null,
         rep: a.closer ?? a.setter ?? null,
-      });
+        // Credit the creation to whoever booked it; it read "Job created" with
+        // no name, so the first line of the record said nobody made it.
+      }, a.setter ?? "Website");
       jobId = job?.id ?? null;
     }
     if (jobId) {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { currentUser, canSell } from "@/lib/auth";
 import { listComeBacks } from "@/lib/knocks";
-import { listJobs, pipeline, STAGE_LABEL } from "@/lib/jobs";
+import { listJobs, pipelineOf, STAGE_LABEL } from "@/lib/jobs";
 import { moneyShort } from "@/lib/money";
 import { listAppointments } from "@/lib/scheduling";
 import { listLeads } from "@/lib/db";
@@ -165,7 +165,10 @@ export default async function TodayPage({
   const toPrice = jobs.filter((j) => j.stage === "inspected");
   const newLeads = leads.filter((l) => hoursAgo(l.created_at) < 168);
   const openJobs = jobs.filter((j) => !["complete", "lost"].includes(j.stage));
-  const pipe = await pipeline();
+  // The pipeline of what this person can see: their own, or everything for
+  // the office. Setters do not price work, so they get counts, not dollars.
+  const pipe = pipelineOf(jobs);
+  const showMoney = sells;
 
   /** Each card is an action, not a statistic. */
   const actions = [
@@ -399,13 +402,21 @@ export default async function TodayPage({
             Pipeline
           </h2>
           <span className="ml-auto mr-4 text-sm text-gray-600">
-            <strong className="text-[#0b0e13]">{moneyShort(pipe.openValue)}</strong> at stake
-            {pipe.wonValue > 0 ? (
+            {showMoney ? (
               <>
-                {" · "}
-                <strong className="text-[#0c7a40]">{moneyShort(pipe.wonValue)}</strong> won
+                <strong className="text-[#0b0e13]">{moneyShort(pipe.openValue)}</strong> at stake
+                {pipe.wonValue > 0 ? (
+                  <>
+                    {" · "}
+                    <strong className="text-[#0c7a40]">{moneyShort(pipe.wonValue)}</strong> won
+                  </>
+                ) : null}
               </>
-            ) : null}
+            ) : (
+              <>
+                <strong className="text-[#0b0e13]">{pipe.openCount}</strong> open
+              </>
+            )}
           </span>
           <Link href="/admin/jobs" className="text-sm font-semibold text-[#0c7a40] hover:underline">
             All jobs →
@@ -443,16 +454,16 @@ export default async function TodayPage({
                   >
                     {sl.count}
                   </div>
-                  <div className="mt-0.5 text-xs text-gray-600">
-                    {sl.value > 0 ? (
-                      <strong className="text-[#0b0e13]">{moneyShort(sl.value)}</strong>
-                    ) : sl.count > 0 ? (
-                      "no price yet"
-                    ) : (
-                      "\u2014"
-                    )}
-                  </div>
-                  {sl.value > 0 && sl.unpriced > 0 ? (
+                  {showMoney ? (
+                    <div className="mt-0.5 text-xs text-gray-600">
+                      {sl.value > 0 ? (
+                        <strong className="text-[#0b0e13]">{moneyShort(sl.value)}</strong>
+                      ) : sl.count > 0 ? (
+                        "no price yet"
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {showMoney && sl.value > 0 && sl.unpriced > 0 ? (
                     <div className="mt-0.5 text-[11px] text-[#b54708]">
                       +{sl.unpriced} unpriced
                     </div>
