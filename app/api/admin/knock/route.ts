@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiUser } from "@/lib/auth";
+import { settleComeBacks } from "@/lib/knocks";
 
 /**
  * Door-knock dispositions.
@@ -69,6 +70,10 @@ export async function POST(req: Request) {
     const t = new Date(String(body.follow_up_at));
     if (!Number.isNaN(t.getTime())) followUp = t.toISOString();
   }
+
+  // Going back to a door settles whatever come-back brought you there, so
+  // the list on Today clears itself instead of growing forever.
+  await settleComeBacks(targetId);
 
   try {
     const res = await fetch(`${url}/rest/v1/knocks`, {

@@ -100,6 +100,8 @@ export async function POST(req: Request) {
   // The door is spoken for. Without this the next setter down the street
   // knocks a house that already has an inspection booked.
   if (/^[0-9a-f-]{36}$/i.test(targetId) && process.env.SUPABASE_URL) {
+    const { settleComeBacks } = await import("@/lib/knocks");
+    await settleComeBacks(targetId);
     try {
       await fetch(`${process.env.SUPABASE_URL}/rest/v1/knocks`, {
         method: "POST",
