@@ -4,7 +4,7 @@ Send the printer the plain PDF (`name.pdf`). The `-proof.pdf` has trim, safe-are
 
 | Piece | File | Finished size | Sides | Stock | Notes |
 |---|---|---|---|---|---|
-| Door hanger | `door-hanger.pdf` | 4.25 x 11 in | 2 (front dark, back light) | 14 pt **uncoated or matte** | Standard 1.25 in hole, 1 in below top. Reps write on the front, so no gloss or UV coating: a ballpoint skips on it. |
+| Door hanger | `door-hanger.pdf` | 4.25 x 11 in | 2 (front light for writing, back dark) | 14 pt **uncoated or matte** | Standard 1.25 in hole, 1 in below top. Reps write on the front, so no gloss or UV coating: a ballpoint skips on it. |
 | Appointment card | `appointment-card.pdf` | 3.5 x 2 in | 2 (front white, back dark) | 16 pt **uncoated or matte** | Setter writes day, window, inspector and their own name on the white side. |
 | Yard sign | `yard-sign-24x18.pdf` | 24 x 18 in | 1 | 4 mm corrugated plastic | H-stake. Goes in the yard of a finished job, with the owner's OK. |
 | Banner | `banner-72x36.pdf` | 6 x 3 ft | 1 | 13 oz vinyl | Hemmed, grommets in the corners and every 2 ft. |
