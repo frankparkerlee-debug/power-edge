@@ -137,7 +137,7 @@ export const guides: Guide[] = [
       {
         h: "Is there a deadline to file?",
         p: [
-          "Usually, yes. Many Texas policies require you to file a claim within a set window, often around a year from the date of loss, and once it closes, you pay for the roof yourself. Check your specific policy, and don't sit on suspected storm damage.",
+          "Usually, yes. Texas policies set a window for filing a claim, some as short as one year from the date of loss, and once it closes, you pay for the roof yourself. Check your specific policy, and don't sit on suspected storm damage.",
         ],
       },
       {
@@ -158,7 +158,7 @@ export const guides: Guide[] = [
       },
       {
         q: "How long do I have to file a roof insurance claim in Texas?",
-        a: "It depends on your policy, but many require filing within about a year of the date of loss. Don't wait, check your policy and get the damage documented promptly.",
+        a: "It depends on your policy, and some require filing within one year of the date of loss. Don't wait, check your policy and get the damage documented promptly.",
       },
       {
         q: "Why does insurance pay in two checks?",

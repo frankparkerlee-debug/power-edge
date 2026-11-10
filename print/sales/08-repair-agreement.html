@@ -20,7 +20,8 @@
   }
   .cancel h3 { font-size: 8pt; margin: 0 0 3px; text-transform: uppercase; letter-spacing: .03em; }
   .cancel p { margin: 0 0 3px; }
-  .cut { text-align: center; font-size: 6.5pt; color: #7a828f; letter-spacing: .25em; margin: 9px 0 0; }
+  .cut { display: flex; align-items: center; gap: 10px; font-size: 6.5pt; color: #7a828f; letter-spacing: .25em; margin: 9px 0 0; }
+  .cut::before, .cut::after { content: ""; flex: 1; border-top: 1px dashed #9aa3b0; }
   footer.doc { margin-top: 10px; padding-top: 5px; }
 </style></head><body>
 
@@ -140,11 +141,11 @@ agreement without written consent.</p>
   <div class="field"><span class="lab">Date</span></div>
 </div>
 
-<div class="cut">&mdash; &mdash; &mdash; &mdash; &nbsp; DETACH AND GIVE BOTH COPIES BELOW TO THE OWNER &nbsp; &mdash; &mdash; &mdash; &mdash;</div>
+<div class="cut">DETACH AND GIVE BOTH COPIES BELOW TO THE OWNER</div>
 
 <div class="cancelwrap">
 <div class="cancel">
-  <h3>Notice of cancellation &nbsp;<span style="font-weight:400;font-size:7pt">(copy 1 of 2 &mdash; Owner&rsquo;s copy)</span></h3>
+  <h3>Notice of cancellation &nbsp;<span style="font-weight:400;font-size:7pt">(copy 1 of 2, Owner&rsquo;s copy)</span></h3>
   <p><strong>Date of transaction: ____________________</strong></p>
   <p>YOU MAY CANCEL THIS TRANSACTION, WITHOUT ANY PENALTY OR OBLIGATION, WITHIN THREE BUSINESS
   DAYS FROM THE ABOVE DATE.</p>
@@ -166,7 +167,7 @@ agreement without written consent.</p>
 </div>
 
 <div class="cancel">
-  <h3>Notice of cancellation &nbsp;<span style="font-weight:400;font-size:7pt">(copy 2 of 2 &mdash; Owner returns this copy to cancel)</span></h3>
+  <h3>Notice of cancellation &nbsp;<span style="font-weight:400;font-size:7pt">(copy 2 of 2, Owner returns this copy to cancel)</span></h3>
   <p><strong>Date of transaction: ____________________</strong></p>
   <p>YOU MAY CANCEL THIS TRANSACTION, WITHOUT ANY PENALTY OR OBLIGATION, WITHIN THREE BUSINESS
   DAYS FROM THE ABOVE DATE.</p>

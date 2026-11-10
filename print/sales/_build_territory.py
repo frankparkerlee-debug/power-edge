@@ -96,7 +96,7 @@ hail report. This page is generated from the live database — if it looks stale
   <strong>Read this before you work the list.</strong> DFW has had no qualifying hail since
   late September. Nobody is knocking fresh damage right now, which is exactly why this list is
   worth money: these are homes hit in April through September that still have not been looked at,
-  and most Texas policies put a filing deadline on the date of loss. You are not early. You are
+  and Texas policies put a filing deadline on the date of loss, some as short as a year. You are not early. You are
   the last call before the window closes.
 </div>
 

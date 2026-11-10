@@ -438,7 +438,7 @@ export const leadSequence: SequenceEmail[] = [
         body:
           h1("Don't lose your claim to the clock.") +
           p(
-            `Here&rsquo;s the part no one warns you about: Texas policies give you a limited window to file, <strong>often about a year from the date of the storm</strong>. Miss it, and the claim is gone for good. At that point the <strong>entire roof</strong> comes out of your pocket, not just your deductible.`,
+            `Here&rsquo;s the part no one warns you about: Texas policies give you a limited window to file, <strong>some as short as one year from the date of the storm</strong>. Miss it, and the claim is gone for good. At that point the <strong>entire roof</strong> comes out of your pocket, not just your deductible.`,
           ) +
           p(
             `And the damage doesn&rsquo;t wait for you. Every rain turns a small bruise into a bigger leak, and an aging roof can quietly slip from full-replacement to depreciated coverage, paying you thousands less.`,

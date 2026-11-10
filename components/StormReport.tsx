@@ -169,8 +169,8 @@ export function StormReport({ data }: { data: StormData }) {
               <p className="mt-2 text-sm leading-relaxed text-fg-inv">
                 A {sigRecent.size}&quot; hail event hit your area on{" "}
                 {fmtDate(sigRecent.date)}, about {ago} month{ago === 1 ? "" : "s"} ago.
-                Most Texas policies only give you ~12 months from the date of loss
-                to file. {left > 0 ? "Don't let the window close and end up paying for the roof yourself." : "It may not be too late, but get it inspected now."}
+                Some Texas policies give you as little as 12 months from the date of
+                loss to file. {left > 0 ? "Don't let the window close and end up paying for the roof yourself." : "It may not be too late, but get it inspected now."}
               </p>
             </div>
           );

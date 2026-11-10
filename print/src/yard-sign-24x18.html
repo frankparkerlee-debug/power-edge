@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PowerEdge yard sign</title>
+<link rel="stylesheet" href="_fonts.css">
+<link rel="stylesheet" href="_print.css">
+<style>
+/*
+ * Yard sign for a finished job. Trim 24 x 18 in, 0.125 in bleed: page 24.25 x
+ * 18.25 in. Corrugated plastic, single sided. Safe area 1 in inside trim,
+ * because H-stakes and the flutes eat the edges.
+ */
+@page { size: 24.25in 18.25in; margin: 0; }
+.page { width: 24.25in; height: 18.25in; background: var(--ink); color: var(--white); }
+.trim { left: .125in; top: .125in; width: 24in; height: 18in; }
+.safe { left: 1.125in; top: 1.125in; width: 22in; height: 16in; }
+.wrap { position: absolute; left: 1.125in; right: 1.125in; top: 1.125in; bottom: 1.125in; display: grid; grid-template-columns: 1fr 5.6in; grid-template-rows: auto 1fr auto; column-gap: 1in; }
+.top { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; padding-bottom: .35in; border-bottom: 2px solid #232a34; }
+.top img { width: 4.6in; display: block; }
+.top .mono { font-size: 25pt; color: var(--muted-dark); }
+h1 { align-self: center; font-size: 205pt; }
+h1 .lime { display: block; }
+.qr { align-self: center; background: var(--white); border-radius: .2in; padding: .45in .45in .3in; text-align: center; }
+.qr img { width: 4.7in; height: 4.7in; display: block; }
+.qr .mono { margin-top: .22in; font-size: 25pt; font-weight: 700; color: var(--deep); }
+.bottom { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: flex-end; border-top: 2px solid #232a34; padding-top: .3in; }
+.bottom .phone { font-size: 150pt; color: var(--lime); line-height: .82; }
+.bottom .side { text-align: right; padding-bottom: .1in; }
+.bottom .side p { font-size: 30pt; font-weight: 600; color: var(--white); }
+.bottom .side .mono { margin-top: .12in; font-size: 19pt; color: var(--muted-dark); }
+</style>
+</head>
+<body>
+<section class="page">
+  <div class="trim"></div><div class="safe"></div>
+  <div class="wrap">
+    <div class="top">
+      <img src="../logos/lockup-on-dark.png" alt="PowerEdge">
+      <div class="mono">Roofing &amp; storm restoration</div>
+    </div>
+    <h1 class="display">This roof: <span class="lime">done right.</span></h1>
+    <div class="qr">
+      <img src="qr-yardsign.svg" alt="">
+      <div class="mono">Free claim check</div>
+    </div>
+    <div class="bottom">
+      <div class="phone display">469-277-9594</div>
+      <div class="side">
+        <p>Free storm inspection.<br>Yours could be next.</p>
+        <div class="mono">poweredgetx.com · Insured · North Texas</div>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

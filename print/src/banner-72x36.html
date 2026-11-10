@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PowerEdge banner</title>
+<link rel="stylesheet" href="_fonts.css">
+<link rel="stylesheet" href="_print.css">
+<style>
+/*
+ * Vinyl banner, 6 x 3 ft. Trim 72 x 36 in, 0.125 in bleed: page 72.25 x
+ * 36.25 in. Grommets go in the corners and every 2 ft, so the safe area is
+ * 3 in inside trim. Read from a car: one line, one number, one scan.
+ */
+@page { size: 72.25in 36.25in; margin: 0; }
+.page { width: 72.25in; height: 36.25in; background: var(--ink); color: var(--white); }
+.trim { left: .125in; top: .125in; width: 72in; height: 36in; }
+.safe { left: 3.125in; top: 3.125in; width: 66in; height: 30in; }
+.wrap { position: absolute; left: 3.125in; right: 3.125in; top: 3.125in; bottom: 3.125in; display: grid; grid-template-columns: 1fr 15in; grid-template-rows: auto 1fr auto; column-gap: 3in; }
+.top { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; padding-bottom: .9in; border-bottom: 4px solid #232a34; }
+.top img { width: 13in; display: block; }
+.top .mono { font-size: 64pt; color: var(--muted-dark); }
+h1 { align-self: center; font-size: 520pt; }
+h1 .lime { display: block; }
+.qr { align-self: center; background: var(--white); border-radius: .5in; padding: 1.2in 1.2in .8in; text-align: center; }
+.qr img { width: 12.6in; height: 12.6in; display: block; }
+.qr .mono { margin-top: .6in; font-size: 66pt; font-weight: 700; color: var(--deep); }
+.bottom { grid-column: 1 / -1; display: flex; align-items: flex-end; justify-content: space-between; }
+.bottom .phone { font-size: 400pt; line-height: .82; }
+.bottom .phone .lime { margin-left: .4in; }
+</style>
+</head>
+<body>
+<section class="page">
+  <div class="trim"></div><div class="safe"></div>
+  <div class="wrap">
+    <div class="top">
+      <img src="../logos/lockup-on-dark.png" alt="PowerEdge">
+      <div class="mono">Storm &amp; hail roof restoration · Insured · North Texas</div>
+    </div>
+    <h1 class="display">Another roof <span class="lime">done right.</span></h1>
+    <div class="qr">
+      <img src="qr-banner.svg" alt="">
+      <div class="mono">Free claim check</div>
+    </div>
+    <div class="bottom">
+      <div class="phone display">Call or text <span class="lime">469-277-9594</span></div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

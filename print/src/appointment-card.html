@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PowerEdge appointment card</title>
+<link rel="stylesheet" href="_fonts.css">
+<link rel="stylesheet" href="_print.css">
+<style>
+/*
+ * Appointment card. Standard business card: trim 3.5 x 2 in, 0.125 in bleed,
+ * so each page is 3.75 x 2.25 in. Safe area 0.125 in inside trim.
+ *
+ * The setter fills it in at the door once the inspection is booked in the
+ * app, which also emails the homeowner a confirmation with a link to change
+ * it. The write-in side is white on purpose: a pen does not show on ink.
+ * Uncoated or matte stock.
+ */
+@page { size: 3.75in 2.25in; margin: 0; }
+.page { width: 3.75in; height: 2.25in; }
+.trim { left: .125in; top: .125in; width: 3.5in; height: 2in; }
+.safe { left: .25in; top: .25in; width: 3.25in; height: 1.75in; }
+
+/* ---- Front: what to write ---- */
+.front { background: var(--white); }
+.band { position: absolute; left: 0; right: 0; top: 0; height: .66in; background: var(--ink); display: flex; align-items: flex-end; justify-content: space-between; padding: 0 .25in .1in; }
+.band img { width: .98in; display: block; }
+.band .mono { font-size: 5.6pt; font-weight: 700; color: var(--lime); padding-bottom: 1pt; }
+.fields { position: absolute; left: .25in; right: .25in; top: .72in; }
+.row { display: flex; gap: .12in; margin-bottom: .07in; }
+.field { flex: 1; display: flex; align-items: flex-end; gap: .05in; }
+.field span { font-family: "JetBrains Mono", monospace; font-size: 5.4pt; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; padding-bottom: 1pt; }
+.field i { flex: 1; height: .24in; border-bottom: .75pt solid #8a919c; }
+.field.time { flex: 0 0 1.42in; }
+.note { position: absolute; left: .25in; right: .25in; bottom: .25in; font-size: 6.2pt; color: var(--muted); display: flex; justify-content: space-between; }
+.note b { color: var(--ink); font-weight: 700; }
+
+/* ---- Back: what happens ---- */
+.back { background: var(--ink); color: var(--white); }
+.back .wrap { position: absolute; left: .25in; right: .25in; top: .25in; bottom: .25in; display: flex; flex-direction: column; }
+.back .label { font-size: 5.6pt; font-weight: 700; color: var(--lime); }
+.back ol { list-style: none; margin-top: .08in; counter-reset: s; }
+.back li { counter-increment: s; display: flex; gap: .07in; font-size: 7pt; line-height: 1.32; color: #d6dbe1; margin-bottom: .045in; }
+.back li::before { content: counter(s); flex: 0 0 .13in; height: .13in; border-radius: 50%; background: var(--lime); color: var(--ink); font: 700 5.4pt "Inter", sans-serif; display: flex; align-items: center; justify-content: center; margin-top: .3pt; }
+.back .end { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; }
+.back .end p { font-size: 6.2pt; line-height: 1.35; color: var(--muted-dark); }
+.back .phone { font-size: 19pt; color: var(--lime); }
+</style>
+</head>
+<body>
+
+<section class="page front">
+  <div class="trim"></div><div class="safe"></div>
+  <div class="band">
+    <img src="../logos/lockup-on-dark.png" alt="PowerEdge">
+    <div class="mono">Free roof inspection</div>
+  </div>
+  <div class="fields">
+    <div class="row">
+      <div class="field"><span>Day</span><i></i></div>
+      <div class="field time"><span>Window</span><i></i></div>
+    </div>
+    <div class="row">
+      <div class="field"><span>Inspector</span><i></i></div>
+    </div>
+    <div class="row">
+      <div class="field"><span>Booked by</span><i></i></div>
+    </div>
+  </div>
+  <div class="note"><span>We call before we head over.</span><b>469-277-9594</b></div>
+</section>
+
+<section class="page back">
+  <div class="trim"></div><div class="safe"></div>
+  <div class="wrap">
+    <div class="label mono">At your inspection</div>
+    <ol>
+      <li>We photograph and measure the roof, top to bottom.</li>
+      <li>You get a written verdict, even &ldquo;your roof is fine.&rdquo;</li>
+      <li>If it&rsquo;s worth filing, we document the damage for your claim.</li>
+    </ol>
+    <div class="end">
+      <p>Need to change it? Call or text,<br>or use the link in your confirmation email.</p>
+      <div class="phone display">469-277-9594</div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+/*
+ * PowerEdge print pieces: shared type and color.
+ *
+ * Fonts are stored in fonts/ so every rebuild looks the same with or without
+ * a network. Archivo carries the display lines (condensed through its
+ * width axis), Inter carries sentences, JetBrains Mono carries the "record":
+ * dates, sizes, labels. See ../DESIGN-PHILOSOPHY.md.
+ *
+ * Colors: ink #0b0e13, lime #7FFBAE (only where the eye should land: the
+ * number, the scan), deep green #0c7a40 for green text on paper.
+ */
+/* @font-face rules live in _fonts.css, which build.py writes with the font
+ * files embedded, so Chrome has them before it lays the page out. */
+
+:root {
+  --ink: #0b0e13;
+  --ink-2: #161b23;
+  --lime: #7FFBAE;
+  --deep: #0c7a40;
+  --paper: #f5f6f4;
+  --white: #ffffff;
+  --muted: #5b6472;
+  --muted-dark: #9aa3b0;
+  --line: #d9ddd6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: "Inter", "Helvetica Neue", Arial, sans-serif; color: var(--ink); }
+
+.display {
+  font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  font-stretch: 62%;
+  font-variation-settings: "wdth" 62;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+  line-height: 0.88;
+}
+.mono {
+  font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.lime { color: var(--lime); }
+.deep { color: var(--deep); }
+
+/* A page is one printed side, bleed included. Each piece sets its size. */
+.page { position: relative; overflow: hidden; break-after: page; page-break-after: always; }
+.page:last-child { break-after: auto; page-break-after: auto; }
+
+/* On screen (previews), sides sit next to each other on a neutral ground. */
+@media screen {
+  body { background: #c9ccc6; display: flex; gap: 0.25in; padding: 0.25in; align-items: flex-start; }
+}
+
+/* Proof overlay: trim, safe area and die cut. Never in the print file. */
+.proof .trim, .proof .safe, .proof .die { display: block; }
+.trim, .safe, .die { display: none; position: absolute; pointer-events: none; z-index: 50; }
+.trim { border: 1px dashed #ff3b30; }
+.safe { border: 1px dotted #0a84ff; }
+.die { border: 1.5px dashed #ff3b30; border-radius: 50%; }
