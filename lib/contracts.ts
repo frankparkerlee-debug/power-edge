@@ -310,7 +310,10 @@ export async function signByToken(
   signature_png: string,
   signer_name: string,
   ip?: string,
-): Promise<{ ok: true; id: string; deadline: Date } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; id: string; deadline: Date; contract: Record<string, unknown> }
+  | { ok: false; error: string }
+> {
   if (!dbOn()) return { ok: false, error: "Not configured." };
   if (!signature_png) return { ok: false, error: "A signature is required." };
   if (!/^[0-9a-f]{48}$/.test(token)) return { ok: false, error: "Not found." };
@@ -334,11 +337,14 @@ export async function signByToken(
       },
     );
     if (!res.ok) return { ok: false, error: "Could not record the signature." };
-    const rows = (await res.json()) as Array<{ id: string }>;
+    const rows = (await res.json()) as Array<Record<string, unknown>>;
     if (rows.length === 0) {
       return { ok: false, error: "This agreement has already been signed or withdrawn." };
     }
-    return { ok: true, id: rows[0].id, deadline };
+    // Hand back the stored agreement, not just its id. What the homeowner is
+    // agreeing to is what we wrote down when the rep drafted it, and the
+    // caller needs those values rather than whatever the browser posts.
+    return { ok: true, id: String(rows[0].id), deadline, contract: rows[0] };
   } catch {
     return { ok: false, error: "Could not record the signature." };
   }

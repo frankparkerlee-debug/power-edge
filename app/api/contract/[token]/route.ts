@@ -39,33 +39,54 @@ export async function POST(
     return NextResponse.json({ ok: false, error: signed.error }, { status: 400 });
   }
 
+  /**
+   * Everything below describes the agreement itself, so it comes from the row
+   * the rep drafted, not from the request.
+   *
+   * It used to be read off `body`, which is the homeowner's browser. That lost
+   * the rep on every remote signing, because no rep was in the body to send:
+   * the job had "Parker Lee" against it at agreement_sent and came back null
+   * once the homeowner signed, which is the commission gone. It also meant the
+   * scope and total in the signed copy we email were whatever was posted to
+   * this endpoint, while the stored contract kept the real ones.
+   */
+  const c = signed.contract;
+  const str = (k: string) => String(c[k] ?? "").trim();
+  const scopeLines = (Array.isArray(c.scope) ? c.scope : []) as ScopeLine[];
+  const claimBased = c.claim_based !== false;
+
   // Advance the job. Without this a remotely signed agreement left the CRM
   // reading "agreement sent" while the contract itself said signed, so the
   // office chased a deal that was already closed.
   await linkJobForContract({
     contractId: signed.id,
     stage: "signed",
-    address: String(body.property_address || ""),
-    owner: String(body.owner_names || ""),
-    email: String(body.owner_email || ""),
-    claim: body.claim_based !== false,
-    value: String(body.total_price || ""),
+    address: str("property_address"),
+    owner: str("owner_names"),
+    phone: str("owner_phone"),
+    email: str("owner_email"),
+    rep: str("rep"),
+    claim: claimBased,
+    carrier: str("carrier"),
+    claimNumber: str("claim_number"),
+    deductible: str("deductible"),
+    value: str("total_price"),
   });
 
   // Their copy, with the cancellation notice and the real deadline. The
   // agreement is already recorded, so a mail failure must not fail the signing.
   let emailed = false;
-  const to = String(body.owner_email || "").trim();
+  const to = str("owner_email");
   const key = process.env.RESEND_API_KEY;
   if (to && key) {
     const r = await sendSignedAgreement(key, {
       id: signed.id,
-      ownerNames: String(body.owner_names || ""),
-      address: String(body.property_address || ""),
+      ownerNames: str("owner_names"),
+      address: str("property_address"),
       email: to,
-      scope: (Array.isArray(body.scope) ? body.scope : []) as ScopeLine[],
-      total: String(body.total_price || ""),
-      claimBased: body.claim_based !== false,
+      scope: scopeLines,
+      total: str("total_price"),
+      claimBased,
       signedOn: fmtDate(new Date()),
       cancelBy: fmtDate(signed.deadline),
     });
