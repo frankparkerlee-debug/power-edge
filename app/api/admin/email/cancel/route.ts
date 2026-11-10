@@ -15,6 +15,11 @@ import { apiUser } from "@/lib/auth";
  * agreements that genuinely matter.
  *
  *   POST /api/admin/email/cancel   { to: "someone@example.com" }
+ *   POST /api/admin/email/cancel   { to, step: "deductible-financing" }
+ *
+ * With a step, only that one email is called back and the rest of the
+ * sequence still goes out. That is for a rule change on a single email, like
+ * financing going to homeowners who never raised the deductible.
  *
  * Only cancels scheduled sequence mail. Anything already delivered is gone,
  * and transactional mail (agreements, confirmations) is never touched.
@@ -30,7 +35,7 @@ export async function POST(req: Request) {
   const u = await apiUser(req);
   if (!u) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
-  let body: { to?: string };
+  let body: { to?: string; step?: string };
   try {
     body = await req.json();
   } catch {
@@ -41,6 +46,10 @@ export async function POST(req: Request) {
   if (!to.includes("@")) {
     return NextResponse.json({ ok: false, error: "Need an email address." }, { status: 400 });
   }
+  const step = String(body.step || "").trim();
+  if (step && !/^[a-z0-9-]+$/.test(step)) {
+    return NextResponse.json({ ok: false, error: "Unknown step." }, { status: 400 });
+  }
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey || !process.env.SUPABASE_URL) {
     return NextResponse.json({ ok: false, error: "Not configured" }, { status: 500 });
@@ -49,7 +58,8 @@ export async function POST(req: Request) {
   const res = await fetch(
     `${process.env.SUPABASE_URL}/rest/v1/email_log` +
       `?select=provider_id,kind&to_addr=ilike.${encodeURIComponent(to)}` +
-      `&kind=like.sequence:*&provider_id=not.is.null&order=created_at.desc&limit=50`,
+      `&kind=${step ? `eq.sequence:${step}` : "like.sequence:*"}` +
+      `&provider_id=not.is.null&order=created_at.desc&limit=50`,
     { headers: db(), cache: "no-store" },
   );
   const rows = res.ok
@@ -73,5 +83,5 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, to, found: rows.length, cancelled, alreadyGone });
+  return NextResponse.json({ ok: true, to, step: step || "all", found: rows.length, cancelled, alreadyGone });
 }

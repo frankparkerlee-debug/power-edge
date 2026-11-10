@@ -209,7 +209,8 @@ export async function POST(req: Request) {
       // Fire-and-forget: the throttled sequence runs in the background on
       // Render's persistent server so the form returns immediately.
       /*
-       * All eight emails are scheduled with the provider now, days ahead.
+       * Up to eight emails are scheduled with the provider now, days ahead
+       * (the financing one only if they said the deductible is the problem).
        * Spam never gets here (the verdict gate is above), but a lead that
        * converts or asks us to stop still needs calling back, which is what
        * /api/admin/email/cancel is for.

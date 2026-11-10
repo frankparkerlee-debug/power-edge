@@ -7,6 +7,7 @@
 //
 // All templates are table-based, inline-styled HTML for email-client safety.
 
+import { AsyncLocalStorage } from "node:async_hooks";
 import { site } from "./site";
 import { money, claimSplit } from "./money";
 import { sendMail } from "@/lib/sendMail";
@@ -162,7 +163,26 @@ export type SequenceEmail = {
   delayDays: number;
   subject: (c: LeadEmailCtx) => string;
   html: (c: LeadEmailCtx) => string;
+  /** Send only when this holds. Absent means everyone in the sequence. */
+  when?: (c: LeadEmailCtx) => boolean;
 };
+
+/**
+ * Deductible financing is an answer, not an opener (Parker, 2026-11-11).
+ *
+ * It is advertised on the website, where a homeowner goes looking for it. In
+ * outreach it comes up only once the homeowner has said the deductible is the
+ * problem; then it is how the deal gets done. c.financing is set when they told
+ * us so on the lead form ("Financing, stuck on the out-of-pocket"), which is
+ * exactly that signal. Every lead used to get a financing email on day 5
+ * whether they had raised it or not.
+ */
+const raisedDeductible = (c: LeadEmailCtx) => !!c.financing;
+
+/** The emails this lead should actually receive. */
+export function sequenceFor(c: LeadEmailCtx): SequenceEmail[] {
+  return leadSequence.filter((e) => !e.when || e.when(c));
+}
 
 export const leadSequence: SequenceEmail[] = [
   // 0, Instant confirmation (or re-intro for existing subscribers)
@@ -281,10 +301,12 @@ export const leadSequence: SequenceEmail[] = [
       }),
   },
 
-  // 4, Deductible financing (the money objection)
+  // 4, Deductible financing (the money objection). Only for homeowners who
+  // told us the deductible is the problem; see raisedDeductible.
   {
     key: "deductible-financing",
     delayDays: 5,
+    when: raisedDeductible,
     subject: () => "The deductible isn't the wall you think it is",
     html: () =>
       shell({
@@ -326,9 +348,11 @@ export const leadSequence: SequenceEmail[] = [
             `If you think a storm hit your roof, don&rsquo;t sit on it. Check whether you still qualify, it takes about a minute.`,
           ) +
           button("Check if I still have a claim", BOOK_URL) +
-          small(
-            `Deductible the holdup? <a href="${FINANCE_URL}" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;">See it financed, from $250 down &rarr;</a>`,
-          ) +
+          (raisedDeductible(c)
+            ? small(
+                `Deductible the holdup? <a href="${FINANCE_URL}" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;">See it financed, from $250 down &rarr;</a>`,
+              )
+            : "") +
           verifyChip(),
       }),
   },
@@ -429,6 +453,24 @@ function isMarketing(kind: string) {
   return kind.startsWith("sequence:") || kind.startsWith("nurture");
 }
 
+/**
+ * Preview capture.
+ *
+ * To see an email exactly as it sends, the preview page runs the real send
+ * function inside captureEmails(), and sendEmail hands the rendered message
+ * back instead of sending it. The capture is per async call, not a module
+ * flag, so a real send happening on the server at the same moment is never
+ * swallowed by someone looking at a preview.
+ */
+export type CapturedEmail = { to: string; subject: string; html: string; kind: string };
+const captureStore = new AsyncLocalStorage<CapturedEmail[]>();
+
+export async function captureEmails(run: () => Promise<unknown>): Promise<CapturedEmail[]> {
+  const out: CapturedEmail[] = [];
+  await captureStore.run(out, run);
+  return out;
+}
+
 async function sendEmail(
   resendKey: string,
   to: string,
@@ -436,6 +478,11 @@ async function sendEmail(
   html: string,
   kind = "transactional",
 ) {
+  const capture = captureStore.getStore();
+  if (capture) {
+    capture.push({ to, subject, html, kind });
+    return { ok: true } as { ok: boolean };
+  }
   return sendMail({
     resendKey,
     kind,
@@ -555,7 +602,7 @@ export async function enqueueLeadSequence(opts: {
   const from = `PowerEdge <hello@${site.domain}>`;
   const now = Date.now();
 
-  for (const email of leadSequence) {
+  for (const email of sequenceFor(ctx)) {
     const scheduledAt =
       email.delayDays > 0
         ? new Date(now + email.delayDays * 86400000).toISOString()
