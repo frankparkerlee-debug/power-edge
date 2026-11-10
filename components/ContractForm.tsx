@@ -35,7 +35,16 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
   const [deductible, setDeductible] = useState("");
   const [squares, setSquares] = useState("");
   const [lines, setLines] = useState<Line[]>([{ description: "", price: "" }]);
-  const [total, setTotal] = useState("");
+  /**
+   * The rep typed line prices AND a separate total, with nothing connecting
+   * them. Fill in a line at $18,400, hit next, and the agreement went out with
+   * a blank contract price, because the total was its own untouched field.
+   * The total is now the sum of the lines, and only becomes a free field once
+   * the rep deliberately edits it (a claim job whose carrier number differs
+   * from the line items still needs that).
+   */
+  const [totalEdited, setTotalEdited] = useState(false);
+  const [totalRaw, setTotalRaw] = useState("");
 
   const [gaveNotices, setGaveNotices] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -201,11 +210,28 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
   // --- live commission maths, so the rep sees their own number before the
   //     homeowner signs rather than working it out in a truck afterwards ---
   const sq = Number(squares) || 0;
+  const linesSum = lines.reduce(
+    (n, l) => n + (Number(String(l.price).replace(/[^0-9.]/g, "")) || 0),
+    0,
+  );
+  const total = totalEdited ? totalRaw : linesSum > 0 ? String(linesSum) : "";
   const collected = Number(String(total).replace(/[^0-9.]/g, "")) || 0;
   const gp = sq > 0 && collected > 0 ? collected - sq * COST_PER_SQUARE : 0;
 
+  /**
+   * Step 2 had no validation, so a rep could walk straight through to "sign or
+   * send" and put a binding agreement in front of a homeowner with no scope
+   * and no contract price on it. A signed agreement that does not state what
+   * the work is or what it costs is not one you want to rely on.
+   */
+  const scopeOk = lines.some((l) => l.description.trim().length > 2);
+  const priceOk = collected > 0;
   const stepOk =
-    step === 1 ? owner.trim().length > 1 && address.trim().length > 4 : true;
+    step === 1
+      ? owner.trim().length > 1 && address.trim().length > 4
+      : step === 2
+        ? scopeOk && priceOk
+        : true;
 
   return (
     <div>
@@ -330,7 +356,15 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
             </div>
             <div>
               <label className={label} htmlFor="c-total">Total price</label>
-              <input id="c-total" value={total} onChange={(e) => setTotal(e.target.value)} className={input} />
+              <input
+                id="c-total"
+                value={total}
+                onChange={(e) => {
+                  setTotalEdited(true);
+                  setTotalRaw(e.target.value);
+                }}
+                className={input}
+              />
             </div>
           </div>
 
@@ -345,9 +379,23 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
             </div>
           )}
 
+          {!stepOk && (
+            <p className="text-sm text-gray-600">
+              {!scopeOk
+                ? "Describe the work before you send this."
+                : "Put a price on it before you send this."}
+            </p>
+          )}
+
           <div className="flex gap-2">
             <button onClick={() => setStep(1)} className={ghost}>Back</button>
-            <button onClick={() => setStep(3)} className={primary}>Next: sign or send</button>
+            <button
+              onClick={() => stepOk && setStep(3)}
+              disabled={!stepOk}
+              className={`${primary} disabled:cursor-not-allowed disabled:opacity-40`}
+            >
+              Next: sign or send
+            </button>
           </div>
         </div>
       )}

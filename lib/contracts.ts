@@ -137,6 +137,23 @@ export function fmtDate(d: Date) {
   });
 }
 
+/**
+ * An agreement has to say what the work is and what it costs, whether it is
+ * signed at the door or emailed as a link. The form enforces this now, but the
+ * form is not the only way in here.
+ */
+function priceAndScope(input: { scope?: Array<{ description?: string; price?: string }>; total_price?: string }) {
+  const described = (input.scope ?? []).some((l) => (l.description ?? "").trim().length > 2);
+  if (!described) return "Describe the work before sending this agreement.";
+  const stated =
+    (Number(String(input.total_price ?? "").replace(/[^0-9.]/g, "")) || 0) > 0 ||
+    (input.scope ?? []).some(
+      (l) => (Number(String(l.price ?? "").replace(/[^0-9.]/g, "")) || 0) > 0,
+    );
+  if (!stated) return "Put a price on this agreement before sending it.";
+  return null;
+}
+
 export async function saveContract(
   input: ContractInput,
 ): Promise<{ ok: true; id: string; deadline: Date } | { ok: false; error: string }> {
@@ -146,6 +163,10 @@ export async function saveContract(
   }
   if (!input.signature_png) {
     return { ok: false, error: "A signature is required." };
+  }
+  {
+    const bad = priceAndScope(input);
+    if (bad) return { ok: false, error: bad };
   }
 
   const deadline = cancelDeadline();
@@ -225,6 +246,10 @@ export async function createDraft(
   if (!dbOn()) return { ok: false, error: "Not configured." };
   if (!input.owner_names?.trim() || !input.property_address?.trim()) {
     return { ok: false, error: "Owner name and property address are required." };
+  }
+  {
+    const bad = priceAndScope(input);
+    if (bad) return { ok: false, error: bad };
   }
   const token = signToken();
   try {
