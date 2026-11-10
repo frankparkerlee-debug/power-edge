@@ -412,3 +412,58 @@ export async function linkJobForContract(a: {
     /* never cost the agreement */
   }
 }
+
+/** Stamp when a signing link actually reached the homeowner. */
+export async function markSent(id: string) {
+  if (!dbOn()) return;
+  try {
+    await fetch(`${process.env.SUPABASE_URL}/rest/v1/contracts?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { ...authHeaders(), Prefer: "return=minimal" },
+      body: JSON.stringify({ sent_at: new Date().toISOString() }),
+    });
+  } catch {
+    /* the draft exists, which is the part that matters */
+  }
+}
+
+/**
+ * Write a line on the job at this address.
+ *
+ * Used for things that are true about the deal but are not a stage change:
+ * that the agreement was emailed, or that it was not and why. A rep should be
+ * able to open the record and see what actually happened without asking.
+ */
+export async function noteOnJobForContract(
+  address: string,
+  detail: string,
+  actor?: string,
+) {
+  if (!dbOn() || !address.trim()) return;
+  try {
+    const { listJobs, logEvent } = await import("@/lib/jobs");
+    const addr = address.trim().toLowerCase();
+    const job = (await listJobs({ limit: 500 })).find(
+      (j) => j.address.trim().toLowerCase() === addr,
+    );
+    if (job) await logEvent(job.id, "note", detail, actor);
+  } catch {
+    /* a timeline gap must never break the thing it was describing */
+  }
+}
+
+/** One agreement by id, for the office rather than the homeowner. */
+export async function getById(id: string): Promise<Record<string, unknown> | null> {
+  if (!dbOn() || !/^[0-9a-f-]{36}$/i.test(id)) return null;
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/contracts?select=*&id=eq.${id}`,
+      { headers: authHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return null;
+    const rows = (await res.json()) as Array<Record<string, unknown>>;
+    return rows[0] || null;
+  } catch {
+    return null;
+  }
+}

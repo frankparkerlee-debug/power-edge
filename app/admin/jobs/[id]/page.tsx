@@ -132,7 +132,7 @@ export default async function JobPage({
               </a>
             )}
             <Link
-              href="/admin/contract"
+              href={`/admin/contract?job=${job.id}`}
               className="rounded-md bg-[#0c7a40] px-4 py-2 text-sm font-bold text-white"
             >
               Write agreement

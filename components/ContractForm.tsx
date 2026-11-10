@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { AddressAutocomplete } from "./AddressAutocomplete";
 
 /**
  * Writing an agreement, in three short steps.
@@ -18,22 +19,56 @@ import { useRef, useState } from "react";
 type Line = { description: string; price: string };
 type Step = 1 | 2 | 3;
 
-const COST_PER_SQUARE = 275; // Parker, 2026-11-09: this is our cost.
+/**
+ * What the homeowner is told the agreement is worth.
+ *
+ * Our cost per square used to be in this file so the rep could see the gross
+ * profit on the screen while the homeowner watched. Parker pulled it on
+ * 2026-11-10: a closer does not need the company's margin to close, and it
+ * does not belong on a phone held at a kitchen table.
+ */
 
-export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
+export type ContractPrefill = {
+  owner?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  carrier?: string;
+  claimNumber?: string;
+  deductible?: string;
+  claimBased?: boolean;
+  squares?: string;
+};
+
+export function ContractForm({
+  repDefault = "",
+  prefill,
+}: {
+  repDefault?: string;
+  prefill?: ContractPrefill;
+}) {
   const [step, setStep] = useState<Step>(1);
 
   const [rep] = useState(repDefault);
-  const [owner, setOwner] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
+  // Everything the CRM already knows arrives filled in. A closer opening this
+  // from a job record was retyping the name, address, phone and email that
+  // were on the screen they just left.
+  const [owner, setOwner] = useState(prefill?.owner ?? "");
+  const [phone, setPhone] = useState(prefill?.phone ?? "");
+  const [email, setEmail] = useState(prefill?.email ?? "");
+  const [address, setAddress] = useState(prefill?.address ?? "");
 
-  const [claimBased, setClaimBased] = useState(true);
-  const [carrier, setCarrier] = useState("");
-  const [claimNo, setClaimNo] = useState("");
-  const [deductible, setDeductible] = useState("");
-  const [squares, setSquares] = useState("");
+  const [claimBased, setClaimBased] = useState(prefill?.claimBased ?? true);
+  const [carrier, setCarrier] = useState(prefill?.carrier ?? "");
+  const [claimNo, setClaimNo] = useState(prefill?.claimNumber ?? "");
+  const [deductible, setDeductible] = useState(prefill?.deductible ?? "");
+  const [squares, setSquares] = useState(prefill?.squares ?? "");
+  /**
+   * Roofs are priced by the square, so that is how a closer enters one:
+   * how many squares, then the rate. The amount follows. Asking for a lump
+   * sum meant doing that multiplication in your head in a driveway.
+   */
+  const [pricePerSquare, setPricePerSquare] = useState("");
   const [lines, setLines] = useState<Line[]>([{ description: "", price: "" }]);
   /**
    * The rep typed line prices AND a separate total, with nothing connecting
@@ -49,7 +84,15 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
   const [gaveNotices, setGaveNotices] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [sent, setSent] = useState<string | null>(null);
+  const [sent, setSent] = useState<{
+    url: string;
+    id: string;
+    emailed: boolean;
+    emailedTo: string | null;
+    emailError: string | null;
+  } | null>(null);
+  const [resending, setResending] = useState(false);
+  const [resendTo, setResendTo] = useState("");
   const [done, setDone] = useState<{ cancelBy: string; emailed: boolean } | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -118,11 +161,41 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
     try {
       const { res, data } = await post({ ...payload(), mode: "send" });
       if (!res.ok || !data.ok) return setError(data.error || "Could not create the link.");
-      setSent(data.signUrl);
+      setSent({
+        url: data.signUrl,
+        id: data.id,
+        emailed: !!data.emailed,
+        emailedTo: data.emailedTo ?? null,
+        emailError: data.emailError ?? null,
+      });
+      setResendTo(data.emailedTo || email || "");
     } catch {
       setError("Network problem. Nothing was sent.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function resend() {
+    if (!sent) return;
+    setResending(true);
+    try {
+      const res = await fetch("/api/admin/contract/resend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: sent.id, email: resendTo.trim() }),
+      });
+      const data = await res.json();
+      setSent({
+        ...sent,
+        emailed: !!data.ok,
+        emailedTo: data.emailedTo ?? resendTo.trim(),
+        emailError: data.ok ? null : data.error || "That did not go through either.",
+      });
+    } catch {
+      setSent({ ...sent, emailed: false, emailError: "Network problem." });
+    } finally {
+      setResending(false);
     }
   }
 
@@ -158,29 +231,77 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
   // --- terminal states ---
   if (sent) {
     return (
-      <div className="rounded-lg border-2 border-[#0c7a40] bg-[#f0fbf4] p-5">
-        <h2 className="font-display text-xl font-extrabold">Link ready.</h2>
-        <p className="mt-1.5 text-sm">
-          Send it to {owner || "the homeowner"}. Their cancellation window starts when they
-          sign, not now.
+      <div
+        className={`rounded-lg border-2 p-5 ${
+          sent.emailed ? "border-[#0c7a40] bg-[#f0fbf4]" : "border-[#b42318] bg-[#fef3f2]"
+        }`}
+      >
+        <h2 className="font-display text-xl font-extrabold">
+          {sent.emailed ? "Sent to the homeowner." : "Saved, but the email did not send."}
+        </h2>
+
+        {sent.emailed ? (
+          <p className="mt-1.5 text-sm">
+            {owner || "They"} will get it at <strong>{sent.emailedTo}</strong>. Their
+            cancellation window starts when they sign, not now.
+          </p>
+        ) : (
+          <p className="mt-1.5 text-sm">
+            The agreement is saved and the link below works. {sent.emailError} Fix the
+            address and send it again, or hand them the link yourself.
+          </p>
+        )}
+
+        {/*
+          The rep used to be handed a URL and left to text it from their own
+          phone. Now we send it, and if we could not, we say so here rather
+          than letting them walk away assuming the homeowner has it.
+        */}
+        {!sent.emailed && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <input
+              type="email"
+              value={resendTo}
+              onChange={(e) => setResendTo(e.target.value)}
+              placeholder="their@email.com"
+              className="min-w-0 flex-1 rounded-md border border-[#d7dbe0] px-3 py-2.5 text-[16px]"
+            />
+            <button
+              onClick={resend}
+              disabled={resending || !resendTo.trim()}
+              className="rounded-md bg-[#0c7a40] px-4 py-2.5 font-bold text-white disabled:opacity-50"
+            >
+              {resending ? "Sending..." : "Send again"}
+            </button>
+          </div>
+        )}
+
+        <p className="mt-4 text-xs font-bold uppercase tracking-wider text-gray-500">
+          Or send the link yourself
         </p>
         <input
           readOnly
-          value={sent}
+          value={sent.url}
           onFocus={(e) => e.currentTarget.select()}
-          className="mt-3 w-full rounded-md border border-[#d7dbe0] bg-white px-3 py-2.5 text-[13px]"
+          className="mt-1 w-full rounded-md border border-[#d7dbe0] bg-white px-3 py-2.5 text-[13px]"
         />
         <div className="mt-3 flex flex-wrap gap-2">
           <a
-            href={`sms:?&body=${encodeURIComponent(`Your PowerEdge agreement is ready to review and sign: ${sent}`)}`}
-            className="rounded-md bg-[#0c7a40] px-4 py-2.5 font-bold text-white"
+            href={`sms:?&body=${encodeURIComponent(`Your PowerEdge agreement is ready to review and sign: ${sent.url}`)}`}
+            className="rounded-md border border-[#d7dbe0] bg-white px-4 py-2.5 font-bold"
           >
             Text it
           </a>
-          <button onClick={() => navigator.clipboard?.writeText(sent)} className="rounded-md border border-[#d7dbe0] px-4 py-2.5 font-bold">
+          <button
+            onClick={() => navigator.clipboard?.writeText(sent.url)}
+            className="rounded-md border border-[#d7dbe0] bg-white px-4 py-2.5 font-bold"
+          >
             Copy
           </button>
-          <button onClick={() => window.location.reload()} className="rounded-md border border-[#d7dbe0] px-4 py-2.5 font-bold">
+          <button
+            onClick={() => window.location.reload()}
+            className="rounded-md border border-[#d7dbe0] bg-white px-4 py-2.5 font-bold"
+          >
             New agreement
           </button>
         </div>
@@ -207,16 +328,21 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
     );
   }
 
-  // --- live commission maths, so the rep sees their own number before the
-  //     homeowner signs rather than working it out in a truck afterwards ---
-  const sq = Number(squares) || 0;
-  const linesSum = lines.reduce(
-    (n, l) => n + (Number(String(l.price).replace(/[^0-9.]/g, "")) || 0),
-    0,
-  );
-  const total = totalEdited ? totalRaw : linesSum > 0 ? String(linesSum) : "";
-  const collected = Number(String(total).replace(/[^0-9.]/g, "")) || 0;
-  const gp = sq > 0 && collected > 0 ? collected - sq * COST_PER_SQUARE : 0;
+  const money = (v: unknown) => Number(String(v ?? "").replace(/[^0-9.]/g, "")) || 0;
+  const sq = money(squares);
+  const rate = money(pricePerSquare);
+  /** The roof itself: squares times the rate. */
+  const roofAmount = sq * rate;
+  /** Anything else on the job: gutters, fascia, decking, a chimney. */
+  const linesSum = lines.reduce((n, l) => n + money(l.price), 0);
+  const computed = roofAmount + linesSum;
+  /**
+   * The contract price adds itself up, line by line, and the rep can still
+   * override it. An insurance job settles at whatever the carrier approved,
+   * which is frequently not what the line items come to.
+   */
+  const total = totalEdited ? totalRaw : computed > 0 ? String(computed) : "";
+  const collected = money(total);
 
   /**
    * Step 2 had no validation, so a rep could walk straight through to "sign or
@@ -224,7 +350,8 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
    * and no contract price on it. A signed agreement that does not state what
    * the work is or what it costs is not one you want to rely on.
    */
-  const scopeOk = lines.some((l) => l.description.trim().length > 2);
+  const scopeOk =
+    (sq > 0 && rate > 0) || lines.some((l) => l.description.trim().length > 2);
   const priceOk = collected > 0;
   const stepOk =
     step === 1
@@ -262,7 +389,18 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
           </div>
           <div>
             <label className={label} htmlFor="c-addr">Property address</label>
-            <input id="c-addr" value={address} onChange={(e) => setAddress(e.target.value)} className={input} />
+            {/*
+              Typed by hand, this is where the record goes wrong. The address is
+              the key everything else joins on, so one transposed house number
+              puts the agreement on a different job from the inspection.
+            */}
+            <AddressAutocomplete
+              value={address}
+              onChange={setAddress}
+              onSelect={setAddress}
+              placeholder="Start typing the address"
+              className={input}
+            />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -318,71 +456,136 @@ export function ContractForm({ repDefault = "" }: { repDefault?: string }) {
             </div>
           )}
 
-          <div>
-            <span className={label}>Scope of work</span>
-            {lines.map((l, i) => (
-              <div key={i} className="mb-2 flex gap-2">
+          {/* The roof, priced the way a roof is priced. */}
+          <div className="rounded-md border border-[#e3e6ea] bg-white p-3">
+            <span className={label}>The roof</span>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-xs text-gray-500" htmlFor="c-sq">
+                  Squares
+                </label>
                 <input
+                  id="c-sq"
+                  inputMode="decimal"
+                  placeholder="30"
+                  value={squares}
+                  onChange={(e) => setSquares(e.target.value)}
+                  className={input}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-gray-500" htmlFor="c-rate">
+                  Price per square
+                </label>
+                <input
+                  id="c-rate"
+                  inputMode="decimal"
+                  placeholder="450"
+                  value={pricePerSquare}
+                  onChange={(e) => setPricePerSquare(e.target.value)}
+                  className={input}
+                />
+              </div>
+            </div>
+            {roofAmount > 0 && (
+              <p className="mt-2 text-sm text-gray-700">
+                {sq} squares x ${rate.toLocaleString()} ={" "}
+                <strong className="text-[#0b0e13]">
+                  ${roofAmount.toLocaleString()}
+                </strong>
+              </p>
+            )}
+          </div>
+
+          {/* Everything that is not the roof. One line, one amount. */}
+          <div>
+            <span className={label}>Anything else</span>
+            {lines.map((l, i) => (
+              <div key={i} className="mb-3 rounded-md border border-[#e3e6ea] bg-white p-3">
+                {/*
+                  This was a single-line input squeezed next to the amount box,
+                  which on a phone left about twenty characters of room for a
+                  description of the work. It is a textarea now, full width.
+                */}
+                <textarea
+                  rows={2}
                   value={l.description}
-                  placeholder="Tear off and replace roof…"
+                  placeholder="Gutters, fascia, decking, chimney flashing..."
                   onChange={(e) => {
                     const n = [...lines];
                     n[i] = { ...n[i], description: e.target.value };
                     setLines(n);
                   }}
-                  className={`${input} flex-1`}
+                  className={`${input} resize-y`}
                 />
-                <input
-                  value={l.price}
-                  placeholder="$"
-                  onChange={(e) => {
-                    const n = [...lines];
-                    n[i] = { ...n[i], price: e.target.value };
-                    setLines(n);
-                  }}
-                  className={`${input} w-24`}
-                />
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                    Amount
+                  </span>
+                  <input
+                    inputMode="decimal"
+                    value={l.price}
+                    placeholder="$"
+                    onChange={(e) => {
+                      const n = [...lines];
+                      n[i] = { ...n[i], price: e.target.value };
+                      setLines(n);
+                    }}
+                    className={`${input} w-32`}
+                  />
+                  {lines.length > 1 && (
+                    <button
+                      onClick={() => setLines(lines.filter((_, x) => x !== i))}
+                      className="ml-auto text-sm font-semibold text-gray-500 underline"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
-            <button onClick={() => setLines([...lines, { description: "", price: "" }])} className="text-sm font-semibold text-[#0c7a40] underline">
+            <button
+              onClick={() => setLines([...lines, { description: "", price: "" }])}
+              className="text-sm font-semibold text-[#0c7a40] underline"
+            >
               Add a line
             </button>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className={label} htmlFor="c-sq">Squares</label>
-              <input id="c-sq" inputMode="decimal" value={squares} onChange={(e) => setSquares(e.target.value)} className={input} />
-            </div>
-            <div>
-              <label className={label} htmlFor="c-total">Total price</label>
-              <input
-                id="c-total"
-                value={total}
-                onChange={(e) => {
-                  setTotalEdited(true);
-                  setTotalRaw(e.target.value);
-                }}
-                className={input}
-              />
-            </div>
+          <div className="rounded-md border-2 border-[#0c7a40] bg-[#f0fbf4] p-3">
+            <label className={label} htmlFor="c-total">
+              Total contract price
+            </label>
+            <input
+              id="c-total"
+              inputMode="decimal"
+              value={total}
+              onChange={(e) => {
+                setTotalEdited(true);
+                setTotalRaw(e.target.value);
+              }}
+              className={`${input} bg-white text-lg font-bold`}
+            />
+            {!totalEdited && computed > 0 && (
+              <p className="mt-1.5 text-xs text-gray-600">
+                Adds up from the lines above. Type over it if the carrier settled
+                at a different number.
+              </p>
+            )}
+            {totalEdited && (
+              <button
+                onClick={() => setTotalEdited(false)}
+                className="mt-1.5 text-xs font-semibold text-[#0c7a40] underline"
+              >
+                Back to the calculated total
+              </button>
+            )}
           </div>
-
-          {gp > 0 && (
-            <div className="rounded-md border border-[#e3e6ea] bg-white p-3 text-sm">
-              <span className="text-gray-600">
-                {sq} sq × ${COST_PER_SQUARE} cost = ${(sq * COST_PER_SQUARE).toLocaleString()}
-              </span>
-              <span className="ml-2 font-bold text-[#0b0e13]">
-                Gross profit ${gp.toLocaleString()}
-              </span>
-            </div>
-          )}
 
           {!stepOk && (
             <p className="text-sm text-gray-600">
               {!scopeOk
-                ? "Describe the work before you send this."
+                ? "Add the squares and the rate, or describe the work, before you send this."
                 : "Put a price on it before you send this."}
             </p>
           )}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ContractForm } from "@/components/ContractForm";
 import { listContracts } from "@/lib/contracts";
 import { currentUser } from "@/lib/auth";
+import { getJob } from "@/lib/jobs";
 
 // Field agreement. NOT indexed. requires a signed-in team member.
 export const metadata: Metadata = {
@@ -45,9 +46,9 @@ function whenDate(ymd: string) {
 export default async function ContractPage({
   searchParams,
 }: {
-  searchParams: Promise<{ key?: string; rep?: string }>;
+  searchParams: Promise<{ key?: string; rep?: string; job?: string }>;
 }) {
-  const { key, rep } = await searchParams;
+  const { key, rep, job } = await searchParams;
   const user = await currentUser(key);
   const authed = !!user;
   const wrap = "min-h-screen bg-white px-5 py-8 text-[#0b0e13] sm:px-6";
@@ -67,6 +68,29 @@ export default async function ContractPage({
 
   const recent = await listContracts(10);
 
+  /*
+   * Opened from a job, the agreement starts filled in.
+   *
+   * "Write agreement" on a job record used to link to a blank form, so a
+   * closer looking at the homeowner's name, address, phone, email, carrier
+   * and claim number typed all six again into the next screen. Everything
+   * here is already ours.
+   */
+  const j = job ? await getJob(job) : null;
+  const prefill = j
+    ? {
+        owner: j.owner_name ?? "",
+        phone: j.phone ?? "",
+        email: j.email ?? "",
+        address: j.address ?? "",
+        carrier: j.carrier ?? "",
+        claimNumber: j.claim_number ?? "",
+        deductible: j.deductible ?? "",
+        claimBased: j.job_type !== "cash",
+        squares: j.squares != null ? String(j.squares) : "",
+      }
+    : undefined;
+
   return (
     <div className={wrap}>
       <div className="mx-auto max-w-2xl">
@@ -78,7 +102,7 @@ export default async function ContractPage({
         </p>
 
         <div className="mt-6">
-          <ContractForm repDefault={rep || ""} />
+          <ContractForm repDefault={rep || user.name || ""} prefill={prefill} />
         </div>
 
         {recent.length > 0 && (

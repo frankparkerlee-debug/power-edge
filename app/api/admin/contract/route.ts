@@ -1,7 +1,15 @@
 import { NextResponse } from "next/server";
-import { saveContract, createDraft, markNoticesDelivered, fmtDate, type ScopeLine } from "@/lib/contracts";
-import { markEmailed } from "@/lib/contracts";
-import { sendSignedAgreement } from "@/lib/emails";
+import {
+  saveContract,
+  createDraft,
+  markNoticesDelivered,
+  fmtDate,
+  markEmailed,
+  markSent,
+  noteOnJobForContract,
+  type ScopeLine,
+} from "@/lib/contracts";
+import { sendSignedAgreement, sendAgreementToSign } from "@/lib/emails";
 import { clientIp } from "@/lib/rateLimit";
 import { apiUser } from "@/lib/auth";
 import { linkJobForContract } from "@/lib/contracts";
@@ -59,11 +67,63 @@ export async function POST(req: Request) {
       value: String(body.total_price || ""),
     });
     const base = process.env.NEXT_PUBLIC_SITE_URL || "https://poweredgetx.com";
+    const signUrl = `${base}/sign/${draft.token}`;
+
+    /*
+     * Send it to the homeowner ourselves.
+     *
+     * The link used to come back to the rep to text from their own phone,
+     * which put the agreement on a personal number, left no record that it
+     * was ever sent, and relied on a rep in a truck remembering to do it.
+     * We have had their email since step one of the form.
+     *
+     * The draft is already saved, so a mail failure must not fail the call.
+     * It comes back as emailed:false with the reason, the rep sees it on the
+     * screen, and they can resend or fall back to the link.
+     */
+    const to = String(body.owner_email || "").trim();
+    let emailed = false;
+    let emailError: string | null = null;
+    if (!to) {
+      emailError = "No email address on the agreement.";
+    } else if (!process.env.RESEND_API_KEY) {
+      emailError = "Email is not configured.";
+    } else {
+      const r = await sendAgreementToSign(process.env.RESEND_API_KEY, {
+        ownerNames: String(body.owner_names || ""),
+        address: String(body.property_address || ""),
+        email: to,
+        url: signUrl,
+        rep: String(body.rep || u.name || ""),
+        total: String(body.total_price || ""),
+        claimBased: body.claim_based !== false,
+      });
+      emailed = !!r?.ok;
+      if (emailed) {
+        await markSent(draft.id);
+      } else {
+        emailError = "The email did not go through.";
+      }
+    }
+
+    // Put it on the record either way. "We sent it" and "we tried and it
+    // bounced" are both things the office needs to see on the job.
+    await noteOnJobForContract(
+      String(body.property_address || ""),
+      emailed
+        ? `Agreement emailed to ${to}`
+        : `Agreement NOT emailed (${emailError}). Link: ${signUrl}`,
+      String(body.rep || u.name || ""),
+    );
+
     return NextResponse.json({
       ok: true,
       mode: "send",
       id: draft.id,
-      signUrl: `${base}/sign/${draft.token}`,
+      signUrl,
+      emailed,
+      emailedTo: to || null,
+      emailError,
     });
   }
 

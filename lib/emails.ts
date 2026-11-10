@@ -744,6 +744,64 @@ export async function sendSignedAgreement(
   );
 }
 
+/**
+ * The signing link, to the homeowner.
+ *
+ * This used to be handed back to the rep as a URL for them to text from their
+ * own phone. That put the agreement on a personal number, left nothing in the
+ * record, and meant a rep who got distracted in the truck simply never sent
+ * it. We already captured the homeowner's email in step one of the form, so
+ * send it from here and write it down.
+ *
+ * Deliberately short: this is a thing to tap, not a thing to read. The
+ * agreement itself, the cancellation notice and the deadline all live on the
+ * page behind the link, and the full copy follows by email once they sign.
+ */
+export async function sendAgreementToSign(
+  resendKey: string,
+  c: {
+    ownerNames: string;
+    address: string;
+    email: string;
+    url: string;
+    rep?: string;
+    total?: string;
+    claimBased: boolean;
+  },
+) {
+  const first = (c.ownerNames || "there").split(" ")[0];
+  return sendEmail(
+    resendKey,
+    c.email,
+    `Your PowerEdge agreement for ${c.address}`,
+    shell({
+      preheader: "Read it, then sign on your phone. Takes a minute.",
+      body:
+        h1(`Ready when you are, ${first}.`) +
+        p(
+          `${c.rep ? `${c.rep} has` : "We have"} prepared your repair agreement for ` +
+            `<strong>${c.address}</strong>. Read it and sign on your phone, no printing ` +
+            `and no app.`,
+        ) +
+        (c.total && !c.claimBased ? p(`<strong>Total: ${c.total}</strong>`) : "") +
+        (c.claimBased
+          ? p(
+              `This one goes through your insurance claim, so your carrier sets the scope ` +
+                `and the price and you pay your deductible.`,
+            )
+          : "") +
+        button("Read and sign", c.url) +
+        p(
+          `Nothing is owed and nothing is agreed until you sign. Once you do, you get your ` +
+            `own copy and three business days to cancel, in writing, with the date on it.`,
+        ) +
+        p(`Questions first? Call or text <strong>${site.phone}</strong>.`) +
+        verifyChip(),
+    }),
+    "agreement-to-sign",
+  );
+}
+
 /** Sign-in link for the team. Short-lived and single use. */
 export async function sendLoginLink(resendKey: string, to: string, url: string) {
   return sendEmail(
