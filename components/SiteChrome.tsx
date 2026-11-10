@@ -30,6 +30,16 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
     return <PortalShell>{children}</PortalShell>;
   }
 
+  /*
+   * A homeowner signing a contract, or looking at their own booking, is a
+   * customer, not a prospect. The marketing bar pinned a "Free Inspection"
+   * button under someone halfway through signing a twenty-thousand-dollar
+   * agreement for an inspection they had already had. Those pages keep the
+   * header and footer, which carry the trust signals, and the page itself
+   * already says how to call or text with a question.
+   */
+  const customerDoc = pathname.startsWith("/sign") || pathname.startsWith("/appointment");
+
   return (
     <>
       <Analytics />
@@ -37,8 +47,8 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
-      <TextFab />
-      <MobileCtaBar />
+      {!customerDoc && <TextFab />}
+      {!customerDoc && <MobileCtaBar />}
     </>
   );
 }
