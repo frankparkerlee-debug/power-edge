@@ -62,6 +62,14 @@ export async function POST(req: Request) {
     null;
   const note = String(body.note || "").slice(0, 500) || null;
 
+  // "Come back" carries when, so it lands on the setter's list at that time
+  // instead of being a word nobody sees again. Anything else ignores it.
+  let followUp: string | null = null;
+  if (outcome === "come_back" && body.follow_up_at) {
+    const t = new Date(String(body.follow_up_at));
+    if (!Number.isNaN(t.getTime())) followUp = t.toISOString();
+  }
+
   try {
     const res = await fetch(`${url}/rest/v1/knocks`, {
       method: "POST",
@@ -71,7 +79,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
         Prefer: "return=minimal",
       },
-      body: JSON.stringify({ target_id: targetId, outcome, rep, note }),
+      body: JSON.stringify({ target_id: targetId, outcome, rep, note, follow_up_at: followUp }),
     });
     if (!res.ok) {
       return NextResponse.json({ error: "Could not save" }, { status: 502 });

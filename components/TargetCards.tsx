@@ -12,6 +12,8 @@
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { TILES, addLightBasemap } from "@/lib/basemap";
+import { BookAtDoor } from "./BookAtDoor";
+import { ComeBackSheet } from "./ComeBackSheet";
 
 export type TargetCard = {
   id: string;
@@ -282,6 +284,10 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
    * find the address by eye. The API has returned the id all along.
    */
   const [convertedJob, setConvertedJob] = useState<Record<string, string>>({});
+  /** The door whose booking sheet is open. "Appt set" now books something. */
+  const [bookingFor, setBookingFor] = useState<TargetCard | null>(null);
+  /** The door whose come-back sheet is open. */
+  const [comeBackFor, setComeBackFor] = useState<TargetCard | null>(null);
   // Local echo of dispositions so a rep sees the door change the instant they
   // tap it, without a refetch in a driveway on bad signal.
   const [knocked, setKnocked] = useState<Record<string, { outcome: string; at: string }>>({});
@@ -769,7 +775,13 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
                       {KNOCK_OUTCOMES.map((o) => (
                         <button
                           key={o.key}
-                          onClick={() => mark(t, o.key)}
+                          onClick={() =>
+                            o.key === "appointment_set"
+                              ? setBookingFor(t)
+                              : o.key === "come_back"
+                                ? setComeBackFor(t)
+                                : mark(t, o.key)
+                          }
                           className={`rounded-lg border px-2.5 py-1.5 text-xs ${
                             lk?.outcome === o.key
                               ? "border-[#0b0e13] bg-[#0b0e13] text-white"
@@ -840,6 +852,38 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
 
       {house && (
         <HouseSheet target={house} data={houseData} onClose={() => setHouse(null)} />
+      )}
+
+      {bookingFor && (
+        <BookAtDoor
+          door={bookingFor}
+          onClose={() => setBookingFor(null)}
+          onBooked={(r) => {
+            const t = bookingFor;
+            // Show the door as set the moment it is, without a refetch on a
+            // driveway's worth of signal.
+            setKnocked((k) => ({
+              ...k,
+              [t.id]: { outcome: "appointment_set", at: new Date().toISOString() },
+            }));
+            setConverted((c) => ({ ...c, [t.id]: "done" }));
+            if (r.jobId) setConvertedJob((j) => ({ ...j, [t.id]: r.jobId as string }));
+          }}
+        />
+      )}
+
+      {comeBackFor && (
+        <ComeBackSheet
+          door={comeBackFor}
+          onClose={() => setComeBackFor(null)}
+          onSaved={() => {
+            const t = comeBackFor;
+            setKnocked((k) => ({
+              ...k,
+              [t.id]: { outcome: "come_back", at: new Date().toISOString() },
+            }));
+          }}
+        />
       )}
     </div>
   );
