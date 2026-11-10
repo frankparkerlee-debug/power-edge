@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { recentEmailFailures } from "@/lib/sendMail";
 import { listStormEvents } from "@/lib/storm";
 import { listAppointments } from "@/lib/scheduling";
-import { listLeads } from "@/lib/db";
+import { listLeads, lastCronRun } from "@/lib/db";
 import { site } from "@/lib/site";
 import { currentUser } from "@/lib/auth";
 
@@ -77,11 +77,12 @@ export default async function HealthPage({
     );
   }
 
-  const [failures, events, appts, leads] = await Promise.all([
+  const [failures, events, appts, leads, lastCron] = await Promise.all([
     recentEmailFailures(25),
     listStormEvents(30),
     listAppointments(200),
     listLeads(50),
+    lastCronRun(),
   ]);
 
   const dayAgo = Date.now() - 86_400_000;
@@ -89,8 +90,19 @@ export default async function HealthPage({
     (f) => new Date(String(f.created_at)).getTime() > dayAgo,
   );
 
-  // The storm feed runs hourly. created_at is when WE ingested, which is what
-  // proves the cron is alive; valid_at only tells us when weather happened.
+  /*
+   * Two different questions, which this page used to answer with one number.
+   *
+   * "Is the hourly job running" is answered by the job's own heartbeat. It was
+   * previously inferred from the last storm row inserted, so a quiet week of
+   * weather rendered the feed red and failing. A health page that cries wolf
+   * over ordinary November gets ignored, and then it is worth nothing on the
+   * day something really breaks.
+   *
+   * "Has it hailed lately" is the storm rows, which is information, not an
+   * alarm. No hail is just no hail.
+   */
+  const cron = ago(lastCron);
   const lastIngest = events.length
     ? events
         .map((e) => (e as unknown as { created_at?: string }).created_at)
@@ -150,10 +162,16 @@ export default async function HealthPage({
               }
             />
             <Row
-              name="Storm feed"
+              name="Hourly job"
+              value={cron.label}
+              state={cron.hours < 3 ? "ok" : cron.hours < 24 ? "warn" : "bad"}
+              note="Storm ingest, nurture mail, inspection reminders. Over 3h and it has stalled."
+            />
+            <Row
+              name="Last hail ingested"
               value={ingest.label}
-              state={ingest.hours < 3 ? "ok" : ingest.hours < 24 ? "warn" : "bad"}
-              note="Hourly cron. Over 3h means the job may be stalled."
+              state="ok"
+              note="Weather, not a fault. Long gaps are normal outside storm season."
             />
             <Row
               name="Last website lead"

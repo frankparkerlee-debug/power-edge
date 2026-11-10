@@ -20,6 +20,34 @@ import { runAppointmentReminders } from "@/lib/scheduling";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/**
+ * Stamp that this job ran.
+ *
+ * Health used to infer liveness from when a storm row was last inserted,
+ * which meant a quiet week of weather looked identical to a dead cron. The
+ * run itself is the thing that proves the job is alive; what it found is a
+ * separate question.
+ */
+async function recordRun(detail: Record<string, unknown>, ok = true) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return;
+  try {
+    await fetch(`${url}/rest/v1/cron_runs`, {
+      method: "POST",
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({ job: "claim-nurture", ok, detail }),
+    });
+  } catch {
+    /* never fail the run over its own bookkeeping */
+  }
+}
+
 export async function POST(req: Request) {
   const token = req.headers.get("x-admin-token");
   if (!process.env.ADMIN_TOKEN || token !== process.env.ADMIN_TOKEN) {
@@ -44,6 +72,7 @@ export async function POST(req: Request) {
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
+    await recordRun({ error: "RESEND_API_KEY not set", storm }, false);
     return NextResponse.json({ ok: false, error: "RESEND_API_KEY not set", storm });
   }
 
@@ -72,6 +101,18 @@ export async function POST(req: Request) {
       await sleep(600);
     }
   }
+
+  const summary = {
+    candidates: candidates.length,
+    touch1,
+    touch2,
+    storm,
+    targets: { today: targetsToday, yesterday: targetsYday },
+    stormAlerts,
+    skiptrace,
+    reminders,
+  };
+  await recordRun(summary);
 
   return NextResponse.json({
     ok: true,

@@ -208,3 +208,30 @@ export async function listLeads(limit = 300): Promise<LeadRow[]> {
     return [];
   }
 }
+
+/**
+ * When the hourly job last ran, from its own heartbeat.
+ *
+ * Health needs this separately from the storm rows: a cron that runs every
+ * hour and finds no hail is healthy, and inferring liveness from storm
+ * inserts made a quiet week look like an outage.
+ */
+export async function lastCronRun(job = "claim-nurture"): Promise<string | null> {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  try {
+    const res = await fetch(
+      `${url}/rest/v1/cron_runs?select=ran_at&job=eq.${encodeURIComponent(job)}&order=ran_at.desc&limit=1`,
+      {
+        headers: { apikey: key, Authorization: `Bearer ${key}` },
+        cache: "no-store",
+      },
+    );
+    if (!res.ok) return null;
+    const rows = (await res.json()) as Array<{ ran_at?: string }>;
+    return rows[0]?.ran_at ?? null;
+  } catch {
+    return null;
+  }
+}
