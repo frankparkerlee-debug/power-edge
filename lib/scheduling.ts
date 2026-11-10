@@ -593,3 +593,27 @@ export async function notifyCloser(a: {
     return false;
   }
 }
+
+/**
+ * Inspections a setter put on the calendar since a date, whatever became of
+ * them.
+ *
+ * Today counted a setter's sets from the booked list, so the moment a closer
+ * inspected one it dropped out of the setter's "set this week". A setter whose
+ * five sets were all inspected saw zero, and sets are what setters are paid
+ * on. Cancelled ones do not count; completed and no-shows do, because the set
+ * was made either way.
+ */
+export async function setsSince(setter: string, sinceIso: string) {
+  if (!dbOn() || !setter) return [] as Array<{ id: string; status: string; slot_start: string }>;
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/appointments?select=id,status,slot_start&setter=eq.${encodeURIComponent(setter)}&created_at=gte.${sinceIso}&status=not.like.cancel*`,
+      { headers: authHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    return (await res.json()) as Array<{ id: string; status: string; slot_start: string }>;
+  } catch {
+    return [];
+  }
+}

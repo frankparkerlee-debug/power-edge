@@ -4,7 +4,7 @@ import { currentUser, canSell } from "@/lib/auth";
 import { listComeBacks } from "@/lib/knocks";
 import { listJobs, pipelineOf, STAGE_LABEL } from "@/lib/jobs";
 import { moneyShort } from "@/lib/money";
-import { listAppointments } from "@/lib/scheduling";
+import { listAppointments, setsSince } from "@/lib/scheduling";
 import { listLeads } from "@/lib/db";
 import { recentEmailFailures } from "@/lib/sendMail";
 import { listContracts } from "@/lib/contracts";
@@ -152,11 +152,11 @@ export default async function TodayPage({
   const unassigned = appts.filter((a) => !a.closer);
   const todaysInspections = isAdmin ? appts.filter((a) => inDay(String(a.slot_start))) : myToday;
 
-  // What the setter put on the calendar this week.
+  // What the setter put on the calendar this week, including the ones that
+  // have since been inspected. Counting only still-booked ones made a setter's
+  // sets disappear the moment a closer did their part.
   const weekAgo = now - 7 * 86400000;
-  const mySets = appts.filter(
-    (a) => a.setter === me && new Date(String(a.created_at)).getTime() >= weekAgo,
-  );
+  const mySets = await setsSince(me, new Date(weekAgo).toISOString());
   const comeBacksDue = comeBacks.filter((c) => new Date(c.follow_up_at).getTime() <= day.end);
 
   const awaitingSignature = contracts.filter(
