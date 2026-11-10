@@ -258,6 +258,20 @@ export type SequenceEmail = {
  */
 const raisedDeductible = (c: LeadEmailCtx) => !!c.financing;
 
+/**
+ * What the homeowner asked for, in their words.
+ *
+ * Lead forms send labels written for the CRM, like "Roof claim check (LIKELY
+ * QUALIFIES)". The qualifier is our internal read and was being printed back
+ * to the homeowner in their first email. Generic picks ("Other") say nothing,
+ * so they are dropped.
+ */
+function serviceLabel(service?: string) {
+  const s = (service || "").replace(/\s*\([^)]*\)\s*/g, " ").trim();
+  if (!s || /^(other|general|not sure)$/i.test(s)) return "";
+  return s;
+}
+
 /** The emails this lead should actually receive. */
 export function sequenceFor(c: LeadEmailCtx): SequenceEmail[] {
   return leadSequence.filter((e) => !e.when || e.when(c));
@@ -297,7 +311,7 @@ export const leadSequence: SequenceEmail[] = [
               h1(`Thanks, ${c.firstName}, we're on it.`) +
               p(
                 `We&rsquo;ve got your request${
-                  c.service ? ` about <strong>${c.service}</strong>` : ""
+                  serviceLabel(c.service) ? ` about <strong>${serviceLabel(c.service)}</strong>` : ""
                 }. A member of our team will call you shortly, usually within the hour during business hours, to lock in your <strong>free inspection</strong>.`,
               ) +
               steps([
@@ -308,7 +322,7 @@ export const leadSequence: SequenceEmail[] = [
               p(`Can&rsquo;t wait? Call or text us at ${phone()}.`) +
               button(`Call ${site.phone}`, site.phoneHref) +
               p(
-                `<strong>Want us in and out fast?</strong> <a href="${CLAIM_PREP_URL}" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;">Prep your claim in 2 minutes &rarr;</a>, add your carrier and deductible so we can inspect and close on-site.`,
+                `<strong>Want it done in one visit?</strong> Add your carrier and deductible ahead of time and we can do the inspection and the paperwork together. <a href="${CLAIM_PREP_URL}" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;white-space:nowrap;">Prep your claim, 2 minutes &rarr;</a>`,
               ) +
               verifyChip(),
           }),
