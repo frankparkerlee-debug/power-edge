@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { recentEmailFailures } from "@/lib/sendMail";
+import { recentEmailFailures, recentSends } from "@/lib/sendMail";
+import { deliveryStatuses, isBad } from "@/lib/deliveryStatus";
 import { listStormEvents } from "@/lib/storm";
 import { listAppointments } from "@/lib/scheduling";
 import { listLeads, lastCronRun } from "@/lib/db";
@@ -84,6 +85,19 @@ export default async function HealthPage({
     listLeads(50),
     lastCronRun(),
   ]);
+
+  /*
+   * What became of the last few emails, from the provider rather than from
+   * our own record of having handed them over. email_log stores the HTTP
+   * response to the send call, and a 200 there means accepted: a suppressed
+   * address, a hard bounce a second later and a silent junking all look
+   * identical at that moment. This page said "no failures in 24h" while an
+   * agreement sat undelivered.
+   */
+  const sends = await recentSends(10);
+  const deliveries = await deliveryStatuses(sends.map((x) => x.provider_id));
+  const byId = new Map(deliveries.map((d) => [d.id, d]));
+  const undelivered = deliveries.filter((d) => isBad(d.event));
 
   const dayAgo = Date.now() - 86_400_000;
   const failuresToday = failures.filter(
@@ -174,6 +188,18 @@ export default async function HealthPage({
               note="Weather, not a fault. Long gaps are normal outside storm season."
             />
             <Row
+              name="Email actually delivered"
+              value={
+                deliveries.length === 0
+                  ? "nothing to check"
+                  : undelivered.length === 0
+                    ? `last ${deliveries.length} delivered`
+                    : `${undelivered.length} of ${deliveries.length} did not arrive`
+              }
+              state={undelivered.length === 0 ? "ok" : "bad"}
+              note="Asked the provider, not our own send log. Accepted is not delivered."
+            />
+            <Row
               name="Last website lead"
               value={lead.label}
               state={lead.hours < 168 ? "ok" : "warn"}
@@ -187,6 +213,66 @@ export default async function HealthPage({
             />
           </tbody>
         </table>
+
+        {/*
+          What the provider says happened to each of the last few messages.
+          "Accepted" and "arrived" are different facts and only one of them
+          matters to the person waiting on an agreement.
+        */}
+        <h2 className="mt-10 text-xs font-bold uppercase tracking-widest text-gray-500">
+          Last few emails, and whether they landed
+        </h2>
+        {sends.length === 0 ? (
+          <p className="mt-3 rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500">
+            Nothing sent yet.
+          </p>
+        ) : (
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wider text-gray-500">
+                  <th className="py-2 pr-4">When</th>
+                  <th className="py-2 pr-4">Kind</th>
+                  <th className="py-2 pr-4">To</th>
+                  <th className="py-2">Outcome</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sends.map((x) => {
+                  const d = byId.get(x.provider_id);
+                  const event = d?.event ?? "unknown";
+                  const bad = isBad(event);
+                  return (
+                    <tr key={x.provider_id} className="border-b border-gray-100">
+                      <td className="py-2 pr-4 whitespace-nowrap text-gray-600">
+                        {ago(x.created_at).label}
+                      </td>
+                      <td className="py-2 pr-4">{x.kind}</td>
+                      <td className="py-2 pr-4 text-gray-600">{x.to_addr}</td>
+                      <td
+                        className={`py-2 font-semibold ${
+                          bad
+                            ? "text-red-600"
+                            : event === "delivered"
+                              ? "text-green-700"
+                              : "text-gray-500"
+                        }`}
+                      >
+                        {event === "delivered"
+                          ? "Delivered"
+                          : bad
+                            ? `Did not arrive (${event})`
+                            : event === "unknown"
+                              ? "Provider did not say"
+                              : event}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         <h2 className="mt-10 text-xs font-bold uppercase tracking-widest text-gray-500">
           Recent email failures

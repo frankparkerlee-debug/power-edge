@@ -160,3 +160,29 @@ export async function recentEmailFailures(limit = 20) {
     return [];
   }
 }
+
+/**
+ * The most recent sends, with their provider ids, so their real delivery
+ * outcome can be looked up. email_log records that the provider accepted a
+ * message, which is not the same as the person receiving it.
+ */
+export async function recentSends(limit = 12) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return [];
+  try {
+    const res = await fetch(
+      `${url}/rest/v1/email_log?select=created_at,kind,to_addr,provider_id&provider_id=not.is.null&order=created_at.desc&limit=${limit}`,
+      { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    return (await res.json()) as Array<{
+      created_at: string;
+      kind: string;
+      to_addr: string;
+      provider_id: string;
+    }>;
+  } catch {
+    return [];
+  }
+}
