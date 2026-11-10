@@ -118,12 +118,17 @@ export function LeadForm({
               className={inputBase}
               autoComplete="email"
             />
+            {/* Was a bare ZIP. A ZIP told the office nothing it could act on:
+                every website lead became a job in the CRM reading "Name (no
+                address given)", and a rep had to phone back just to ask where
+                the house was. The address is the job in this business, and on
+                a phone it autofills in one tap, so this costs no conversion
+                and the ZIP still gets parsed out of it server-side. */}
             <input
-              name="zip"
-              placeholder="ZIP code"
+              name="address"
+              placeholder="Property address"
               className={inputBase}
-              autoComplete="postal-code"
-              inputMode="numeric"
+              autoComplete="street-address"
             />
           </div>
           <select name="service" defaultValue={defaultService} className={inputBase} required>

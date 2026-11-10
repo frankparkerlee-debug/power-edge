@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
+/** A real timestamp, shown in the timezone the crew works in. */
 function when(iso: string) {
   try {
     return new Date(iso).toLocaleDateString("en-US", {
@@ -20,6 +21,25 @@ function when(iso: string) {
   } catch {
     return iso;
   }
+}
+
+/**
+ * A calendar date with no time in it, such as cancel_deadline, which Postgres
+ * hands back as "2026-11-13".
+ *
+ * Passing that through when() parsed it as UTC midnight and then printed it in
+ * Chicago, six hours earlier, so every cancellation deadline on this table
+ * showed a day early: the database said Friday the 13th and the screen said
+ * Nov 12. The homeowner's emailed copy was right, which is what kept this from
+ * being a legal problem, but a rep reading this table would have told someone
+ * the wrong date over the phone. Split the day out of the string instead of
+ * letting a timezone touch it at all.
+ */
+function whenDate(ymd: string) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(ymd);
+  if (!m) return when(ymd);
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${MONTHS[Number(m[2]) - 1]} ${Number(m[3])}`;
 }
 
 export default async function ContractPage({
@@ -92,7 +112,7 @@ export default async function ContractPage({
                         {c.canceled_at ? (
                           <span className="font-semibold text-red-600">Cancelled</span>
                         ) : (
-                          when(String(c.cancel_deadline))
+                          whenDate(String(c.cancel_deadline))
                         )}
                       </td>
                     </tr>

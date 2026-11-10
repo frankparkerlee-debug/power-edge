@@ -27,6 +27,7 @@ function when(iso: string) {
 
 const EVENT_LABEL: Record<string, string> = {
   created: "Job created",
+  lead: "Came in from the website",
   stage: "Stage changed",
   knock: "Door knocked",
   call: "Called",

@@ -49,7 +49,12 @@ export async function POST(req: Request) {
     phone,
     email: (body.email || "").trim(),
     address: (body.address || "").trim(),
-    zip: (body.zip || "").trim(),
+    // The main form now asks for a property address instead of a bare ZIP, so
+    // pull the ZIP back out of it. Older forms and tools still post zip
+    // directly, and those keep working unchanged.
+    zip:
+      (body.zip || "").trim() ||
+      (/\b(\d{5})(?:-\d{4})?\s*$/.exec((body.address || "").trim())?.[1] ?? ""),
     service: (body.service || "").trim(),
     message: (body.message || "").trim(),
     // Which on-site form/tool produced this (e.g. roof-claim-check). From
@@ -128,7 +133,10 @@ export async function POST(req: Request) {
         stage: "new",
       });
       if (job) {
-        await logEvent(job.id, "created", `Website lead: ${lead.service || "general"}`);
+        // createJob already logs a "created" row with the address. Logging the
+        // source as "created" as well gave every website job two creation
+        // events; this is where the lead came from, not a second birth.
+        await logEvent(job.id, "lead", `Website: ${lead.service || "general"}`);
       }
     } catch {
       /* the lead row and the notification already landed */
