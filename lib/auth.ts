@@ -223,3 +223,92 @@ export async function apiUser(req: Request): Promise<Member | null> {
   const keyParam = new URL(req.url).searchParams.get("key") ?? undefined;
   return currentUser(keyParam);
 }
+
+/* ---------------------------------------------------------------------------
+ * Managing who can sign in.
+ *
+ * Adding a rep meant someone with database access writing a row, which does
+ * not survive hiring. These are admin-only and used by /admin/team.
+ * ------------------------------------------------------------------------ */
+
+export async function listMembers(): Promise<
+  Array<Member & { active: boolean; last_login_at: string | null; created_at: string }>
+> {
+  if (!dbOn()) return [];
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/team_members?select=id,email,name,role,active,last_login_at,created_at&order=active.desc,name.asc`,
+      { headers: headers(), cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+/** Roles a person can be given. "rep" is legacy and not offered for new people. */
+export const ASSIGNABLE_ROLES: Array<{ role: Role; label: string; what: string }> = [
+  { role: "setter", label: "Setter", what: "Knocks doors and books inspections." },
+  { role: "closer", label: "Closer", what: "Runs inspections, prices work, writes agreements." },
+  { role: "admin", label: "Admin", what: "Everything, including leads, territories and health." },
+];
+
+export async function addMember(input: { email: string; name: string; role: Role }) {
+  if (!dbOn()) return { ok: false as const, error: "Not configured." };
+  const email = input.email.trim().toLowerCase();
+  const name = input.name.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    return { ok: false as const, error: "That is not an email address." };
+  }
+  if (name.length < 2) return { ok: false as const, error: "Give them a name." };
+  if (!ASSIGNABLE_ROLES.some((r) => r.role === input.role)) {
+    return { ok: false as const, error: "Pick a role." };
+  }
+  // Someone already on the list, perhaps deactivated, is reactivated rather
+  // than duplicated, so their history stays attached to one row.
+  const existing = await findMember(email);
+  if (existing) {
+    await fetch(`${process.env.SUPABASE_URL}/rest/v1/team_members?email=eq.${encodeURIComponent(email)}`, {
+      method: "PATCH",
+      headers: { ...headers(), Prefer: "return=minimal" },
+      body: JSON.stringify({ active: true, role: input.role, name }),
+    });
+    return { ok: true as const, reactivated: true };
+  }
+  const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/team_members`, {
+    method: "POST",
+    headers: { ...headers(), Prefer: "return=minimal" },
+    body: JSON.stringify({ email, name, role: input.role, active: true }),
+  });
+  if (!res.ok) return { ok: false as const, error: "Could not add them." };
+  return { ok: true as const, reactivated: false };
+}
+
+/**
+ * Turn someone off rather than delete them.
+ *
+ * Their name is on knocks, jobs and signed agreements. Deleting the row would
+ * orphan that history, and a signed contract needs to keep saying who wrote
+ * it. Deactivating stops them signing in and leaves the record intact.
+ */
+export async function setMemberActive(id: number, active: boolean) {
+  if (!dbOn()) return false;
+  const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/team_members?id=eq.${id}`, {
+    method: "PATCH",
+    headers: { ...headers(), Prefer: "return=minimal" },
+    body: JSON.stringify({ active }),
+  });
+  return res.ok;
+}
+
+export async function setMemberRole(id: number, role: Role) {
+  if (!dbOn()) return false;
+  if (!ASSIGNABLE_ROLES.some((r) => r.role === role)) return false;
+  const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/team_members?id=eq.${id}`, {
+    method: "PATCH",
+    headers: { ...headers(), Prefer: "return=minimal" },
+    body: JSON.stringify({ role }),
+  });
+  return res.ok;
+}
