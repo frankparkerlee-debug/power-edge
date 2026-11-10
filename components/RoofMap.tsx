@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef } from "react";
 import "leaflet/dist/leaflet.css";
+import { TILES } from "@/lib/basemap";
 
 // Satellite/aerial view of the home's roof, makes the estimate feel real
 // ("that's MY roof"). Esri World Imagery tiles (free, no key); Leaflet bundled.
@@ -28,10 +29,10 @@ export function RoofMap({
       }).setView([home.lat, home.lon], zoom);
       mapRef.current = map;
 
-      L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom: 21, attribution: "Imagery &copy; Esri" },
-      ).addTo(map);
+      L.tileLayer(TILES.satellite, {
+        maxZoom: 21,
+        attribution: TILES.attribution,
+      }).addTo(map);
 
       const marker = L.divIcon({
         className: "",

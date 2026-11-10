@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
+import { addLightBasemap } from "@/lib/basemap";
 
 // Admin storm-engine dashboard map + timeline. Leaflet is bundled (same reason
 // as HailMap: ad blockers kill CDN loads). Dark-friendly admin styling.
@@ -79,10 +80,7 @@ export function StormDashboard({
         9,
       );
       mapRef.current = map;
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-        maxZoom: 18,
-        attribution: "&copy; OpenStreetMap &copy; CARTO",
-      }).addTo(map);
+      addLightBasemap(L, map, 18);
       layerRef.current = L.layerGroup().addTo(map);
       setTimeout(() => map.invalidateSize(), 250);
     });

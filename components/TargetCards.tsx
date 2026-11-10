@@ -11,6 +11,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
+import { TILES, addLightBasemap } from "@/lib/basemap";
 
 export type TargetCard = {
   id: string;
@@ -126,10 +127,11 @@ function HouseSheet({
         20,
       );
       satRef.current = map;
-      L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        { maxNativeZoom: 19, maxZoom: 21 },
-      ).addTo(map);
+      L.tileLayer(TILES.satellite, {
+        maxNativeZoom: 19,
+        maxZoom: 21,
+        attribution: TILES.attribution,
+      }).addTo(map);
       L.circleMarker([target.lat as number, target.lon as number], {
         radius: 10,
         color: "#7ffbae",
@@ -444,10 +446,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
       if (cancelled || !mapDiv.current) return;
       if (!mapRef.current) {
         mapRef.current = L.map(mapDiv.current, { zoomControl: true });
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-          maxZoom: 19,
-          attribution: "&copy; OpenStreetMap &copy; CARTO",
-        }).addTo(mapRef.current);
+        addLightBasemap(L, mapRef.current, 19);
         layerRef.current = L.layerGroup().addTo(mapRef.current);
       }
       const map = mapRef.current;
