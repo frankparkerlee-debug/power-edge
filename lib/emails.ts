@@ -411,6 +411,23 @@ type IntakeLite = {
   address?: string;
 };
 
+/**
+ * Marketing mail carries an unsubscribe header. One-to-one mail does not.
+ *
+ * Every email from here used to carry List-Unsubscribe, the agreement to
+ * sign, the signed copy and the sign-in link included. That header is how a
+ * mailbox provider is told "this is bulk, the recipient may not want it", so
+ * we were volunteering a homeowner's own contract for the promotions tab, and
+ * offering to unsubscribe people from their sign-in links.
+ *
+ * It is also the wrong way round legally: marketing needs an unsubscribe,
+ * transactional mail about an agreement someone is party to does not, and
+ * nobody can opt out of being sent the contract they just signed.
+ */
+function isMarketing(kind: string) {
+  return kind.startsWith("sequence:") || kind.startsWith("nurture");
+}
+
 async function sendEmail(
   resendKey: string,
   to: string,
@@ -426,9 +443,12 @@ async function sendEmail(
     html,
     from: `PowerEdge <hello@${site.domain}>`,
     replyTo: site.email,
-    headers: {
-      "List-Unsubscribe": `<mailto:${site.email}?subject=Unsubscribe>`,
-    },
+    headers: isMarketing(kind)
+      ? {
+          "List-Unsubscribe": `<mailto:${site.email}?subject=Unsubscribe>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        }
+      : undefined,
   });
 }
 
@@ -548,8 +568,11 @@ export async function enqueueLeadSequence(opts: {
       from,
       replyTo: site.email,
       scheduledAt,
+      // This one is marketing, so it keeps the unsubscribe, and gets the
+      // one-click form Gmail expects from anyone sending drip mail.
       headers: {
         "List-Unsubscribe": `<mailto:${site.email}?subject=Unsubscribe>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
       },
     });
     await sleep(600); // ~1.6/s, under Resend's 2/s free-tier limit
