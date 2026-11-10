@@ -79,6 +79,18 @@ function observedHolidays(year: number): Set<string> {
   );
 }
 
+/** Today's date on the Texas calendar, as y/m/d, free of any server timezone. */
+function chicagoToday(now: Date): { y: number; m: number; d: number } {
+  const p = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const get = (t: string) => Number(p.find((x) => x.type === t)!.value);
+  return { y: get("year"), m: get("month"), d: get("day") };
+}
+
 /**
  * Three BUSINESS days, which is what the cancellation notice has to state.
  *
@@ -86,29 +98,39 @@ function observedHolidays(year: number): Set<string> {
  * business day shortens the homeowner's window and puts a wrong, short date on
  * a statutory form; skipping one only ever lengthens it. Erring long is safe,
  * erring short is what voids a sale.
+ *
+ * All arithmetic is anchored to the America/Chicago calendar date and then
+ * done in pure UTC. An earlier version mixed getDay() (server-local) with
+ * toISOString() (UTC), and within six hours of midnight UTC the two disagreed
+ * about the day, which produced a deadline that landed on a Saturday.
  */
 export function cancelDeadline(from = new Date()): Date {
-  const d = new Date(from);
+  const { y, m, d: dd } = chicagoToday(from);
+  // Noon UTC so the date is unambiguous and cannot drift across a boundary.
+  const cursor = new Date(Date.UTC(y, m - 1, dd, 12, 0, 0));
+
   let added = 0;
-  let holidays = observedHolidays(d.getUTCFullYear());
-  let year = d.getUTCFullYear();
+  let year = cursor.getUTCFullYear();
+  let holidays = observedHolidays(year);
+
   while (added < 3) {
-    d.setDate(d.getDate() + 1);
-    if (d.getUTCFullYear() !== year) {
-      year = d.getUTCFullYear();
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+    if (cursor.getUTCFullYear() !== year) {
+      year = cursor.getUTCFullYear();
       holidays = observedHolidays(year);
     }
-    const day = d.getDay();
+    const day = cursor.getUTCDay();
     if (day === 0 || day === 6) continue;
-    if (holidays.has(d.toISOString().slice(0, 10))) continue;
+    if (holidays.has(cursor.toISOString().slice(0, 10))) continue;
     added++;
   }
-  return d;
+  return cursor;
 }
 
+/** Calendar dates are carried at noon UTC, so they are formatted in UTC. */
 export function fmtDate(d: Date) {
   return d.toLocaleDateString("en-US", {
-    timeZone: "America/Chicago",
+    timeZone: "UTC",
     month: "long",
     day: "numeric",
     year: "numeric",
