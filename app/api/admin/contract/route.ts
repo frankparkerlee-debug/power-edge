@@ -27,7 +27,7 @@ export async function POST(req: Request) {
   // sign later on their own device; the default signs on the rep's phone now.
   if (body.mode === "send") {
     const draft = await createDraft({
-      rep: String(body.rep || ""),
+      rep: String(body.rep || u.name || ""),
       owner_names: String(body.owner_names || ""),
       owner_phone: String(body.owner_phone || ""),
       owner_email: String(body.owner_email || ""),
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
   }
 
   const saved = await saveContract({
-    rep: String(body.rep || ""),
+    rep: String(body.rep || u.name || ""),
     owner_names: String(body.owner_names || ""),
     owner_phone: String(body.owner_phone || ""),
     owner_email: String(body.owner_email || ""),

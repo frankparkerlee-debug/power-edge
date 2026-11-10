@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { signByToken, fmtDate, markEmailed, type ScopeLine } from "@/lib/contracts";
+import { signByToken, fmtDate, markEmailed, linkJobForContract, type ScopeLine } from "@/lib/contracts";
 import { sendSignedAgreement } from "@/lib/emails";
 import { burst, clientIp, tooMany } from "@/lib/rateLimit";
 
@@ -38,6 +38,19 @@ export async function POST(
   if (!signed.ok) {
     return NextResponse.json({ ok: false, error: signed.error }, { status: 400 });
   }
+
+  // Advance the job. Without this a remotely signed agreement left the CRM
+  // reading "agreement sent" while the contract itself said signed, so the
+  // office chased a deal that was already closed.
+  await linkJobForContract({
+    contractId: signed.id,
+    stage: "signed",
+    address: String(body.property_address || ""),
+    owner: String(body.owner_names || ""),
+    email: String(body.owner_email || ""),
+    claim: body.claim_based !== false,
+    value: String(body.total_price || ""),
+  });
 
   // Their copy, with the cancellation notice and the real deadline. The
   // agreement is already recorded, so a mail failure must not fail the signing.
