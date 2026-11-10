@@ -200,3 +200,68 @@ export async function stageCounts(rep?: string): Promise<Record<string, number>>
   for (const j of jobs) out[j.stage] = (out[j.stage] ?? 0) + 1;
   return out;
 }
+
+/**
+ * The pipeline: how many jobs sit at each stage and what they are worth.
+ *
+ * Counts alone do not say whether a week was good. Four jobs at "agreement
+ * sent" is a different business depending on whether that is $24k or $140k,
+ * and the stage that deserves attention is usually the one with the most
+ * money sitting still, not the one with the most rows.
+ *
+ * Value comes from contract_value, which only exists once an agreement has
+ * been written. Earlier stages are counted but carry no money, and the board
+ * says so rather than printing $0 and implying the work is worthless.
+ */
+export type StageSlice = {
+  stage: Stage;
+  label: string;
+  count: number;
+  value: number;
+  /** Jobs at this stage that have no price on them yet. */
+  unpriced: number;
+};
+
+export async function pipeline(rep?: string): Promise<{
+  slices: StageSlice[];
+  openValue: number;
+  openCount: number;
+  wonValue: number;
+}> {
+  const jobs = await listJobs({ rep, limit: 1000 });
+  const num = (v: unknown) => {
+    const n = Number(String(v ?? "").replace(/[^0-9.]/g, ""));
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const order: Stage[] = [...STAGES];
+  const slices: StageSlice[] = order.map((stage) => {
+    const at = jobs.filter((j) => j.stage === stage);
+    return {
+      stage,
+      label: STAGE_LABEL[stage] ?? stage,
+      count: at.length,
+      value: at.reduce((n, j) => n + num(j.contract_value), 0),
+      unpriced: at.filter((j) => num(j.contract_value) === 0).length,
+    };
+  });
+
+  // "At stake" is work that could still be won or lost. Complete is money
+  // already earned and lost is gone, so neither belongs in that number.
+  const openStages: Stage[] = [
+    "new",
+    "contacted",
+    "inspection_booked",
+    "inspected",
+    "agreement_sent",
+  ];
+  const open = jobs.filter((j) => openStages.includes(j.stage as Stage));
+  const won = jobs.filter((j) => j.stage === "signed" || j.stage === "in_production" || j.stage === "complete");
+
+  return {
+    slices,
+    openCount: open.length,
+    openValue: open.reduce((n, j) => n + num(j.contract_value), 0),
+    wonValue: won.reduce((n, j) => n + num(j.contract_value), 0),
+  };
+}

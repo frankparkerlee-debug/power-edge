@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { currentUser } from "@/lib/auth";
-import { listJobs, STAGE_LABEL } from "@/lib/jobs";
+import { listJobs, pipeline, STAGE_LABEL } from "@/lib/jobs";
+import { moneyShort } from "@/lib/money";
 import { listAppointments } from "@/lib/scheduling";
 import { listLeads } from "@/lib/db";
 import { recentEmailFailures } from "@/lib/sendMail";
@@ -82,6 +83,7 @@ export default async function TodayPage({
   const needsFollowUp = jobs.filter((j) => j.stage === "inspected" || j.stage === "contacted");
   const newLeads = leads.filter((l) => hoursAgo(l.created_at) < 168);
   const openJobs = jobs.filter((j) => !["complete", "lost"].includes(j.stage));
+  const pipe = await pipeline();
 
   /** Each card is an action, not a statistic. */
   const actions = [
@@ -174,9 +176,69 @@ export default async function TodayPage({
           <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">
             Pipeline
           </h2>
+          <span className="ml-auto mr-4 text-sm text-gray-600">
+            <strong className="text-[#0b0e13]">{moneyShort(pipe.openValue)}</strong> at stake
+            {pipe.wonValue > 0 ? (
+              <>
+                {" · "}
+                <strong className="text-[#0c7a40]">{moneyShort(pipe.wonValue)}</strong> won
+              </>
+            ) : null}
+          </span>
           <Link href="/admin/jobs" className="text-sm font-semibold text-[#0c7a40] hover:underline">
             All jobs →
           </Link>
+        </div>
+
+        {/*
+          Stages, with the money sitting at each.
+          Counts on their own do not say whether a week went well: four jobs
+          at "agreement sent" is a different business at $24k than at $140k,
+          and the stage worth attention is usually the one with the most money
+          standing still, not the most rows.
+        */}
+        <div className="mt-3 overflow-x-auto">
+          <div className="flex min-w-max gap-2">
+            {pipe.slices.map((sl) => {
+              const live = sl.count > 0;
+              return (
+                <Link
+                  key={sl.stage}
+                  href={`/admin/jobs?stage=${sl.stage}`}
+                  className={`min-w-[7.5rem] flex-1 rounded-lg border p-3 ${
+                    live
+                      ? "border-[#d7dbe0] bg-white"
+                      : "border-dashed border-gray-200 bg-transparent"
+                  }`}
+                >
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                    {sl.label}
+                  </div>
+                  <div
+                    className={`mt-1 font-display text-xl font-extrabold ${
+                      live ? "text-[#0b0e13]" : "text-gray-300"
+                    }`}
+                  >
+                    {sl.count}
+                  </div>
+                  <div className="mt-0.5 text-xs text-gray-600">
+                    {sl.value > 0 ? (
+                      <strong className="text-[#0b0e13]">{moneyShort(sl.value)}</strong>
+                    ) : sl.count > 0 ? (
+                      "no price yet"
+                    ) : (
+                      "\u2014"
+                    )}
+                  </div>
+                  {sl.value > 0 && sl.unpriced > 0 ? (
+                    <div className="mt-0.5 text-[11px] text-[#b54708]">
+                      +{sl.unpriced} unpriced
+                    </div>
+                  ) : null}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
         {openJobs.length === 0 ? (
