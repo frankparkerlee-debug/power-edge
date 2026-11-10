@@ -21,13 +21,14 @@ export const site = {
    * merchant "may not fail to include on both copies" of the notice of
    * cancellation the address of the merchant's place of business, and the
    * statutory form itself reads "...TO (name of merchant), AT (address of
-   * merchant's place of business)". Until this is filled in, the printed form
-   * carries a blank line nobody fills in and the emailed copy carries nothing.
+   * merchant's place of business)". It prints on the signing page and in the
+   * emailed notice of cancellation.
    *
-   * NEEDED FROM PARKER. Any address that receives mail is fine; it does not
-   * have to be a storefront.
+   * Provided by Parker 2026-11-11. The agreement's cancellation stance (notice
+   * in the agreement and the emailed copy, no printed card) was cleared by
+   * counsel the same day.
    */
-  mailingAddress: "" as string,
+  mailingAddress: "PO Box 600715, Dallas, TX 75206" as string,
   domain: "poweredgetx.com",
   url: "https://poweredgetx.com",
 
