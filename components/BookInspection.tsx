@@ -1,5 +1,7 @@
 "use client";
 
+import { AddressAutocomplete } from "./AddressAutocomplete";
+
 import { useEffect, useState } from "react";
 
 /**
@@ -182,9 +184,14 @@ export function BookInspection({
           </div>
           <div>
             <label className={lbl} htmlFor="bi-address">Property address</label>
-            <input id="bi-address" value={form.address}
-              onChange={(e) => setForm({ ...form, address: e.target.value })}
-              className={`mt-1 ${inputBase}`} placeholder="Street, city" />
+            <AddressAutocomplete
+              id="bi-address"
+              value={form.address}
+              onChange={(v) => setForm({ ...form, address: v })}
+              onSelect={(v) => setForm({ ...form, address: v })}
+              className={`mt-1 ${inputBase}`}
+              placeholder="Street, city"
+            />
           </div>
           <div>
             <label className={lbl} htmlFor="bi-email">Email <span className="font-normal text-fg-inv-dim">(for your confirmation)</span></label>

@@ -11,7 +11,7 @@ import {
 } from "@/lib/contracts";
 import { sendSignedAgreement, sendAgreementToSign } from "@/lib/emails";
 import { clientIp } from "@/lib/rateLimit";
-import { apiUser } from "@/lib/auth";
+import { apiUser, canSell } from "@/lib/auth";
 import { linkJobForContract } from "@/lib/contracts";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +20,13 @@ export async function POST(req: Request) {
   const u = await apiUser(req);
   if (!u) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  // The page hides this from setters; the endpoint has to mean it.
+  if (!canSell(u.role)) {
+    return NextResponse.json(
+      { ok: false, error: "Agreements are written by closers." },
+      { status: 403 },
+    );
   }
 
   let body: Record<string, unknown>;

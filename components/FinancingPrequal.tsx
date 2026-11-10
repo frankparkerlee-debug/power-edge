@@ -1,5 +1,7 @@
 "use client";
 
+import { AddressAutocomplete } from "./AddressAutocomplete";
+
 import { useRef, useState } from "react";
 import { SmsConsent } from "./SmsConsent";
 import { leadContext } from "@/lib/leadContext";
@@ -218,7 +220,7 @@ export function FinancingPrequal() {
           <input name="phone" required type="tel" placeholder="Phone" className={inputBase} autoComplete="tel" />
         </div>
         <input name="email" required type="email" placeholder="Email" className={inputBase} autoComplete="email" />
-        <input name="address" placeholder="Property address" className={inputBase} autoComplete="street-address" />
+        <AddressAutocomplete name="address" placeholder="Property address" className={inputBase} />
         <input name="zip" placeholder="ZIP code" className={inputBase} inputMode="numeric" autoComplete="postal-code" />
 
         <div>

@@ -8,20 +8,40 @@ import { useEffect, useRef, useState } from "react";
  * a suggestion fills the field and (optionally) fires onSelect to auto-run.
  */
 export function AddressAutocomplete({
-  value,
-  onChange,
+  value: valueProp,
+  onChange: onChangeProp,
   onSelect,
   placeholder = "Street address, city, ZIP",
   className = "",
   required = false,
+  name,
+  id,
+  autoFocus,
 }: {
-  value: string;
-  onChange: (v: string) => void;
+  /**
+   * Optional. Several forms on this site are plain uncontrolled forms read
+   * with FormData at submit, and rewriting them into controlled state just to
+   * get a typeahead would be a lot of churn for no gain. Leave value and
+   * onChange off, pass a name, and this keeps its own state while still
+   * submitting like the input it replaced.
+   */
+  value?: string;
+  onChange?: (v: string) => void;
   onSelect?: (v: string) => void;
   placeholder?: string;
   className?: string;
   required?: boolean;
+  name?: string;
+  id?: string;
+  autoFocus?: boolean;
 }) {
+  const [selfValue, setSelfValue] = useState(valueProp ?? "");
+  const controlled = valueProp !== undefined;
+  const value = controlled ? valueProp : selfValue;
+  const onChange = (v: string) => {
+    if (!controlled) setSelfValue(v);
+    onChangeProp?.(v);
+  };
   const [items, setItems] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
@@ -96,6 +116,9 @@ export function AddressAutocomplete({
   return (
     <div ref={boxRef} className="relative">
       <input
+        name={name}
+        id={id}
+        autoFocus={autoFocus}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => items.length && setOpen(true)}

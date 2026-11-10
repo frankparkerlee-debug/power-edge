@@ -40,7 +40,17 @@ function headers() {
   };
 }
 
-export type Member = { id: number; email: string; name: string; role: "rep" | "admin" };
+/**
+ * Setters book inspections, closers price and sign them. "rep" predates the
+ * split and means both, so existing rows keep working.
+ */
+export type Role = "setter" | "closer" | "rep" | "admin";
+export type Member = { id: number; email: string; name: string; role: Role };
+
+/** Can this person price work and put an agreement in front of a homeowner? */
+export function canSell(role?: Role) {
+  return role === "closer" || role === "rep" || role === "admin";
+}
 
 export async function findMember(email: string): Promise<Member | null> {
   if (!dbOn() || !email) return null;
@@ -153,7 +163,7 @@ function decode(value: string): Member | null {
 
   try {
     const d = JSON.parse(payload) as {
-      id: number; email: string; name: string; role: "rep" | "admin"; exp: number;
+      id: number; email: string; name: string; role: Role; exp: number;
     };
     if (!d.exp || d.exp < Date.now()) return null;
     return { id: d.id, email: d.email, name: d.name, role: d.role };

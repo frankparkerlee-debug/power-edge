@@ -17,24 +17,52 @@ import { useEffect, useState } from "react";
  * company phone number in a nav bar for lead data.
  */
 
-type Me = { name: string; email: string; role: "rep" | "admin" };
+/**
+ * Who is signed in, and therefore what they are here to do.
+ *
+ * Parker runs a setter and closer model: setters knock doors and book
+ * inspections, closers turn up to those inspections, price the job and get it
+ * signed. They are not the same screen. A setter does not price work, and
+ * putting the agreement in front of one is how an unpriced contract gets
+ * signed on a doorstep.
+ *
+ * "rep" is the old single role and still exists on older rows. It is treated
+ * as both, so nobody loses access on the day this ships.
+ */
+type Role = "setter" | "closer" | "rep" | "admin";
+type Me = { name: string; email: string; role: Role };
 
-type NavItem = { href: string; label: string; icon: string; adminOnly?: boolean };
+type NavItem = {
+  href: string;
+  label: string;
+  icon: string;
+  /** Roles that see it. Omitted means everyone signed in. */
+  roles?: Role[];
+};
+
+const SELLS = ["closer", "rep", "admin"] as const;
 
 const NAV: NavItem[] = [
   { href: "/admin", label: "Today", icon: "sun" },
   { href: "/admin/storms", label: "Map", icon: "map" },
   { href: "/admin/jobs", label: "Jobs", icon: "folder" },
-  { href: "/admin/contract", label: "Agreement", icon: "pen" },
+  // Setters book the inspection; the closer prices it and writes the paper.
+  { href: "/admin/contract", label: "Agreement", icon: "pen", roles: [...SELLS] },
 ];
 
 const MORE: NavItem[] = [
-  { href: "/admin/appointments", label: "Inspections", icon: "calendar", adminOnly: true },
-  { href: "/admin/leads", label: "Leads", icon: "inbox", adminOnly: true },
-  { href: "/admin/territories", label: "Territories", icon: "flag", adminOnly: true },
-  { href: "/sales", label: "Playbook", icon: "book", adminOnly: true },
-  { href: "/admin/health", label: "Health", icon: "pulse", adminOnly: true },
+  // A setter's whole job is what is on the board, so they get this one.
+  { href: "/admin/appointments", label: "Inspections", icon: "calendar" },
+  { href: "/sales", label: "Playbook", icon: "book" },
+  { href: "/admin/leads", label: "Leads", icon: "inbox", roles: ["admin"] },
+  { href: "/admin/territories", label: "Territories", icon: "flag", roles: ["admin"] },
+  { href: "/admin/health", label: "Health", icon: "pulse", roles: ["admin"] },
 ];
+
+function allowed(n: NavItem, role?: Role) {
+  if (!n.roles) return true;
+  return !!role && n.roles.includes(role);
+}
 
 function Icon({ name, className = "h-5 w-5" }: { name: string; className?: string }) {
   const d: Record<string, string> = {
@@ -97,8 +125,8 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
 
   const { title, parent } = titleFor(pathname);
   const isHome = pathname === "/admin";
-  const nav = NAV.filter((n) => !n.adminOnly || me?.role === "admin");
-  const more = MORE.filter((n) => !n.adminOnly || me?.role === "admin");
+  const nav = NAV.filter((n) => allowed(n, me?.role));
+  const more = MORE.filter((n) => allowed(n, me?.role));
 
   async function signOut() {
     await fetch("/api/auth/signout", { method: "POST" });

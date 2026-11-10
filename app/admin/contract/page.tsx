@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ContractForm } from "@/components/ContractForm";
 import { listContracts } from "@/lib/contracts";
-import { currentUser } from "@/lib/auth";
+import { currentUser, canSell } from "@/lib/auth";
 import { getJob } from "@/lib/jobs";
 
 // Field agreement. NOT indexed. requires a signed-in team member.
@@ -61,6 +61,33 @@ export default async function ContractPage({
           <p className="mt-2 text-sm text-gray-600">
             Sign in to open this.
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  /*
+   * Setters do not write agreements.
+   *
+   * Hiding the tab is not the same as closing the door: the URL is guessable
+   * and a setter who lands here could put an unpriced contract in front of a
+   * homeowner. Pricing and paper belong to the closer.
+   */
+  if (!canSell(user.role)) {
+    return (
+      <div className={wrap}>
+        <div className="mx-auto max-w-md">
+          <h1 className="font-display text-2xl font-extrabold">Agreement</h1>
+          <p className="mt-2 text-sm text-gray-600">
+            Agreements are written by closers. Book the inspection and the closer
+            prices it from there.
+          </p>
+          <a
+            href="/admin/appointments"
+            className="mt-4 inline-block rounded-md bg-[#0c7a40] px-4 py-2.5 font-bold text-white"
+          >
+            Go to inspections
+          </a>
         </div>
       </div>
     );

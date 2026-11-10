@@ -274,6 +274,14 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
   const [house, setHouse] = useState<TargetCard | null>(null);
   const [houseData, setHouseData] = useState<HouseData>({ loading: false, roof: null, roofError: null, storms: [] });
   const [converted, setConverted] = useState<Record<string, "working" | "done" | "error">>({});
+  /**
+   * The job a converted door became.
+   *
+   * Converting said "Lead created" and stopped there, so the rep had no way
+   * from the map to the record they had just made: they had to go to Jobs and
+   * find the address by eye. The API has returned the id all along.
+   */
+  const [convertedJob, setConvertedJob] = useState<Record<string, string>>({});
   // Local echo of dispositions so a rep sees the door change the instant they
   // tap it, without a refetch in a driveway on bad signal.
   const [knocked, setKnocked] = useState<Record<string, { outcome: string; at: string }>>({});
@@ -351,7 +359,9 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
         body: JSON.stringify({ key: adminKey(), id: t.id }),
       });
       if (!res.ok) throw new Error(String(res.status));
+      const data = await res.json().catch(() => ({}) as { jobId?: string });
       setConverted((c) => ({ ...c, [t.id]: "done" }));
+      if (data?.jobId) setConvertedJob((j) => ({ ...j, [t.id]: data.jobId as string }));
     } catch {
       setConverted((c) => ({ ...c, [t.id]: "error" }));
     }
@@ -776,27 +786,36 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
 
               {/* Actions */}
               <div className="mt-2 flex items-center gap-2 text-xs">
-                <button
-                  onClick={() => promote(t)}
-                  disabled={convertState(t) !== "idle" && convertState(t) !== "error"}
-                  className={`flex-1 rounded-lg py-2.5 text-sm font-bold ${
-                    convertState(t) === "done"
-                      ? "bg-green-600 text-white"
+                {convertState(t) === "done" && convertedJob[t.id] ? (
+                  <a
+                    href={`/admin/jobs/${convertedJob[t.id]}`}
+                    className="flex-1 rounded-lg bg-green-600 py-2.5 text-center text-sm font-bold text-white"
+                  >
+                    Open the job →
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => promote(t)}
+                    disabled={convertState(t) !== "idle" && convertState(t) !== "error"}
+                    className={`flex-1 rounded-lg py-2.5 text-sm font-bold ${
+                      convertState(t) === "done"
+                        ? "bg-green-600 text-white"
+                        : convertState(t) === "working"
+                          ? "bg-gray-300 text-gray-600"
+                          : convertState(t) === "error"
+                            ? "bg-red-600 text-white"
+                            : "bg-[#0c7a40] text-white"
+                    }`}
+                  >
+                    {convertState(t) === "done"
+                      ? "✓ In the pipeline"
                       : convertState(t) === "working"
-                        ? "bg-gray-300 text-gray-600"
+                        ? "Converting…"
                         : convertState(t) === "error"
-                          ? "bg-red-600 text-white"
-                          : "bg-[#0c7a40] text-white"
-                  }`}
-                >
-                  {convertState(t) === "done"
-                    ? "✓ Lead created"
-                    : convertState(t) === "working"
-                      ? "Converting…"
-                      : convertState(t) === "error"
-                        ? "Failed, tap to retry"
-                        : "Convert to lead"}
-                </button>
+                          ? "Failed, tap to retry"
+                          : "Convert to lead"}
+                  </button>
+                )}
                 {t.lat != null && (
                   <button
                     onClick={() => openHouse(t)}

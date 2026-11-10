@@ -1,5 +1,7 @@
 "use client";
 
+import { AddressAutocomplete } from "./AddressAutocomplete";
+
 import { useId, useState } from "react";
 import { services } from "@/lib/services";
 import { SmsConsent } from "./SmsConsent";
@@ -124,11 +126,10 @@ export function LeadForm({
                 the house was. The address is the job in this business, and on
                 a phone it autofills in one tap, so this costs no conversion
                 and the ZIP still gets parsed out of it server-side. */}
-            <input
+            <AddressAutocomplete
               name="address"
               placeholder="Property address"
               className={inputBase}
-              autoComplete="street-address"
             />
           </div>
           <select name="service" defaultValue={defaultService} className={inputBase} required>
