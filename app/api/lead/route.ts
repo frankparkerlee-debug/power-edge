@@ -208,6 +208,12 @@ export async function POST(req: Request) {
       );
       // Fire-and-forget: the throttled sequence runs in the background on
       // Render's persistent server so the form returns immediately.
+      /*
+       * All eight emails are scheduled with the provider now, days ahead.
+       * Spam never gets here (the verdict gate is above), but a lead that
+       * converts or asks us to stop still needs calling back, which is what
+       * /api/admin/email/cancel is for.
+       */
       void enqueueLeadSequence({
         resendKey,
         to: lead.email,
