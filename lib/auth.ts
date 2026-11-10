@@ -202,7 +202,51 @@ export async function currentUser(keyParam?: string): Promise<Member | null> {
   const jar = await cookies();
   const raw = jar.get(SESSION_COOKIE)?.value;
   if (!raw) return null;
-  return decode(raw);
+  const session = decode(raw);
+  if (!session) return null;
+
+  const now = await memberNow(session.id);
+  if (now === null) return null; // removed or deactivated since signing in
+  return now ?? session; // the team table could not be read: trust the signature
+}
+
+/*
+ * The cookie says who someone was when they signed in. The team table says who
+ * they are now.
+ *
+ * Sessions last 30 days and used to be trusted on the cookie alone, so taking
+ * someone off the team, or switching them off, changed nothing for anyone
+ * already signed in: a rep who left kept the portal and its homeowner records
+ * for up to a month, and a demoted admin stayed an admin. Found 2026-11-11
+ * when a deleted test account was still getting in.
+ *
+ * Now every request checks the row, cached for a minute so a page with
+ * several server calls does not hit the database for each. A change on the
+ * Team page clears the cache on this instance; any other instance catches up
+ * within the minute. If the database cannot be reached the signed cookie is
+ * trusted, because locking the whole team out during a blip is worse.
+ */
+const MEMBER_TTL_MS = 60_000;
+const memberCache = new Map<number, { at: number; member: Member | null }>();
+
+/** The member as the team table has them now. null = not active; undefined = could not check. */
+async function memberNow(id: number): Promise<Member | null | undefined> {
+  const hit = memberCache.get(id);
+  if (hit && Date.now() - hit.at < MEMBER_TTL_MS) return hit.member;
+  if (!dbOn()) return undefined;
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/team_members?select=id,email,name,role&active=is.true&id=eq.${Number(id)}`,
+      { headers: headers(), cache: "no-store" },
+    );
+    if (!res.ok) return undefined;
+    const rows = (await res.json()) as Member[];
+    const member = rows[0] ?? null;
+    memberCache.set(id, { at: Date.now(), member });
+    return member;
+  } catch {
+    return undefined;
+  }
 }
 
 export async function requireAdmin(keyParam?: string) {
@@ -299,6 +343,7 @@ export async function setMemberActive(id: number, active: boolean) {
     headers: { ...headers(), Prefer: "return=minimal" },
     body: JSON.stringify({ active }),
   });
+  memberCache.delete(id);
   return res.ok;
 }
 
@@ -310,5 +355,6 @@ export async function setMemberRole(id: number, role: Role) {
     headers: { ...headers(), Prefer: "return=minimal" },
     body: JSON.stringify({ role }),
   });
+  memberCache.delete(id);
   return res.ok;
 }
