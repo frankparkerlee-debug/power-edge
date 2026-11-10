@@ -44,9 +44,12 @@ export type ContractPrefill = {
 export function ContractForm({
   repDefault = "",
   prefill,
+  jobId,
 }: {
   repDefault?: string;
   prefill?: ContractPrefill;
+  /** The job this agreement is for, so it attaches to that job by id. */
+  jobId?: string;
 }) {
   const [step, setStep] = useState<Step>(1);
 
@@ -144,6 +147,7 @@ export function ContractForm({
     squares: squares ? Number(squares) : undefined,
     scope: lines.filter((l) => l.description.trim()),
     total_price: total,
+    job_id: jobId || undefined,
   });
 
   async function post(body: Record<string, unknown>) {
@@ -318,22 +322,37 @@ export function ContractForm({
         <p className="mt-2 text-sm">
           {done.emailed
             ? "Their copy, with the cancellation notice, has been emailed."
-            : "No email address, so make sure they have the printed copy and both cancellation notices."}
+            : "Their copy did not send. Do not leave until they have it: check the address on the job and resend from there."}
         </p>
-        <button onClick={() => window.location.reload()} className="mt-4 rounded-md bg-[#0c7a40] px-5 py-2.5 font-bold text-white">
-          New agreement
-        </button>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {jobId ? (
+            <a href={`/admin/jobs/${jobId}`} className="rounded-md bg-[#0c7a40] px-5 py-2.5 font-bold text-white">
+              Back to the job
+            </a>
+          ) : null}
+          <button
+            onClick={() => window.location.reload()}
+            className={`rounded-md px-5 py-2.5 font-bold ${
+              jobId ? "border border-[#d7dbe0] text-[#3b424e]" : "bg-[#0c7a40] text-white"
+            }`}
+          >
+            New agreement
+          </button>
+        </div>
       </div>
     );
   }
 
-  const money = (v: unknown) => Number(String(v ?? "").replace(/[^0-9.]/g, "")) || 0;
-  const sq = money(squares);
-  const rate = money(pricePerSquare);
+  // A number out of whatever was typed. Named apart from the imported money()
+  // formatter, which returns "$5,000.00": one word meaning both was working
+  // only by accident.
+  const num = (v: unknown) => Number(String(v ?? "").replace(/[^0-9.]/g, "")) || 0;
+  const sq = num(squares);
+  const rate = num(pricePerSquare);
   /** The roof itself: squares times the rate. */
   const roofAmount = sq * rate;
   /** Anything else on the job: gutters, fascia, decking, a chimney. */
-  const linesSum = lines.reduce((n, l) => n + money(l.price), 0);
+  const linesSum = lines.reduce((n, l) => n + num(l.price), 0);
   const computed = roofAmount + linesSum;
   /**
    * The contract price adds itself up, line by line, and the rep can still
@@ -341,7 +360,7 @@ export function ContractForm({
    * which is frequently not what the line items come to.
    */
   const total = totalEdited ? totalRaw : computed > 0 ? String(computed) : "";
-  const collected = money(total);
+  const collected = num(total);
 
   /**
    * Step 2 had no validation, so a rep could walk straight through to "sign or
@@ -352,9 +371,18 @@ export function ContractForm({
   const scopeOk =
     (sq > 0 && rate > 0) || lines.some((l) => l.description.trim().length > 2);
   const priceOk = collected > 0;
+  /*
+   * An email is required now, not optional.
+   *
+   * Reps no longer hand over a printed cancellation card (Parker, 2026-11-10),
+   * so the email is the homeowner's only copy of the agreement and their only
+   * written cancellation notice. Texas requires they be given a copy when they
+   * sign. Without an address they would leave with nothing.
+   */
+  const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim());
   const stepOk =
     step === 1
-      ? owner.trim().length > 1 && address.trim().length > 4
+      ? owner.trim().length > 1 && address.trim().length > 4 && emailOk
       : step === 2
         ? scopeOk && priceOk
         : true;
@@ -408,11 +436,19 @@ export function ContractForm({
             </div>
             <div>
               <label className={label} htmlFor="c-email">
-                Email <span className="font-normal normal-case text-gray-400">their copy goes here</span>
+                Email{" "}
+                <span className="font-normal normal-case text-gray-400">
+                  required: their copy and cancellation notice go here
+                </span>
               </label>
               <input id="c-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={input} />
             </div>
           </div>
+          {!stepOk && owner.trim().length > 1 && address.trim().length > 4 && !emailOk ? (
+            <p className="text-sm text-gray-600">
+              Add their email. It is the only copy of the agreement they get.
+            </p>
+          ) : null}
           <button onClick={() => setStep(2)} disabled={!stepOk} className={primary}>
             Next: the work
           </button>
@@ -570,7 +606,7 @@ export function ContractForm({
               wrong deductible gets caught at the kitchen table rather than in
               the signed copy.
             */}
-            {claimBased && collected > 0 && money(deductible) ? (
+            {claimBased && collected > 0 && num(deductible) > 0 ? (
               <div className="mt-3 space-y-1 border-t border-[#d7dbe0] pt-3 text-sm">
                 <div className="flex justify-between text-gray-600">
                   <span>Insurance pays</span>

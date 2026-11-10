@@ -130,7 +130,11 @@ export default async function ContractPage({
         </p>
 
         <div className="mt-6">
-          <ContractForm repDefault={rep || user.name || ""} prefill={prefill} />
+          <ContractForm
+            repDefault={rep || user.name || ""}
+            prefill={prefill}
+            jobId={j?.id}
+          />
         </div>
 
         {recent.length > 0 && (

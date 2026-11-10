@@ -142,6 +142,15 @@ export function fmtDate(d: Date) {
  * signed at the door or emailed as a link. The form enforces this now, but the
  * form is not the only way in here.
  */
+/**
+ * The homeowner's copy and cancellation notice are emailed, and with no
+ * printed card that email is the only one they get. Refuse an agreement that
+ * has nowhere to send it.
+ */
+function hasEmail(input: { owner_email?: string }) {
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(input.owner_email ?? "").trim());
+}
+
 function priceAndScope(input: { scope?: Array<{ description?: string; price?: string }>; total_price?: string }) {
   const described = (input.scope ?? []).some((l) => (l.description ?? "").trim().length > 2);
   if (!described) return "Describe the work before sending this agreement.";
@@ -167,6 +176,9 @@ export async function saveContract(
   {
     const bad = priceAndScope(input);
     if (bad) return { ok: false, error: bad };
+    if (!hasEmail(input)) {
+      return { ok: false, error: "Add the homeowner's email. It is their only copy." };
+    }
   }
 
   const deadline = cancelDeadline();
@@ -250,6 +262,9 @@ export async function createDraft(
   {
     const bad = priceAndScope(input);
     if (bad) return { ok: false, error: bad };
+    if (!hasEmail(input)) {
+      return { ok: false, error: "Add the homeowner's email. It is their only copy." };
+    }
   }
   const token = signToken();
   try {
@@ -379,15 +394,33 @@ export async function linkJobForContract(a: {
   claimNumber?: string;
   deductible?: string;
   value?: string;
+  /** The job this agreement was written from, when there is one. */
+  jobId?: string;
 }) {
   if (!dbOn() || !a.address?.trim()) return;
-  const { listJobs, createJob, updateJob, logEvent } = await import("@/lib/jobs");
+  const { listJobs, getJob, createJob, updateJob, logEvent } = await import("@/lib/jobs");
   const label = a.stage === "signed" ? "agreement_signed" : "agreement_sent";
   try {
     const addr = a.address.trim();
-    const existing = (await listJobs({ limit: 500 })).find(
-      (j) => j.address.trim().toLowerCase() === addr.toLowerCase(),
-    );
+    /*
+     * Find the job by what actually identifies it.
+     *
+     * This matched on the address text alone. The agreement's address field
+     * autocompletes, so "88 Pricing Rd" can come back as "88 Pricing Road,
+     * Arlington, TX 76010", miss the match, and create a second job for the
+     * same house: the setter's credit on one, the closer's on the other, and
+     * the deal counted twice in the pipeline.
+     *
+     * In order: the job it was written from; the job already pointing at
+     * this contract (which is how a remote signature finds its way back);
+     * and only then the address.
+     */
+    const all = await listJobs({ limit: 500 });
+    const existing =
+      (a.jobId ? await getJob(a.jobId) : null) ??
+      all.find((j) => j.contract_id === a.contractId) ??
+      all.find((j) => j.address.trim().toLowerCase() === addr.toLowerCase()) ??
+      null;
     const patch = {
       stage: a.stage as never,
       contract_id: a.contractId,

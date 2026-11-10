@@ -72,6 +72,7 @@ export async function POST(req: Request) {
       claimNumber: String(body.claim_number || ""),
       deductible: String(body.deductible || ""),
       value: String(body.total_price || ""),
+      jobId: String(body.job_id || "") || undefined,
     });
     const base = process.env.NEXT_PUBLIC_SITE_URL || "https://poweredgetx.com";
     const signUrl = `${base}/sign/${draft.token}`;
@@ -206,6 +207,7 @@ export async function POST(req: Request) {
     claimNumber: String(body.claim_number || ""),
     deductible: String(body.deductible || ""),
     value: String(body.total_price || ""),
+    jobId: String(body.job_id || "") || undefined,
   });
 
   return NextResponse.json({
