@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
-import { currentUser } from "@/lib/auth";
+import { currentUser, canSell } from "@/lib/auth";
+import { getAppointment } from "@/lib/scheduling";
+import { money } from "@/lib/money";
+import { JobActions, type Inspection } from "@/components/JobActions";
 import { getJob, jobTimeline, updateJob, STAGES, STAGE_LABEL } from "@/lib/jobs";
 
 /**
@@ -79,6 +82,25 @@ export default async function JobPage({
     );
   }
 
+  // The inspection this job is booked for, so the closer sees when and with
+  // whom without leaving the record.
+  const appt = job.appointment_id ? await getAppointment(job.appointment_id) : null;
+  const inspection: Inspection = appt
+    ? {
+        when: new Date(String(appt.slot_start)).toLocaleString("en-US", {
+          timeZone: "America/Chicago",
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        }),
+        closer: (appt.closer as string | null) ?? null,
+        status: String(appt.status || "booked"),
+      }
+    : null;
+  const sells = canSell(user.role);
+
   async function setStage(formData: FormData) {
     "use server";
     const next = String(formData.get("stage") || "");
@@ -131,18 +153,24 @@ export default async function JobPage({
                 Call {job.phone}
               </a>
             )}
-            <Link
-              href={`/admin/contract?job=${job.id}`}
-              className="rounded-md bg-[#0c7a40] px-4 py-2 text-sm font-bold text-white"
-            >
-              Write agreement
-            </Link>
-            <Link
-              href="/schedule"
-              className="rounded-md border border-gray-300 px-4 py-2 text-sm font-bold text-[#3b424e]"
-            >
-              Book inspection
-            </Link>
+            {/*
+              The agreement belongs to the closer, and it is the obvious next
+              step once the roof has been inspected, so it leads then and steps
+              back otherwise. "Book inspection" used to link to the public
+              homeowner form; booking now lives below, prefilled from this job.
+            */}
+            {sells ? (
+              <Link
+                href={`/admin/contract?job=${job.id}`}
+                className={`rounded-md px-4 py-2 text-sm font-bold ${
+                  job.stage === "inspected"
+                    ? "bg-[#0c7a40] text-white"
+                    : "border border-gray-300 text-[#3b424e]"
+                }`}
+              >
+                {job.stage === "inspected" ? "Price it and write the agreement" : "Write agreement"}
+              </Link>
+            ) : null}
           </div>
 
           <dl className="mt-5 grid grid-cols-2 gap-4 border-t border-gray-100 pt-4 sm:grid-cols-3">
@@ -157,12 +185,26 @@ export default async function JobPage({
             {field("Squares", job.squares)}
             {field("Carrier", job.carrier)}
             {field("Claim #", job.claim_number)}
-            {field("Deductible", job.deductible)}
-            {field("Contract value", job.contract_value)}
+            {field("Deductible", money(job.deductible))}
+            {field("Contract value", money(job.contract_value))}
             {field("Phone", job.phone)}
             {field("Email", job.email)}
           </dl>
         </div>
+
+        <JobActions
+          job={{
+            id: job.id,
+            stage: job.stage,
+            address: job.address,
+            owner_name: job.owner_name,
+            phone: job.phone,
+            email: job.email,
+            squares: job.squares,
+          }}
+          inspection={inspection}
+          canSell={sells}
+        />
 
         {/* Stage is the one control that matters, so it gets its own row. */}
         <form action={setStage} className="mt-4 rounded-lg border border-[#e3e6ea] bg-white p-4">

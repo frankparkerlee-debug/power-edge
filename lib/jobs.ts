@@ -98,6 +98,8 @@ export type Job = {
   last_storm_alert_at: string | null;
   appointment_id: string | null;
   contract_id: string | null;
+  /** Why a job ended without a sale, e.g. "Roof is fine, no claim". */
+  lost_reason: string | null;
 };
 
 export async function listJobs(opts: { rep?: string; stage?: string; limit?: number } = {}) {

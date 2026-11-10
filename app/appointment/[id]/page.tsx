@@ -43,6 +43,31 @@ export default async function AppointmentPage({
               and we&apos;ll sort it out.
             </p>
           </>
+        ) : appt.status === "completed" ? (
+          /*
+            Every status that was not "booked" used to land here as
+            "cancelled". A homeowner opening the link in their confirmation
+            after the inspection was done would have been told it was
+            cancelled and nothing was scheduled.
+          */
+          <>
+            <h1 className="font-display text-3xl text-fg-inv">Your inspection is done.</h1>
+            <p className="mt-3 text-fg-inv-dim">
+              We emailed you a written assessment of what we found. Questions about it?
+              Call or text{" "}
+              <a href={site.phoneHref} className="font-semibold text-bolt">{site.phone}</a>.
+            </p>
+          </>
+        ) : appt.status === "no_show" ? (
+          <>
+            <h1 className="font-display text-3xl text-fg-inv">We missed each other.</h1>
+            <p className="mt-3 text-fg-inv-dim">
+              Still want the roof looked at?{" "}
+              <a href="/schedule" className="font-semibold text-bolt">Pick a new time</a>, or call
+              or text{" "}
+              <a href={site.phoneHref} className="font-semibold text-bolt">{site.phone}</a>.
+            </p>
+          </>
         ) : appt.status !== "booked" ? (
           <>
             <h1 className="font-display text-3xl text-fg-inv">That inspection is cancelled.</h1>

@@ -46,10 +46,16 @@ function fullAddress(d: DoorForBooking) {
 
 export function BookAtDoor({
   door,
+  jobId,
+  prefill,
   onClose,
   onBooked,
 }: {
   door: DoorForBooking;
+  /** Booking from a job record rather than a door on the map. */
+  jobId?: string;
+  /** What the job already knows about the homeowner. */
+  prefill?: { name?: string; phone?: string; email?: string };
   onClose: () => void;
   onBooked: (r: { jobId: string | null; when: string; closer: string | null }) => void;
 }) {
@@ -58,9 +64,9 @@ export function BookAtDoor({
   const [day, setDay] = useState(0);
   const [slot, setSlot] = useState<Slot | null>(null);
 
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState(door.phone || "");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState(prefill?.name || "");
+  const [phone, setPhone] = useState(prefill?.phone || door.phone || "");
+  const [email, setEmail] = useState(prefill?.email || "");
   const [note, setNote] = useState("");
 
   const [busy, setBusy] = useState(false);
@@ -107,6 +113,7 @@ export function BookAtDoor({
           address: fullAddress(door),
           note: note.trim(),
           target_id: door.id,
+          job_id: jobId || "",
         }),
       });
       const d = await res.json();

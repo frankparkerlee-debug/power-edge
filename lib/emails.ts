@@ -950,6 +950,75 @@ export async function sendAgreementToSign(
   );
 }
 
+/**
+ * The written assessment, after every inspection.
+ *
+ * Every booking confirmation promises it: "You get a written assessment,
+ * including 'your roof is fine' if that's the answer." Nothing sent one, and
+ * nothing even recorded what an inspection found. That promise is the whole of
+ * the positioning, so it goes out for both outcomes, and the "fine" version is
+ * written to be read as good news rather than a lost sale.
+ */
+export async function sendInspectionAssessment(
+  resendKey: string,
+  a: {
+    name: string;
+    email: string;
+    address: string;
+    inspectedOn: string;
+    closer?: string | null;
+    verdict: "qualifies" | "fine";
+    findings?: string;
+    jobId?: string;
+  },
+) {
+  const first = (a.name || "there").split(" ")[0];
+  const by = a.closer ? `${a.closer} inspected` : "We inspected";
+  const findings = (a.findings || "").trim();
+
+  const body =
+    a.verdict === "fine"
+      ? h1(`Good news, ${first}.`) +
+        p(
+          `${by} your roof at <strong>${a.address}</strong> on ${a.inspectedOn}. ` +
+            `We did not find storm damage that would support an insurance claim.`,
+        ) +
+        (findings ? p(`<strong>What we saw:</strong> ${findings}`) : "") +
+        p(
+          `You do not need to do anything. We will not call to sell you a roof you do not need. ` +
+            `If a storm comes through and you want a second look, call or text ` +
+            `<strong>${site.phone}</strong> and it is free again.`,
+        )
+      : h1(`Here is what we found, ${first}.`) +
+        p(
+          `${by} your roof at <strong>${a.address}</strong> on ${a.inspectedOn} and found ` +
+            `damage consistent with the storm.`,
+        ) +
+        (findings ? p(`<strong>What we saw:</strong> ${findings}`) : "") +
+        p(
+          `The next step is your insurance claim. You file it with your carrier; we document ` +
+            `what we found and meet your adjuster. Texas law does not allow a contractor to file ` +
+            `or negotiate the claim for you, and we would not want to.`,
+        ) +
+        p(`Questions about any of it, call or text <strong>${site.phone}</strong>.`);
+
+  return sendEmail(
+    resendKey,
+    a.email,
+    a.verdict === "fine"
+      ? `Your roof inspection: no storm damage found`
+      : `Your roof inspection: what we found`,
+    shell({
+      preheader:
+        a.verdict === "fine"
+          ? "Your roof is fine. Nothing for you to do."
+          : "Damage found. Here is what happens next.",
+      body: body + verifyChip(),
+    }),
+    "inspection-assessment",
+  );
+}
+
 /** Sign-in link for the team. Short-lived and single use. */
 export async function sendLoginLink(resendKey: string, to: string, url: string) {
   return sendEmail(

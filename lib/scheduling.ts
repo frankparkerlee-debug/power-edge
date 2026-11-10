@@ -388,7 +388,7 @@ export async function getAppointment(id: string) {
   if (!dbOn() || !/^[0-9a-f-]{36}$/i.test(id)) return null;
   try {
     const res = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/appointments?select=id,slot_start,slot_end,name,address,status&id=eq.${id}`,
+      `${process.env.SUPABASE_URL}/rest/v1/appointments?select=id,slot_start,slot_end,name,address,status,closer,setter,job_id&id=eq.${id}`,
       { headers: authHeaders(), cache: "no-store" },
     );
     if (!res.ok) return null;
