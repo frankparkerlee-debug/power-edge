@@ -73,6 +73,8 @@ export function ContractForm({
    * sum meant doing that multiplication in your head in a driveway.
    */
   const [pricePerSquare, setPricePerSquare] = useState("");
+  /** What the roof work actually is, written onto the agreement as a line. */
+  const [roofWork, setRoofWork] = useState("Tear off and replace roof");
   const [lines, setLines] = useState<Line[]>([{ description: "", price: "" }]);
   /**
    * The rep typed line prices AND a separate total, with nothing connecting
@@ -145,7 +147,28 @@ export function ContractForm({
     claim_number: claimNo,
     deductible,
     squares: squares ? Number(squares) : undefined,
-    scope: lines.filter((l) => l.description.trim()),
+    /*
+     * The roof goes on the agreement as a line of work.
+     *
+     * Squares times the rate only ever reached the total. The scope carried
+     * the "anything else" lines and nothing for the roof itself, so a closer
+     * who priced the roof and added nothing else sent an agreement describing
+     * no work at all. The server refused it with "describe the work", shown
+     * below the signature pad where nobody tapping Send would see it. Had it
+     * gone through, the homeowner would have signed for a number with no job
+     * written next to it.
+     */
+    scope: [
+      ...(roofAmount > 0
+        ? [
+            {
+              description: `${roofWork.trim() || "Roof replacement"}, ${sq} squares at ${money(rate)} per square`,
+              price: String(roofAmount),
+            },
+          ]
+        : []),
+      ...lines.filter((l) => l.description.trim()),
+    ],
     total_price: total,
     job_id: jobId || undefined,
   });
@@ -494,6 +517,21 @@ export function ContractForm({
           {/* The roof, priced the way a roof is priced. */}
           <div className="rounded-md border border-[#e3e6ea] bg-white p-3">
             <span className={label}>The roof</span>
+            {/*
+              What the work is, because this becomes the agreement's first line.
+              It used to be priced but never described, so a roof-only job went
+              out as a total with no work written next to it.
+            */}
+            <label className="mb-1 block text-xs text-gray-500" htmlFor="c-roofwork">
+              The work
+            </label>
+            <input
+              id="c-roofwork"
+              value={roofWork}
+              onChange={(e) => setRoofWork(e.target.value)}
+              placeholder="Tear off and replace roof"
+              className={`${input} mb-3`}
+            />
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1 block text-xs text-gray-500" htmlFor="c-sq">
@@ -524,10 +562,8 @@ export function ContractForm({
             </div>
             {roofAmount > 0 && (
               <p className="mt-2 text-sm text-gray-700">
-                {sq} squares x ${rate.toLocaleString()} ={" "}
-                <strong className="text-[#0b0e13]">
-                  ${roofAmount.toLocaleString()}
-                </strong>
+                {sq} squares x {money(rate)} ={" "}
+                <strong className="text-[#0b0e13]">{money(roofAmount)}</strong>
               </p>
             )}
           </div>
@@ -588,9 +624,21 @@ export function ContractForm({
           </div>
 
           <div className="rounded-md border-2 border-[#0c7a40] bg-[#f0fbf4] p-3">
-            <label className={label} htmlFor="c-total">
-              Total contract price
-            </label>
+            {/*
+              The box is a plain number so it can be typed over; the figure
+              beside the label is how it reads on the agreement. On its own the
+              box showed "13440", which is what a homeowner objected to seeing.
+            */}
+            <div className="flex items-baseline justify-between gap-2">
+              <label className={label} htmlFor="c-total">
+                Total contract price
+              </label>
+              {collected > 0 ? (
+                <span className="font-display text-lg font-extrabold text-[#0b0e13]">
+                  {money(collected)}
+                </span>
+              ) : null}
+            </div>
             <input
               id="c-total"
               inputMode="decimal"
@@ -662,9 +710,21 @@ export function ContractForm({
             <div className="text-gray-600">{address}</div>
             <div className="mt-1 text-gray-600">
               {claimBased ? "Insurance claim" : "Cash"}
-              {total ? ` · ${total}` : ""}
+              {total ? ` · ${money(total)}` : ""}
+              {claimBased && num(deductible) > 0 ? ` · they pay ${money(deductible)}` : ""}
             </div>
           </div>
+
+          {/*
+            Errors show here, next to the button that caused them. They used to
+            render below the signature pad, so a closer who tapped Send and got
+            refused saw nothing happen at all.
+          */}
+          {error && (
+            <p className="rounded-md border border-red-300 bg-red-50 p-3 text-sm font-semibold text-red-700">
+              {error}
+            </p>
+          )}
 
           <button onClick={sendLink} disabled={busy} className={primary}>
             {busy ? "Working…" : "Send them a link to sign"}
