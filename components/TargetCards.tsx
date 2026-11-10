@@ -97,6 +97,7 @@ function gmapsHref(t: TargetCard) {
 type HouseData = {
   loading: boolean;
   roof: { roofSqft: number; squares: number; pitchDeg: number | null } | null;
+  roofError?: { reason: string; detail?: string } | null;
   storms: Array<{ date: string; type: string; magnitude: number | null; city: string; mi: number }>;
 };
 
@@ -192,7 +193,11 @@ function HouseSheet({
             </div>
           ) : (
             <p className="text-sm text-gray-500">
-              Satellite measurement unavailable for this roof, measure on-site.
+              {data.roofError?.reason === "no_building"
+                ? "No building found at this point. Measure on-site."
+                : data.roofError
+                  ? "Satellite measuring is switched off right now, so measure on-site and tell the office."
+                  : "Satellite measurement unavailable for this roof, measure on-site."}
             </p>
           )}
           <p className="mt-1.5 text-xs text-gray-400">
@@ -265,7 +270,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
   const [view, setView] = useState<"list" | "map">("list");
   const [focusId, setFocusId] = useState<string | null>(null);
   const [house, setHouse] = useState<TargetCard | null>(null);
-  const [houseData, setHouseData] = useState<HouseData>({ loading: false, roof: null, storms: [] });
+  const [houseData, setHouseData] = useState<HouseData>({ loading: false, roof: null, roofError: null, storms: [] });
   const [converted, setConverted] = useState<Record<string, "working" | "done" | "error">>({});
   // Local echo of dispositions so a rep sees the door change the instant they
   // tap it, without a refetch in a driveway on bad signal.
@@ -522,12 +527,12 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
 
   const openHouse = (t: TargetCard) => {
     setHouse(t);
-    setHouseData({ loading: true, roof: null, storms: [] });
+    setHouseData({ loading: true, roof: null, roofError: null, storms: [] });
     const key = new URLSearchParams(window.location.search).get("key") || "";
     fetch(`/api/admin/house?key=${encodeURIComponent(key)}&lat=${t.lat}&lon=${t.lon}`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d) => setHouseData({ loading: false, roof: d.roof ?? null, storms: d.storms ?? [] }))
-      .catch(() => setHouseData({ loading: false, roof: null, storms: [] }));
+      .then((d) => setHouseData({ loading: false, roof: d.roof ?? null, roofError: d.roofError ?? null, storms: d.storms ?? [] }))
+      .catch(() => setHouseData({ loading: false, roof: null, roofError: { reason: "unreachable" }, storms: [] }));
   };
 
   // Map popups are plain HTML, delegate their "roof & storms" links here.

@@ -77,7 +77,9 @@ export type Job = {
   deductible: string | null;
   contract_value: string | null;
   notes: string | null;
-  storm_target_id: number | null;
+  /** uuid, matching storm_targets.id. Was typed number before that column
+   *  was corrected from bigint. */
+  storm_target_id: string | null;
   appointment_id: string | null;
   contract_id: string | null;
 };

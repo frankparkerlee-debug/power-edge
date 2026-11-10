@@ -171,6 +171,37 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, contactId, dealId });
   } catch (err) {
     console.error("[promote] failed", err);
-    return NextResponse.json({ error: "Promotion failed" }, { status: 500 });
+    // A converted door is a job. Without this the knock map and the pipeline
+  // stayed separate systems: a rep could convert a lead and the office would
+  // never see it anywhere except HubSpot.
+  try {
+    const { listJobs, createJob, logEvent } = await import("@/lib/jobs");
+    const addr = String(target?.address || "").trim();
+    if (addr) {
+      const existing = (await listJobs({ limit: 500 })).find(
+        (j) => j.address.trim().toLowerCase() === addr.toLowerCase(),
+      );
+      if (!existing) {
+        const job = await createJob(
+          {
+            address: addr,
+            owner_name: target?.owner_name ? String(target.owner_name) : null,
+            phone: target?.phone ? String(target.phone) : null,
+            city: target?.city ? String(target.city) : null,
+            zip: target?.zip ? String(target.zip) : null,
+            stage: "contacted",
+            storm_target_id: target?.id ? String(target.id) : null,
+            rep: u.name || null,
+          },
+          u.name,
+        );
+        if (job) await logEvent(job.id, "knock", "Converted from the knock map", u.name);
+      }
+    }
+  } catch {
+    /* never cost the conversion */
+  }
+
+  return NextResponse.json({ error: "Promotion failed" }, { status: 500 });
   }
 }
