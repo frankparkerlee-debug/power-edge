@@ -261,9 +261,25 @@ export async function cancelAppointment(
       },
     );
     if (!res.ok) return { ok: false, error: "Could not cancel." };
-    const rows = (await res.json()) as unknown[];
+    const rows = (await res.json()) as Array<{ id?: string }>;
     if (!Array.isArray(rows) || rows.length === 0) {
       return { ok: false, error: "That booking is already cancelled." };
+    }
+    // Put the job back, or the office keeps chasing an inspection that is no
+    // longer happening.
+    try {
+      const { listJobs, updateJob, logEvent } = await import("@/lib/jobs");
+      const job = (await listJobs({ limit: 500 })).find((j) => j.appointment_id === id);
+      if (job && job.stage === "inspection_booked") {
+        await updateJob(job.id, { stage: "contacted", appointment_id: null });
+        await logEvent(
+          job.id,
+          "note",
+          by === "homeowner" ? "Homeowner cancelled the inspection" : "Office cancelled the inspection",
+        );
+      }
+    } catch {
+      /* the cancellation itself already succeeded */
     }
     return { ok: true };
   } catch {

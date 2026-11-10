@@ -22,18 +22,42 @@ function haversineMi(lat1: number, lon1: number, lat2: number, lon2: number) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-async function measureRoof(lat: number, lon: number) {
+/**
+ * Why a measurement is missing, so the rep tool can say "no building found
+ * here" instead of silently showing nothing, and so a broken key is
+ * diagnosable without guessing. Every failure used to collapse to null.
+ */
+export type RoofFail = { reason: string; detail?: string };
+
+async function measureRoof(
+  lat: number,
+  lon: number,
+): Promise<{ roofSqft: number; squares: number; pitchDeg: number | null } | RoofFail> {
   const key = process.env.GOOGLE_SOLAR_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
-  if (!key) return null;
+  if (!key) return { reason: "no_key", detail: "GOOGLE_SOLAR_API_KEY is not set" };
   try {
     const res = await fetch(
       `https://solar.googleapis.com/v1/buildingInsights:findClosest?location.latitude=${lat}&location.longitude=${lon}&requiredQuality=LOW&key=${key}`,
       { signal: AbortSignal.timeout(9000), next: { revalidate: 2592000 } },
     );
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      const msg = (() => {
+        try { return JSON.parse(body)?.error?.message as string; } catch { return undefined; }
+      })();
+      console.error(`[house] solar ${res.status}: ${msg || body.slice(0, 200)}`);
+      return {
+        reason:
+          res.status === 403 ? "key_rejected"
+          : res.status === 404 ? "no_building"
+          : res.status === 429 ? "quota"
+          : `http_${res.status}`,
+        detail: msg,
+      };
+    }
     const data = await res.json();
     const m2 = data?.solarPotential?.wholeRoofStats?.areaMeters2;
-    if (!m2 || m2 < 30) return null;
+    if (!m2 || m2 < 30) return { reason: "no_building" };
     const roofSqft = Math.round(m2 * 10.7639);
     // Same math the public estimator shows: area ÷ 100 = squares, +10% waste.
     const squares = Math.round((roofSqft / 100) * 1.1 * 10) / 10;
@@ -53,8 +77,9 @@ async function measureRoof(lat: number, lon: number) {
       squares,
       pitchDeg: asum ? Math.round(wsum / asum) : null,
     };
-  } catch {
-    return null;
+  } catch (err) {
+    console.error("[house] solar call failed", err);
+    return { reason: "unreachable", detail: String(err).slice(0, 200) };
   }
 }
 
@@ -102,6 +127,10 @@ export async function GET(req: Request) {
   if (!(lat > 25 && lat < 37 && lon > -107 && lon < -93)) {
     return NextResponse.json({ error: "Bad coordinates" }, { status: 400 });
   }
-  const [roof, storms] = await Promise.all([measureRoof(lat, lon), stormsNear(lat, lon)]);
-  return NextResponse.json({ ok: true, roof, storms });
+  const [measured, storms] = await Promise.all([measureRoof(lat, lon), stormsNear(lat, lon)]);
+  // Split the measurement from the reason it is missing, so the tool can say
+  // "no building found here" rather than showing an empty panel.
+  const roof = measured && "squares" in measured ? measured : null;
+  const roofError = measured && "reason" in measured ? measured : null;
+  return NextResponse.json({ ok: true, roof, roofError, storms });
 }

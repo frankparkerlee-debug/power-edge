@@ -53,7 +53,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "DB not configured" }, { status: 503 });
   }
 
-  const rep = String(body.rep || "").replace(/[^\w .'-]/g, "").slice(0, 40) || null;
+  // Attribution comes from the session. The client used to send ?rep= from
+  // the URL, which nothing set once sign-in existed, so every knock was
+  // recorded with no rep against it.
+  const rep =
+    u.name?.trim() ||
+    String(body.rep || "").replace(/[^\w .'-]/g, "").slice(0, 40) ||
+    null;
   const note = String(body.note || "").slice(0, 500) || null;
 
   try {
