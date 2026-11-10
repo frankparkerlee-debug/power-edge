@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { site } from "@/lib/site";
 import { sendMail } from "@/lib/sendMail";
 import { enqueueLeadSequence } from "@/lib/emails";
+import { scoreLead } from "@/lib/spam";
 import { insertLead } from "@/lib/db";
 
 
@@ -87,6 +88,21 @@ export async function POST(req: Request) {
       : `${origin} · ${marketing}`
     : marketing;
 
+  /*
+   * Score it before deciding what happens to it.
+   *
+   * Almost nothing arriving at this form is a homeowner: of the last thirty
+   * leads, two were. The rest were virtual assistant agencies, estimating
+   * services, business brokers, lenders and one procurement fraud, and since
+   * leads started becoming jobs they were landing in the CRM as work.
+   *
+   * A flagged lead is still written down, in full, with the reasons. The only
+   * things it does not get are the notification email and a job. That matters
+   * because the previous guard here silently dropped real people, so the
+   * homeowner saw a thank you and we never knew they existed.
+   */
+  const verdict = scoreLead(lead);
+
   // --- 0. Durable capture (Supabase), first, so no lead is lost to an email
   // hiccup. No-ops until SUPABASE_* env is set. Best-effort (never throws).
   await insertLead({
@@ -105,6 +121,8 @@ export async function POST(req: Request) {
     utm_medium: lead.utm_medium,
     utm_campaign: lead.utm_campaign,
     gclid: lead.gclid,
+    spam_score: verdict.score,
+    spam_reasons: verdict.reasons.join("; ") || null,
   });
 
   // --- 0b. The CRM. Jobs is the system of record as of 2026-11-10. This used
@@ -118,6 +136,7 @@ export async function POST(req: Request) {
       const addr = (lead.address || "").trim();
       const isRep = /sales rep application/i.test(lead.service || "");
       if (isRep) return; // applicants are not jobs
+      if (verdict.spam) return; // solicitation is not a roof
       const existing = addr
         ? (await listJobs({ limit: 500 })).find(
             (j) => j.address.trim().toLowerCase() === addr.toLowerCase(),
@@ -148,7 +167,13 @@ export async function POST(req: Request) {
   // site.email is the single source of truth. LEAD_TO_EMAIL used to
   // override it and silently sent months of leads to a suppressed inbox.
   const to = site.email;
-  if (resendKey) {
+  /*
+   * A flagged lead is written down but it does not ring the phone. The point
+   * of the notification is that someone acts on it, and training the office
+   * to ignore these is how a real one gets missed. They are on /admin/leads
+   * under the spam filter if anyone wants to look.
+   */
+  if (resendKey && !verdict.spam) {
     await sendMail({
       resendKey,
       kind: "lead",

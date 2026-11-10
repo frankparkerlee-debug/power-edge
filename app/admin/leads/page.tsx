@@ -25,9 +25,9 @@ function fmt(iso: string) {
 export default async function AdminLeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ key?: string }>;
+  searchParams: Promise<{ key?: string; show?: string }>;
 }) {
-  const { key } = await searchParams;
+  const { key, show } = await searchParams;
   const user = await currentUser(key);
   const authed = user?.role === "admin";
 
@@ -51,7 +51,19 @@ export default async function AdminLeadsPage({
     );
   }
 
-  const leads = await listLeads();
+  const all = await listLeads();
+  /*
+   * Flagged leads are kept, not deleted, and they are reachable here.
+   *
+   * Of everything this form has ever received, roughly two in three was
+   * solicitation. Those no longer email anyone or open a job, but hiding them
+   * outright would repeat the mistake the old guard made, where a real person
+   * was dropped and nobody could go and find them.
+   */
+  const spamOf = (l: { spam_score?: number }) => (l.spam_score ?? 0) >= 5;
+  const spamCount = all.filter(spamOf).length;
+  const showingSpam = show === "spam";
+  const leads = all.filter((l) => (showingSpam ? spamOf(l) : !spamOf(l)));
 
   return (
     <div className={wrap}>
@@ -63,6 +75,24 @@ export default async function AdminLeadsPage({
               ({leads.length})
             </span>
           </h1>
+          <div className="flex gap-2 text-sm">
+            <a
+              href="/admin/leads"
+              className={`rounded-md px-3 py-1.5 font-semibold ${
+                showingSpam ? "text-gray-600 underline" : "bg-[#0b0e13] text-white"
+              }`}
+            >
+              Real ({all.length - spamCount})
+            </a>
+            <a
+              href="/admin/leads?show=spam"
+              className={`rounded-md px-3 py-1.5 font-semibold ${
+                showingSpam ? "bg-[#0b0e13] text-white" : "text-gray-600 underline"
+              }`}
+            >
+              Filtered ({spamCount})
+            </a>
+          </div>
           {!dbEnabled() && (
             <span className="text-sm text-red-600">
               Supabase not configured, set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY.
@@ -71,7 +101,9 @@ export default async function AdminLeadsPage({
         </div>
 
         {leads.length === 0 ? (
-          <p className="mt-6 text-gray-600">No leads yet.</p>
+          <p className="mt-6 text-gray-600">
+            {showingSpam ? "Nothing filtered." : "No leads yet."}
+          </p>
         ) : (
           <div className="mt-6 overflow-x-auto">
             <table className="w-full border-collapse text-sm">

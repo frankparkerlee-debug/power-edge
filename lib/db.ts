@@ -36,6 +36,9 @@ export type LeadInsert = {
   utm_medium?: string;
   utm_campaign?: string;
   gclid?: string;
+  /** How much this looks like solicitation rather than a homeowner. */
+  spam_score?: number;
+  spam_reasons?: string | null;
 };
 
 export type LeadRow = LeadInsert & { id: string; created_at: string };
