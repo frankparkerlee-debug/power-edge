@@ -87,6 +87,9 @@ export async function POST(
       scope: scopeLines,
       total: str("total_price"),
       claimBased,
+      carrier: str("carrier"),
+      claimNumber: str("claim_number"),
+      deductible: str("deductible"),
       signedOn: fmtDate(new Date()),
       cancelBy: fmtDate(signed.deadline),
     });

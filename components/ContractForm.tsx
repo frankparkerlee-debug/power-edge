@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { AddressAutocomplete } from "./AddressAutocomplete";
+import { money, claimSplit } from "@/lib/money";
 
 /**
  * Writing an agreement, in three short steps.
@@ -566,6 +567,23 @@ export function ContractForm({
               }}
               className={`${input} bg-white text-lg font-bold`}
             />
+            {/*
+              Show the rep the figures the homeowner is about to see, so a
+              wrong deductible gets caught at the kitchen table rather than in
+              the signed copy.
+            */}
+            {claimBased && collected > 0 && money(deductible) ? (
+              <div className="mt-3 space-y-1 border-t border-[#d7dbe0] pt-3 text-sm">
+                <div className="flex justify-between text-gray-600">
+                  <span>Insurance pays</span>
+                  <span>{claimSplit(total, deductible).carrierText}</span>
+                </div>
+                <div className="flex justify-between font-bold text-[#0b0e13]">
+                  <span>They pay (deductible)</span>
+                  <span>{claimSplit(total, deductible).deductibleText}</span>
+                </div>
+              </div>
+            ) : null}
             {!totalEdited && computed > 0 && (
               <p className="mt-1.5 text-xs text-gray-600">
                 Adds up from the lines above. Type over it if the carrier settled

@@ -498,10 +498,9 @@ export default async function AdminStormsPage({
         )}
 
         <p className="mt-10 border-t border-gray-200 pt-4 text-xs text-gray-500">
-          Phase 1b adds: parcel intersect (owner names from county CAD rolls),
-          batch skip trace, DNC scrub, and per-storm scored target lists pushed
-          to HubSpot. Cold outreach = knock + manual dial only, no cold texts,
-          no AI cold calls (TCPA).
+          Owner names come from county CAD rolls, numbers are DNC scrubbed, and
+          scored targets land in the jobs pipeline. Cold outreach is knock and
+          manual dial only: no cold texts, no AI cold calls (TCPA).
         </p>
       </div>
     </div>

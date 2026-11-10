@@ -8,6 +8,7 @@
 // All templates are table-based, inline-styled HTML for email-client safety.
 
 import { site } from "./site";
+import { money, claimSplit } from "./money";
 import { sendMail } from "@/lib/sendMail";
 
 // ---- Brand tokens (email-safe) -------------------------------------------
@@ -708,6 +709,9 @@ export async function sendSignedAgreement(
     scope: Array<{ description: string; price: string }>;
     total?: string;
     claimBased: boolean;
+    carrier?: string;
+    claimNumber?: string;
+    deductible?: string;
     signedOn: string;
     cancelBy: string;
   },
@@ -717,9 +721,15 @@ export async function sendSignedAgreement(
     .map(
       (s) =>
         `<tr><td style="padding:6px 10px 6px 0;border-bottom:1px solid ${LINE};font:13px ${FONT};">${s.description}</td>` +
-        `<td style="padding:6px 0;border-bottom:1px solid ${LINE};font:600 13px ${FONT};text-align:right;">${s.price || ""}</td></tr>`,
+        `<td style="padding:6px 0;border-bottom:1px solid ${LINE};font:600 13px ${FONT};text-align:right;white-space:nowrap;">${money(s.price)}</td></tr>`,
     )
     .join("");
+  const split = claimSplit(c.total, c.deductible);
+  const fig = (label: string, value: string, strong = false) =>
+    `<tr>
+       <td style="padding:7px 10px 7px 0;font:${strong ? "700" : "400"} 14px ${FONT};color:${TEXT};">${label}</td>
+       <td style="padding:7px 0;font:${strong ? "700" : "400"} 14px ${FONT};color:${TEXT};text-align:right;white-space:nowrap;">${value}</td>
+     </tr>`;
 
   return sendEmail(
     resendKey,
@@ -733,7 +743,15 @@ export async function sendSignedAgreement(
           `Here is your signed agreement for <strong>${c.address}</strong>, dated ${c.signedOn}.`,
         ) +
         `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 16px;">${rows}</table>` +
-        (c.total ? p(`<strong>Total: ${c.total}</strong>`) : "") +
+        `<div style="border:1px solid ${LINE};border-radius:8px;padding:12px 14px;margin:14px 0;">
+           <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;">
+             ${c.carrier ? fig("Insurance carrier", c.carrier) : ""}
+             ${c.claimNumber ? fig("Claim number", c.claimNumber) : ""}
+             ${split.total > 0 ? fig(c.claimBased ? "Approved scope total" : "Total price", split.totalText, !c.claimBased) : ""}
+             ${c.claimBased && split.show ? fig("Your insurance pays", split.carrierText) : ""}
+             ${c.claimBased && split.deductible > 0 ? fig("You pay (your deductible)", split.deductibleText, true) : ""}
+           </table>
+         </div>` +
         (c.claimBased
           ? p(
               `This work is being done through your insurance claim. The carrier sets the scope and the price; you pay your deductible. We never waive it, because that is a crime in Texas.`,
@@ -790,15 +808,59 @@ export async function sendAgreementToSign(
     rep?: string;
     total?: string;
     claimBased: boolean;
+    carrier?: string;
+    claimNumber?: string;
+    deductible?: string;
+    scope?: Array<{ description: string; price: string }>;
   },
 ) {
   const first = (c.ownerNames || "there").split(" ")[0];
+  const split = claimSplit(c.total, c.deductible);
+
+  const row = (label: string, value: string, strong = false) =>
+    `<tr>
+       <td style="padding:7px 10px 7px 0;font:${strong ? "700" : "400"} 14px ${FONT};color:${TEXT};">${label}</td>
+       <td style="padding:7px 0;font:${strong ? "700" : "400"} 14px ${FONT};color:${TEXT};text-align:right;white-space:nowrap;">${value}</td>
+     </tr>`;
+
+  /*
+   * What it costs, and specifically what THEY pay.
+   *
+   * The first version of this email carried a bare total with no currency
+   * formatting, no carrier, no claim number and no deductible, so a homeowner
+   * opening it saw "20000" and had no way to tell what their own share was.
+   * On an insurance job the contract total is mostly not their money, and the
+   * deductible is, which is the number they are actually deciding about.
+   */
+  const figures = c.claimBased
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:4px 0 2px;">
+         ${c.carrier ? row("Insurance carrier", c.carrier) : ""}
+         ${c.claimNumber ? row("Claim number", c.claimNumber) : ""}
+         ${split.total > 0 ? row("Approved scope total", split.totalText) : ""}
+         ${split.show ? row("Your insurance pays", split.carrierText) : ""}
+         ${split.deductible > 0 ? row("You pay (your deductible)", split.deductibleText, true) : ""}
+       </table>`
+    : `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:4px 0 2px;">
+         ${split.total > 0 ? row("Total price", split.totalText, true) : ""}
+       </table>`;
+
+  const scopeRows = (c.scope ?? [])
+    .filter((l) => (l.description || "").trim())
+    .map(
+      (l) =>
+        `<tr><td style="padding:6px 10px 6px 0;border-bottom:1px solid ${LINE};font:13px ${FONT};color:${TEXT};">${l.description}</td>` +
+        `<td style="padding:6px 0;border-bottom:1px solid ${LINE};font:600 13px ${FONT};color:${TEXT};text-align:right;white-space:nowrap;">${money(l.price)}</td></tr>`,
+    )
+    .join("");
+
   return sendEmail(
     resendKey,
     c.email,
     `Your PowerEdge agreement for ${c.address}`,
     shell({
-      preheader: "Read it, then sign on your phone. Takes a minute.",
+      preheader: split.show
+        ? `Your part is ${split.deductibleText}. Read it and sign on your phone.`
+        : "Read it, then sign on your phone. Takes a minute.",
       body:
         h1(`Ready when you are, ${first}.`) +
         p(
@@ -806,11 +868,15 @@ export async function sendAgreementToSign(
             `<strong>${c.address}</strong>. Read it and sign on your phone, no printing ` +
             `and no app.`,
         ) +
-        (c.total && !c.claimBased ? p(`<strong>Total: ${c.total}</strong>`) : "") +
+        (scopeRows
+          ? `<p style="margin:16px 0 4px;font:700 12px ${FONT};letter-spacing:.06em;text-transform:uppercase;color:#6b7280;">The work</p>` +
+            `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 10px;">${scopeRows}</table>`
+          : "") +
+        `<div style="border:1px solid ${LINE};border-radius:8px;padding:12px 14px;margin:14px 0;">${figures}</div>` +
         (c.claimBased
           ? p(
-              `This one goes through your insurance claim, so your carrier sets the scope ` +
-                `and the price and you pay your deductible.`,
+              `Your carrier sets the scope and the price. You pay your deductible, ` +
+                `and we never discount it or absorb it, because doing that is a crime in Texas.`,
             )
           : "") +
         button("Read and sign", c.url) +

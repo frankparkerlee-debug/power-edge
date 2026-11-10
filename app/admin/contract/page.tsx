@@ -3,6 +3,7 @@ import { ContractForm } from "@/components/ContractForm";
 import { listContracts } from "@/lib/contracts";
 import { currentUser, canSell } from "@/lib/auth";
 import { getJob } from "@/lib/jobs";
+import { money } from "@/lib/money";
 
 // Field agreement. NOT indexed. requires a signed-in team member.
 export const metadata: Metadata = {
@@ -158,7 +159,7 @@ export default async function ContractPage({
                       <td className="py-2.5 pr-4 text-gray-600">
                         {String(c.property_address)}
                       </td>
-                      <td className="py-2.5 pr-4">{String(c.total_price ?? "")}</td>
+                      <td className="py-2.5 pr-4 whitespace-nowrap">{money(c.total_price)}</td>
                       <td className="py-2.5 whitespace-nowrap">
                         {/*
                           This column used to print the cancellation deadline

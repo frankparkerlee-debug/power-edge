@@ -104,6 +104,10 @@ export async function POST(req: Request) {
         rep: String(body.rep || u.name || ""),
         total: String(body.total_price || ""),
         claimBased: body.claim_based !== false,
+        carrier: String(body.carrier || ""),
+        claimNumber: String(body.claim_number || ""),
+        deductible: String(body.deductible || ""),
+        scope,
       });
       emailed = !!r?.ok;
       if (emailed) {
@@ -170,6 +174,9 @@ export async function POST(req: Request) {
       scope,
       total: String(body.total_price || ""),
       claimBased: body.claim_based !== false,
+      carrier: String(body.carrier || ""),
+      claimNumber: String(body.claim_number || ""),
+      deductible: String(body.deductible || ""),
       signedOn: fmtDate(new Date()),
       cancelBy: fmtDate(saved.deadline),
     });

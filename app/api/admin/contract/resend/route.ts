@@ -59,6 +59,12 @@ export async function POST(req: Request) {
     rep: String(c.rep || u.name || ""),
     total: String(c.total_price || ""),
     claimBased: c.claim_based !== false,
+    carrier: String(c.carrier || ""),
+    claimNumber: String(c.claim_number || ""),
+    deductible: String(c.deductible || ""),
+    scope: Array.isArray(c.scope)
+      ? (c.scope as Array<{ description: string; price: string }>)
+      : [],
   });
 
   if (!r?.ok) {
