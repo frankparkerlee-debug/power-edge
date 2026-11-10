@@ -41,3 +41,9 @@ policy on the target table; drop it right after.
 
 `cell_signals` windows ("last 12 months") are relative to `computed_on`, so
 rerun it at least monthly, and after any new hail.
+
+## Dallas re-roof permits
+
+`dallas_permits.py` documents the steps (Dallas open data, then the Census
+batch geocoder, then a CSV for `reroof_permits`). Load it with `load_rows.py`.
+Rerun when you want newer permits; roofer names stop after Sept 2025.

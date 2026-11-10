@@ -7,9 +7,9 @@ H = {"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "applicati
      "Prefer": "resolution=merge-duplicates,return=minimal"}
 def conv(k, v):
     if v == "": return None
-    if k in ("r", "c", "big_hail_days"): return int(v)
-    if k in ("hail12_in", "hail24_in", "mesh_in", "wind_mph", "wind_dist_mi"): return float(v)
-    if k == "wind_roof": return v == "true"
+    if k in ("r", "c", "big_hail_days", "contractor_permits"): return int(v)
+    if k in ("hail12_in", "hail24_in", "mesh_in", "wind_mph", "wind_dist_mi", "lat", "lon"): return float(v)
+    if k in ("wind_roof", "contractor_burst"): return v == "true"
     return v
 rows = csv.DictReader(open(path)); batch = []; sent = 0
 def flush():

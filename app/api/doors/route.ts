@@ -20,7 +20,8 @@ const inBox = (lat: number, lon: number) =>
   lat >= BOX.south && lat <= BOX.north && lon >= BOX.west && lon <= BOX.east;
 
 export type Door = {
-  src: "target" | "parcel";
+  /** target: already on the knock list. parcel: county record. permit: Dallas re-roof permit only. */
+  src: "target" | "parcel" | "permit";
   target_id: string | null;
   county: string;
   address: string;
@@ -29,7 +30,8 @@ export type Door = {
   zip: string | null;
   owner_name: string | null;
   mailing: string | null;
-  absentee: boolean;
+  /** null when we only know the house from a permit. */
+  absentee: boolean | null;
   lat: number;
   lon: number;
   dist_mi: number;
@@ -43,7 +45,12 @@ export type Door = {
   wind_roof: boolean | null;
   wind_dist_mi: number | null;
   roof_year: number | null;
-  roof_basis: "built" | "hail" | null;
+  roof_basis: "built" | "hail" | "permit" | null;
+  permit_date: string | null;
+  roofer: string | null;
+  roofer_last: string | null;
+  /** Someone else roofed it recently (permit since 2021 or golf-ball hail since 2023). */
+  recent_roof: boolean | null;
   last_outcome: string | null;
   last_knock_at: string | null;
   score: number;

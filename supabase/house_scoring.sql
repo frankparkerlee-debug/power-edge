@@ -51,15 +51,47 @@ create or replace function public.cell_r(lat double precision) returns int
 create or replace function public.cell_c(lon double precision) returns int
   language sql immutable as $$ select (floor(lon * 100) + 9815)::int $$;
 
+-- Re-roof permits, so a card can say who did the roof and when. City of Dallas
+-- only for now (Fort Worth skips permits for shingle-only jobs; most suburbs
+-- publish none). Dallas stopped filling in the contractor name after
+-- 2025-09-17, so contractor_last can never be later than that.
+create or replace function public.norm_street(a text) returns text
+  language sql immutable as
+  $$ select upper(regexp_replace(trim(split_part(coalesce(a, ''), ',', 1)), '\s+', ' ', 'g')) $$;
+
+create table if not exists public.reroof_permits (
+  permit_number text primary key,
+  city text not null,
+  issued_date date not null,
+  street text not null,          -- norm_street() of the permit address
+  zip text,
+  lat double precision not null,
+  lon double precision not null,
+  contractor text,
+  contractor_permits int,        -- that roofer's Dallas residential re-roof permits since 2020
+  contractor_first date,
+  contractor_last date,
+  contractor_burst boolean,      -- 5+ permits with 80%+ inside one 90-day window
+  work text
+);
+comment on table public.reroof_permits is
+  'Residential re-roof permits (City of Dallas open data e7gq-4sah), geocoded with the Census batch geocoder. Contractor names stop after 2025-09-17.';
+create index if not exists reroof_permits_latlon_idx on public.reroof_permits (lat, lon);
+create index if not exists reroof_permits_street_idx on public.reroof_permits (street);
+alter table public.reroof_permits enable row level security;
+
 -- Best doors around a point. Scores every house we can place on the map:
--- storm targets (all 11 counties) plus residential parcels (the 9 counties in
--- the parcels table). A parcel already on the target list appears once, as the
--- target, so knocks and come-backs stay attached to it.
+-- storm targets (all 11 counties), residential parcels (the 9 counties in the
+-- parcels table) and Dallas re-roof permit addresses. A house already on the
+-- target list appears once, as the target, so knocks stay attached to it.
 --
 -- Roof age is an estimate. Radar history starts in 2020, so:
---   built 1996 to 2011 with no golf-ball hail since 2020 -> roof may be original
---   built before 1996 -> replaced at least once, date unknown (small weight)
+--   a re-roof permit wins when it is the newest evidence
 --   golf-ball hail older than a year -> roof likely replaced on that claim
+--   built 1996 to 2011 with neither -> roof may be original
+--   built before 1996 -> replaced at least once, date unknown (small weight)
+-- "Recent roof" (permit since 2021 or golf-ball hail since 2023) is the
+-- workmanship-check play: someone else did that roof; are they still around?
 drop function if exists public.doors_near(double precision, double precision, double precision, int);
 create function public.doors_near(
   p_lat double precision,
@@ -73,6 +105,7 @@ returns table (
   dist_mi double precision, year_built int, value bigint,
   hail_in real, hail_date date, wind_kind text, wind_date date, wind_mph real,
   wind_roof boolean, wind_dist_mi real, roof_year int, roof_basis text,
+  permit_date date, roofer text, roofer_last date, recent_roof boolean,
   last_outcome text, last_knock_at timestamptz, score int, reasons text[]
 )
 language sql stable
@@ -83,8 +116,8 @@ with box as (
 tgt as (
   select distinct on (upper(trim(t.address)))
     'target'::text as src, t.id as target_id, t.county, upper(trim(t.address)) as address,
-    t.city, t.zip, t.owner_name, t.owner_mailing as mailing, coalesce(t.absentee, false) as absentee, t.lat, t.lon,
-    nullif(t.year_built, 0)::int as year_built, t.value::bigint as value, t.status
+    t.city, t.zip, t.owner_name, t.owner_mailing as mailing, coalesce(t.absentee, false) as absentee,
+    t.lat, t.lon, nullif(t.year_built, 0)::int as year_built, t.value::bigint as value, t.status
   from public.storm_targets t, box
   where t.lat between p_lat - box.dlat and p_lat + box.dlat
     and t.lon between p_lon - box.dlon and p_lon + box.dlon
@@ -112,10 +145,26 @@ par as (
     and coalesce(trim(p.situs), '') <> ''
     and coalesce(trim(p.owner), '') <> ''
 ),
+prm as (
+  -- Permit-only houses: we know the address and the roof, not the owner.
+  select distinct on (rp.street)
+    'permit'::text as src, null::uuid as target_id, 'dallas'::text as county,
+    rp.street || ', DALLAS, TX' as address, 'Dallas'::text as city, rp.zip,
+    null::text as owner_name, null::text as mailing, null::boolean as absentee,
+    rp.lat, rp.lon, null::int as year_built, null::bigint as value, null::text as status
+  from public.reroof_permits rp, box
+  where rp.lat between p_lat - box.dlat and p_lat + box.dlat
+    and rp.lon between p_lon - box.dlon and p_lon + box.dlon
+  order by rp.street, rp.issued_date desc
+),
 houses as (
   select * from tgt
   union all
   select * from par where not exists (select 1 from tgt where tgt.address = par.address)
+  union all
+  select * from prm where not exists (
+    select 1 from tgt where public.norm_street(tgt.address) = public.norm_street(prm.address)
+  )
 ),
 scored as (
   select
@@ -127,46 +176,68 @@ scored as (
     s.hail12_in, s.hail12_date, s.hail24_in, s.hail24_date, s.big_hail_old_date,
     s.wind_kind, s.wind_date, s.wind_mph, s.wind_roof, s.wind_dist_mi,
     k.outcome as last_outcome, k.created_at as last_knock_at,
-    case
-      when s.big_hail_old_date is not null
-        and extract(year from s.big_hail_old_date)::int + 1 >= coalesce(h.year_built, 0)
-        then extract(year from s.big_hail_old_date)::int + 1
-      else h.year_built
-    end as roof_year,
-    case
-      when s.big_hail_old_date is not null
-        and extract(year from s.big_hail_old_date)::int + 1 >= coalesce(h.year_built, 0) then 'hail'
-      when h.year_built is not null then 'built'
-    end as roof_basis
+    pm.issued_date as permit_date, pm.contractor as roofer, pm.contractor_last as roofer_last,
+    extract(year from pm.issued_date)::int as permit_year,
+    case when s.big_hail_old_date is not null
+      then extract(year from s.big_hail_old_date)::int + 1 end as hail_roof_year
   from houses h
   left join public.cell_signals s on s.r = public.cell_r(h.lat) and s.c = public.cell_c(h.lon)
   left join public.target_last_knock k on k.target_id = h.target_id
+  left join lateral (
+    select rp.issued_date, nullif(rp.contractor, '') as contractor, rp.contractor_last
+    from public.reroof_permits rp
+    where h.county ilike 'dallas%'
+      and rp.street = public.norm_street(h.address)
+      and (rp.zip is null or h.zip is null or left(h.zip, 5) = rp.zip)
+    order by rp.issued_date desc
+    limit 1
+  ) pm on true
+),
+basis as (
+  select sc.*,
+    greatest(sc.year_built, sc.hail_roof_year, sc.permit_year) as roof_year,
+    case
+      when sc.permit_year is not null
+        and sc.permit_year >= coalesce(sc.hail_roof_year, 0)
+        and sc.permit_year >= coalesce(sc.year_built, 0) then 'permit'
+      when sc.hail_roof_year is not null and sc.hail_roof_year >= coalesce(sc.year_built, 0) then 'hail'
+      when sc.year_built is not null then 'built'
+    end as roof_basis
+  from scored sc
 ),
 pts as (
-  select sc.*,
-    extract(year from current_date)::int - sc.year_built as home_age,
+  select b.*,
+    extract(year from current_date)::int - b.year_built as home_age,
+    (b.roofer is not null and b.roofer_last <= date '2025-03-15') as roofer_quiet,
+    (
+      (b.roof_basis = 'permit' and b.permit_date >= date '2021-01-01') or
+      (b.roof_basis = 'hail' and b.big_hail_old_date >= date '2023-01-01')
+    ) as recent_roof,
     (case
-       when sc.hail12_in >= 2.5 then 40 when sc.hail12_in >= 1.75 then 32
-       when sc.hail12_in >= 1.25 then 22 when sc.hail12_in >= 1 then 15
-       when sc.hail12_in >= 0.75 then 6 else 0 end)
-    + (case when sc.hail24_in >= 1.75 then 6 when sc.hail24_in >= 1 then 3 else 0 end)
+       when b.hail12_in >= 2.5 then 40 when b.hail12_in >= 1.75 then 32
+       when b.hail12_in >= 1.25 then 22 when b.hail12_in >= 1 then 15
+       when b.hail12_in >= 0.75 then 6 else 0 end)
+    + (case when b.hail24_in >= 1.75 then 6 when b.hail24_in >= 1 then 3 else 0 end)
     + (case
-         when sc.wind_date >= current_date - 365 then
-           (case when sc.wind_kind = 'tornado' then 25 else 12 end)
-           + (case when sc.wind_roof then 8 else 0 end)
-           + (case when sc.wind_mph >= 70 then 4 else 0 end)
-         when sc.wind_date is not null then 4 else 0 end)
+         when b.wind_date >= current_date - 365 then
+           (case when b.wind_kind = 'tornado' then 25 else 12 end)
+           + (case when b.wind_roof then 8 else 0 end)
+           + (case when b.wind_mph >= 70 then 4 else 0 end)
+         when b.wind_date is not null then 4 else 0 end)
     + (case
-         when sc.roof_basis <> 'built' or sc.roof_basis is null then 0
-         when extract(year from current_date)::int - sc.year_built between 15 and 30 then 18
-         when extract(year from current_date)::int - sc.year_built > 30 then 5
+         when b.roof_basis = 'built' and extract(year from current_date)::int - b.year_built between 15 and 30 then 18
+         when b.roof_basis = 'built' and extract(year from current_date)::int - b.year_built > 30 then 5
+         when b.roof_basis = 'permit' and b.roofer is not null and b.roofer_last <= date '2025-03-15' then 18
+         when b.roof_basis = 'permit' and b.roofer is not null then 8
+         when b.roof_basis = 'permit' then 6
+         when b.roof_basis = 'hail' and b.big_hail_old_date >= date '2023-01-01' then 10
          else 0 end)
-    + (case when sc.absentee then -12 else 6 end)
-    + (case when sc.value >= 500000 then 4 when sc.value >= 300000 then 2 else 0 end)
+    + (case when b.absentee is null then 0 when b.absentee then -12 else 6 end)
+    + (case when b.value >= 500000 then 4 when b.value >= 300000 then 2 else 0 end)
     as score
-  from scored sc
-  where sc.dist_mi <= p_miles
-    and coalesce(sc.status, '') <> 'converted'
+  from basis b
+  where b.dist_mi <= p_miles
+    and coalesce(b.status, '') <> 'converted'
 )
 select
   src, target_id, county, address,
@@ -175,7 +246,8 @@ select
   zip, owner_name, mailing, absentee, lat, lon,
   round(dist_mi::numeric, 2)::double precision, year_built, value,
   hail12_in, hail12_date, wind_kind, wind_date, wind_mph, wind_roof, wind_dist_mi,
-  roof_year, roof_basis, last_outcome, last_knock_at, score::int,
+  roof_year, roof_basis, permit_date, roofer, roofer_last, recent_roof,
+  last_outcome, last_knock_at, score::int,
   array_remove(array[
     case when hail12_in >= 0.75 then
       'About ' || to_char(hail12_in, 'FM9.0') || ' in hail on radar, ' || to_char(hail12_date, 'Mon FMDD') end,
@@ -187,13 +259,24 @@ select
         else to_char(wind_mph, 'FM999') || ' mph gust reported '
       end || to_char(wind_dist_mi, 'FM0.0') || ' mi away, ' || to_char(wind_date, 'Mon FMDD') end,
     case
+      when roof_basis = 'permit' and roofer_quiet then
+        'Re-roofed ' || to_char(permit_date, 'Mon YYYY') || ' by ' ||
+        regexp_replace(initcap(roofer), '\mLlc\M', 'LLC', 'g') ||
+        '. Their last Dallas permit on record: ' || to_char(roofer_last, 'Mon YYYY')
+      when roof_basis = 'permit' and roofer is not null then
+        'Re-roofed ' || to_char(permit_date, 'Mon YYYY') || ' by ' ||
+        regexp_replace(initcap(roofer), '\mLlc\M', 'LLC', 'g')
+      when roof_basis = 'permit' then
+        'Re-roofed ' || to_char(permit_date, 'Mon YYYY') || ' (city permit)'
+      when roof_basis = 'hail' and big_hail_old_date >= date '2023-01-01' then
+        'Golf-ball hail ' || to_char(big_hail_old_date, 'Mon YYYY') || ': roof likely replaced since. Ask who did it'
+      when roof_basis = 'hail' then
+        'Golf-ball hail ' || to_char(big_hail_old_date, 'Mon YYYY') || ': roof likely replaced since'
       when roof_basis = 'built' and home_age between 15 and 30 then
         'Built ' || year_built || ', no big hail here since 2020: roof may be original'
       when roof_basis = 'built' and home_age > 30 then
-        'Built ' || year_built || ', no big hail here since 2020'
-      when roof_basis = 'hail' then
-        'Golf-ball hail ' || to_char(big_hail_old_date, 'Mon YYYY') || ': roof likely replaced since' end,
-    case when absentee then 'Owner lives elsewhere' else 'Owner lives here' end
+        'Built ' || year_built || ', no big hail here since 2020' end,
+    case when absentee is null then null when absentee then 'Owner lives elsewhere' else 'Owner lives here' end
   ], null) as reasons
 from pts
 order by score desc, dist_mi asc
@@ -201,4 +284,4 @@ limit p_limit;
 $$;
 
 comment on function public.doors_near is
-  'Ranked doors around a point with plain-language reasons: radar hail at the house, wind or tornado reports nearby, an estimated roof year and whether the owner lives there.';
+  'Ranked doors around a point with plain-language reasons: radar hail at the house, wind or tornado reports nearby, who re-roofed it and when (Dallas permits), an estimated roof age and whether the owner lives there.';

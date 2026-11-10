@@ -12,12 +12,15 @@ import type { Door } from "@/app/api/doors/route";
  * is not on the knock list yet gets one button that puts it there.
  */
 
-type Kind = "hail" | "wind" | "roof" | "other";
+// hail and wind: storm damage. recent: someone else roofed it lately (the
+// workmanship-check play). roof: old enough that the original may still be on.
+type Kind = "hail" | "wind" | "recent" | "roof" | "other";
 type Filter = "all" | Exclude<Kind, "other">;
 
 const COLOR: Record<Kind, string> = {
   hail: "#0c7a40",
   wind: "#2563eb",
+  recent: "#7c3aed",
   roof: "#d97706",
   other: "#9ca3af",
 };
@@ -39,6 +42,7 @@ const roofMayBeOriginal = (d: Door) =>
 function kindOf(d: Door): Kind {
   if ((d.hail_in ?? 0) >= 1) return "hail";
   if (windRecent(d)) return "wind";
+  if (d.recent_roof) return "recent";
   if (roofMayBeOriginal(d)) return "roof";
   return "other";
 }
@@ -46,6 +50,7 @@ function kindOf(d: Door): Kind {
 function reasonKind(r: string): Kind | "owner" {
   if (r.startsWith("About")) return "hail";
   if (/^(Tornado|Roof damage|Wind damage|\d+ mph)/.test(r)) return "wind";
+  if (r.startsWith("Re-roofed") || r.endsWith("Ask who did it")) return "recent";
   if (r.startsWith("Built") || r.startsWith("Golf-ball")) return "roof";
   return "owner";
 }
@@ -152,12 +157,17 @@ export default function DoorList({
     if (lastAsk.current) load(lastAsk.current, r);
   };
 
-  const pool = useMemo(() => (ownerOnly ? doors.filter((d) => !d.absentee) : doors), [doors, ownerOnly]);
+  // Only doors we know the owner lives at; permit-only houses (owner unknown) drop out.
+  const pool = useMemo(
+    () => (ownerOnly ? doors.filter((d) => d.absentee === false) : doors),
+    [doors, ownerOnly],
+  );
   const counts = useMemo(
     () => ({
       all: pool.length,
       hail: pool.filter((d) => (d.hail_in ?? 0) >= 1).length,
       wind: pool.filter(windRecent).length,
+      recent: pool.filter((d) => !!d.recent_roof).length,
       roof: pool.filter(roofMayBeOriginal).length,
     }),
     [pool],
@@ -165,6 +175,7 @@ export default function DoorList({
   const shown = useMemo(() => {
     if (filter === "hail") return pool.filter((d) => (d.hail_in ?? 0) >= 1);
     if (filter === "wind") return pool.filter(windRecent);
+    if (filter === "recent") return pool.filter((d) => !!d.recent_roof);
     if (filter === "roof") return pool.filter(roofMayBeOriginal);
     return pool;
   }, [pool, filter]);
@@ -332,6 +343,7 @@ export default function DoorList({
             {chip("all", "All", counts.all)}
             {chip("hail", "Hail", counts.hail)}
             {chip("wind", "Wind", counts.wind)}
+            {chip("recent", "Recent roof", counts.recent)}
             {chip("roof", "Older roof", counts.roof)}
           </div>
           <label className="mt-3 flex items-center gap-2 text-sm text-gray-700">
@@ -429,6 +441,8 @@ export default function DoorList({
           <p className="mt-6 text-[13px] leading-relaxed text-gray-500">
             Hail is a radar estimate (NOAA), not a measurement. Wind and tornadoes are National Weather
             Service reports within a mile. Roof age is a guess from the year built and hail since 2020.
+            Re-roof dates and roofers are City of Dallas permits; the city stopped recording roofer names
+            in Sept 2025. Say what the record shows, never that a roofer went out of business.
           </p>
         </>
       )}
