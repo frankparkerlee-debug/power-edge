@@ -135,17 +135,17 @@ export default async function ContractPage({
         {recent.length > 0 && (
           <>
             <h2 className="mt-12 text-xs font-bold uppercase tracking-widest text-gray-500">
-              Recently signed
+              Recent agreements
             </h2>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wider text-gray-500">
-                    <th className="py-2 pr-4">Signed</th>
+                    <th className="py-2 pr-4">Written</th>
                     <th className="py-2 pr-4">Homeowner</th>
                     <th className="py-2 pr-4">Property</th>
                     <th className="py-2 pr-4">Total</th>
-                    <th className="py-2">Cancel by</th>
+                    <th className="py-2">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -160,10 +160,27 @@ export default async function ContractPage({
                       </td>
                       <td className="py-2.5 pr-4">{String(c.total_price ?? "")}</td>
                       <td className="py-2.5 whitespace-nowrap">
+                        {/*
+                          This column used to print the cancellation deadline
+                          and nothing else, under a heading that said these
+                          were all signed. They are not: listContracts returns
+                          drafts that have been sent and not signed, and those
+                          have no deadline yet, so the cell read "Invalid
+                          Date". An unsigned agreement sitting out there is the
+                          thing a closer most needs to see, so say which it is.
+                        */}
                         {c.canceled_at ? (
                           <span className="font-semibold text-red-600">Cancelled</span>
+                        ) : String(c.status) !== "signed" ? (
+                          <span className="font-semibold text-[#b54708]">
+                            Awaiting signature
+                          </span>
+                        ) : c.cancel_deadline ? (
+                          <span className="text-gray-700">
+                            Can cancel to {whenDate(String(c.cancel_deadline))}
+                          </span>
                         ) : (
-                          whenDate(String(c.cancel_deadline))
+                          <span className="font-semibold text-green-700">Signed</span>
                         )}
                       </td>
                     </tr>

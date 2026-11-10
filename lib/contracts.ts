@@ -205,7 +205,7 @@ export async function listContracts(limit = 100) {
   if (!dbOn()) return [];
   try {
     const res = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/contracts?select=id,created_at,rep,owner_names,property_address,total_price,claim_based,cancel_deadline,canceled_at&order=created_at.desc&limit=${limit}`,
+      `${process.env.SUPABASE_URL}/rest/v1/contracts?select=id,created_at,rep,owner_names,property_address,total_price,claim_based,cancel_deadline,canceled_at,status,signed_at,owner_email&order=created_at.desc&limit=${limit}`,
       { headers: authHeaders(), cache: "no-store" },
     );
     if (!res.ok) return [];
