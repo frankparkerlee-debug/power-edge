@@ -82,7 +82,6 @@ export function ContractForm({
   const [totalEdited, setTotalEdited] = useState(false);
   const [totalRaw, setTotalRaw] = useState("");
 
-  const [gaveNotices, setGaveNotices] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sent, setSent] = useState<{
@@ -208,7 +207,6 @@ export function ContractForm({
       const { res, data } = await post({
         ...payload(),
         signer_name: owner,
-        notices_delivered: gaveNotices,
         signature_png: canvasRef.current!.toDataURL("image/png"),
       });
       if (!res.ok || !data.ok) return setError(data.error || "Could not save.");
@@ -663,11 +661,14 @@ export function ContractForm({
             </button>
           </div>
 
-          <label className="flex items-start gap-2.5 rounded-md border border-[#e3e6ea] bg-white p-3 text-sm">
-            <input type="checkbox" checked={gaveNotices} onChange={(e) => setGaveNotices(e.target.checked)} className="mt-0.5 h-4 w-4" />
-            <span>I gave them <strong>both printed cancellation notices</strong>. The email is a copy, not a replacement.</span>
-          </label>
-
+          {/*
+            There used to be a checkbox here attesting the rep had handed over
+            two printed cancellation notices. Parker decided on 2026-11-10 that
+            reps will not carry those: the agreement states the cancellation
+            right in full, and the emailed copy repeats it with the deadline
+            date. Asking a rep to confirm something they are no longer doing
+            would train them to tick a box that means nothing.
+          */}
           {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
 
           <div className="flex gap-2">

@@ -189,10 +189,38 @@ export default async function SignPage({
             <a href="/agreement" className="font-semibold text-bolt">poweredgetx.com/agreement</a>.
           </p>
 
-          <div className="rounded-md border-2 border-bolt bg-bolt/10 p-4 font-semibold text-fg-inv">
-            YOU, THE BUYER, MAY CANCEL THIS TRANSACTION AT ANY TIME PRIOR TO MIDNIGHT OF THE
-            THIRD BUSINESS DAY AFTER THE DATE YOU SIGN. We email you that right, in writing,
-            with the deadline date, the moment you sign.
+          {/*
+            The notice of cancellation, in full, on the agreement itself.
+            Parker decided on 2026-11-10 that reps will not hand over a printed
+            card, so this document and the email that follows it are the whole
+            of what the buyer is given. That means this cannot be a summary
+            pointing at a form they will never see: it has to contain what the
+            form would have said, including who to send it to and by when.
+          */}
+          <div className="rounded-md border-2 border-bolt bg-bolt/10 p-4 text-fg-inv">
+            <p className="font-display text-base font-extrabold">NOTICE OF CANCELLATION</p>
+            <p className="mt-2 font-semibold">
+              YOU, THE BUYER, MAY CANCEL THIS TRANSACTION AT ANY TIME PRIOR TO MIDNIGHT OF
+              THE THIRD BUSINESS DAY AFTER THE DATE YOU SIGN, WITHOUT ANY PENALTY OR
+              OBLIGATION.
+            </p>
+            <p className="mt-2 text-sm">
+              If you cancel, any payments made by you under this agreement will be returned
+              within ten business days of our receiving your notice, and any security
+              interest arising out of the transaction will be cancelled.
+            </p>
+            <p className="mt-2 text-sm">
+              To cancel, send a signed and dated written notice, or any other written notice
+              saying you are cancelling, to{" "}
+              <strong>{site.legalEntity}</strong>
+              {site.mailingAddress ? <>, {site.mailingAddress}</> : null}, or by email to{" "}
+              <strong>{site.email}</strong>, no later than midnight of the third business day
+              after you sign.
+            </p>
+            <p className="mt-2 text-sm">
+              The moment you sign, we email you a copy of this agreement and this notice,
+              with your exact cancellation deadline written on it.
+            </p>
           </div>
         </div>
 

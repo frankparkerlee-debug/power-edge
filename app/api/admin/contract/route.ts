@@ -184,9 +184,13 @@ export async function POST(req: Request) {
     if (emailed) await markEmailed(saved.id);
   }
 
-  // The rep confirms they handed over the two printed cancellation notices.
-  // Chapter 601 wants them furnished in duplicate with the contract; the email
-  // is strong evidence but not clearly a substitute, so we record the paper too.
+  /*
+   * Reps no longer hand over printed cancellation notices (Parker,
+   * 2026-11-10). The agreement carries the notice in full and the emailed
+   * copy repeats it with the deadline, so there is nothing left to attest to.
+   * Kept accepting the flag for older clients mid-deploy; it writes the same
+   * column it always did.
+   */
   if (body.notices_delivered === true) await markNoticesDelivered(saved.id);
 
   await linkJobForContract({
