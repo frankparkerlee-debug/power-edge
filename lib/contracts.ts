@@ -394,7 +394,12 @@ export async function linkJobForContract(a: {
       owner_name: a.owner || null,
       phone: a.phone || null,
       email: a.email || null,
+      // rep is current ownership and moves to whoever is working it now.
+      // closer is credit and is set here; setter is deliberately absent from
+      // this patch, because the person who writes the agreement is not the
+      // person who found the door and must not overwrite them.
       rep: a.rep || null,
+      closer: a.rep || null,
       job_type: (a.claim ? "claim" : "cash") as "claim" | "cash",
       carrier: a.carrier || null,
       claim_number: a.claimNumber || null,

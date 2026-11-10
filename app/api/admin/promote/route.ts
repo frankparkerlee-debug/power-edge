@@ -89,6 +89,9 @@ export async function POST(req: Request) {
       job_type: "claim",
       storm_target_id: id,
       rep: u.name || null,
+      // Whoever worked this door owns the set, whatever happens to the job
+      // afterwards and whoever ends up closing it.
+      setter: u.name || null,
       notes: [hail, stormDate ? `storm ${stormDate}` : null,
               target.year_built ? `built ${target.year_built}` : null]
         .filter(Boolean)

@@ -70,7 +70,18 @@ export type Job = {
   zip: string | null;
   stage: Stage;
   job_type: "claim" | "cash";
+  /** Who owns it right now. */
   rep: string | null;
+  /**
+   * Durable credit, because a job has two people on it.
+   *
+   * The setter knocked the door and put the inspection on the calendar; the
+   * closer turned up, priced it and got it signed. rep used to be the only
+   * field and whoever acted last won it, so writing the agreement erased the
+   * setter at the exact moment the job became worth money.
+   */
+  setter: string | null;
+  closer: string | null;
   squares: number | null;
   carrier: string | null;
   claim_number: string | null;

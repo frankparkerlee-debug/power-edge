@@ -147,7 +147,13 @@ export default async function JobPage({
 
           <dl className="mt-5 grid grid-cols-2 gap-4 border-t border-gray-100 pt-4 sm:grid-cols-3">
             {field("Type", job.job_type === "claim" ? "Insurance claim" : "Cash")}
-            {field("Rep", job.rep)}
+            {/*
+              Two people, shown separately. One "Rep" field meant whoever
+              touched the job last owned it, so writing the agreement wiped
+              the setter at the moment the job became worth money.
+            */}
+            {field("Set by", job.setter ?? job.rep)}
+            {job.closer ? field("Closed by", job.closer) : null}
             {field("Squares", job.squares)}
             {field("Carrier", job.carrier)}
             {field("Claim #", job.claim_number)}
