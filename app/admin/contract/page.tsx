@@ -171,6 +171,18 @@ export default async function ContractPage({
                         */}
                         {c.canceled_at ? (
                           <span className="font-semibold text-red-600">Cancelled</span>
+                        ) : String(c.status) !== "signed" && !c.emailed_at ? (
+                          /*
+                            Written, but nobody has it. The first agreement
+                            through this flow sat in this state for twenty
+                            minutes and nothing on any screen said so: the
+                            table called it "signed", the rep had been handed
+                            a link to text by hand, and the homeowner had
+                            never heard of it.
+                          */
+                          <span className="font-semibold text-red-600">
+                            Not sent to them
+                          </span>
                         ) : String(c.status) !== "signed" ? (
                           <span className="font-semibold text-[#b54708]">
                             Awaiting signature

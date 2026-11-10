@@ -205,7 +205,7 @@ export async function listContracts(limit = 100) {
   if (!dbOn()) return [];
   try {
     const res = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/contracts?select=id,created_at,rep,owner_names,property_address,total_price,claim_based,cancel_deadline,canceled_at,status,signed_at,owner_email&order=created_at.desc&limit=${limit}`,
+      `${process.env.SUPABASE_URL}/rest/v1/contracts?select=id,created_at,rep,owner_names,property_address,total_price,claim_based,cancel_deadline,canceled_at,status,signed_at,owner_email,emailed_at&order=created_at.desc&limit=${limit}`,
       { headers: authHeaders(), cache: "no-store" },
     );
     if (!res.ok) return [];
@@ -413,14 +413,23 @@ export async function linkJobForContract(a: {
   }
 }
 
-/** Stamp when a signing link actually reached the homeowner. */
+/**
+ * Stamp when the signing link was actually emailed to the homeowner.
+ *
+ * This wrote to sent_at, which createDraft already sets the moment a draft is
+ * written. So it overwrote a column with roughly the same value and recorded
+ * nothing, while emailed_at, the one column that means "this person has it",
+ * stayed null. The distinction is the whole question: an agreement can be
+ * written and never reach anybody, which is exactly what happened to the
+ * first one through this flow.
+ */
 export async function markSent(id: string) {
   if (!dbOn()) return;
   try {
     await fetch(`${process.env.SUPABASE_URL}/rest/v1/contracts?id=eq.${id}`, {
       method: "PATCH",
       headers: { ...authHeaders(), Prefer: "return=minimal" },
-      body: JSON.stringify({ sent_at: new Date().toISOString() }),
+      body: JSON.stringify({ emailed_at: new Date().toISOString() }),
     });
   } catch {
     /* the draft exists, which is the part that matters */
