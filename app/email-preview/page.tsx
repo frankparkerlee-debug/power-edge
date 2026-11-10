@@ -75,7 +75,7 @@ async function render(): Promise<Shown[]> {
       name: "Chris Whitfield",
       email: HOME,
       address: ADDR,
-      when: "10:00 AM – 12:00 PM",
+      when: "Thursday 10:00 AM",
     }),
   );
   await take("Inspection", "Assessment: storm damage found", () =>

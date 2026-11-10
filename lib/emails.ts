@@ -34,18 +34,44 @@ export type LeadEmailCtx = {
 };
 
 // ---- Building blocks ------------------------------------------------------
-function wordmark() {
-  return `<span style="font-family:${FONT};font-weight:800;font-size:22px;letter-spacing:-0.5px;color:#ffffff;">power<span style="color:${LIME};">edge</span></span>`;
+/*
+ * One look for every customer email (2026-11-11):
+ *
+ *   - a slim ink header carrying the real logo, not typed letters;
+ *   - one key panel per email holding the single fact it exists to deliver:
+ *     the arrival window, the verdict, what the homeowner pays, the date they
+ *     can cancel by;
+ *   - hairline rows for the rest, and a button that runs full width on phones.
+ *
+ * Mail about a homeowner's own inspection or agreement carries no sales pitch
+ * and no unsubscribe line. Those used to sit under the signed contract and
+ * under "your roof is fine", which read as a form letter at exactly the
+ * moments the homeowner is deciding whether we are straight with them. Only
+ * marketing (the lead sequence and claim-prep nudges) keeps the trust line
+ * and the unsubscribe, and every email now carries the mailing address.
+ */
+const LOGO_URL = `${site.url}/brand/email-logo-on-dark.png`;
+
+function logo() {
+  // Alt text is styled, so a client that blocks images still shows the name.
+  return `<img src="${LOGO_URL}" width="132" height="34" alt="PowerEdge" style="display:block;border:0;outline:none;text-decoration:none;width:132px;height:34px;font-family:${FONT};font-size:20px;font-weight:800;color:#ffffff;" />`;
 }
 
-function button(label: string, href: string) {
-  // Bulletproof-ish CTA button.
+/** The phone number as a tap target that never breaks across two lines. */
+function phone(color = TEXT) {
+  return `<a href="${site.phoneHref}" style="color:${color};font-weight:700;text-decoration:none;white-space:nowrap;">${site.phone}</a>`;
+}
+
+/** Primary is lime and used once per email. Quiet is for change/cancel/call. */
+function button(label: string, href: string, variant: "primary" | "quiet" = "primary") {
+  const bg = variant === "primary" ? LIME : CARD;
+  const edge = variant === "primary" ? LIME : INK;
   return `
-  <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 4px;">
+  <table role="presentation" class="pe-btn" cellpadding="0" cellspacing="0" style="margin:24px 0 8px;">
     <tr>
-      <td align="center" bgcolor="${LIME}" style="border-radius:8px;">
+      <td align="center" bgcolor="${bg}" style="background:${bg};border:2px solid ${edge};border-radius:10px;">
         <a href="${href}" target="_blank"
-           style="display:inline-block;padding:15px 30px;font-family:${FONT};font-size:16px;font-weight:800;color:${INK};text-decoration:none;border-radius:8px;">
+           style="display:inline-block;padding:14px 30px;font-family:${FONT};font-size:16px;line-height:20px;font-weight:800;color:${INK};text-decoration:none;border-radius:10px;white-space:nowrap;">
           ${label}
         </a>
       </td>
@@ -53,15 +79,64 @@ function button(label: string, href: string) {
   </table>`;
 }
 
+/** Small green label above the headline: what kind of email this is. */
+const eyebrow = (t: string) =>
+  `<p style="margin:0 0 10px;font-family:${FONT};font-size:12px;line-height:16px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:${LIME_DEEP};">${t}</p>`;
+
+/** Muted label above a block of rows. */
+const section = (t: string) =>
+  `<p style="margin:26px 0 8px;font-family:${FONT};font-size:12px;line-height:16px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:${MUTED};">${t}</p>`;
+
+/** The one fact the email exists to deliver, on ink, in lime. */
+function keyPanel(k: { label: string; value: string; sub?: string }) {
+  return `
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 22px;">
+    <tr><td bgcolor="${INK}" style="background:${INK};border-radius:12px;padding:20px 22px 22px;">
+      <p style="margin:0 0 8px;font-family:${FONT};font-size:12px;line-height:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9aa3b0;">${k.label}</p>
+      <p class="pe-key" style="margin:0;font-family:${FONT};font-size:30px;line-height:36px;font-weight:800;letter-spacing:-0.5px;color:${LIME};">${k.value}</p>
+      ${k.sub ? `<p style="margin:10px 0 0;font-family:${FONT};font-size:15px;line-height:23px;color:#d6dbe1;">${k.sub}</p>` : ""}
+    </td></tr>
+  </table>`;
+}
+
+type Row = [label: string, value: string, strong?: boolean];
+
+/** Label left, value right, hairlines between. Falsy rows are skipped. */
+function rows(list: Array<Row | false | null | undefined | "">) {
+  const r = list.filter(Boolean) as Row[];
+  if (!r.length) return "";
+  return `
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 6px;border-top:1px solid ${LINE};">
+    ${r
+      .map(
+        ([k, v, strong]) => `<tr>
+      <td valign="top" style="padding:11px 14px 11px 0;border-bottom:1px solid ${LINE};font-family:${FONT};font-size:14px;line-height:20px;font-weight:${strong ? 700 : 400};color:${strong ? TEXT : MUTED};">${k}</td>
+      <td valign="top" align="right" style="padding:11px 0;border-bottom:1px solid ${LINE};font-family:${FONT};font-size:14px;line-height:20px;font-weight:${strong ? 800 : 600};color:${TEXT};text-align:right;white-space:nowrap;">${v}</td>
+    </tr>`,
+      )
+      .join("")}
+  </table>`;
+}
+
+/** Vertical space that survives every client. */
+const gap = (px: number) =>
+  `<div style="height:${px}px;line-height:${px}px;font-size:1px;">&nbsp;</div>`;
+
+/** What the inspector wrote, set apart from our own words. */
+const quote = (t: string) => `
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 6px;">
+    <tr><td style="background:${PAPER};border-left:3px solid ${LIME_DEEP};border-radius:0 8px 8px 0;padding:14px 16px;font-family:${FONT};font-size:15px;line-height:23px;color:${TEXT};">${t}</td></tr>
+  </table>`;
+
 function steps(items: string[]) {
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 18px;">
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:4px 0 14px;">
     ${items
       .map(
         (step, i) => `<tr>
-          <td width="36" valign="top" style="padding:7px 0;">
-            <span style="display:inline-block;width:26px;height:26px;background:${LIME};color:${INK};border-radius:13px;text-align:center;line-height:26px;font-weight:800;font-size:14px;font-family:${FONT};">${i + 1}</span>
+          <td width="36" valign="top" style="padding:8px 0;">
+            <span style="display:inline-block;width:24px;height:24px;background:${INK};color:${LIME};border-radius:12px;text-align:center;line-height:24px;font-weight:800;font-size:13px;font-family:${FONT};">${i + 1}</span>
           </td>
-          <td valign="top" style="padding:9px 0;font-family:${FONT};font-size:15px;line-height:1.5;color:${TEXT};">${step}</td>
+          <td valign="top" style="padding:9px 0;font-family:${FONT};font-size:15px;line-height:23px;color:${TEXT};">${step}</td>
         </tr>`,
       )
       .join("")}
@@ -74,69 +149,73 @@ function stars() {
     <span style="font-family:${FONT};font-size:13px;color:${MUTED};"> ${site.googleRating} · ${site.googleReviewCount} Google reviews</span>`;
 }
 
+/** Trust line. Marketing only; never under a contract or an inspection result. */
 function verifyChip() {
   return `
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:26px;border-top:1px solid ${LINE};padding-top:18px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;border-top:1px solid ${LINE};">
     <tr>
-      <td style="font-family:${FONT};font-size:13px;color:${MUTED};line-height:1.5;">
-        <strong style="color:${TEXT};">Insured & accountable in Texas.</strong>
-        Roofing is unlicensed statewide, so anyone can knock after a storm, we're
-        a real, accountable company backed by ${site.liabilityCoverage} in liability coverage
-        and a 1-year workmanship guarantee.
-        <br/><span style="color:${MUTED};">${stars()}</span>
+      <td style="padding-top:18px;font-family:${FONT};font-size:13px;color:${MUTED};line-height:20px;">
+        <strong style="color:${TEXT};">Insured &amp; accountable in Texas.</strong>
+        Texas doesn&rsquo;t license roofers, so anyone can knock after a storm. We carry
+        ${site.liabilityCoverage} in liability coverage and back our work with a
+        ${site.workmanshipGuarantee}.
+        <br/>${stars()}
       </td>
     </tr>
   </table>`;
 }
 
-
 /** Wrap body content in the branded shell. */
 function shell({
   preheader,
   body,
+  marketing = false,
 }: {
   preheader: string;
   body: string;
+  /** Lead sequence and nudges: adds the unsubscribe line. */
+  marketing?: boolean;
 }) {
+  const muted = "#6b7280";
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="color-scheme" content="light only"/>
+<meta name="supported-color-schemes" content="light only"/>
+<style>
+  @media only screen and (max-width:480px) {
+    .pe-pad { padding-left:22px !important; padding-right:22px !important; }
+    .pe-btn { width:100% !important; }
+    .pe-btn a { display:block !important; }
+    .pe-h1 { font-size:24px !important; line-height:30px !important; }
+    .pe-key { font-size:27px !important; line-height:33px !important; }
+  }
+</style>
 </head>
 <body style="margin:0;padding:0;background:${PAPER};">
-  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${preheader}</div>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${PAPER};padding:24px 12px;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${preheader}&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${PAPER};padding:20px 10px 28px;">
     <tr><td align="center">
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;">
 
-        <!-- Header -->
-        <tr><td style="background:${INK};border-radius:14px 14px 0 0;padding:22px 32px;">
-          ${wordmark()}
-          <div style="height:3px;width:44px;background:${LIME};margin-top:12px;border-radius:2px;"></div>
+        <tr><td class="pe-pad" bgcolor="${INK}" style="background:${INK};border-radius:14px 14px 0 0;padding:20px 32px;">
+          <a href="${site.url}" target="_blank" style="text-decoration:none;">${logo()}</a>
         </td></tr>
 
-        <!-- Body -->
-        <tr><td style="background:${CARD};padding:34px 32px 30px;">
+        <tr><td class="pe-pad" style="background:${CARD};border-radius:0 0 14px 14px;padding:32px 32px 34px;">
           ${body}
         </td></tr>
 
-        <!-- Footer -->
-        <tr><td style="background:${INK_SOFT};border-radius:0 0 14px 14px;padding:22px 32px;">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-            <tr><td style="font-family:${FONT};font-size:13px;color:#9aa3b0;line-height:1.6;">
-              <a href="${site.phoneHref}" style="color:#ffffff;font-weight:700;text-decoration:none;">${site.phone}</a>
-              &nbsp;·&nbsp;
-              <a href="${site.textHref}" style="color:#ffffff;font-weight:700;text-decoration:none;">Text us</a>
-              &nbsp;·&nbsp;
-              <a href="${site.url}" style="color:#9aa3b0;text-decoration:none;">${site.domain}</a>
-              <br/>
-              ${site.legalEntity} · Insured & accountable · Serving ${site.serviceArea}.
-              <br/><br/>
-              <span style="color:#6b7280;">You&rsquo;re receiving this because you requested contact at ${site.domain}.
-              Reply <strong>STOP</strong> to opt out, or
-              <a href="mailto:${site.email}?subject=Unsubscribe" style="color:#9aa3b0;text-decoration:underline;">unsubscribe</a>.</span>
-            </td></tr>
-          </table>
+        <tr><td class="pe-pad" style="padding:22px 32px 0;font-family:${FONT};font-size:13px;line-height:20px;color:${muted};">
+          <strong style="color:${TEXT};">PowerEdge</strong> &middot; ${site.legalEntity}<br/>
+          ${site.mailingAddress}<br/>
+          ${phone(muted)} &middot; <a href="${site.url}" style="color:${muted};text-decoration:none;">${site.domain}</a>
+          ${
+            marketing
+              ? `<br/><br/>You&rsquo;re getting this because you asked about your roof at ${site.domain}.
+          <a href="mailto:${site.email}?subject=Unsubscribe" style="color:${muted};text-decoration:underline;">Unsubscribe</a>, or reply STOP.`
+              : ""
+          }
         </td></tr>
 
       </table>
@@ -147,11 +226,11 @@ function shell({
 
 // Shared type/link helpers
 const h1 = (t: string) =>
-  `<h1 style="margin:0 0 14px;font-family:${FONT};font-size:26px;line-height:1.2;font-weight:800;color:${INK};">${t}</h1>`;
+  `<h1 class="pe-h1" style="margin:0 0 14px;font-family:${FONT};font-size:27px;line-height:33px;font-weight:800;letter-spacing:-0.4px;color:${INK};">${t}</h1>`;
 const p = (t: string) =>
-  `<p style="margin:0 0 16px;font-family:${FONT};font-size:16px;line-height:1.62;color:${TEXT};">${t}</p>`;
+  `<p style="margin:0 0 16px;font-family:${FONT};font-size:16px;line-height:26px;color:${TEXT};">${t}</p>`;
 const small = (t: string) =>
-  `<p style="margin:14px 0 0;font-family:${FONT};font-size:13px;line-height:1.55;color:${MUTED};">${t}</p>`;
+  `<p style="margin:14px 0 0;font-family:${FONT};font-size:14px;line-height:22px;color:${MUTED};">${t}</p>`;
 
 const BOOK_URL = `${site.url}/roof-claim-check`;
 const FINANCE_URL = `${site.url}/financing`;
@@ -196,6 +275,7 @@ export const leadSequence: SequenceEmail[] = [
     html: (c) =>
       c.existing
         ? shell({
+        marketing: true,
             preheader:
               "DFW's insurance-first storm roof team, here's the 2-minute version.",
             body:
@@ -210,6 +290,7 @@ export const leadSequence: SequenceEmail[] = [
               verifyChip(),
           })
         : shell({
+        marketing: true,
             preheader:
               "A member of our team will call you shortly to schedule.",
             body:
@@ -224,7 +305,7 @@ export const leadSequence: SequenceEmail[] = [
                 "We inspect &amp; document your roof, free.",
                 "You decide. No pressure, no games.",
               ]) +
-              p(`Can&rsquo;t wait? Call or text us at <strong>${site.phone}</strong>.`) +
+              p(`Can&rsquo;t wait? Call or text us at ${phone()}.`) +
               button(`Call ${site.phone}`, site.phoneHref) +
               p(
                 `<strong>Want us in and out fast?</strong> <a href="${CLAIM_PREP_URL}" style="color:${LIME_DEEP};font-weight:700;text-decoration:none;">Prep your claim in 2 minutes &rarr;</a>, add your carrier and deductible so we can inspect and close on-site.`,
@@ -240,6 +321,7 @@ export const leadSequence: SequenceEmail[] = [
     subject: () => "Your hail claim, in 4 simple steps",
     html: (c) =>
       shell({
+        marketing: true,
         preheader: "You pay your deductible. We document the rest. No games.",
         body:
           h1("How your claim works, 4 steps.") +
@@ -268,6 +350,7 @@ export const leadSequence: SequenceEmail[] = [
     subject: () => "Anyone can knock after a storm. Not everyone can prove it.",
     html: (c) =>
       shell({
+        marketing: true,
         preheader: `Insured, ${site.googleRating}★, and one crew for your whole roof.`,
         body:
           h1("Why homeowners pick PowerEdge.") +
@@ -310,6 +393,7 @@ export const leadSequence: SequenceEmail[] = [
     subject: () => "The deductible isn't the wall you think it is",
     html: () =>
       shell({
+        marketing: true,
         preheader: "Finance it from $250 down, and get the roof done now.",
         body:
           h1("Short on the deductible? That's not a dead end.") +
@@ -334,6 +418,7 @@ export const leadSequence: SequenceEmail[] = [
     subject: () => "Wait too long and you lose the claim entirely",
     html: (c) =>
       shell({
+        marketing: true,
         preheader:
           "Texas claims expire, then the whole roof comes out of your pocket.",
         body:
@@ -345,7 +430,7 @@ export const leadSequence: SequenceEmail[] = [
             `And the damage doesn&rsquo;t wait for you. Every rain turns a small bruise into a bigger leak, and an aging roof can quietly slip from full-replacement to depreciated coverage, paying you thousands less.`,
           ) +
           p(
-            `If you think a storm hit your roof, don&rsquo;t sit on it. Check whether you still qualify, it takes about a minute.`,
+            `If you think a storm hit your roof, don&rsquo;t sit on it. Check whether you still qualify. It takes about a minute.`,
           ) +
           button("Check if I still have a claim", BOOK_URL) +
           (raisedDeductible(c)
@@ -364,6 +449,7 @@ export const leadSequence: SequenceEmail[] = [
     subject: () => "Did we lose you?",
     html: (c) =>
       shell({
+        marketing: true,
         preheader: "Your roof's still up there. We checked.",
         body:
           h1(`Did we lose you, ${c.firstName}?`) +
@@ -390,6 +476,7 @@ export const leadSequence: SequenceEmail[] = [
     subject: () => "About the guy in the pickup with the clipboard",
     html: (c) =>
       shell({
+        marketing: true,
         preheader: "Texas doesn't license roofers. We're the one you can verify.",
         body:
           h1("Not every 'roofer' is a roofer.") +
@@ -411,6 +498,7 @@ export const leadSequence: SequenceEmail[] = [
     subject: () => "Okay, we can take a hint",
     html: (c) =>
       shell({
+        marketing: true,
         preheader: "Last one, the offer stands whenever you're ready.",
         body:
           h1("We'll stop crowding your inbox.") +
@@ -421,7 +509,7 @@ export const leadSequence: SequenceEmail[] = [
             `If a storm ever does a number on your roof, you know who to call: the insured crew that <em>shows you the coverage</em>. Until then, ${c.firstName}, take care.`,
           ) +
           button("Actually, I'm ready, book it", BOOK_URL) +
-          p(`Or text <strong>${site.phone}</strong>. That&rsquo;s it. Promise.`) +
+          p(`Or text ${phone()}. That&rsquo;s it. Promise.`) +
           verifyChip(),
       }),
   },
@@ -525,14 +613,15 @@ export async function sendClaimComplete(
     shell({
       preheader: "We've got everything to move fast on-site.",
       body:
+        eyebrow("Claim details received") +
         h1(`You're all set, ${first}.`) +
         p(
-          `We&rsquo;ve got your claim details, and a member of our team will call you <strong>right away</strong> to lock in your inspection. When we arrive we go straight to documenting the roof, no paperwork on the doorstep.`,
+          `We&rsquo;ve got your claim details, and someone from our team will call you <strong>right away</strong> to set your inspection. When we arrive we go straight to documenting the roof, no paperwork on the doorstep.`,
         ) +
-        p(`Need us sooner? Call or text <strong>${site.phone}</strong>.`) +
         button(`Call ${site.phone}`, site.phoneHref) +
-        verifyChip(),
+        small(`Or text the same number. A person answers.`),
     }),
+    "claim-complete",
   );
 }
 
@@ -551,6 +640,7 @@ export async function sendClaimNurture(
       intake.email,
       "You're almost there, finish your claim in a minute",
       shell({
+        marketing: true,
         preheader: "A couple more details and your crew arrives ready.",
         body:
           h1(`Almost done, ${first}.`) +
@@ -560,6 +650,7 @@ export async function sendClaimNurture(
           button("Finish my claim →", url) +
           verifyChip(),
       }),
+      "nurture:claim-prep-2",
     );
   }
   return sendEmail(
@@ -567,6 +658,7 @@ export async function sendClaimNurture(
     intake.email,
     "Your roof claim, made easy",
     shell({
+        marketing: true,
       preheader: "Storm damage doesn't wait, let's get ahead of it.",
       body:
         h1(`Let's get your claim rolling, ${first}.`) +
@@ -579,6 +671,7 @@ export async function sendClaimNurture(
         button("Finish my claim →", url) +
         verifyChip(),
     }),
+    "nurture:claim-prep-1",
   );
 }
 
@@ -663,28 +756,31 @@ export async function sendAppointmentConfirmation(
       shell({
         preheader: `${when}. Free, documented, no obligation.`,
         body:
+          eyebrow("Inspection booked") +
           h1(`You're booked, ${first}.`) +
+          keyPanel({
+            label: "Arrival window",
+            value: a.dayLabel,
+            sub: `${a.timeLabel}${a.address ? `<br/>${a.address}` : ""}`,
+          }) +
           p(
-            `Your free roof inspection is set for <strong>${when}</strong>${
-              a.address ? ` at <strong>${a.address}</strong>` : ""
-            }. That's an arrival window, not a fixed minute, so we'll call before we head over.`,
+            `${a.closer ? `Your inspector is <strong>${a.closer}</strong>. ` : ""}That&rsquo;s an arrival window, not a fixed minute, so we&rsquo;ll call before we head over.`,
           ) +
+          section("At the inspection") +
           steps([
             "We photograph and measure the roof, top to bottom.",
-            "You get a written assessment, including &ldquo;your roof is fine&rdquo; if that's the answer.",
-            "If it's worth filing, we document the damage so your claim stands on evidence.",
+            "You get a written assessment, including &ldquo;your roof is fine&rdquo; if that&rsquo;s the answer.",
+            "If it&rsquo;s worth filing, we document the damage so your claim stands on evidence.",
           ]) +
           p(
-            `You don't need to be home for the roof itself, but it helps to be there for the walkthrough.`,
+            `You don&rsquo;t need to be home for the roof itself, but it helps to be there for the walkthrough.`,
           ) +
           (a.id
-            ? p(
-                `Need to change or cancel it? <a href="${site.url}/appointment/${a.id}" style="color:${LIME_DEEP};font-weight:600;">Manage your inspection</a>, or call <strong>${site.phone}</strong>.`,
-              )
-            : p(`Need to move it? Call or text <strong>${site.phone}</strong>.`)) +
-          button(`Call ${site.phone}`, site.phoneHref) +
-          verifyChip(),
+            ? button("Change or cancel", `${site.url}/appointment/${a.id}`, "quiet") +
+              small(`Or call or text ${phone(MUTED)}.`)
+            : small(`Need to move it? Call or text ${phone(MUTED)}.`)),
       }),
+      "appointment-confirmation",
     );
   }
 
@@ -781,17 +877,18 @@ export async function sendAppointmentReminder(
     shell({
       preheader: `We'll call before we head over.`,
       body:
+        eyebrow("Inspection today") +
         h1(`See you today, ${first}.`) +
+        keyPanel({
+          label: "Arrival window opens",
+          value: a.when,
+          sub: a.address || undefined,
+        }) +
         p(
-          `Your free roof inspection is <strong>${a.when}</strong>${
-            a.address ? ` at <strong>${a.address}</strong>` : ""
-          }. That's an arrival window, and we'll call before we head over.`,
+          `We&rsquo;ll call before we head over. You don&rsquo;t need to be home for the roof itself, but it helps to be there for the walkthrough.`,
         ) +
-        p(
-          `You don't need to be home for the roof itself, but it helps to be there for the walkthrough.`,
-        ) +
-        button("Change or cancel", `${site.url}/appointment/${a.id}`) +
-        verifyChip(),
+        button("Change or cancel", `${site.url}/appointment/${a.id}`, "quiet") +
+        small(`Questions? Call or text ${phone(MUTED)}.`),
     }),
     "appointment-reminder",
   );
@@ -805,6 +902,65 @@ export async function sendAppointmentReminder(
  * given that in writing. Emailing it also means they keep it, which a page
  * handed over at a kitchen table frequently does not achieve.
  */
+/** The work, line by line, as hairline rows. */
+function scopeRows(scope?: Array<{ description: string; price: string }>) {
+  return rows(
+    (scope ?? [])
+      .filter((l) => (l.description || "").trim())
+      .map((l): Row => [l.description, money(l.price)]),
+  );
+}
+
+/**
+ * The money panel and its ledger.
+ *
+ * On an insurance job the contract total is mostly not the homeowner's money;
+ * the deductible is, and it is the number they are actually deciding about.
+ * So the panel carries what they pay, and the rows carry the carrier, the
+ * claim number and the split.
+ */
+function moneyBlock(c: {
+  total?: string;
+  claimBased: boolean;
+  carrier?: string;
+  claimNumber?: string;
+  deductible?: string;
+}) {
+  const split = claimSplit(c.total, c.deductible);
+  if (!c.claimBased) {
+    return {
+      panel:
+        split.total > 0
+          ? keyPanel({ label: "Total price", value: split.totalText, sub: "No deposit is due at signing." })
+          : "",
+      ledger: "",
+    };
+  }
+  const panel = split.show
+    ? keyPanel({
+        label: "You pay, your deductible",
+        value: split.deductibleText,
+        sub: `${c.carrier || "Your insurance"} pays ${split.carrierText} of the ${split.totalText} approved scope.`,
+      })
+    : split.total > 0
+      ? keyPanel({
+          label: "Approved scope total",
+          value: split.totalText,
+          sub: "Your carrier sets the scope and the price. You pay your deductible.",
+        })
+      : "";
+  const ledger =
+    section("Your claim") +
+    rows([
+      c.carrier ? ["Insurance carrier", c.carrier] : null,
+      c.claimNumber ? ["Claim number", c.claimNumber] : null,
+      split.total > 0 ? ["Approved scope total", split.totalText] : null,
+      split.show ? ["Your insurance pays", split.carrierText] : null,
+      split.deductible > 0 ? ["You pay (your deductible)", split.deductibleText, true] : null,
+    ]);
+  return { panel, ledger };
+}
+
 export async function sendSignedAgreement(
   resendKey: string,
   c: {
@@ -823,69 +979,55 @@ export async function sendSignedAgreement(
   },
 ) {
   const first = (c.ownerNames || "there").split(" ")[0];
-  const rows = c.scope
-    .map(
-      (s) =>
-        `<tr><td style="padding:6px 10px 6px 0;border-bottom:1px solid ${LINE};font:13px ${FONT};">${s.description}</td>` +
-        `<td style="padding:6px 0;border-bottom:1px solid ${LINE};font:600 13px ${FONT};text-align:right;white-space:nowrap;">${money(s.price)}</td></tr>`,
-    )
-    .join("");
+  const { ledger } = moneyBlock(c);
   const split = claimSplit(c.total, c.deductible);
-  const fig = (label: string, value: string, strong = false) =>
-    `<tr>
-       <td style="padding:7px 10px 7px 0;font:${strong ? "700" : "400"} 14px ${FONT};color:${TEXT};">${label}</td>
-       <td style="padding:7px 0;font:${strong ? "700" : "400"} 14px ${FONT};color:${TEXT};text-align:right;white-space:nowrap;">${value}</td>
-     </tr>`;
 
   return sendEmail(
     resendKey,
     c.email,
     `Your signed agreement with PowerEdge`,
     shell({
-      preheader: `A copy for your records, plus your right to cancel.`,
+      preheader: `Your copy, and your right to cancel until ${c.cancelBy}.`,
       body:
+        eyebrow("Your signed copy") +
         h1(`Thanks, ${first}.`) +
         p(
-          `Here is your signed agreement for <strong>${c.address}</strong>, dated ${c.signedOn}.`,
+          `Here is your signed agreement for <strong>${c.address}</strong>, dated ${c.signedOn}. Keep this email; it is your copy.`,
         ) +
-        `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 16px;">${rows}</table>` +
-        `<div style="border:1px solid ${LINE};border-radius:8px;padding:12px 14px;margin:14px 0;">
-           <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;">
-             ${c.carrier ? fig("Insurance carrier", c.carrier) : ""}
-             ${c.claimNumber ? fig("Claim number", c.claimNumber) : ""}
-             ${split.total > 0 ? fig(c.claimBased ? "Approved scope total" : "Total price", split.totalText, !c.claimBased) : ""}
-             ${c.claimBased && split.show ? fig("Your insurance pays", split.carrierText) : ""}
-             ${c.claimBased && split.deductible > 0 ? fig("You pay (your deductible)", split.deductibleText, true) : ""}
-           </table>
-         </div>` +
+        keyPanel({
+          label: "You can cancel until",
+          value: c.cancelBy,
+          sub: "Midnight on that date, for any reason, with nothing owed. Reply CANCEL to this email and we will confirm in writing.",
+        }) +
+        section("The work") +
+        scopeRows(c.scope) +
         (c.claimBased
-          ? p(
-              `This work is being done through your insurance claim. The carrier sets the scope and the price; you pay your deductible. We never waive it, because that is a crime in Texas.`,
+          ? ledger +
+            small(
+              `The carrier sets the scope and the price; you pay your deductible. We never waive it, because that is a crime in Texas.`,
             )
-          : "") +
+          : rows([split.total > 0 ? ["Total price", split.totalText, true] : null])) +
         /*
          * Tex. Bus. & Com. Code § 601.053(b) lists what a merchant "may not
          * fail to include" on the notice: the merchant's name, the address of
          * the merchant's place of business, the date of the transaction, and
-         * the deadline. The name, date and deadline were here. The address was
-         * not, so set site.mailingAddress.
+         * the deadline. Wording is the statutory form; only the styling here
+         * is ours.
          */
-        `<div style="border:2px solid ${INK};padding:14px;margin:18px 0;font:700 13px ${FONT};line-height:1.45;color:${TEXT};">
-           NOTICE OF CANCELLATION<br>
-           DATE OF TRANSACTION: ${c.signedOn}<br><br>
-           YOU MAY CANCEL THIS TRANSACTION, WITHOUT ANY PENALTY OR OBLIGATION, WITHIN THREE
-           BUSINESS DAYS FROM THE DATE ABOVE.<br><br>
-           TO CANCEL THIS TRANSACTION, MAIL OR DELIVER A SIGNED AND DATED COPY OF THIS NOTICE,
-           OR ANY OTHER WRITTEN NOTICE, TO ${site.legalEntity.toUpperCase()}${
-             site.mailingAddress ? `, AT ${site.mailingAddress.toUpperCase()}` : ""
-           }, OR REPLY TO THIS EMAIL, NOT LATER THAN MIDNIGHT OF
-           <span style="text-decoration:underline">${c.cancelBy}</span>.
-         </div>` +
-        p(
-          `Replying to this email with the word CANCEL before that date cancels it, and we will confirm in writing. No reason needed and nothing owed.`,
-        ) +
-        p(`Questions about any of it, call or text <strong>${site.phone}</strong>.`) +
-        verifyChip(),
+        `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:26px 0 8px;">
+           <tr><td style="border:2px solid ${INK};border-radius:8px;padding:16px 18px;font-family:${FONT};font-size:13px;line-height:20px;font-weight:700;color:${TEXT};">
+             NOTICE OF CANCELLATION<br>
+             DATE OF TRANSACTION: ${c.signedOn}<br><br>
+             YOU MAY CANCEL THIS TRANSACTION, WITHOUT ANY PENALTY OR OBLIGATION, WITHIN THREE
+             BUSINESS DAYS FROM THE DATE ABOVE.<br><br>
+             TO CANCEL THIS TRANSACTION, MAIL OR DELIVER A SIGNED AND DATED COPY OF THIS NOTICE,
+             OR ANY OTHER WRITTEN NOTICE, TO ${site.legalEntity.toUpperCase()}${
+               site.mailingAddress ? `, AT ${site.mailingAddress.toUpperCase()}` : ""
+             }, OR REPLY TO THIS EMAIL, NOT LATER THAN MIDNIGHT OF
+             <span style="text-decoration:underline">${c.cancelBy}</span>.
+           </td></tr>
+         </table>` +
+        small(`Questions about any of it, call or text ${phone(MUTED)}.`),
     }),
     "signed-agreement",
   );
@@ -922,42 +1064,8 @@ export async function sendAgreementToSign(
 ) {
   const first = (c.ownerNames || "there").split(" ")[0];
   const split = claimSplit(c.total, c.deductible);
-
-  const row = (label: string, value: string, strong = false) =>
-    `<tr>
-       <td style="padding:7px 10px 7px 0;font:${strong ? "700" : "400"} 14px ${FONT};color:${TEXT};">${label}</td>
-       <td style="padding:7px 0;font:${strong ? "700" : "400"} 14px ${FONT};color:${TEXT};text-align:right;white-space:nowrap;">${value}</td>
-     </tr>`;
-
-  /*
-   * What it costs, and specifically what THEY pay.
-   *
-   * The first version of this email carried a bare total with no currency
-   * formatting, no carrier, no claim number and no deductible, so a homeowner
-   * opening it saw "20000" and had no way to tell what their own share was.
-   * On an insurance job the contract total is mostly not their money, and the
-   * deductible is, which is the number they are actually deciding about.
-   */
-  const figures = c.claimBased
-    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:4px 0 2px;">
-         ${c.carrier ? row("Insurance carrier", c.carrier) : ""}
-         ${c.claimNumber ? row("Claim number", c.claimNumber) : ""}
-         ${split.total > 0 ? row("Approved scope total", split.totalText) : ""}
-         ${split.show ? row("Your insurance pays", split.carrierText) : ""}
-         ${split.deductible > 0 ? row("You pay (your deductible)", split.deductibleText, true) : ""}
-       </table>`
-    : `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:4px 0 2px;">
-         ${split.total > 0 ? row("Total price", split.totalText, true) : ""}
-       </table>`;
-
-  const scopeRows = (c.scope ?? [])
-    .filter((l) => (l.description || "").trim())
-    .map(
-      (l) =>
-        `<tr><td style="padding:6px 10px 6px 0;border-bottom:1px solid ${LINE};font:13px ${FONT};color:${TEXT};">${l.description}</td>` +
-        `<td style="padding:6px 0;border-bottom:1px solid ${LINE};font:600 13px ${FONT};color:${TEXT};text-align:right;white-space:nowrap;">${money(l.price)}</td></tr>`,
-    )
-    .join("");
+  const { panel, ledger } = moneyBlock(c);
+  const work = scopeRows(c.scope);
 
   return sendEmail(
     resendKey,
@@ -968,30 +1076,25 @@ export async function sendAgreementToSign(
         ? `Your part is ${split.deductibleText}. Read it and sign on your phone.`
         : "Read it, then sign on your phone. Takes a minute.",
       body:
+        eyebrow("Your agreement") +
         h1(`Ready when you are, ${first}.`) +
         p(
           `${c.rep ? `${c.rep} has` : "We have"} prepared your repair agreement for ` +
-            `<strong>${c.address}</strong>. Read it and sign on your phone, no printing ` +
-            `and no app.`,
+            `<strong>${c.address}</strong>. Read it and sign on your phone. No printing, no app.`,
         ) +
-        (scopeRows
-          ? `<p style="margin:16px 0 4px;font:700 12px ${FONT};letter-spacing:.06em;text-transform:uppercase;color:#6b7280;">The work</p>` +
-            `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 10px;">${scopeRows}</table>`
-          : "") +
-        `<div style="border:1px solid ${LINE};border-radius:8px;padding:12px 14px;margin:14px 0;">${figures}</div>` +
+        panel +
+        button("Read and sign", c.url) +
+        small(
+          `Nothing is owed and nothing is agreed until you sign. Once you do, you get your own copy and three business days to cancel.`,
+        ) +
+        (work ? section("The work") + work : "") +
         (c.claimBased
-          ? p(
-              `Your carrier sets the scope and the price. You pay your deductible, ` +
-                `and we never discount it or absorb it, because doing that is a crime in Texas.`,
+          ? ledger +
+            small(
+              `Your carrier sets the scope and the price. You pay your deductible, and we never discount it or absorb it, because doing that is a crime in Texas.`,
             )
           : "") +
-        button("Read and sign", c.url) +
-        p(
-          `Nothing is owed and nothing is agreed until you sign. Once you do, you get your ` +
-            `own copy and three business days to cancel, in writing, with the date on it.`,
-        ) +
-        p(`Questions first? Call or text <strong>${site.phone}</strong>.`) +
-        verifyChip(),
+        small(`Questions first? Call or text ${phone(MUTED)}.`),
     }),
     "agreement-to-sign",
   );
@@ -1020,47 +1123,52 @@ export async function sendInspectionAssessment(
   },
 ) {
   const first = (a.name || "there").split(" ")[0];
-  const by = a.closer ? `${a.closer} inspected` : "We inspected";
   const findings = (a.findings || "").trim();
+  const fine = a.verdict === "fine";
+  const panel = keyPanel({
+    label: "Verdict",
+    value: fine ? "No storm damage found" : "Storm damage found",
+    sub: `${a.address}<br/>Inspected ${a.inspectedOn}${a.closer ? ` by ${a.closer}` : ""}`,
+  });
+  const saw = findings ? section("What we saw") + quote(findings) : "";
 
-  const body =
-    a.verdict === "fine"
-      ? h1(`Good news, ${first}.`) +
-        p(
-          `${by} your roof at <strong>${a.address}</strong> on ${a.inspectedOn}. ` +
-            `We did not find storm damage that would support an insurance claim.`,
-        ) +
-        (findings ? p(`<strong>What we saw:</strong> ${findings}`) : "") +
-        p(
-          `You do not need to do anything. We will not call to sell you a roof you do not need. ` +
-            `If a storm comes through and you want a second look, call or text ` +
-            `<strong>${site.phone}</strong> and it is free again.`,
-        )
-      : h1(`Here is what we found, ${first}.`) +
-        p(
-          `${by} your roof at <strong>${a.address}</strong> on ${a.inspectedOn} and found ` +
-            `damage consistent with the storm.`,
-        ) +
-        (findings ? p(`<strong>What we saw:</strong> ${findings}`) : "") +
-        p(
-          `The next step is your insurance claim. You file it with your carrier; we document ` +
-            `what we found and meet your adjuster. Texas law does not allow a contractor to file ` +
-            `or negotiate the claim for you, and we would not want to.`,
-        ) +
-        p(`Questions about any of it, call or text <strong>${site.phone}</strong>.`);
+  const body = fine
+    ? eyebrow("Your inspection") +
+      h1(`Good news, ${first}.`) +
+      panel +
+      saw +
+      gap(18) +
+      p(
+        `Nothing we saw would support an insurance claim. You do not need to do anything, and we will not call to sell you a roof you do not need.`,
+      ) +
+      p(
+        `Keep this email. It is a dated record of your roof&rsquo;s condition, which helps if a future storm ever leads to a claim.`,
+      ) +
+      small(
+        `If a storm comes through and you want a second look, call or text ${phone(MUTED)}. It is free again.`,
+      )
+    : eyebrow("Your inspection") +
+      h1(`Here is what we found, ${first}.`) +
+      panel +
+      saw +
+      section("What happens next") +
+      steps([
+        `You file the claim with your carrier. Texas law does not let a contractor file or negotiate it for you, and we would not want to.`,
+        `We document what we found and meet your adjuster at the house, so nothing legitimate gets missed.`,
+        `Your carrier decides the scope. You pay your deductible.`,
+      ]) +
+      button(`Call ${site.phone}`, site.phoneHref, "quiet") +
+      small(`Questions about any of it, call or text. A person answers.`);
 
   return sendEmail(
     resendKey,
     a.email,
-    a.verdict === "fine"
-      ? `Your roof inspection: no storm damage found`
-      : `Your roof inspection: what we found`,
+    fine ? `Your roof inspection: no storm damage found` : `Your roof inspection: what we found`,
     shell({
-      preheader:
-        a.verdict === "fine"
-          ? "Your roof is fine. Nothing for you to do."
-          : "Damage found. Here is what happens next.",
-      body: body + verifyChip(),
+      preheader: fine
+        ? "Your roof is fine. Nothing for you to do."
+        : "Damage found. Here is what happens next.",
+      body,
     }),
     "inspection-assessment",
   );
