@@ -3,7 +3,7 @@ import { listIncompleteIntakes, markIntakeNurtured } from "@/lib/db";
 import { sendClaimNurture } from "@/lib/emails";
 import { runStormWatch } from "@/lib/storm";
 import { generateStormTargets } from "@/lib/parcels";
-import { runStormContactTasks } from "@/lib/hubspotStorm";
+import { runStormJobAlerts } from "@/lib/stormAlerts";
 import { runSkipTrace } from "@/lib/skiptrace";
 import { runAppointmentReminders } from "@/lib/scheduling";
 
@@ -34,8 +34,9 @@ export async function POST(req: Request) {
   const yesterday = new Date(Date.now() - 86400 * 1000).toISOString().slice(0, 10);
   const targetsToday = await generateStormTargets(today);
   const targetsYday = await generateStormTargets(yesterday);
-  // Fresh hail near an existing HubSpot contact → HIGH-priority call task.
-  const hubspotTasks = await runStormContactTasks();
+  // Fresh hail near an open job lands on that job's timeline, which is
+  // where the office and the rep already look.
+  const stormAlerts = await runStormJobAlerts();
   // Skip-trace the highest-score untraced targets (no-op until BATCHDATA_API_KEY).
   const skiptrace = await runSkipTrace();
   // Day-of reminders for inspections booked through the site.
@@ -79,7 +80,7 @@ export async function POST(req: Request) {
     touch2,
     storm,
     targets: { today: targetsToday, yesterday: targetsYday },
-    hubspotTasks,
+    stormAlerts,
     skiptrace,
     reminders,
   });

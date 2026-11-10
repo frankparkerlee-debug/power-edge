@@ -3,7 +3,7 @@ import { site } from "@/lib/site";
 import { sendMail } from "@/lib/sendMail";
 import { enqueueLeadSequence } from "@/lib/emails";
 import { insertLead } from "@/lib/db";
-import { pushLeadToHubspot } from "@/lib/hubspot";
+
 
 /**
  * Lead handler.
@@ -102,19 +102,38 @@ export async function POST(req: Request) {
     gclid: lead.gclid,
   });
 
-  // --- 0b. HubSpot CRM (env-gated HUBSPOT_ACCESS_TOKEN), fire-and-forget so
-  // the form returns fast; contact + timeline note. Best-effort, never throws.
-  void pushLeadToHubspot({
-    name: lead.name,
-    phone: lead.phone,
-    email: lead.email,
-    address: lead.address,
-    zip: lead.zip,
-    service: lead.service,
-    message: lead.message,
-    solar: lead.solar === "yes",
-    source: sourceLine,
-  }).catch(() => {});
+  // --- 0b. The CRM. Jobs is the system of record as of 2026-11-10. This used
+  // to create a HubSpot contact; an inbound enquiry now enters the same
+  // pipeline a knocked door does instead of living in a separate tool.
+  // Fire-and-forget so the form returns fast, and best-effort so a CRM hiccup
+  // never costs the lead row or the notification that already landed.
+  void (async () => {
+    try {
+      const { listJobs, createJob, logEvent } = await import("@/lib/jobs");
+      const addr = (lead.address || "").trim();
+      const isRep = /sales rep application/i.test(lead.service || "");
+      if (isRep) return; // applicants are not jobs
+      const existing = addr
+        ? (await listJobs({ limit: 500 })).find(
+            (j) => j.address.trim().toLowerCase() === addr.toLowerCase(),
+          )
+        : null;
+      if (existing) return;
+      const job = await createJob({
+        address: addr || `${lead.name} (no address given)`,
+        owner_name: lead.name || null,
+        phone: lead.phone || null,
+        email: lead.email || null,
+        zip: lead.zip || null,
+        stage: "new",
+      });
+      if (job) {
+        await logEvent(job.id, "created", `Website lead: ${lead.service || "general"}`);
+      }
+    } catch {
+      /* the lead row and the notification already landed */
+    }
+  })();
 
   // --- 1. Email notification -------------------------------------------------
   const resendKey = process.env.RESEND_API_KEY;

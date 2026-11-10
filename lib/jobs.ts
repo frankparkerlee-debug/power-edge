@@ -80,6 +80,11 @@ export type Job = {
   /** uuid, matching storm_targets.id. Was typed number before that column
    *  was corrected from bigint. */
   storm_target_id: string | null;
+  /** Carried so fresh hail can be matched against open jobs, which is what
+   *  HubSpot used to do against contacts. */
+  lat: number | null;
+  lon: number | null;
+  last_storm_alert_at: string | null;
   appointment_id: string | null;
   contract_id: string | null;
 };
