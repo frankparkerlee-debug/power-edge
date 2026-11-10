@@ -8,12 +8,12 @@
 <style>
 /*
  * Door hanger. Trim 4.25 x 11 in, 0.125 in bleed on every side, so each page
- * is 4.5 x 11.25 in. Die cut: 1.25 in hole centered 1 in below the top trim;
- * nothing sits above 2.15 in. Safe area 0.25 in inside trim.
+ * is 4.5 x 11.25 in. Die cut: 1.25 in hole centered 1 in below the top trim.
+ * Safe area 0.25 in inside trim.
  *
- * Reps hang this only on streets from the storm list, and write the storm
- * date and hail size from the door card in the app. Print on uncoated or
- * matte stock: a ballpoint skips on gloss.
+ * Calm on purpose: sentence case, one two-tone headline, hairlines, one lime
+ * accent (the number to call). The front is paper because the rep writes the
+ * storm date, hail size and their name on it. Uncoated or matte stock.
  */
 @page { size: 4.5in 11.25in; margin: 0; }
 .page { width: 4.5in; height: 11.25in; }
@@ -21,129 +21,112 @@
 .safe { left: .375in; top: .375in; width: 3.75in; height: 10.5in; }
 .die  { left: 1.625in; top: .5in; width: 1.25in; height: 1.25in; }
 
-.inner { position: absolute; left: .375in; right: .375in; top: 2.15in; bottom: .4in; display: flex; flex-direction: column; align-items: center; text-align: center; }
+:root { --paper: #f4f4f1; --gray: #8b929c; --rule: #c9cdd2; --mist: #ced5dd; --ink-gray: #6f7782; }
+.head { font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; font-weight: 600; letter-spacing: -0.022em; line-height: 1.08; }
+.label { font-size: 7pt; font-weight: 600; letter-spacing: .02em; display: flex; align-items: center; gap: .1in; }
+.label::after { content: ""; flex: 1; height: 0; border-top: .6pt solid currentColor; opacity: .35; }
 
-/* ---- Front ---- */
-.front { background: var(--ink); color: var(--white); }
-.front .logo { width: 1.75in; display: block; }
-.front .kicker { margin-top: .09in; font-size: 6.6pt; color: var(--muted-dark); }
-.front h1 { margin-top: .26in; font-size: 66pt; color: var(--white); }
-.front h1 .lime { display: block; font-size: 70pt; }
+/* ---------------- Front ---------------- */
+.front { background: var(--paper); color: var(--ink); }
+.front .band { position: absolute; left: 0; right: 0; top: 0; height: 2.62in; background: var(--ink); }
+.front .band img { position: absolute; left: 50%; transform: translateX(-50%); top: 1.98in; width: 1.38in; }
+.front .band .bolt { position: absolute; left: .375in; right: .375in; bottom: 0; height: 2.2pt; background: var(--lime); }
+.front .body { position: absolute; left: .42in; right: .42in; top: 3.02in; bottom: .42in; display: flex; flex-direction: column; }
 
-.ledger { margin-top: .26in; width: 100%; background: var(--white); color: var(--ink); border-radius: 6pt; padding: .13in .16in .08in; text-align: left; }
-.ledger .label { font-size: 6.6pt; font-weight: 700; color: var(--deep); }
-.ledger .row { display: flex; gap: .14in; margin-top: .1in; }
-.ledger .field { flex: 1; display: flex; align-items: flex-end; gap: .06in; }
-.ledger .field span { font-family: "JetBrains Mono", monospace; font-size: 6.4pt; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; padding-bottom: 1pt; }
-.ledger .field i { flex: 1; height: .27in; border-bottom: 1px solid #8a919c; }
-.ledger .field.narrow { flex: 0 0 1.25in; }
+.front .label { color: var(--muted); }
+.front h1 { margin-top: .18in; font-size: 25.5pt; }
+.front h1 .lead { color: var(--gray); display: block; }
 
-.proofs { margin-top: .2in; width: 100%; text-align: left; list-style: none; }
-.proofs li { font-size: 7.4pt; line-height: 1.45; color: var(--white); display: flex; gap: .09in; align-items: baseline; }
-.proofs li::before { content: ""; flex: 0 0 5pt; height: 5pt; background: var(--lime); transform: translateY(-1pt); }
+.record { margin-top: .34in; }
+.record .row { display: flex; gap: .18in; margin-top: .22in; }
+.record .field { flex: 1; display: flex; flex-direction: column; }
+.record .field i { height: .4in; border-bottom: .75pt solid #b4b9bf; }
+.record .field span { margin-top: .045in; font-size: 7pt; color: var(--muted); }
+.record .field.short { flex: 0 0 1.05in; }
+.record .src { margin-top: .1in; font-size: 7pt; color: var(--muted); }
 
-.scan { margin-top: .24in; display: flex; align-items: center; gap: .16in; width: 100%; }
-.qr { background: var(--white); border-radius: 5pt; padding: .11in; flex: 0 0 auto; }
-.qr img { display: block; width: 1.02in; height: 1.02in; }
-.scan .what { text-align: left; }
-.scan .what .mono { font-size: 6.8pt; font-weight: 700; color: var(--lime); line-height: 1.5; }
-.scan .what p { margin-top: .05in; font-size: 8.4pt; line-height: 1.35; color: #d6dbe1; }
+.offer { margin-top: .38in; font-size: 9.6pt; line-height: 1.45; color: #2a2f37; }
 
-.call { margin-top: auto; width: 100%; }
-.call .mono { font-size: 7pt; color: var(--muted-dark); }
-.call .phone { margin-top: .03in; font-size: 50pt; color: var(--lime); letter-spacing: 0; }
-.call .promise { margin-top: .08in; font-size: 9pt; color: #d6dbe1; }
-.foot { margin-top: .14in; font-size: 6pt; color: var(--muted-dark); }
+.act { margin-top: auto; display: flex; gap: .2in; align-items: flex-end; padding-top: .22in; border-top: .6pt solid var(--rule); }
+.act img { width: 1.02in; height: 1.02in; display: block; }
+.act .how { flex: 1; padding-bottom: .02in; }
+.act .how b { display: block; font-size: 10pt; font-weight: 600; }
+.act .how span { display: block; margin-top: .03in; font-size: 7.6pt; color: var(--muted); }
+.act .how .tel { margin-top: .16in; font-family: "Archivo", sans-serif; font-size: 17pt; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
+.act .how .tel small { display: block; font-family: "Inter", sans-serif; font-size: 7.6pt; font-weight: 400; letter-spacing: 0; color: var(--muted); margin-bottom: .02in; }
+.front .fine { margin-top: .18in; font-size: 6.6pt; color: var(--muted); display: flex; justify-content: space-between; }
 
-/* ---- Back ---- */
-.back { background: var(--paper); }
-.back .logo { width: 1.75in; display: block; }
-.back h2 { margin-top: .28in; font-size: 50pt; color: var(--ink); }
-.back h2 .deep { display: block; font-size: 56pt; }
-.standard { margin-top: .26in; list-style: none; width: 100%; text-align: left; }
-.standard li { display: grid; grid-template-columns: 9pt 1fr; column-gap: .1in; margin-bottom: .17in; }
-.standard li::before { content: ""; width: 7pt; height: 7pt; background: var(--deep); margin-top: 3.5pt; }
-.standard b { display: block; font-size: 11.6pt; line-height: 1.2; letter-spacing: -0.01em; }
-.standard em { display: block; grid-column: 2; font-style: normal; font-size: 8.6pt; line-height: 1.35; color: var(--muted); margin-top: 2pt; }
-.clock { margin-top: .04in; font-size: 9.6pt; font-weight: 700; line-height: 1.35; }
-.back .qrwrap { margin-top: .2in; }
-.back .qrwrap img { width: 1.05in; height: 1.05in; display: block; }
-.back .url { margin-top: .06in; font-size: 7pt; font-weight: 700; color: var(--deep); }
-.back .call { border-top: 1px solid var(--line); padding-top: .14in; }
-.back .call .phone { color: var(--ink); font-size: 46pt; }
-.back .foot { color: var(--muted); }
+/* ---------------- Back ---------------- */
+.back { background: var(--ink); color: var(--white); }
+.back .body { position: absolute; left: .42in; right: .42in; top: 2.12in; bottom: .42in; display: flex; flex-direction: column; }
+.back .photo { width: 100%; height: 3.55in; object-fit: cover; object-position: 50% 40%; display: block; }
+.back h2 { margin-top: .36in; font-size: 25pt; }
+.back h2 .lead { color: var(--ink-gray); display: block; }
+.back ol { list-style: none; margin-top: .3in; counter-reset: n; }
+.back li { counter-increment: n; display: grid; grid-template-columns: .34in 1fr; padding: .13in 0; border-top: .6pt solid #262c35; font-size: 8.8pt; line-height: 1.4; color: var(--mist); }
+.back li:last-child { border-bottom: .6pt solid #262c35; }
+.back li::before { content: "0" counter(n); font-size: 7pt; font-weight: 600; color: var(--ink-gray); padding-top: 1.2pt; }
+.back li b { color: var(--white); font-weight: 600; }
+.back .call { margin-top: auto; }
+.back .call small { display: block; font-size: 7.6pt; color: var(--ink-gray); }
+.back .call .tel { margin-top: .02in; font-family: "Archivo", sans-serif; font-size: 30pt; font-weight: 600; letter-spacing: -0.015em; color: var(--lime); line-height: 1; }
+.back .fine { margin-top: .14in; font-size: 6.6pt; color: var(--ink-gray); display: flex; justify-content: space-between; }
 </style>
 </head>
 <body>
 
 <section class="page front">
   <div class="trim"></div><div class="safe"></div><div class="die"></div>
-  <div class="inner">
-    <img class="logo" src="../logos/lockup-on-dark.png" alt="PowerEdge">
-    <div class="kicker mono">Roofing &amp; storm restoration · North Texas</div>
+  <div class="band">
+    <img src="../logos/lockup-on-dark.png" alt="PowerEdge">
+    <div class="bolt"></div>
+  </div>
+  <div class="body">
+    <div class="label">Storm record for this address</div>
+    <h1 class="head"><span class="lead">Hail was reported near your home.</span>We&rsquo;ll inspect your roof free and put the answer in writing.</h1>
 
-    <h1 class="display">Hail hit <span class="lime">your street.</span></h1>
-
-    <div class="ledger">
-      <div class="label mono">Storm on record near this address</div>
+    <div class="record">
       <div class="row">
-        <div class="field"><span>Date</span><i></i></div>
-        <div class="field narrow"><span>Hail</span><i></i><span>in</span></div>
+        <div class="field"><i></i><span>Date of the storm</span></div>
+        <div class="field short"><i></i><span>Hail size, inches</span></div>
       </div>
+      <div class="src">Source: National Weather Service storm reports</div>
       <div class="row">
-        <div class="field"><span>Your rep</span><i></i></div>
-      </div>
-      <div class="row">
-        <div class="field"><span>We stopped by</span><i></i></div>
+        <div class="field"><i></i><span>Your PowerEdge rep</span></div>
+        <div class="field short"><i></i><span>We stopped by</span></div>
       </div>
     </div>
 
-    <ul class="proofs mono">
-      <li>Free inspection: photos and measurements</li>
-      <li>A written verdict, even &ldquo;your roof is fine&rdquo;</li>
-      <li>Some policies allow just one year to file</li>
-    </ul>
+    <p class="offer">Photos and measurements of the whole roof, and a straight answer, even when the answer is that your roof is fine. Some policies give you as little as one year from the storm to file.</p>
 
-    <div class="scan">
-      <div class="qr"><img src="qr-doorhanger.svg" alt=""></div>
-      <div class="what">
-        <div class="mono">Scan for a free<br>60-second claim check</div>
-        <p>See whether your address was in the hail, then book a free inspection.</p>
+    <div class="act">
+      <img src="qr-doorhanger.svg" alt="">
+      <div class="how">
+        <b>Check your address</b>
+        <span>See the storm record and book a time.</span>
+        <div class="tel"><small>Or call or text</small>469-277-9594</div>
       </div>
     </div>
-
-    <div class="call">
-      <div class="mono">Call or text</div>
-      <div class="phone display">469-277-9594</div>
-      <div class="promise">If your roof is fine, we&rsquo;ll tell you. In writing.</div>
-      <div class="foot mono">poweredgetx.com · Insured · $2M liability</div>
-    </div>
+    <div class="fine"><span>Insured for $2,000,000</span><span>poweredgetx.com</span></div>
   </div>
 </section>
 
 <section class="page back">
   <div class="trim"></div><div class="safe"></div><div class="die"></div>
-  <div class="inner">
-    <img class="logo" src="../logos/lockup-on-light.png" alt="PowerEdge">
-
-    <h2 class="display">The PowerEdge <span class="deep">standard.</span></h2>
-
-    <ul class="standard">
-      <li><b>We&rsquo;ll tell you if your roof is fine.</b><em>No invented damage. An honest verdict, in writing.</em></li>
-      <li><b>No deductible games. Ever.</b><em>Waiving a deductible is a crime in Texas. We don&rsquo;t play.</em></li>
-      <li><b>We document. Your adjuster decides.</b><em>Photos, measurements and a written scope, by the book.</em></li>
-      <li><b>Insured, and you can check.</b><em>$2,000,000 in liability coverage. Ask us for the certificate.</em></li>
-    </ul>
-
-    <p class="clock">Some Texas policies give you as little as<br>one year from the storm to file. Don&rsquo;t sit on it.</p>
-
-    <div class="qrwrap"><img src="qr-doorhanger.svg" alt=""></div>
-    <div class="url mono">poweredgetx.com/roof-claim-check</div>
-
+  <div class="body">
+    <img class="photo" src="../../public/photos/new-roof.jpg" alt="">
+    <h2 class="head"><span class="lead">Still answering</span>after the check clears.</h2>
+    <ol>
+      <li><span><b>If your roof is fine, we say so.</b> In writing, with the photos.</span></li>
+      <li><span><b>You file the claim.</b> We document the damage and meet your adjuster.</span></li>
+      <li><span><b>Your deductible is yours.</b> Waiving it is a crime in Texas, so we never do.</span></li>
+      <li><span><b>Insured for $2,000,000.</b> Ask us for the certificate.</span></li>
+    </ol>
     <div class="call">
-      <div class="phone display">469-277-9594</div>
-      <div class="foot mono">Power Edge, LLC · North Texas</div>
+      <small>Call or text</small>
+      <div class="tel">469-277-9594</div>
     </div>
+    <div class="fine"><span>Power Edge, LLC &middot; North Texas</span><span>poweredgetx.com</span></div>
   </div>
 </section>
 

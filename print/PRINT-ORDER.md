@@ -9,6 +9,8 @@ Send the printer the plain PDF (`name.pdf`). The `-proof.pdf` has trim, safe-are
 | Yard sign | `yard-sign-24x18.pdf` | 24 x 18 in | 1 | 4 mm corrugated plastic | H-stake. Goes in the yard of a finished job, with the owner's OK. |
 | Banner | `banner-72x36.pdf` | 6 x 3 ft | 1 | 13 oz vinyl | Hemmed, grommets in the corners and every 2 ft. |
 
+The door hanger back uses the finished-roof photo from the website (`public/photos/new-roof.jpg`) as a placeholder. Swap in a real PowerEdge job photo before a large run: one line in `src/door-hanger.html`.
+
 QR codes all go to poweredgetx.com/roof-claim-check, each tagged with its own source (door hanger, yard sign, banner), so scans show up separately in analytics.
 
 ## Changing a piece
