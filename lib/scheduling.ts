@@ -100,27 +100,74 @@ function authHeaders() {
 }
 const dbOn = () => !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-/** Slots already taken in the booking window. */
-async function bookedStarts(): Promise<Set<string>> {
-  if (!dbOn()) return new Set();
+/**
+ * Who drives to inspections.
+ *
+ * Capacity used to be one booked inspection per window for the whole company,
+ * so four a day however many closers there were. It is now one per closer per
+ * window, and these are the closers.
+ */
+export async function inspectors(): Promise<string[]> {
+  if (!dbOn()) return [];
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/team_members?select=name&active=is.true&takes_inspections=is.true&order=name.asc`,
+      { headers: authHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    const rows = (await res.json()) as Array<{ name: string }>;
+    return rows.map((r) => r.name).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+type Booked = { slot_start: string; closer: string | null };
+
+/** Every booked inspection from an hour ago onward, with who is on it. */
+async function bookedFrom(): Promise<Booked[]> {
+  if (!dbOn()) return [];
   try {
     const since = new Date(Date.now() - 3600 * 1000).toISOString();
     const res = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/appointments?select=slot_start&status=eq.booked&slot_start=gte.${since}`,
+      `${process.env.SUPABASE_URL}/rest/v1/appointments?select=slot_start,closer&status=eq.booked&slot_start=gte.${since}`,
       { headers: authHeaders(), cache: "no-store" },
     );
-    if (!res.ok) return new Set();
-    const rows: { slot_start: string }[] = await res.json();
-    return new Set(rows.map((r) => new Date(r.slot_start).toISOString()));
+    if (!res.ok) return [];
+    const rows = (await res.json()) as Booked[];
+    return rows.map((r) => ({ ...r, slot_start: new Date(r.slot_start).toISOString() }));
   } catch {
-    return new Set();
+    return [];
   }
+}
+
+/**
+ * Which closers are free in each window.
+ *
+ * With nobody set to take inspections, the old rule applies: one unassigned
+ * booking per window, placed by the office. That keeps the public site from
+ * ever offering capacity that does not exist.
+ */
+async function freeByWindow(): Promise<{ free: Map<string, string[]>; pooled: boolean }> {
+  const [people, booked] = await Promise.all([inspectors(), bookedFrom()]);
+  const free = new Map<string, string[]>();
+  const pooled = people.length === 0;
+  for (const s of candidateSlots()) {
+    const here = booked.filter((b) => b.slot_start === s.start);
+    if (pooled) {
+      free.set(s.start, here.length === 0 ? [""] : []);
+    } else {
+      const busy = new Set(here.map((b) => b.closer || ""));
+      free.set(s.start, people.filter((p) => !busy.has(p)));
+    }
+  }
+  return { free, pooled };
 }
 
 /** Open slots, grouped by day, ready for the picker. */
 export async function availableSlots() {
-  const taken = await bookedStarts();
-  const open = candidateSlots().filter((s) => !taken.has(s.start));
+  const { free } = await freeByWindow();
+  const open = candidateSlots().filter((s) => (free.get(s.start) ?? []).length > 0);
   const days: { date: string; dayLabel: string; slots: Slot[] }[] = [];
   for (const s of open) {
     let d = days.find((x) => x.date === s.date);
@@ -162,10 +209,14 @@ export type BookingInput = {
   source?: string;
   claim_intake_id?: string;
   ip?: string;
+  /** Who set it. Present when a setter books at the door. */
+  setter?: string;
+  /** The job this inspection belongs to, when we already know it. */
+  job_id?: string;
 };
 
 export type BookingResult =
-  | { ok: true; slot: Slot; id?: string }
+  | { ok: true; slot: Slot; id?: string; closer?: string | null }
   | { ok: false; error: string; code: "taken" | "invalid" | "db" };
 
 /**
@@ -192,31 +243,76 @@ export async function bookSlot(input: BookingInput): Promise<BookingResult> {
   }
   if (!dbOn()) return { ok: false, error: "Scheduling is not configured.", code: "db" };
 
-  try {
-    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/appointments`, {
-      method: "POST",
-      headers: { ...authHeaders(), Prefer: "return=representation" },
-      body: JSON.stringify({
-        slot_start: slot.start,
-        slot_end: slot.end,
-        name: input.name.trim(),
-        phone: input.phone.trim(),
-        email: input.email?.trim() || null,
-        address: input.address?.trim() || null,
-        notes: input.notes?.trim() || null,
-        source: input.source || null,
-        claim_intake_id: input.claim_intake_id || null,
-        ip: input.ip || null,
-      }),
-    });
-    if (res.status === 409)
-      return { ok: false, error: "Someone just took that window. Pick another.", code: "taken" };
-    if (!res.ok) return { ok: false, error: "Could not save that booking.", code: "db" };
-    const rows = (await res.json()) as Array<{ id?: string }>;
-    return { ok: true, slot, id: rows?.[0]?.id };
-  } catch {
-    return { ok: false, error: "Could not save that booking.", code: "db" };
+  /*
+   * Pick a closer who is free in this window, lightest day first, and let the
+   * database settle any race.
+   *
+   * Two setters can open the same morning on two phones and both see Zach
+   * free. The unique index on (closer, slot_start) means only one insert wins;
+   * the loser moves on to the next free closer rather than failing, and only
+   * hears "that window filled up" when there genuinely is nobody left.
+   */
+  const { free, pooled } = await freeByWindow();
+  let candidates = free.get(slot.start) ?? [];
+  if (candidates.length === 0) {
+    return { ok: false, error: "That window just filled up. Pick another.", code: "taken" };
   }
+  if (!pooled && candidates.length > 1) {
+    const load = await dayLoad(slot.date);
+    candidates = [...candidates].sort((a, b) => (load.get(a) ?? 0) - (load.get(b) ?? 0));
+  }
+
+  for (const who of candidates) {
+    try {
+      const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/appointments`, {
+        method: "POST",
+        headers: { ...authHeaders(), Prefer: "return=representation" },
+        body: JSON.stringify({
+          slot_start: slot.start,
+          slot_end: slot.end,
+          name: input.name.trim(),
+          phone: input.phone.trim(),
+          email: input.email?.trim() || null,
+          address: input.address?.trim() || null,
+          notes: input.notes?.trim() || null,
+          source: input.source || null,
+          claim_intake_id: input.claim_intake_id || null,
+          ip: input.ip || null,
+          closer: pooled ? null : who,
+          setter: input.setter || null,
+          job_id: input.job_id || null,
+        }),
+      });
+      if (res.status === 409) continue; // that closer was just taken; try the next
+      if (!res.ok) return { ok: false, error: "Could not save that booking.", code: "db" };
+      const rows = (await res.json()) as Array<{ id?: string }>;
+      return { ok: true, slot, id: rows?.[0]?.id, closer: pooled ? null : who };
+    } catch {
+      return { ok: false, error: "Could not save that booking.", code: "db" };
+    }
+  }
+  return { ok: false, error: "That window just filled up. Pick another.", code: "taken" };
+}
+
+/** How many inspections each closer already has on a given day. */
+async function dayLoad(date: string): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  if (!dbOn()) return out;
+  try {
+    const from = new Date(`${date}T00:00:00-06:00`).toISOString();
+    const to = new Date(`${date}T23:59:59-06:00`).toISOString();
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/appointments?select=closer&status=eq.booked&slot_start=gte.${from}&slot_start=lte.${to}`,
+      { headers: authHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return out;
+    for (const r of (await res.json()) as Array<{ closer: string | null }>) {
+      if (r.closer) out.set(r.closer, (out.get(r.closer) ?? 0) + 1);
+    }
+  } catch {
+    /* even split is fine if this fails */
+  }
+  return out;
 }
 
 /** Upcoming booked inspections, for the admin board. */
@@ -372,37 +468,126 @@ export async function runAppointmentReminders(resendKey?: string) {
  * or who was already knocked, on one record instead of spawning duplicates.
  */
 export async function upsertJobForBooking(a: {
-  name: string; phone: string; email?: string; address?: string; id?: string;
-}) {
-  if (!dbOn() || !a.address?.trim()) return;
-  const { listJobs, createJob, updateJob, logEvent } = await import("@/lib/jobs");
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  /** The appointment row. */
+  id?: string;
+  /** The closer the booking was assigned to. */
+  closer?: string | null;
+  /** The setter who booked it, when it came from the door. */
+  setter?: string | null;
+  /** A job already known to belong to this house. */
+  jobId?: string;
+  /** Shown on the job timeline. */
+  when?: string;
+}): Promise<string | null> {
+  if (!dbOn()) return null;
+  const { listJobs, getJob, createJob, updateJob, logEvent } = await import("@/lib/jobs");
+  const source = a.setter ? `Set by ${a.setter}` : "Booked from the website";
+  const detail = [a.when, a.closer ? `with ${a.closer}` : "closer not yet assigned", source]
+    .filter(Boolean)
+    .join(" · ");
   try {
-    const addr = a.address.trim();
-    const existing = (await listJobs({ limit: 500 })).find(
-      (j) => j.address.trim().toLowerCase() === addr.toLowerCase(),
-    );
+    const addr = (a.address || "").trim();
+    const existing = a.jobId
+      ? await getJob(a.jobId)
+      : addr
+        ? (await listJobs({ limit: 500 })).find(
+            (j) => j.address.trim().toLowerCase() === addr.toLowerCase(),
+          ) ?? null
+        : null;
+
+    let jobId: string | null = null;
     if (existing) {
+      jobId = existing.id;
       await updateJob(existing.id, {
-        stage: existing.stage === "new" || existing.stage === "contacted"
-          ? "inspection_booked"
-          : existing.stage,
+        stage:
+          existing.stage === "new" || existing.stage === "contacted" || existing.stage === "lost"
+            ? "inspection_booked"
+            : existing.stage,
         appointment_id: a.id ?? null,
         phone: existing.phone || a.phone,
         email: existing.email || a.email || null,
+        // Only credit a setter who actually set it, and never overwrite one.
+        ...(a.setter && !existing.setter ? { setter: a.setter } : {}),
+        // The closer is whoever is driving to it, so it moves with the booking.
+        ...(a.closer ? { closer: a.closer, rep: a.closer } : {}),
       });
-      await logEvent(existing.id, "appointment", "Booked from the website");
-      return;
+    } else {
+      if (!addr) return null;
+      const job = await createJob({
+        address: addr,
+        owner_name: a.name,
+        phone: a.phone,
+        email: a.email || null,
+        stage: "inspection_booked",
+        appointment_id: a.id ?? null,
+        setter: a.setter ?? null,
+        closer: a.closer ?? null,
+        rep: a.closer ?? a.setter ?? null,
+      });
+      jobId = job?.id ?? null;
     }
-    const job = await createJob({
-      address: addr,
-      owner_name: a.name,
-      phone: a.phone,
-      email: a.email || null,
-      stage: "inspection_booked",
-      appointment_id: a.id ?? null,
-    });
-    if (job) await logEvent(job.id, "appointment", "Booked from the website");
+    if (jobId) {
+      await logEvent(jobId, "appointment", detail, a.setter ?? undefined);
+      // Tie the inspection back to the job by id, not by matching addresses.
+      if (a.id) {
+        await fetch(`${process.env.SUPABASE_URL}/rest/v1/appointments?id=eq.${a.id}`, {
+          method: "PATCH",
+          headers: { ...authHeaders(), Prefer: "return=minimal" },
+          body: JSON.stringify({ job_id: jobId }),
+        });
+      }
+    }
+    return jobId;
   } catch {
     /* a CRM write must never cost the booking */
+    return null;
+  }
+}
+
+/** A team member's email by name, for telling a closer about their booking. */
+export async function memberEmail(name?: string | null): Promise<string | null> {
+  if (!dbOn() || !name) return null;
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/team_members?select=email&active=is.true&name=eq.${encodeURIComponent(name)}&limit=1`,
+      { headers: authHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return null;
+    const rows = (await res.json()) as Array<{ email: string }>;
+    return rows[0]?.email ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Tell the assigned closer, best effort. Shared by the public booking form and
+ * the setter's door booking so the closer hears about it either way.
+ */
+export async function notifyCloser(a: {
+  closer?: string | null;
+  name: string;
+  phone: string;
+  address: string;
+  dayLabel: string;
+  timeLabel: string;
+  setter?: string | null;
+  note?: string;
+  jobId?: string | null;
+}) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key || !a.closer) return false;
+  const to = await memberEmail(a.closer);
+  if (!to) return false;
+  try {
+    const { sendCloserAssignment } = await import("@/lib/emails");
+    const r = await sendCloserAssignment(key, to, { ...a, closer: a.closer });
+    return !!(r as { ok?: boolean } | undefined)?.ok;
+  } catch {
+    return false;
   }
 }

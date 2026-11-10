@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
-import { availableSlots, bookSlot, bookingsFromIpToday, upsertJobForBooking } from "@/lib/scheduling";
+import {
+  availableSlots,
+  bookSlot,
+  bookingsFromIpToday,
+  upsertJobForBooking,
+  notifyCloser,
+} from "@/lib/scheduling";
 import { burst, clientIp, tooMany } from "@/lib/rateLimit";
 import { sendAppointmentConfirmation } from "@/lib/emails";
 
@@ -70,12 +76,25 @@ export async function POST(req: Request) {
 
   // The booking is also a job, so the office can see it in the pipeline
   // rather than only on a calendar.
-  await upsertJobForBooking({
+  const jobId = await upsertJobForBooking({
     name: String(body.name || ''),
     phone: String(body.phone || ''),
     email: String(body.email || ''),
     address: String(body.address || ''),
     id: result.id,
+    closer: result.closer ?? null,
+    when: `${result.slot.dayLabel}, ${result.slot.timeLabel}`,
+  });
+
+  await notifyCloser({
+    closer: result.closer ?? null,
+    name: String(body.name || ""),
+    phone: String(body.phone || ""),
+    address: String(body.address || ""),
+    dayLabel: result.slot.dayLabel,
+    timeLabel: result.slot.timeLabel,
+    note: String(body.notes || ""),
+    jobId,
   });
 
   // Confirmations are best-effort. A mail hiccup must never lose the booking.
@@ -91,6 +110,7 @@ export async function POST(req: Request) {
         dayLabel: result.slot.dayLabel,
         timeLabel: result.slot.timeLabel,
         id: result.id,
+        closer: result.closer ?? null,
       });
     }
   } catch {

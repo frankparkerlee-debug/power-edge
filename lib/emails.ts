@@ -596,14 +596,20 @@ export async function sendAppointmentConfirmation(
     dayLabel: string;
     timeLabel: string;
     id?: string;
+    /** Who is driving to it. */
+    closer?: string | null;
+    /** Who set it at the door. */
+    setter?: string | null;
   },
-) {
+): Promise<{ ok: boolean } | undefined> {
   const first = (a.name || "there").split(" ")[0];
   const when = `${a.dayLabel}, ${a.timeLabel}`;
 
-  // Homeowner confirmation.
+  // Homeowner confirmation. Returned, so the caller can tell the setter
+  // whether it actually went rather than assuming.
+  let homeowner: { ok: boolean } | undefined;
   if (a.email) {
-    await sendEmail(
+    homeowner = await sendEmail(
       resendKey,
       a.email,
       `You're booked: roof inspection ${a.dayLabel}`,
@@ -649,11 +655,64 @@ export async function sendAppointmentConfirmation(
       body:
         h1("New inspection booked") +
         `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
-          ${row("When", when)}${row("Name", a.name)}${row("Phone", a.phone)}
+          ${row("When", when)}${row("Closer", a.closer || "NOT ASSIGNED, place it")}
+          ${row("Set by", a.setter || "Website")}
+          ${row("Name", a.name)}${row("Phone", a.phone)}
           ${row("Email", a.email)}${row("Address", a.address)}${row("Notes", a.notes)}
         </table>` +
-        p(`Booked from the website. It's already on the board at <a href="${site.url}/admin/appointments">/admin/appointments</a>.`),
+        p(`It's already on the board at <a href="${site.url}/admin/appointments">/admin/appointments</a>.`),
     }),
+  );
+
+  return homeowner;
+}
+
+/**
+ * The closer hears about their own inspection.
+ *
+ * Bookings used to notify one office inbox and nobody else, so the person
+ * actually driving to the house found out by checking a board. In a setter and
+ * closer business that is how an 8am inspection gets missed.
+ */
+export async function sendCloserAssignment(
+  resendKey: string,
+  to: string,
+  a: {
+    closer: string;
+    name: string;
+    phone: string;
+    address: string;
+    dayLabel: string;
+    timeLabel: string;
+    setter?: string | null;
+    note?: string;
+    jobId?: string | null;
+  },
+) {
+  const when = `${a.dayLabel}, ${a.timeLabel}`;
+  const first = (a.closer || "there").split(" ")[0];
+  const map = `https://maps.google.com/?q=${encodeURIComponent(a.address)}`;
+  const row = (k: string, v?: string | null) =>
+    v
+      ? `<tr><td style="padding:5px 12px 5px 0;color:${MUTED};font:13px ${FONT};">${k}</td><td style="padding:5px 0;color:${TEXT};font:600 14px ${FONT};">${v}</td></tr>`
+      : "";
+  return sendEmail(
+    resendKey,
+    to,
+    `Inspection: ${a.dayLabel} ${a.timeLabel} · ${a.address}`,
+    shell({
+      preheader: `${a.name} · ${when}${a.setter ? ` · set by ${a.setter}` : ""}`,
+      body:
+        h1(`You're on it, ${first}.`) +
+        `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">
+          ${row("When", when)}${row("Homeowner", a.name)}${row("Phone", a.phone)}
+          ${row("Address", `<a href="${map}" style="color:${LIME_DEEP};">${a.address}</a>`)}
+          ${row("Set by", a.setter)}
+        </table>` +
+        (a.note ? p(`<strong>From the setter:</strong> ${a.note}`) : "") +
+        (a.jobId ? button("Open the job", `${site.url}/admin/jobs/${a.jobId}`) : ""),
+    }),
+    "closer-assignment",
   );
 }
 
