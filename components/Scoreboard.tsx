@@ -319,7 +319,8 @@ export function Scoreboard(props: ScoreboardProps) {
         ) : null}
 
         {/* You */}
-        {mine && (mySetter || myCloser) ? (
+        {/* An admin gets the card only once they work doors or inspections themselves. */}
+        {mine && (mySetter || myCloser) && (me.role !== "admin" || mine.knocks > 0 || mine.sets > 0 || mine.ran > 0 || mine.signed > 0) ? (
           <YouCard
             r={mine}
             setterRank={mySetter ? { rank: mySetter.rank, of: setters.length } : null}
