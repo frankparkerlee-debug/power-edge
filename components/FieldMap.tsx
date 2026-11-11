@@ -505,7 +505,7 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
               : status === "error"
                 ? error
                 : status === "ready"
-                  ? `${openCount} door${openCount === 1 ? "" : "s"} to knock on ${streets.length} street${streets.length === 1 ? "" : "s"}${
+                  ? `${openCount.toLocaleString()} door${openCount === 1 ? "" : "s"} to knock on ${streets.length} street${streets.length === 1 ? "" : "s"}${
                       mode?.kind === "zip" ? ` in ${mode.zip}` : mode?.kind === "near" ? `, within ${mode.mi === 0.5 ? "½" : mode.mi} mi` : ""
                     }${total > doors.length ? `. Showing the ${mode?.kind === "zip" ? "biggest-hail" : "nearest"} ${doors.length.toLocaleString()} of ${total.toLocaleString()}.` : ""}`
                   : ""}

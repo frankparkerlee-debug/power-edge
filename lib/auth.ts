@@ -276,12 +276,21 @@ export async function apiUser(req: Request): Promise<Member | null> {
  * ------------------------------------------------------------------------ */
 
 export async function listMembers(): Promise<
-  Array<Member & { active: boolean; last_login_at: string | null; created_at: string }>
+  Array<
+    Member & {
+      active: boolean;
+      last_login_at: string | null;
+      created_at: string;
+      goal_knocks_week: number | null;
+      goal_sets_week: number | null;
+      goal_signed_month: number | null;
+    }
+  >
 > {
   if (!dbOn()) return [];
   try {
     const res = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/team_members?select=id,email,name,role,active,last_login_at,created_at&order=active.desc,name.asc`,
+      `${process.env.SUPABASE_URL}/rest/v1/team_members?select=id,email,name,role,active,last_login_at,created_at,goal_knocks_week,goal_sets_week,goal_signed_month&order=active.desc,name.asc`,
       { headers: headers(), cache: "no-store" },
     );
     if (!res.ok) return [];
@@ -344,6 +353,29 @@ export async function setMemberActive(id: number, active: boolean) {
     body: JSON.stringify({ active }),
   });
   memberCache.delete(id);
+  return res.ok;
+}
+
+/**
+ * A person's goals for the scoreboard. Blank means the team default, so a
+ * cleared field puts them back on it.
+ */
+export async function setMemberGoals(
+  id: number,
+  goals: { knocksWeek: number | null; setsWeek: number | null; signedMonth: number | null },
+) {
+  if (!dbOn()) return false;
+  const clean = (v: number | null, max: number) =>
+    v == null || !Number.isFinite(v) || v <= 0 ? null : Math.min(Math.round(v), max);
+  const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/team_members?id=eq.${id}`, {
+    method: "PATCH",
+    headers: { ...headers(), Prefer: "return=minimal" },
+    body: JSON.stringify({
+      goal_knocks_week: clean(goals.knocksWeek, 5000),
+      goal_sets_week: clean(goals.setsWeek, 500),
+      goal_signed_month: clean(goals.signedMonth, 10_000_000),
+    }),
+  });
   return res.ok;
 }
 

@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { revalidatePath } from "next/cache";
+import { DEFAULT_GOALS } from "@/lib/scoreboard";
 import {
   currentUser,
   listMembers,
   addMember,
   setMemberActive,
   setMemberRole,
+  setMemberGoals,
   ASSIGNABLE_ROLES,
   type Role,
 } from "@/lib/auth";
@@ -81,6 +84,21 @@ export default async function TeamPage({
       String(formData.get("to")) === "on",
     );
     revalidatePath("/admin/team");
+  }
+
+  async function saveGoals(formData: FormData) {
+    "use server";
+    const num = (k: string) => {
+      const raw = String(formData.get(k) || "").replace(/[^0-9.]/g, "");
+      return raw ? Number(raw) : null;
+    };
+    await setMemberGoals(Number(formData.get("id")), {
+      knocksWeek: num("knocks"),
+      setsWeek: num("sets"),
+      signedMonth: num("signed"),
+    });
+    revalidatePath("/admin/team");
+    revalidatePath("/admin/scoreboard");
   }
 
   async function changeRole(formData: FormData) {
@@ -169,6 +187,72 @@ export default async function TeamPage({
                   </td>
                 </tr>
               ))}
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="goals" className="mt-10 scroll-mt-20 text-xs font-bold uppercase tracking-widest text-gray-500">
+          Goals
+        </h2>
+        <p className="mt-1 text-sm text-gray-600">
+          What the{" "}
+          <Link href="/admin/scoreboard" className="font-semibold text-[#0c7a40] underline">
+            scoreboard
+          </Link>{" "}
+          measures each person against. Leave a box blank for the team default: {DEFAULT_GOALS.knocksWeek} doors and{" "}
+          {DEFAULT_GOALS.setsWeek} inspections a week, ${DEFAULT_GOALS.signedMonth.toLocaleString("en-US")} signed a month.
+          A day&apos;s goal is a fifth of the week&apos;s.
+        </p>
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wider text-gray-500">
+                <th className="py-2 pr-4">Name</th>
+                <th className="py-2 pr-3">Doors a week</th>
+                <th className="py-2 pr-3">Inspections a week</th>
+                <th className="py-2 pr-3">Signed a month</th>
+                <th className="py-2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {members
+                .filter((m) => m.active)
+                .map((m) => {
+                  const form = `goals-${m.id}`;
+                  const box =
+                    "w-28 rounded-md border border-[#d7dbe0] px-2 py-1.5 text-[16px] tabular-nums focus:border-[#0c7a40] focus:outline-none sm:text-sm";
+                  const sells = m.role !== "setter";
+                  const knocks = m.role !== "closer";
+                  return (
+                    <tr key={m.id} className="border-b border-gray-100">
+                      <td className="py-2.5 pr-4 font-semibold">{m.name}</td>
+                      <td className="py-2.5 pr-3">
+                        {knocks ? (
+                          <input form={form} name="knocks" inputMode="numeric" defaultValue={m.goal_knocks_week ?? ""}
+                            placeholder={String(DEFAULT_GOALS.knocksWeek)} className={box} aria-label={`Doors a week for ${m.name}`} />
+                        ) : <span className="text-gray-400">Closer</span>}
+                      </td>
+                      <td className="py-2.5 pr-3">
+                        {knocks ? (
+                          <input form={form} name="sets" inputMode="numeric" defaultValue={m.goal_sets_week ?? ""}
+                            placeholder={String(DEFAULT_GOALS.setsWeek)} className={box} aria-label={`Inspections a week for ${m.name}`} />
+                        ) : null}
+                      </td>
+                      <td className="py-2.5 pr-3">
+                        {sells ? (
+                          <input form={form} name="signed" inputMode="numeric" defaultValue={m.goal_signed_month ?? ""}
+                            placeholder={DEFAULT_GOALS.signedMonth.toLocaleString("en-US")} className={box} aria-label={`Signed a month for ${m.name}`} />
+                        ) : <span className="text-gray-400">Setter</span>}
+                      </td>
+                      <td className="py-2.5 text-right">
+                        <form id={form} action={saveGoals}>
+                          <input type="hidden" name="id" value={m.id} />
+                          <button className="text-xs font-semibold text-[#0c7a40] underline">Save</button>
+                        </form>
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>

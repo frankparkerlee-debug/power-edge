@@ -54,6 +54,9 @@ const NAV: NavItem[] = [
 ];
 
 const MORE: NavItem[] = [
+  // Everyone's numbers, open to everyone. Today links to it with your rank,
+  // so it does not need one of the four phone tabs.
+  { href: "/admin/scoreboard", label: "Scoreboard", icon: "chart" },
   { href: "/admin/appointments", label: "Inspections", icon: "calendar", roles: [...SELLS] },
   { href: "/admin/alerts", label: "Storm alerts", icon: "bell" },
   { href: "/sales", label: "Playbook", icon: "book" },
@@ -82,6 +85,7 @@ function Icon({ name, className = "h-5 w-5" }: { name: string; className?: strin
     target: "M12 22a10 10 0 100-20 10 10 0 000 20zM12 18a6 6 0 100-12 6 6 0 000 12zM12 14a2 2 0 100-4 2 2 0 000 4z",
     bell: "M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0",
     back: "M19 12H5M12 19l-7-7 7-7",
+    chart: "M3 21h18M6 17v-5M11 17V7M16 17v-8M21 17V4",
   };
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"
@@ -106,6 +110,8 @@ function titleFor(path: string): { title: string; parent?: string } {
     "/admin/territories": { title: "Territories" },
     "/admin/team": { title: "Team" },
     "/admin/health": { title: "Health" },
+    "/admin/scoreboard": { title: "Scoreboard" },
+    "/admin/scoreboard/preview": { title: "Scoreboard preview", parent: "/admin/scoreboard" },
     "/sales": { title: "Playbook" },
   };
   if (map[path]) return map[path];

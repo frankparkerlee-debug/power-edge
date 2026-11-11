@@ -8,6 +8,7 @@ import { listAppointments, setsSince } from "@/lib/scheduling";
 import { listLeads } from "@/lib/db";
 import { recentEmailFailures } from "@/lib/sendMail";
 import { listContracts } from "@/lib/contracts";
+import { loadBoard, periodFor, ranked } from "@/lib/scoreboard";
 
 /**
  * Today.
@@ -112,14 +113,48 @@ export default async function TodayPage({
   const sets = user.role === "setter" || user.role === "rep" || isAdmin;
   const me = user.name;
 
-  const [allJobs, appts, leads, failures, contracts, comeBacks] = await Promise.all([
+  const week = periodFor("week");
+  const [allJobs, appts, leads, failures, contracts, comeBacks, board] = await Promise.all([
     listJobs({ limit: 500 }),
     listAppointments(200),
     isAdmin ? listLeads(50) : Promise.resolve([]),
     isAdmin ? recentEmailFailures(5) : Promise.resolve([]),
     listContracts(50),
     sets ? listComeBacks(isAdmin ? undefined : me) : Promise.resolve([]),
+    loadBoard(week),
   ]);
+
+  /*
+   * One line from the scoreboard: where you stand this week, or for the
+   * office, what the team has done. The board itself is a tap away.
+   */
+  let standing: { lead: string; rest: string } | null = null;
+  if (board) {
+    const setterRows = ranked(board.reps, "setters", sells);
+    const closerRows = ranked(board.reps, "closers", sells);
+    const asSetter = setterRows.find((r) => r.who === me && (user.role !== "closer" || r.knocks > 0));
+    const asCloser = closerRows.find((r) => r.who === me && (user.role !== "setter" || r.ran > 0));
+    const ord = (k: number) => `${k}${["th", "st", "nd", "rd"][((k % 100) - 20) % 10] || ["th", "st", "nd", "rd"][k % 100] || "th"}`;
+    if (asSetter && (asSetter.knocks > 0 || asSetter.sets > 0)) {
+      standing = {
+        lead: `You're ${ord(asSetter.rank)} of ${setterRows.length} setters this week.`,
+        rest: `${asSetter.knocks.toLocaleString("en-US")} doors, ${asSetter.sets} set`,
+      };
+    } else if (asCloser && (asCloser.ran > 0 || asCloser.signed > 0)) {
+      standing = {
+        lead: `You're ${ord(asCloser.rank)} of ${closerRows.length} closers this week.`,
+        rest: `${asCloser.ran} inspected, ${sells ? moneyShort(asCloser.signed_value) || "$0" : asCloser.signed} signed`,
+      };
+    } else if (isAdmin) {
+      const t = board.team;
+      standing = {
+        lead: "The team this week.",
+        rest: `${t.knocks.toLocaleString("en-US")} doors, ${t.sets} set, ${t.signed} signed${t.signed_value ? ` (${moneyShort(t.signed_value)})` : ""}`,
+      };
+    } else if (asSetter || asCloser) {
+      standing = { lead: "Nothing on the board this week yet.", rest: "The first door counts" };
+    }
+  }
 
   /*
    * Whose work is whose. Jobs used to be filtered on rep, which moves to the
@@ -258,6 +293,19 @@ export default async function TodayPage({
               ? "Your doors and your sets."
               : "Your inspections and your deals."}
         </p>
+
+        {standing ? (
+          <Link
+            href="/admin/scoreboard"
+            className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-[#e3e6ea] bg-white px-4 py-3 hover:border-[#0c7a40]"
+          >
+            <span className="text-sm">
+              <span className="font-semibold text-[#0b0e13]">{standing.lead}</span>{" "}
+              <span className="text-gray-500">{standing.rest}.</span>
+            </span>
+            <span className="shrink-0 text-sm font-semibold text-[#0c7a40]">Scoreboard</span>
+          </Link>
+        ) : null}
 
         {failures.length > 0 && (
           <Link
