@@ -20,5 +20,5 @@ def flush():
     sent += len(batch); batch = []
 for row in rows:
     batch.append({k: conv(k, v) for k, v in row.items()})
-    if len(batch) == 5000: flush(); print("sent", sent, flush=True)
+    if len(batch) == int(__import__("os").environ.get("BATCH", "5000")): flush(); print("sent", sent, flush=True)
 flush(); print("done", sent)

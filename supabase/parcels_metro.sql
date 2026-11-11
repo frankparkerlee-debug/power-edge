@@ -32,3 +32,34 @@ create index if not exists parcels_metro_lat_lon_idx on public.parcels_metro (la
 comment on table public.parcels_metro is
   'Single-family homes in Dallas and Tarrant (StratMap 2026 + DCAD 2026). Read only by doors_near; never by the storm-target job.';
 alter table public.parcels_metro enable row level security;
+
+-- Tarrant city and ZIP, filled from tarrant_roll after the load. The roll pads
+-- pidn with dashes ("--515---16---13") and StratMap sometimes doubles them
+-- ("50--1"), so both sides are normalized. Run per first character of
+-- prop_id (1, 2, 3, 4, then 5-9 and A) to keep each update small; a single
+-- whole-table update right after the bulk load filled the disk on 2026-11-11.
+-- Result 2026-11-11: 554,536 of 582,175 Tarrant homes matched (95%).
+--
+--   with roll as (
+--     select distinct on (k) k, city, mail_addr, mail_zip from (
+--       select regexp_replace(trim(both '-' from pidn), '-+', '-', 'g') as k,
+--              city, mail_addr, mail_zip, account
+--       from public.tarrant_roll) x
+--     where left(k, 1) = '<prefix>'
+--     order by k, account)
+--   update public.parcels_metro m
+--   set city = nullif(r.city, ''),
+--       zip = case when upper(trim(r.mail_addr)) = upper(trim(m.situs))
+--                  then nullif(left(r.mail_zip, 5), '') end,
+--       situs = m.situs
+--         || case when coalesce(r.city, '') <> '' then ', ' || upper(r.city) else '' end
+--         || case when upper(trim(r.mail_addr)) = upper(trim(m.situs)) and coalesce(r.mail_zip, '') <> ''
+--                 then ', TX ' || left(r.mail_zip, 5) else '' end
+--   from roll r
+--   where m.county = 'tarrant' and left(m.prop_id, 1) = '<prefix>'
+--     and r.k = regexp_replace(trim(both '-' from m.prop_id), '-+', '-', 'g')
+--     and position(',' in m.situs) = 0;
+--   vacuum analyze public.parcels_metro;
+--
+-- Load in pieces of about 275k rows; PostgREST's 3 s statement timeout
+-- cancels 5,000-row batches once the table is large, so use BATCH=2000.
