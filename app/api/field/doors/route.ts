@@ -221,6 +221,12 @@ function stateOf(r: Row) {
     case "not_interested":
     case "do_not_knock":
       return { kind: "no", by: r.last_rep, when: r.last_knock_at, note: r.last_note };
+    // Logged from the office tools: a roof already done is a no (red); an
+    // inspection with no job yet is still being worked (yellow).
+    case "already_done":
+      return { kind: "no", by: r.last_rep, when: r.last_knock_at, note: r.last_note || "Reason: Already done" };
+    case "inspected":
+      return { kind: "job", stage: "inspected" };
     case "not_home":
       return { kind: "not_home", by: r.last_rep, when: r.last_knock_at };
     case "appointment_set":
