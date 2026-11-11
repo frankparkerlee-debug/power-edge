@@ -323,7 +323,13 @@ function AgreementStep({ p, onSaved }: { p: OnboardingProps; onSaved: () => void
         <p className="mt-3 text-sm text-gray-600">
           Signed by <strong className="text-[#0b0e13]">{a.signedName}</strong> on{" "}
           {new Date(a.signedAt).toLocaleDateString("en-US", { timeZone: "America/Chicago", month: "long", day: "numeric", year: "numeric" })}
-          {p.steps.find((s) => s.key === "agreement")?.done ? "." : ", on an earlier version."}
+          {p.steps.find((s) => s.key === "agreement")?.done ? "." : ", on an earlier version."}{" "}
+          <a
+            href={`/admin/onboarding/agreement${p.self ? "" : `?member=${p.memberId}`}`}
+            className="font-semibold text-[#0c7a40] underline"
+          >
+            View the signed copy
+          </a>
         </p>
       ) : null}
 

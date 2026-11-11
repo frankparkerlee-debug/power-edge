@@ -1422,6 +1422,50 @@ export function onbOfficeStalled(c: OnbCtx): OnbEmail {
   };
 }
 
+export type SignedCtx = { first: string; name: string; version: string; signedAt: string; text: string; url: string };
+
+/** The agreement as signed, for the rep's records. */
+export function onbSignedCopy(c: SignedCtx): OnbEmail {
+  const blocks = c.text.split(/\n\n+/);
+  const body = blocks
+    .map((b, i) => {
+      const t = escHtml(b);
+      if (i === 0) return `<p style="margin:0 0 4px;font-family:${FONT};font-size:17px;font-weight:800;color:${INK};">${t}</p>`;
+      if (/^(\d+\.\s|Compensation Schedule$)/.test(b)) return `<p style="margin:16px 0 4px;font-family:${FONT};font-size:15px;font-weight:700;color:${INK};">${t}</p>`;
+      return `<p style="margin:0 0 8px;font-family:${FONT};font-size:14px;line-height:21px;color:${TEXT};">${t}</p>`;
+    })
+    .join("");
+  return {
+    subject: "Your signed PowerEdge contractor agreement",
+    html: shell({
+      preheader: `A copy of what you signed on ${c.signedAt}. Keep it for your records.`,
+      body:
+        h1("Your signed agreement") +
+        p(`${escHtml(c.first)}, here's a copy of the agreement you signed on ${escHtml(c.signedAt)}. Keep it for your records; it's also in the app any time.`) +
+        button("Open it in the app", c.url) +
+        gap(12) +
+        body +
+        small(`Signed electronically by ${escHtml(c.name)} on ${escHtml(c.signedAt)} (version ${escHtml(c.version)}).`),
+    }),
+  };
+}
+
+/** Tells the office someone signed. */
+export function onbSignedOffice(c: SignedCtx): OnbEmail {
+  return {
+    subject: `${c.name} signed the contractor agreement`,
+    html: shell({
+      preheader: `Version ${c.version}, signed ${c.signedAt}.`,
+      body:
+        eyebrow("Onboarding") +
+        h1(`${escHtml(c.first)} signed`) +
+        p(`${escHtml(c.name)} signed the contractor agreement (version ${escHtml(c.version)}) on ${escHtml(c.signedAt)}. A copy went to them by email.`) +
+        button("View the signed copy", c.url) +
+        small("Sent to admins only."),
+    }),
+  };
+}
+
 export async function sendOnboardingEmail(resendKey: string, to: string, e: OnbEmail, kind: string) {
   return sendEmail(resendKey, to, e.subject, e.html, kind);
 }

@@ -385,12 +385,12 @@ export async function setMemberActive(id: number, active: boolean) {
  * A person is on at most one team; the scoreboard shows each rep their team.
  * ------------------------------------------------------------------------ */
 
-export type Team = { id: number; name: string; active: boolean };
+export type Team = { id: number; name: string; active: boolean; region_id: number | null };
 
 export async function listTeams(): Promise<Team[]> {
   if (!dbOn()) return [];
   try {
-    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/teams?select=id,name,active&order=active.desc,name.asc`, {
+    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/teams?select=id,name,active,region_id&order=active.desc,name.asc`, {
       headers: headers(),
       cache: "no-store",
     });
@@ -398,6 +398,75 @@ export async function listTeams(): Promise<Team[]> {
   } catch {
     return [];
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * Regions: a regional leader over several closer-led teams. The leader's
+ * override is paid from PowerEdge's share and never reduces a rep's
+ * commission (lib/repAgreement.ts, section 5); the terms are in their own
+ * leader addendum.
+ * ------------------------------------------------------------------------ */
+
+export type Region = { id: number; name: string; leader_member_id: number | null; active: boolean };
+
+export async function listRegions(): Promise<Region[]> {
+  if (!dbOn()) return [];
+  try {
+    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/regions?select=id,name,leader_member_id,active&order=active.desc,name.asc`, {
+      headers: headers(),
+      cache: "no-store",
+    });
+    return res.ok ? await res.json() : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function createRegion(name: string) {
+  const clean = name.trim().replace(/\s+/g, " ").slice(0, 40);
+  if (!dbOn() || !clean) return false;
+  const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/regions`, {
+    method: "POST",
+    headers: { ...headers(), Prefer: "return=minimal" },
+    body: JSON.stringify({ name: clean }),
+  });
+  return res.ok;
+}
+
+export async function updateRegion(id: number, patch: { name?: string; leader_member_id?: number | null; active?: boolean }) {
+  if (!dbOn()) return false;
+  const body: Record<string, unknown> = {};
+  if (patch.name != null) {
+    const clean = patch.name.trim().replace(/\s+/g, " ").slice(0, 40);
+    if (!clean) return false;
+    body.name = clean;
+  }
+  if (patch.leader_member_id !== undefined) body.leader_member_id = patch.leader_member_id;
+  if (patch.active != null) body.active = patch.active;
+  const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/regions?id=eq.${id}`, {
+    method: "PATCH",
+    headers: { ...headers(), Prefer: "return=minimal" },
+    body: JSON.stringify(body),
+  });
+  // A retired region's teams are in no region until they are moved.
+  if (res.ok && patch.active === false) {
+    await fetch(`${process.env.SUPABASE_URL}/rest/v1/teams?region_id=eq.${id}`, {
+      method: "PATCH",
+      headers: { ...headers(), Prefer: "return=minimal" },
+      body: JSON.stringify({ region_id: null }),
+    });
+  }
+  return res.ok;
+}
+
+export async function setTeamRegion(teamId: number, regionId: number | null) {
+  if (!dbOn()) return false;
+  const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/teams?id=eq.${teamId}`, {
+    method: "PATCH",
+    headers: { ...headers(), Prefer: "return=minimal" },
+    body: JSON.stringify({ region_id: regionId }),
+  });
+  return res.ok;
 }
 
 export async function createTeam(name: string) {

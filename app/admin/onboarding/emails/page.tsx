@@ -8,11 +8,14 @@ import {
   onbPermit,
   onbReady,
   onbReminder,
+  onbSignedCopy,
+  onbSignedOffice,
   onbWelcome,
   type OnbCtx,
   type OnbEmail,
 } from "@/lib/emails";
 import { REMINDER_DAYS } from "@/lib/onboardingSequence";
+import { AGREEMENT_VERSION, agreementPlainText } from "@/lib/repAgreement";
 
 /**
  * Every email in the onboarding sequence, as it sends, with a made-up rep.
@@ -42,6 +45,15 @@ const base: OnbCtx = {
 
 const later: OnbCtx = { ...base, done: 3, open: base.open.slice(3) };
 
+const signed = {
+  first: "Jordan",
+  name: "Jordan Reyes",
+  version: AGREEMENT_VERSION,
+  signedAt: "November 18, 2026 at 4:12 PM",
+  text: agreementPlainText("Jordan Reyes", "setter"),
+  url: "#",
+};
+
 type Item = { id: string; when: string; to: "Rep" | "Office"; email: OnbEmail };
 
 const ITEMS: Item[] = [
@@ -59,6 +71,8 @@ const ITEMS: Item[] = [
   { id: "turn", when: "When they've done everything on their side", to: "Office", email: onbOfficeTurn({ ...base, open: [], done: 6 }) },
   { id: "agreement", when: "When the agreement goes final, if they started before it was", to: "Rep", email: onbGate(later, "agreement") },
   { id: "secure", when: "When the W-9 and bank steps open, if they started before", to: "Rep", email: onbGate(later, "secure") },
+  { id: "signed", when: "The moment they sign the agreement (a copy for their records)", to: "Rep", email: onbSignedCopy(signed) },
+  { id: "signed-office", when: "The moment they sign the agreement", to: "Office", email: onbSignedOffice(signed) },
   { id: "ready", when: "When all 8 steps are done", to: "Rep", email: onbReady({ ...base, open: [], blocked: [], done: 8, permitsHeld: ["Dallas", "Garland"] }) },
   {
     id: "permit",

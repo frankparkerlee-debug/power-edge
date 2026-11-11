@@ -139,6 +139,23 @@ export async function loadAllOnboarding() {
   };
 }
 
+export type SignedAgreement = {
+  agreement_version: string | null;
+  agreement_text: string | null;
+  agreement_typed_name: string | null;
+  agreement_signature_png: string | null;
+  agreement_signed_at: string | null;
+  agreement_ip: string | null;
+};
+
+/** The agreement exactly as someone signed it. */
+export async function loadSignedAgreement(memberId: number) {
+  const rows = await get<SignedAgreement>(
+    `rep_onboarding?select=agreement_version,agreement_text,agreement_typed_name,agreement_signature_png,agreement_signed_at,agreement_ip&member_id=eq.${memberId}`,
+  );
+  return rows[0] ?? null;
+}
+
 export async function upsert(table: string, row: Record<string, unknown>, conflict = "member_id") {
   if (!dbOn()) return false;
   const res = await fetch(url(`${table}?on_conflict=${conflict}`), {

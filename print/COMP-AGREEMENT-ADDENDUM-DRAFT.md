@@ -1,3 +1,5 @@
+> **Superseded 2026-11-11.** Merged into one contractor agreement with a pay schedule per role (knocker, closer) and a leader override addendum. Source of truth: `lib/repAgreement.ts` (what reps sign in the app). Counsel copy: `print/CONTRACTOR-AGREEMENT-DRAFT-FOR-COUNSEL.docx`. Kept for history only.
+
 # Sales Representative Commission & Advance Addendum — DRAFT for counsel review
 
 **Not legal advice.** This is a business-terms draft for [Power Edge, LLC]'s attorney to review, revise, and approve before use. It is written to reflect the compensation Parker has set and to keep the arrangement squarely within an independent-contractor (1099) framework. Bracketed items are for counsel/Parker to confirm.

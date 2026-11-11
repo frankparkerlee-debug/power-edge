@@ -16,6 +16,10 @@ import {
   updateTeam,
   setMemberTeam,
   setMemberInspections,
+  listRegions,
+  createRegion,
+  updateRegion,
+  setTeamRegion,
   ASSIGNABLE_ROLES,
   type Role,
 } from "@/lib/auth";
@@ -71,8 +75,11 @@ export default async function TeamPage({
     );
   }
 
-  const [members, teams] = await Promise.all([listMembers(), listTeams()]);
+  const [members, teams, regions] = await Promise.all([listMembers(), listTeams(), listRegions()]);
   const liveTeams = teams.filter((t) => t.active);
+  const liveRegions = regions.filter((r) => r.active);
+  // Who can lead a region: anyone who sells (closers, admins), not knockers.
+  const leaders = members.filter((m) => m.active && m.role !== "setter");
 
   // Add someone and, unless the box is unticked, start their onboarding:
   // the welcome goes now and the reminders run on their own from there.
@@ -119,6 +126,36 @@ export default async function TeamPage({
     await updateTeam(id, retire ? { active: false } : { name: String(formData.get("name") || "") });
     revalidatePath("/admin/team");
     revalidatePath("/admin/scoreboard");
+  }
+
+  async function addRegion(formData: FormData) {
+    "use server";
+    const me = await currentUser();
+    if (me?.role !== "admin") return;
+    await createRegion(String(formData.get("name") || ""));
+    revalidatePath("/admin/team");
+  }
+
+  async function editRegion(formData: FormData) {
+    "use server";
+    const me = await currentUser();
+    if (me?.role !== "admin") return;
+    const id = Number(formData.get("id"));
+    if (String(formData.get("retire") || "") === "1") await updateRegion(id, { active: false });
+    else if (formData.has("leader")) {
+      const raw = String(formData.get("leader") || "");
+      await updateRegion(id, { leader_member_id: raw ? Number(raw) : null });
+    } else await updateRegion(id, { name: String(formData.get("name") || "") });
+    revalidatePath("/admin/team");
+  }
+
+  async function moveTeamRegion(formData: FormData) {
+    "use server";
+    const me = await currentUser();
+    if (me?.role !== "admin") return;
+    const raw = String(formData.get("region") || "");
+    await setTeamRegion(Number(formData.get("id")), raw ? Number(raw) : null);
+    revalidatePath("/admin/team");
   }
 
   async function toggleInspections(formData: FormData) {
@@ -331,6 +368,25 @@ export default async function TeamPage({
                       ? people.map((m) => `${m.name}${m.role === "closer" ? " (closer)" : ""}`).join(", ")
                       : "Nobody yet"}
                   </span>
+                  {liveRegions.length ? (
+                    <form action={moveTeamRegion} key={`r${t.id}-${t.region_id ?? ""}`} className="flex items-center gap-1.5">
+                      <input type="hidden" name="id" value={t.id} />
+                      <select
+                        name="region"
+                        defaultValue={t.region_id ?? ""}
+                        aria-label={`Region for ${t.name}`}
+                        className="rounded-md border border-[#d7dbe0] px-2 py-1 text-[16px] sm:text-sm"
+                      >
+                        <option value="">No region</option>
+                        {liveRegions.map((r) => (
+                          <option key={r.id} value={r.id}>
+                            {r.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button className="text-xs font-semibold text-[#0c7a40] underline">Save</button>
+                    </form>
+                  ) : null}
                   <form action={editTeam}>
                     <input type="hidden" name="id" value={t.id} />
                     <input type="hidden" name="retire" value="1" />
@@ -349,6 +405,67 @@ export default async function TeamPage({
             className="w-56 rounded-md border border-[#d7dbe0] px-3 py-2 text-[16px] sm:text-sm"
           />
           <button className="rounded-md bg-[#0b0e13] px-4 py-2 text-sm font-bold text-white">Add team</button>
+        </form>
+
+        <h2 id="regions" className="mt-10 scroll-mt-20 text-xs font-bold uppercase tracking-widest text-gray-500">
+          Regions
+        </h2>
+        <p className="mt-1 text-sm text-gray-600">
+          A regional leader over several teams. Their override is paid from PowerEdge&apos;s share; it never changes what a knocker
+          or closer earns. Put teams in a region in the list above.
+        </p>
+        {liveRegions.length ? (
+          <ul className="mt-3 divide-y divide-gray-100 border-y border-gray-100">
+            {liveRegions.map((r) => {
+              const inIt = liveTeams.filter((t) => t.region_id === r.id);
+              return (
+                <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
+                  <form action={editRegion} className="flex items-center gap-2">
+                    <input type="hidden" name="id" value={r.id} />
+                    <input
+                      name="name"
+                      defaultValue={r.name}
+                      aria-label="Region name"
+                      className="w-40 rounded-md border border-[#d7dbe0] px-2 py-1 text-[16px] font-semibold sm:text-sm"
+                    />
+                    <button className="text-xs font-semibold text-[#0c7a40] underline">Rename</button>
+                  </form>
+                  <form action={editRegion} key={`l${r.id}-${r.leader_member_id ?? ""}`} className="flex items-center gap-1.5">
+                    <input type="hidden" name="id" value={r.id} />
+                    <select
+                      name="leader"
+                      defaultValue={r.leader_member_id ?? ""}
+                      aria-label={`Leader of ${r.name}`}
+                      className="rounded-md border border-[#d7dbe0] px-2 py-1 text-[16px] sm:text-sm"
+                    >
+                      <option value="">No leader yet</option>
+                      {leaders.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button className="text-xs font-semibold text-[#0c7a40] underline">Save</button>
+                  </form>
+                  <span className="flex-1 text-sm text-gray-600">{inIt.length ? inIt.map((t) => t.name).join(", ") : "No teams yet"}</span>
+                  <form action={editRegion}>
+                    <input type="hidden" name="id" value={r.id} />
+                    <input type="hidden" name="retire" value="1" />
+                    <button className="text-xs font-semibold text-gray-500 underline">Retire</button>
+                  </form>
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
+        <form action={addRegion} className="mt-3 flex items-center gap-2">
+          <input
+            name="name"
+            required
+            placeholder="Region name, e.g. Tarrant County"
+            className="w-56 rounded-md border border-[#d7dbe0] px-3 py-2 text-[16px] sm:text-sm"
+          />
+          <button className="rounded-md bg-[#0b0e13] px-4 py-2 text-sm font-bold text-white">Add region</button>
         </form>
 
         <h2 id="goals" className="mt-10 scroll-mt-20 text-xs font-bold uppercase tracking-widest text-gray-500">

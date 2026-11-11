@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { apiUser } from "@/lib/auth";
+import { apiUser, listMembers } from "@/lib/auth";
+import { onbSignedCopy, onbSignedOffice, sendOnboardingEmail } from "@/lib/emails";
+import { site } from "@/lib/site";
 import { clientIp } from "@/lib/rateLimit";
 import { digits, encrypt, piiReady, validEin, validRouting, validSsn } from "@/lib/pii";
 import { upsert, removePermit, loadOnboarding, PERMIT_CITIES } from "@/lib/onboarding";
@@ -72,17 +74,41 @@ export async function POST(req: Request) {
       const sig = String(b.signature_png ?? "");
       if (typed.length < 3) return bad("Type your full legal name.");
       if (!sig.startsWith("data:image/png;base64,") || sig.length < 2000 || sig.length > 400_000) return bad("Sign in the box.");
-      return NextResponse.json({
-        ok: await upsert("rep_onboarding", {
-          member_id: target,
-          agreement_version: AGREEMENT_VERSION,
-          agreement_text: agreementPlainText(typed),
-          agreement_typed_name: typed,
-          agreement_signature_png: sig,
-          agreement_signed_at: now,
-          agreement_ip: clientIp(req),
-        }),
+      const text = agreementPlainText(typed, u.role);
+      const ok = await upsert("rep_onboarding", {
+        member_id: target,
+        agreement_version: AGREEMENT_VERSION,
+        agreement_text: text,
+        agreement_typed_name: typed,
+        agreement_signature_png: sig,
+        agreement_signed_at: now,
+        agreement_ip: clientIp(req),
       });
+      // A copy to the rep for their records, and a note to the office. A
+      // mail problem never undoes the signature; it's logged in Health.
+      if (ok && process.env.RESEND_API_KEY) {
+        const base = process.env.NEXT_PUBLIC_SITE_URL || site.url;
+        const signedAt = new Date(now).toLocaleString("en-US", {
+          timeZone: "America/Chicago",
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+        const c = { first: typed.split(/\s+/)[0], name: typed, version: AGREEMENT_VERSION, signedAt, text, url: `${base}/admin/onboarding/agreement` };
+        await sendOnboardingEmail(process.env.RESEND_API_KEY, u.email, onbSignedCopy(c), "onboarding-agreement-copy").catch(() => undefined);
+        const admins = (await listMembers()).filter((m) => m.active && m.role === "admin" && m.email.includes("@"));
+        for (const a of admins) {
+          await sendOnboardingEmail(
+            process.env.RESEND_API_KEY,
+            a.email,
+            onbSignedOffice({ ...c, url: `${base}/admin/onboarding/agreement?member=${target}` }),
+            "onboarding-agreement-signed",
+          ).catch(() => undefined);
+        }
+      }
+      return NextResponse.json({ ok });
     }
 
     case "tax": {

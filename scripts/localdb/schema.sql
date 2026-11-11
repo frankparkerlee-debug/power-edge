@@ -1243,3 +1243,13 @@ create table if not exists public.onboarding_sends (
 );
 create index if not exists onboarding_sends_member_idx on public.onboarding_sends (member_id, sent_at);
 alter table public.onboarding_sends enable row level security;
+-- Regions: a regional leader over several closer-led teams.
+create table if not exists public.regions (
+  id bigint generated always as identity primary key,
+  name text not null,
+  leader_member_id bigint references public.team_members(id) on delete set null,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+alter table public.regions enable row level security;
+alter table public.teams add column if not exists region_id bigint references public.regions(id) on delete set null;

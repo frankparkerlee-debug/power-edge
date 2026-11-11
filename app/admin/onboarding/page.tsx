@@ -271,7 +271,7 @@ export default async function OnboardingPage({
               status: AGREEMENT_STATUS,
               version: AGREEMENT_VERSION,
               title: AGREEMENT_TITLE,
-              sections: agreementSections(o?.legal_name || target.name),
+              sections: agreementSections(o?.legal_name || target.name, target.role),
               signedAt: o?.agreement_signed_at ?? null,
               signedName: o?.agreement_typed_name ?? null,
             }}
