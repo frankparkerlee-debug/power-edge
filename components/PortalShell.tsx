@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Logo } from "./Logo";
 
 /**
  * The portal's own chrome.
@@ -161,6 +162,7 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
       {/* Top bar: always says where you are, always offers a way back. */}
       <header className="sticky top-0 z-40 border-b border-[#1d222b] bg-[#0b0e13]">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
+          {/* Back on every sub-page; the mark on every page, linking to Today. */}
           {!isHome ? (
             <button
               onClick={() => (parent ? router.push(parent) : router.back())}
@@ -169,13 +171,9 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
             >
               <Icon name="back" />
             </button>
-          ) : (
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#7FFBAE]">
-              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-[#0b0e13]">
-                <path d="M13 2L4.5 13H11l-1 9 8.5-11H12l1-9z" />
-              </svg>
-            </span>
-          )}
+          ) : null}
+          <Logo light href="/admin" compact size={30} />
+          <span className="hidden h-5 w-px shrink-0 bg-white/20 sm:block" aria-hidden />
           <span className="truncate font-display text-base font-bold text-white">{title}</span>
 
           <div className="ml-auto flex items-center gap-2">
