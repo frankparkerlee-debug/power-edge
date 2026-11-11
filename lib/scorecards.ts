@@ -26,9 +26,9 @@ import {
 import { buildCompanyReport, buildPersonScorecard, type ScorecardRow } from "@/lib/emails";
 
 const usd = (v: number | null | undefined) =>
-  v == null ? "·" : v.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  v == null ? "None yet" : v.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const n = (v: number) => Math.round(v).toLocaleString("en-US");
-const pctOf = (a: number, b: number, min = 20) => (b >= min && b > 0 ? `${Math.round((a / b) * 100)}%` : "·");
+const pctOf = (a: number, b: number, min = 20) => (b >= min && b > 0 ? `${Math.round((a / b) * 100)}%` : "too few to rate");
 function ordinal(k: number) {
   const s = ["th", "st", "nd", "rd"];
   const v = k % 100;
@@ -90,7 +90,11 @@ export async function buildScorecards(period: Period): Promise<{ ok: boolean; ca
       const led = money.profitPerRoof != null;
       const html = buildCompanyReport({
         span: period.span,
-        key: {
+        key: money.roofs === 0 ? {
+          label: "Roofs signed",
+          value: "0",
+          sub: `No roofs signed. ${n(b.team.knocks)} doors, ${b.team.sets} inspection${b.team.sets === 1 ? "" : "s"} set.`,
+        } : {
           label: led ? "Profit per roof" : "Revenue per roof",
           value: usd(led ? money.profitPerRoof : money.perRoof),
           sub: `${money.roofs} roof${money.roofs === 1 ? "" : "s"} signed, ${usd(money.revenue)} revenue${
@@ -102,7 +106,7 @@ export async function buildScorecards(period: Period): Promise<{ ok: boolean; ca
           ["Revenue", usd(money.revenue)],
           ["Revenue per roof", usd(money.perRoof), true],
           ["Profit per roof", money.profitPerRoof != null ? usd(money.profitPerRoof) : "Costs not in yet", true],
-          ["Margin", money.margin != null ? `${Math.round(money.margin * 100)}%` : "·"],
+          ["Margin", money.margin != null ? `${Math.round(money.margin * 100)}%` : "None yet"],
           ["Doors", n(b.team.knocks)],
           ["Talked", `${n(b.team.talked)} (${pctOf(b.team.talked, b.team.knocks)})`],
           ["Inspections set", `${b.team.sets}`],
@@ -120,7 +124,9 @@ export async function buildScorecards(period: Period): Promise<{ ok: boolean; ca
         role: m.role,
         team: null,
         kind: "company",
-        subject: `Company report, ${period.span}: ${usd(led ? money.profitPerRoof : money.perRoof)} ${led ? "profit" : "revenue"} per roof`,
+        subject: money.roofs
+          ? `Company report, ${period.span}: ${usd(led ? money.profitPerRoof : money.perRoof)} ${led ? "profit" : "revenue"} per roof`
+          : `Company report, ${period.span}: no roofs signed`,
         html,
         quiet: false,
       });
@@ -162,7 +168,7 @@ export async function buildScorecards(period: Period): Promise<{ ok: boolean; ca
         ["Doors", `${n(me.knocks)} of ${n(g.knocks)}`, true],
         ["Talked", `${n(me.talked)} (${pctOf(me.talked, me.knocks)})`],
         ["Inspections set", `${me.sets} of ${g.sets}`, true],
-        ["Sets per 100 doors", me.knocks >= 20 ? ((me.sets / me.knocks) * 100).toFixed(1) : "·"],
+        ["Sets per 100 doors", me.knocks >= 20 ? ((me.sets / me.knocks) * 100).toFixed(1) : "too few to rate"],
         ["Roofs from your doors", `${setM.roofs}`],
         ["Revenue from your doors", usd(setM.revenue)],
         me.come_backs_late ? ["Come-backs past due", `${me.come_backs_late}`, true] : false,
