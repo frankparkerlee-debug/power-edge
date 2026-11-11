@@ -620,7 +620,8 @@ export function Scoreboard(props: ScoreboardProps) {
             />
           </div>
 
-          {focusRow ? (
+          {/* Your own notes are already in your card at the top. */}
+          {focusRow && !(focusRow.who === me.name && (mySetter || myCloser)) ? (
             <ul className="mt-4 space-y-1.5">
               {[...(isSetterRow(focusRow) ? setterNotes(focusRow, now.reps) : []), ...(isCloserRow(focusRow) ? closerNotes(focusRow, now.reps) : [])].map(
                 (note, i) => <NoteLine key={i} note={note} />,
