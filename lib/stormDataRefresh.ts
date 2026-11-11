@@ -139,7 +139,8 @@ export async function refreshWind(opts: { days?: number } = {}) {
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`IEM LSR ${res.status}`);
   const features = ((await res.json()) as { features?: LsrFeature[] }).features ?? [];
-  const keep: object[] = [];
+  // IEM sometimes lists the same report twice; one row per report.
+  const keep = new Map<string, object>();
   for (const f of features) {
     const [lon, lat] = f.geometry.coordinates;
     if (!(lat >= 31.9 && lat <= 33.55 && lon >= -98.15 && lon <= -95.75)) continue;
@@ -148,8 +149,9 @@ export async function refreshWind(opts: { days?: number } = {}) {
     const gust = (tt === "TSTM WND GST" || tt === "NON-TSTM WND GST") && (f.properties.magf ?? 0) >= 58;
     if (!damage && !gust) continue;
     const valid = new Date(f.properties.valid.endsWith("Z") ? f.properties.valid : `${f.properties.valid}Z`);
-    keep.push({
-      id: `${f.properties.valid}|${tt}|${lat.toFixed(4)}|${lon.toFixed(4)}`,
+    const id = `${f.properties.valid}|${tt}|${lat.toFixed(4)}|${lon.toFixed(4)}`;
+    keep.set(id, {
+      id,
       valid_at: valid.toISOString(),
       local_date: centralDay(valid),
       type: tt,
@@ -160,8 +162,8 @@ export async function refreshWind(opts: { days?: number } = {}) {
       remark: (f.properties.remark || "").slice(0, 200) || null,
     });
   }
-  await upsert("wind_reports", keep, "id");
-  return { days, reports: features.length, kept: keep.length };
+  await upsert("wind_reports", [...keep.values()], "id");
+  return { days, reports: features.length, kept: keep.size };
 }
 
 // ---- Dallas permits --------------------------------------------------------
