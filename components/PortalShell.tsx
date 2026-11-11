@@ -45,6 +45,10 @@ const SELLS = ["closer", "rep", "admin"] as const;
 const NAV: NavItem[] = [
   { href: "/admin", label: "Today", icon: "sun" },
   { href: "/admin/storms", label: "Map", icon: "map" },
+  // The ranked door list is a setter's working tool, so it takes the tab slot
+  // a setter does not have (Agreement). Everyone else finds it under the menu,
+  // which keeps every role at four tabs.
+  { href: "/admin/doors", label: "Best doors", icon: "target", roles: ["setter"] },
   { href: "/admin/jobs", label: "Jobs", icon: "folder" },
   // Setters book the inspection; the closer prices it and writes the paper.
   { href: "/admin/contract", label: "Agreement", icon: "pen", roles: [...SELLS] },
@@ -53,6 +57,8 @@ const NAV: NavItem[] = [
 const MORE: NavItem[] = [
   // A setter's whole job is what is on the board, so they get this one.
   { href: "/admin/appointments", label: "Inspections", icon: "calendar" },
+  { href: "/admin/doors", label: "Best doors", icon: "target", roles: [...SELLS] },
+  { href: "/admin/alerts", label: "Storm alerts", icon: "bell" },
   { href: "/sales", label: "Playbook", icon: "book" },
   { href: "/admin/leads", label: "Leads", icon: "inbox", roles: ["admin"] },
   { href: "/admin/territories", label: "Territories", icon: "flag", roles: ["admin"] },
@@ -76,6 +82,8 @@ function Icon({ name, className = "h-5 w-5" }: { name: string; className?: strin
     flag: "M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7",
     book: "M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z",
     pulse: "M22 12h-4l-3 9L9 3l-3 9H2",
+    target: "M12 22a10 10 0 100-20 10 10 0 000 20zM12 18a6 6 0 100-12 6 6 0 000 12zM12 14a2 2 0 100-4 2 2 0 000 4z",
+    bell: "M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0",
     back: "M19 12H5M12 19l-7-7 7-7",
   };
   return (
@@ -94,6 +102,8 @@ function titleFor(path: string): { title: string; parent?: string } {
     "/admin/jobs": { title: "Jobs" },
     "/admin/contract": { title: "New agreement", parent: "/admin/jobs" },
     "/admin/appointments": { title: "Inspections" },
+    "/admin/doors": { title: "Best doors" },
+    "/admin/alerts": { title: "Storm alerts" },
     "/admin/leads": { title: "Leads" },
     "/admin/territories": { title: "Territories" },
     "/admin/team": { title: "Team" },
