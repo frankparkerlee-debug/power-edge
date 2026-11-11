@@ -200,7 +200,7 @@ export default async function TeamPage({
             scoreboard
           </Link>{" "}
           measures each person against. Leave a box blank for the team default: {DEFAULT_GOALS.knocksWeek} doors and{" "}
-          {DEFAULT_GOALS.setsWeek} inspections a week, ${DEFAULT_GOALS.signedMonth.toLocaleString("en-US")} signed a month.
+          {DEFAULT_GOALS.setsWeek} inspections a week, {`$${DEFAULT_GOALS.signedMonth.toLocaleString("en-US")} signed a month.`}
           A day&apos;s goal is a fifth of the week&apos;s.
         </p>
         <div className="mt-3 overflow-x-auto">
