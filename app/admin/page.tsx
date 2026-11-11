@@ -8,7 +8,7 @@ import { listAppointments, setsSince } from "@/lib/scheduling";
 import { listLeads } from "@/lib/db";
 import { recentEmailFailures } from "@/lib/sendMail";
 import { listContracts } from "@/lib/contracts";
-import { loadBoard, periodFor, ranked } from "@/lib/scoreboard";
+import { loadBoard, metricsFor, moneyOf, periodFor, rankBy, restrict, seesProfit, type Scope } from "@/lib/scoreboard";
 
 /**
  * Today.
@@ -130,26 +130,32 @@ export default async function TodayPage({
    */
   let standing: { lead: string; rest: string } | null = null;
   if (board) {
-    const setterRows = ranked(board.reps, "setters", sells);
-    const closerRows = ranked(board.reps, "closers", sells);
+    // The same cut as the scoreboard: your team, or the company for the office.
+    const myTeam = board.reps.find((r) => r.who === me)?.team_id ?? null;
+    const team = board.teams.find((x) => x.id === myTeam);
+    const scope: Scope = isAdmin ? { kind: "company" } : team ? { kind: "team", id: team.id, name: team.name } : { kind: "self" };
+    const b = restrict(board, scope, me, seesProfit(user.role));
+    const setterRows = rankBy(b.reps, b.roofs, "setters", metricsFor("setters", false)[0]);
+    const closerRows = rankBy(b.reps, b.roofs, "closers", metricsFor("closers", false)[0]);
     const asSetter = setterRows.find((r) => r.who === me && (user.role !== "closer" || r.knocks > 0));
     const asCloser = closerRows.find((r) => r.who === me && (user.role !== "setter" || r.ran > 0));
     const ord = (k: number) => `${k}${["th", "st", "nd", "rd"][((k % 100) - 20) % 10] || ["th", "st", "nd", "rd"][k % 100] || "th"}`;
-    if (asSetter && (asSetter.knocks > 0 || asSetter.sets > 0)) {
+    const where = team && !isAdmin ? ` on ${team.name}` : "";
+    const m = moneyOf(b.roofs);
+    if (asSetter?.rank && (asSetter.knocks > 0 || asSetter.sets > 0)) {
       standing = {
-        lead: `You're ${ord(asSetter.rank)} of ${setterRows.length} setters this week.`,
+        lead: `You're ${ord(asSetter.rank)} of ${setterRows.length} knockers${where} this week.`,
         rest: `${asSetter.knocks.toLocaleString("en-US")} doors, ${asSetter.sets} set`,
       };
-    } else if (asCloser && (asCloser.ran > 0 || asCloser.signed > 0)) {
+    } else if (asCloser?.rank && (asCloser.ran > 0 || asCloser.money.roofs > 0)) {
       standing = {
-        lead: `You're ${ord(asCloser.rank)} of ${closerRows.length} closers this week.`,
-        rest: `${asCloser.ran} inspected, ${sells ? moneyShort(asCloser.signed_value) || "$0" : asCloser.signed} signed`,
+        lead: `You're ${ord(asCloser.rank)} of ${closerRows.length} closers${where} this week.`,
+        rest: `${asCloser.money.roofs} roof${asCloser.money.roofs === 1 ? "" : "s"}, ${moneyShort(asCloser.money.revenue) || "$0"}`,
       };
     } else if (isAdmin) {
-      const t = board.team;
       standing = {
-        lead: "The team this week.",
-        rest: `${t.knocks.toLocaleString("en-US")} doors, ${t.sets} set, ${t.signed} signed${t.signed_value ? ` (${moneyShort(t.signed_value)})` : ""}`,
+        lead: m.roofs ? `${moneyShort(m.perRoof)} revenue per roof this week${m.profitPerRoof != null ? `, ${moneyShort(m.profitPerRoof)} profit` : ""}.` : "No roofs signed this week yet.",
+        rest: `${m.roofs} roof${m.roofs === 1 ? "" : "s"}, ${b.team.knocks.toLocaleString("en-US")} doors, ${b.team.sets} set`,
       };
     } else if (asSetter || asCloser) {
       standing = { lead: "Nothing on the board this week yet.", rest: "The first door counts" };

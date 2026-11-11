@@ -100,6 +100,18 @@ export type Job = {
   contract_id: string | null;
   /** Why a job ended without a sale, e.g. "Roof is fine, no claim". */
   lost_reason: string | null;
+  /**
+   * What the roof brought in and cost, entered by the office. final_value
+   * replaces the contract value once supplements are settled. Profit is
+   * final (or contract) value minus the four costs.
+   */
+  final_value?: number | null;
+  cost_materials?: number | null;
+  cost_labor?: number | null;
+  cost_other?: number | null;
+  cost_commission?: number | null;
+  costs_entered_at?: string | null;
+  costs_by?: string | null;
 };
 
 export async function listJobs(opts: { rep?: string; stage?: string; limit?: number } = {}) {

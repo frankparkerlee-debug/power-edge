@@ -1205,3 +1205,71 @@ export async function sendLoginLink(resendKey: string, to: string, url: string) 
     "login-link",
   );
 }
+
+// ---- Weekly scorecards (internal) -----------------------------------------
+//
+// One email per person with their own week and their team's, and one company
+// report for admins. Built here so they share the shell, and sent only when
+// an admin presses Send on /admin/scoreboard/send after previewing them.
+
+export type ScorecardRow = [label: string, value: string, strong?: boolean];
+
+export type PersonScorecard = {
+  firstName: string;
+  span: string;
+  /** "You were 2nd of 5 knockers on North." */
+  headline: string;
+  key: { label: string; value: string; sub?: string };
+  mine: ScorecardRow[];
+  note?: string | null;
+  team?: { name: string; rows: ScorecardRow[]; ranking: ScorecardRow[] } | null;
+  url: string;
+};
+
+export function buildPersonScorecard(c: PersonScorecard) {
+  return shell({
+    preheader: `${c.headline} ${c.key.label}: ${c.key.value}.`,
+    body:
+      eyebrow(`Your week · ${c.span}`) +
+      h1(c.headline) +
+      keyPanel(c.key) +
+      section("Your numbers") +
+      rows(c.mine) +
+      (c.note ? quote(c.note) : "") +
+      (c.team
+        ? section(`${c.team.name}`) + rows(c.team.rows) + (c.team.ranking.length ? section(`${c.team.name}, ranked`) + rows(c.team.ranking) : "")
+        : "") +
+      button("Open the scoreboard", c.url) +
+      small(`Sent by the office. Your numbers and your team's are on the scoreboard any time.`),
+  });
+}
+
+export type CompanyReport = {
+  span: string;
+  key: { label: string; value: string; sub?: string };
+  rows: ScorecardRow[];
+  teams: ScorecardRow[];
+  knockers: ScorecardRow[];
+  closers: ScorecardRow[];
+  url: string;
+};
+
+export function buildCompanyReport(r: CompanyReport) {
+  return shell({
+    preheader: `${r.key.label}: ${r.key.value}. ${r.span}.`,
+    body:
+      eyebrow(`Company report · ${r.span}`) +
+      h1("The week, door to signature") +
+      keyPanel(r.key) +
+      rows(r.rows) +
+      (r.teams.length ? section("Teams, by profit per roof") + rows(r.teams) : "") +
+      (r.knockers.length ? section("Knockers, by inspections set") + rows(r.knockers) : "") +
+      (r.closers.length ? section("Closers, by revenue") + rows(r.closers) : "") +
+      button("Open the scoreboard", r.url) +
+      small("Admins only. Reps get their own scorecard with their team, never the company."),
+  });
+}
+
+export async function sendScorecard(resendKey: string, to: string, subject: string, html: string, kind: "scorecard" | "company-report") {
+  return sendEmail(resendKey, to, subject, html, kind);
+}

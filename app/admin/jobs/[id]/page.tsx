@@ -3,7 +3,7 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { currentUser, canSell } from "@/lib/auth";
 import { getAppointment } from "@/lib/scheduling";
-import { money } from "@/lib/money";
+import { money, moneyShort, toNumber } from "@/lib/money";
 import { JobActions, type Inspection } from "@/components/JobActions";
 import { getJob, jobTimeline, updateJob, STAGES, STAGE_LABEL } from "@/lib/jobs";
 
@@ -38,6 +38,8 @@ const EVENT_LABEL: Record<string, string> = {
   appointment: "Inspection booked",
   agreement_sent: "Agreement sent",
   agreement_signed: "Agreement signed",
+  inspection: "Inspection result",
+  costs: "Revenue and costs entered",
 };
 
 export default async function JobPage({
@@ -129,6 +131,56 @@ export default async function JobPage({
     revalidatePath(`/admin/jobs/${id}`);
   }
 
+  /*
+   * Revenue and profit. The office enters what the roof finally brought in
+   * and what it cost; the scoreboard reads them as revenue and profit per
+   * roof. Closers see profit on roofs they closed; knockers never see it.
+   */
+  async function saveCosts(formData: FormData) {
+    "use server";
+    const me = await currentUser();
+    if (!me || me.role !== "admin") return;
+    const num = (k: string) => {
+      const raw = String(formData.get(k) || "").replace(/[^0-9.]/g, "");
+      if (!raw) return null;
+      const v = Number(raw);
+      return Number.isFinite(v) && v >= 0 ? Math.round(v * 100) / 100 : null;
+    };
+    const patch = {
+      final_value: num("final"),
+      cost_materials: num("materials"),
+      cost_labor: num("labor"),
+      cost_other: num("other"),
+      cost_commission: num("commission"),
+    };
+    const anyCost = [patch.cost_materials, patch.cost_labor, patch.cost_other, patch.cost_commission].some((v) => v != null);
+    await updateJob(
+      id,
+      { ...patch, costs_entered_at: anyCost ? new Date().toISOString() : null, costs_by: anyCost ? me.name : null } as never,
+      me.name,
+    );
+    const { logEvent } = await import("@/lib/jobs");
+    const cost = (patch.cost_materials ?? 0) + (patch.cost_labor ?? 0) + (patch.cost_other ?? 0) + (patch.cost_commission ?? 0);
+    await logEvent(
+      id,
+      "costs",
+      [patch.final_value != null ? `Final ${moneyShort(patch.final_value)}` : null, anyCost ? `costs ${moneyShort(cost)}` : "costs cleared"]
+        .filter(Boolean)
+        .join(", "),
+      me.name,
+    );
+    revalidatePath(`/admin/jobs/${id}`);
+    revalidatePath("/admin/scoreboard");
+  }
+
+  const isAdmin = user.role === "admin";
+  const seesJobProfit = isAdmin || (!!job.closer && job.closer === user.name && user.role !== "setter");
+  const revenue = job.final_value ?? (job.contract_value ? toNumber(job.contract_value) : null);
+  const costTotal =
+    (job.cost_materials ?? 0) + (job.cost_labor ?? 0) + (job.cost_other ?? 0) + (job.cost_commission ?? 0);
+  const profit = job.costs_entered_at && revenue != null ? revenue - costTotal : null;
+  const sold = ["signed", "in_production", "complete"].includes(job.stage);
+
   const field = (label: string, value?: string | number | null) =>
     value ? (
       <div>
@@ -206,6 +258,66 @@ export default async function JobPage({
             {field("Email", job.email)}
           </dl>
         </div>
+
+        {sold && (isAdmin || seesJobProfit) ? (
+          <section className="mt-4 rounded-lg border border-[#e3e6ea] bg-white p-5">
+            <div className="flex flex-wrap items-baseline justify-between gap-3">
+              <h2 className="font-display text-lg font-bold text-[#0b0e13]">Revenue and profit</h2>
+              <p className="text-sm text-gray-600">
+                {revenue != null ? (
+                  <>
+                    <strong className="text-[#0b0e13]">{moneyShort(revenue)}</strong> revenue
+                    {job.final_value == null ? <span className="text-gray-400"> (contract value)</span> : null}
+                  </>
+                ) : (
+                  "No price yet"
+                )}
+                {profit != null ? (
+                  <>
+                    {" · "}
+                    <strong style={{ color: profit >= 0 ? "#0c7a40" : "#b42318" }}>{moneyShort(profit)}</strong> profit
+                    {revenue ? <span className="text-gray-400"> ({Math.round((profit / revenue) * 100)}%)</span> : null}
+                  </>
+                ) : (
+                  <span className="text-gray-400"> · costs not entered</span>
+                )}
+              </p>
+            </div>
+            {isAdmin ? (
+              <form action={saveCosts} className="mt-4 grid gap-3 sm:grid-cols-5">
+                {[
+                  { name: "final", label: "Final amount", hint: "With supplements", v: job.final_value },
+                  { name: "materials", label: "Materials", hint: "Shingles, underlayment", v: job.cost_materials },
+                  { name: "labor", label: "Labor", hint: "Crew, tear-off", v: job.cost_labor },
+                  { name: "other", label: "Other", hint: "Dumpster, permit", v: job.cost_other },
+                  { name: "commission", label: "Commissions", hint: "Knocker and closer", v: job.cost_commission },
+                ].map((f) => (
+                  <label key={f.name} className="block">
+                    <span className="block text-sm font-semibold text-[#3b424e]">{f.label}</span>
+                    <span className="block text-xs text-gray-500">{f.hint}</span>
+                    <span className="mt-1 flex items-center rounded-md border border-[#d7dbe0] px-2.5 focus-within:border-[#0c7a40]">
+                      <span className="text-sm text-gray-400">$</span>
+                      <input
+                        name={f.name}
+                        inputMode="decimal"
+                        defaultValue={f.v ?? ""}
+                        className="w-full bg-transparent px-1.5 py-2 text-[16px] tabular-nums outline-none sm:text-sm"
+                      />
+                    </span>
+                  </label>
+                ))}
+                <div className="flex items-center gap-3 sm:col-span-5">
+                  <button className="rounded-md bg-[#0b0e13] px-4 py-2.5 text-sm font-bold text-white">Save</button>
+                  <span className="text-xs text-gray-500">
+                    {job.costs_entered_at
+                      ? `Entered by ${job.costs_by ?? "the office"}. The scoreboard uses these as this roof's actual profit.`
+                      : "Until costs are entered, the scoreboard estimates this roof's profit from the company rates."}
+                  </span>
+                </div>
+              </form>
+            ) : null}
+          </section>
+        ) : null}
 
         <JobActions
           job={{
@@ -286,7 +398,10 @@ export default async function JobPage({
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold text-[#0b0e13]">
                     {EVENT_LABEL[e.kind] || e.kind}
-                    {e.detail ? <span className="font-normal text-gray-600"> · {e.detail}</span> : null}
+                    {/* Costs are the office's and the closer's, not the knocker's. */}
+                    {e.detail && (e.kind !== "costs" || seesJobProfit) ? (
+                      <span className="font-normal text-gray-600"> · {e.detail}</span>
+                    ) : null}
                   </div>
                   <div className="text-xs text-gray-500">
                     {when(e.created_at)}

@@ -9,6 +9,10 @@ import {
   setMemberActive,
   setMemberRole,
   setMemberGoals,
+  listTeams,
+  createTeam,
+  updateTeam,
+  setMemberTeam,
   ASSIGNABLE_ROLES,
   type Role,
 } from "@/lib/auth";
@@ -64,7 +68,8 @@ export default async function TeamPage({
     );
   }
 
-  const members = await listMembers();
+  const [members, teams] = await Promise.all([listMembers(), listTeams()]);
+  const liveTeams = teams.filter((t) => t.active);
 
   async function add(formData: FormData) {
     "use server";
@@ -84,6 +89,35 @@ export default async function TeamPage({
       String(formData.get("to")) === "on",
     );
     revalidatePath("/admin/team");
+  }
+
+  async function addTeam(formData: FormData) {
+    "use server";
+    const me = await currentUser();
+    if (me?.role !== "admin") return;
+    await createTeam(String(formData.get("name") || ""));
+    revalidatePath("/admin/team");
+  }
+
+  async function editTeam(formData: FormData) {
+    "use server";
+    const me = await currentUser();
+    if (me?.role !== "admin") return;
+    const id = Number(formData.get("id"));
+    const retire = String(formData.get("retire") || "") === "1";
+    await updateTeam(id, retire ? { active: false } : { name: String(formData.get("name") || "") });
+    revalidatePath("/admin/team");
+    revalidatePath("/admin/scoreboard");
+  }
+
+  async function moveToTeam(formData: FormData) {
+    "use server";
+    const me = await currentUser();
+    if (me?.role !== "admin") return;
+    const raw = String(formData.get("team") || "");
+    await setMemberTeam(Number(formData.get("id")), raw ? Number(raw) : null);
+    revalidatePath("/admin/team");
+    revalidatePath("/admin/scoreboard");
   }
 
   async function saveGoals(formData: FormData) {
@@ -138,6 +172,7 @@ export default async function TeamPage({
                 <th className="py-2 pr-4">Name</th>
                 <th className="py-2 pr-4">Email</th>
                 <th className="py-2 pr-4">Role</th>
+                <th className="py-2 pr-4">Team</th>
                 <th className="py-2 pr-4">Last sign-in</th>
                 <th className="py-2"></th>
               </tr>
@@ -170,6 +205,27 @@ export default async function TeamPage({
                       </button>
                     </form>
                   </td>
+                  <td className="py-2.5 pr-4">
+                    {m.active ? (
+                      <form action={moveToTeam} className="flex items-center gap-2">
+                        <input type="hidden" name="id" value={m.id} />
+                        <select
+                          name="team"
+                          defaultValue={m.team_id ?? ""}
+                          className="rounded-md border border-[#d7dbe0] px-2 py-1 text-sm"
+                          aria-label={`Team for ${m.name}`}
+                        >
+                          <option value="">No team</option>
+                          {liveTeams.map((t) => (
+                            <option key={t.id} value={t.id}>
+                              {t.name}
+                            </option>
+                          ))}
+                        </select>
+                        <button className="text-xs font-semibold text-[#0c7a40] underline">Save</button>
+                      </form>
+                    ) : null}
+                  </td>
                   <td className="py-2.5 pr-4 text-gray-600">{when(m.last_login_at)}</td>
                   <td className="py-2.5 text-right">
                     {/*
@@ -191,6 +247,57 @@ export default async function TeamPage({
           </table>
         </div>
 
+        <h2 id="teams" className="mt-10 scroll-mt-20 text-xs font-bold uppercase tracking-widest text-gray-500">
+          Teams
+        </h2>
+        <p className="mt-1 text-sm text-gray-600">
+          A closer and the knockers who feed them. Each person sees their own numbers and their team&apos;s on the{" "}
+          <Link href="/admin/scoreboard" className="font-semibold text-[#0c7a40] underline">
+            scoreboard
+          </Link>
+          ; only admins see other teams and the company. Put people on a team in the table above.
+        </p>
+        {liveTeams.length ? (
+          <ul className="mt-3 divide-y divide-gray-100 border-y border-gray-100">
+            {liveTeams.map((t) => {
+              const people = members.filter((m) => m.active && m.team_id === t.id);
+              return (
+                <li key={t.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
+                  <form action={editTeam} className="flex items-center gap-2">
+                    <input type="hidden" name="id" value={t.id} />
+                    <input
+                      name="name"
+                      defaultValue={t.name}
+                      aria-label="Team name"
+                      className="w-40 rounded-md border border-[#d7dbe0] px-2 py-1 text-[16px] font-semibold sm:text-sm"
+                    />
+                    <button className="text-xs font-semibold text-[#0c7a40] underline">Rename</button>
+                  </form>
+                  <span className="flex-1 text-sm text-gray-600">
+                    {people.length
+                      ? people.map((m) => `${m.name}${m.role === "closer" ? " (closer)" : ""}`).join(", ")
+                      : "Nobody yet"}
+                  </span>
+                  <form action={editTeam}>
+                    <input type="hidden" name="id" value={t.id} />
+                    <input type="hidden" name="retire" value="1" />
+                    <button className="text-xs font-semibold text-gray-500 underline">Retire</button>
+                  </form>
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
+        <form action={addTeam} className="mt-3 flex items-center gap-2">
+          <input
+            name="name"
+            required
+            placeholder="Team name, e.g. North"
+            className="w-56 rounded-md border border-[#d7dbe0] px-3 py-2 text-[16px] sm:text-sm"
+          />
+          <button className="rounded-md bg-[#0b0e13] px-4 py-2 text-sm font-bold text-white">Add team</button>
+        </form>
+
         <h2 id="goals" className="mt-10 scroll-mt-20 text-xs font-bold uppercase tracking-widest text-gray-500">
           Goals
         </h2>
@@ -200,7 +307,7 @@ export default async function TeamPage({
             scoreboard
           </Link>{" "}
           measures each person against. Leave a box blank for the team default: {DEFAULT_GOALS.knocksWeek} doors and{" "}
-          {DEFAULT_GOALS.setsWeek} inspections a week, {`$${DEFAULT_GOALS.signedMonth.toLocaleString("en-US")} signed a month.`}{" "}
+          {DEFAULT_GOALS.setsWeek} inspections a week, {`$${DEFAULT_GOALS.signedMonth.toLocaleString("en-US")} revenue a month for closers.`}{" "}
           A day&apos;s goal is a fifth of the week&apos;s.
         </p>
         <div className="mt-3 overflow-x-auto">
@@ -210,7 +317,7 @@ export default async function TeamPage({
                 <th className="py-2 pr-4">Name</th>
                 <th className="py-2 pr-3">Doors a week</th>
                 <th className="py-2 pr-3">Inspections a week</th>
-                <th className="py-2 pr-3">Signed a month</th>
+                <th className="py-2 pr-3">Revenue a month</th>
                 <th className="py-2"></th>
               </tr>
             </thead>

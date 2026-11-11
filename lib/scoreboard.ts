@@ -164,12 +164,29 @@ export function periodFor(key: PeriodKey, now = new Date()): Period {
   };
 }
 
+/**
+ * Last Monday to Sunday, whole: what a weekly scorecard reports. Compared
+ * with the whole week before, not a partial one.
+ */
+export function lastWeekPeriod(now = new Date()): Period {
+  const p = periodFor("week", new Date(now.getTime() - 7 * 86400000));
+  const end = p.days[p.days.length - 1];
+  return {
+    ...p,
+    label: "Last week",
+    prevTo: p.from,
+    versus: "the week before",
+    today: end,
+  };
+}
+
 /* ------------------------------------------------------------------------ */
 
 export type RepRow = {
   who: string;
   role: "setter" | "closer" | "rep" | "admin" | null;
   active: boolean;
+  team_id: number | null;
   goal_knocks_week: number | null;
   goal_sets_week: number | null;
   goal_signed_month: number | null;
@@ -215,6 +232,32 @@ export type Board = {
   hail: Array<{ who: string; band: number; knocks: number; talked: number; sets: number }>;
   daily: Array<{ day: string; who: string; knocks: number; sets: number; signed: number; signed_value: number }>;
   wins: Array<{ kind: "signed" | "damage" | "set"; who: string; at: string; amount: number | null; address: string | null; city: string | null }>;
+  /** Every roof signed in the period, with revenue and (when known) profit. */
+  roofs: Roof[];
+  teams: TeamRef[];
+  settings: EstimateSettings;
+};
+
+export type Roof = {
+  job_id: string;
+  signed_at: string;
+  setter: string | null;
+  closer: string | null;
+  squares: number | null;
+  address: string | null;
+  city: string | null;
+  revenue: number;
+  /** "actual" once the office enters costs, "estimated" from company rates, else null. */
+  profit_kind: "actual" | "estimated" | null;
+  profit: number | null;
+};
+
+export type TeamRef = { id: number; name: string };
+
+export type EstimateSettings = {
+  est_cost_per_square: number | null;
+  est_other_per_job: number | null;
+  est_commission_pct: number | null;
 };
 
 export type DayRow = { who: string; day: string; knocks: number; sets: number; signed_value: number };
@@ -253,6 +296,9 @@ function normalize(b: Board | null): Board {
     hail: b?.hail ?? [],
     daily: b?.daily ?? [],
     wins: b?.wins ?? [],
+    roofs: (b?.roofs ?? []).map((r) => ({ ...r, revenue: Number(r.revenue) || 0, profit: r.profit == null ? null : Number(r.profit) })),
+    teams: b?.teams ?? [],
+    settings: b?.settings ?? { est_cost_per_square: null, est_other_per_job: null, est_commission_pct: null },
   };
 }
 
@@ -283,24 +329,6 @@ const shows = (r: RepRow, board: "setters" | "closers") =>
   board === "setters"
     ? (r.active && r.role !== "admin" && r.role !== "closer") || r.knocks > 0 || r.sets > 0
     : (r.active && r.role !== "admin" && r.role !== "setter") || r.ran > 0 || r.signed > 0 || r.sent > 0 || r.assigned > 0;
-
-export function ranked(reps: RepRow[], board: "setters" | "closers", byMoney: boolean) {
-  const rows = reps.filter((r) => shows(r, board));
-  rows.sort((a, b) =>
-    board === "setters"
-      ? b.sets - a.sets || b.knocks - a.knocks || a.who.localeCompare(b.who)
-      : (byMoney ? b.signed_value - a.signed_value : 0) || b.signed - a.signed || b.ran - a.ran || a.who.localeCompare(b.who),
-  );
-  // Ties share a rank.
-  let rank = 0;
-  let last = "";
-  return rows.map((r, i) => {
-    const key = board === "setters" ? `${r.sets}:${r.knocks}` : `${byMoney ? r.signed_value : ""}:${r.signed}:${r.ran}`;
-    if (key !== last) rank = i + 1;
-    last = key;
-    return { ...r, rank };
-  });
-}
 
 export function goalsFor(r: Pick<RepRow, "goal_knocks_week" | "goal_sets_week" | "goal_signed_month">, p: Period) {
   const knocksWeek = r.goal_knocks_week ?? DEFAULT_GOALS.knocksWeek;
@@ -471,3 +499,196 @@ export const HAIL_BANDS: Record<number, string> = {
   2: "1 to 2 in",
   1: "Under 1 in, or no radar",
 };
+
+/* ------------------------------------------------------------------------ */
+/* Revenue and profit per roof: the company's chief numbers.                 */
+/* ------------------------------------------------------------------------ */
+
+export type Money = {
+  roofs: number;
+  revenue: number;
+  /** Revenue divided by roofs. */
+  perRoof: number | null;
+  /** Roofs with a profit figure (actual or estimated). */
+  profitRoofs: number;
+  estimated: number;
+  profit: number;
+  /** Profit divided by the roofs that have one. */
+  profitPerRoof: number | null;
+  /** Profit over the revenue of the roofs that have one. */
+  margin: number | null;
+};
+
+export function moneyOf(roofs: Roof[]): Money {
+  const revenue = roofs.reduce((t, r) => t + r.revenue, 0);
+  const withProfit = roofs.filter((r) => r.profit != null);
+  const profit = withProfit.reduce((t, r) => t + (r.profit ?? 0), 0);
+  const profitRevenue = withProfit.reduce((t, r) => t + r.revenue, 0);
+  return {
+    roofs: roofs.length,
+    revenue,
+    perRoof: roofs.length ? revenue / roofs.length : null,
+    profitRoofs: withProfit.length,
+    estimated: withProfit.filter((r) => r.profit_kind === "estimated").length,
+    profit,
+    profitPerRoof: withProfit.length ? profit / withProfit.length : null,
+    margin: profitRevenue > 0 ? profit / profitRevenue : null,
+  };
+}
+
+/** A roof belongs to the team of the knocker who found it, else the closer's. */
+export function teamOfRoof(r: Roof, teamOf: Map<string, number | null>) {
+  return (r.setter ? teamOf.get(r.setter) : null) ?? (r.closer ? teamOf.get(r.closer) : null) ?? null;
+}
+
+/* ------------------------------------------------------------------------ */
+/* Who sees what.                                                            */
+/*                                                                           */
+/* Admins: the company, every team, every person. Everyone else: their own   */
+/* numbers and their team, ranked. Closers see profit on their roofs and     */
+/* their team's; knockers see revenue, never profit. The filtering happens   */
+/* here, on the server, before anything is rendered, so a knocker's page     */
+/* never carries another team's numbers or a profit figure at all.           */
+/* ------------------------------------------------------------------------ */
+
+export type Scope =
+  | { kind: "company" }
+  | { kind: "team"; id: number; name: string }
+  | { kind: "self" };
+
+export const seesProfit = (role?: string | null) => role === "admin" || role === "closer" || role === "rep";
+
+/** Keep only these people, and recount the team totals from them. */
+export function restrict(b: Board, scope: Scope, me: string, showProfit: boolean): Board {
+  const teamOf = new Map(b.reps.map((r) => [r.who, r.team_id] as const));
+  let keep: (who: string | null | undefined) => boolean;
+  let roofs: Roof[];
+  if (scope.kind === "company") {
+    keep = () => true;
+    roofs = b.roofs;
+  } else if (scope.kind === "team") {
+    keep = (who) => !!who && teamOf.get(who) === scope.id;
+    roofs = b.roofs.filter((r) => teamOfRoof(r, teamOf) === scope.id);
+  } else {
+    keep = (who) => who === me;
+    roofs = b.roofs.filter((r) => r.setter === me || r.closer === me);
+  }
+  if (!showProfit) roofs = roofs.map((r) => ({ ...r, profit: null, profit_kind: null }));
+  const reps = b.reps.filter((r) => keep(r.who));
+  const sum = (k: keyof RepRow) => reps.reduce((t, r) => t + Number(r[k] || 0), 0);
+  const team: TeamRow =
+    scope.kind === "company"
+      ? b.team
+      : {
+          knocks: sum("knocks"),
+          talked: sum("talked"),
+          sets: sum("sets"),
+          web_sets: 0,
+          no_shows: sum("no_shows"),
+          held: sum("ran"),
+          damage: sum("damage"),
+          sent: sum("sent"),
+          signed: roofs.length,
+          signed_value: roofs.reduce((t, r) => t + r.revenue, 0),
+        };
+  return {
+    team,
+    reps,
+    reasons: b.reasons.filter((x) => keep(x.who)),
+    hours: b.hours.filter((x) => keep(x.who)),
+    hail: b.hail.filter((x) => keep(x.who)),
+    daily: b.daily.filter((x) => keep(x.who)),
+    wins: b.wins.filter((x) => keep(x.who)),
+    roofs,
+    teams: scope.kind === "company" ? b.teams : b.teams.filter((t) => scope.kind === "team" && t.id === scope.id),
+    settings: b.settings,
+  };
+}
+
+/* ------------------------------------------------------------------------ */
+/* Stack ranking by any metric.                                              */
+/* ------------------------------------------------------------------------ */
+
+export type MetricKey =
+  | "sets" | "knocks" | "talk" | "per100" | "held" | "roofs" | "revenue" | "perRoof"
+  | "profit" | "profitPerRoof" | "margin" | "close" | "ran";
+
+export type Metric = {
+  key: MetricKey;
+  label: string;
+  /** Column header. */
+  short: string;
+  kind: "count" | "money" | "rate" | "per100";
+  profit?: boolean;
+  /** null means "not enough to rank on": sorted last, shown as a dot. */
+  value: (r: RepRow, m: Money) => number | null;
+};
+
+export const SETTER_METRICS: Metric[] = [
+  { key: "sets", label: "Inspections set", short: "Set", kind: "count", value: (r) => r.sets },
+  { key: "knocks", label: "Doors", short: "Doors", kind: "count", value: (r) => r.knocks },
+  { key: "talk", label: "Talk rate", short: "Talked", kind: "rate", value: (r) => (r.knocks >= MIN_DOORS_FOR_RATE ? r.talked / r.knocks : null) },
+  { key: "per100", label: "Sets per 100 doors", short: "Per 100", kind: "per100", value: (r) => (r.knocks >= MIN_DOORS_FOR_RATE ? (r.sets / r.knocks) * 100 : null) },
+  { key: "roofs", label: "Roofs signed", short: "Roofs", kind: "count", value: (_r, m) => m.roofs },
+  { key: "revenue", label: "Revenue", short: "Revenue", kind: "money", value: (_r, m) => m.revenue },
+  { key: "perRoof", label: "Revenue per roof", short: "Per roof", kind: "money", value: (_r, m) => m.perRoof },
+];
+
+export const CLOSER_METRICS: Metric[] = [
+  { key: "revenue", label: "Revenue", short: "Revenue", kind: "money", value: (_r, m) => m.revenue },
+  { key: "roofs", label: "Roofs signed", short: "Roofs", kind: "count", value: (_r, m) => m.roofs },
+  { key: "perRoof", label: "Revenue per roof", short: "Per roof", kind: "money", value: (_r, m) => m.perRoof },
+  { key: "profitPerRoof", label: "Profit per roof", short: "Profit/roof", kind: "money", profit: true, value: (_r, m) => m.profitPerRoof },
+  { key: "profit", label: "Profit", short: "Profit", kind: "money", profit: true, value: (_r, m) => (m.profitRoofs ? m.profit : null) },
+  { key: "margin", label: "Margin", short: "Margin", kind: "rate", profit: true, value: (_r, m) => m.margin },
+  { key: "close", label: "Close rate", short: "Close", kind: "rate", value: (r) => (r.damage >= 3 ? r.signed / r.damage : null) },
+  { key: "ran", label: "Inspections run", short: "Inspected", kind: "count", value: (r) => r.ran },
+];
+
+export function metricsFor(board: "setters" | "closers", showProfit: boolean) {
+  return (board === "setters" ? SETTER_METRICS : CLOSER_METRICS).filter((m) => showProfit || !m.profit);
+}
+
+/** Each person's roofs on this board: as the knocker on Setters, as the closer on Closers. */
+export function roofsOf(who: string, roofs: Roof[], board: "setters" | "closers") {
+  return roofs.filter((r) => (board === "setters" ? r.setter === who : r.closer === who));
+}
+
+export type RankedRow = RepRow & { rank: number | null; money: Money; metric: number | null };
+
+/**
+ * Stack rank on any metric. People without enough to rank on (a rate on a
+ * handful of doors) go to the bottom without a rank, rather than topping the
+ * board on one lucky knock.
+ */
+export function rankBy(reps: RepRow[], roofs: Roof[], board: "setters" | "closers", metric: Metric): RankedRow[] {
+  const rows = reps
+    .filter((r) => shows(r, board))
+    .map((r) => {
+      const money = moneyOf(roofsOf(r.who, roofs, board));
+      return { ...r, money, metric: metric.value(r, money), rank: null as number | null };
+    });
+  rows.sort((a, b) => {
+    if (a.metric == null && b.metric == null) return a.who.localeCompare(b.who);
+    if (a.metric == null) return 1;
+    if (b.metric == null) return -1;
+    return b.metric - a.metric || a.who.localeCompare(b.who);
+  });
+  let rank = 0;
+  let last: number | null = null;
+  rows.forEach((r, i) => {
+    if (r.metric == null) return;
+    if (r.metric !== last) rank = i + 1;
+    last = r.metric;
+    r.rank = rank;
+  });
+  return rows;
+}
+
+export function fmtMetric(m: Metric, v: number | null) {
+  if (v == null) return null;
+  if (m.kind === "money") return v.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  if (m.kind === "rate") return `${Math.round(v * 100)}%`;
+  if (m.kind === "per100") return v.toFixed(1);
+  return Math.round(v).toLocaleString("en-US");
+}
