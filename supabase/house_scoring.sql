@@ -82,7 +82,8 @@ alter table public.reroof_permits enable row level security;
 
 -- Best doors around a point. Scores every house we can place on the map:
 -- storm targets (all 11 counties), residential parcels (the 9 counties in the
--- parcels table) and Dallas re-roof permit addresses. A house already on the
+-- parcels table), every Dallas and Tarrant home (parcels_metro) and Dallas
+-- re-roof permit addresses. A house already on the
 -- target list appears once, as the target, so knocks stay attached to it.
 --
 -- Roof age is an estimate. Radar history starts in 2020, so:
@@ -145,6 +146,23 @@ par as (
     and coalesce(trim(p.situs), '') <> ''
     and coalesce(trim(p.owner), '') <> ''
 ),
+met as (
+  -- Every single-family home in Dallas and Tarrant (public.parcels_metro).
+  select
+    'parcel'::text as src, null::uuid as target_id, m.county, upper(trim(m.situs)) as address,
+    m.city, m.zip, m.owner as owner_name, upper(trim(m.mail)) as mailing,
+    case
+      when coalesce(trim(m.mail), '') = '' then false
+      else position(
+        (split_part(regexp_replace(upper(m.situs), '[^A-Z0-9 ]', '', 'g'), ' ', 1) || ' ' ||
+         split_part(regexp_replace(upper(m.situs), '[^A-Z0-9 ]', '', 'g'), ' ', 2))
+        in regexp_replace(upper(m.mail), '[^A-Z0-9 ]', '', 'g')) <> 1
+    end as absentee,
+    m.lat, m.lon, m.year_built, m.mkt_value as value, null::text as status
+  from public.parcels_metro m, box
+  where m.lat between p_lat - box.dlat and p_lat + box.dlat
+    and m.lon between p_lon - box.dlon and p_lon + box.dlon
+),
 prm as (
   -- Permit-only houses: we know the address and the roof, not the owner.
   select distinct on (rp.street)
@@ -157,14 +175,18 @@ prm as (
     and rp.lon between p_lon - box.dlon and p_lon + box.dlon
   order by rp.street, rp.issued_date desc
 ),
+tgt_n as (select public.norm_street(address) as n from tgt),
+met_n as (select public.norm_street(address) as n from met),
 houses as (
   select * from tgt
   union all
   select * from par where not exists (select 1 from tgt where tgt.address = par.address)
   union all
-  select * from prm where not exists (
-    select 1 from tgt where public.norm_street(tgt.address) = public.norm_street(prm.address)
-  )
+  select * from met where not exists (select 1 from tgt_n where tgt_n.n = public.norm_street(met.address))
+  union all
+  select * from prm
+  where not exists (select 1 from tgt_n where tgt_n.n = public.norm_street(prm.address))
+    and not exists (select 1 from met_n where met_n.n = public.norm_street(prm.address))
 ),
 scored as (
   select
