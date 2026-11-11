@@ -117,6 +117,7 @@ function titleFor(path: string): { title: string; parent?: string } {
     "/admin/health": { title: "Health" },
     "/admin/scoreboard": { title: "Scoreboard" },
     "/admin/onboarding": { title: "Getting started" },
+    "/admin/onboarding/emails": { title: "Onboarding emails", parent: "/admin/onboarding" },
     "/admin/scoreboard/preview": { title: "Scoreboard preview", parent: "/admin/scoreboard" },
     "/admin/scoreboard/send": { title: "Scorecards", parent: "/admin/scoreboard" },
     "/sales": { title: "Playbook" },
