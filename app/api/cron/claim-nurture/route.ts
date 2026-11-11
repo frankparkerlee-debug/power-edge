@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { listIncompleteIntakes, markIntakeNurtured } from "@/lib/db";
 import { sendClaimNurture } from "@/lib/emails";
-import { runStormWatch } from "@/lib/storm";
+import { runStormWatch, localDay, addDays } from "@/lib/storm";
 import { generateStormTargets } from "@/lib/parcels";
 import { runStormJobAlerts } from "@/lib/stormAlerts";
 import { runSkipTrace } from "@/lib/skiptrace";
@@ -56,10 +56,11 @@ export async function POST(req: Request) {
   // Storm engine piggybacks on this hourly cron (also serves as the Supabase
   // free-tier keep-alive). Ingest is best-effort and never blocks nurture.
   const storm = await runStormWatch();
-  // Auto-generate homeowner targets for fresh hail (today + yesterday UTC).
-  // Idempotent (unique storm_date+address), no-op on hail-free days.
-  const today = new Date().toISOString().slice(0, 10);
-  const yesterday = new Date(Date.now() - 86400 * 1000).toISOString().slice(0, 10);
+  // Auto-generate homeowner targets for fresh hail: the storm night that
+  // started this morning and the one that started yesterday morning (local
+  // 7am to 7am). Idempotent (unique storm_date+address), no-op on hail-free days.
+  const today = localDay(new Date().toISOString());
+  const yesterday = addDays(today, -1);
   const targetsToday = await generateStormTargets(today);
   const targetsYday = await generateStormTargets(yesterday);
   // Fresh hail near an open job lands on that job's timeline, which is

@@ -1,3 +1,4 @@
+import { localDay } from "@/lib/storm";
 // Storm → HubSpot call tasks. When fresh 1″+ hail lands near an EXISTING
 // HubSpot contact, create a HIGH-priority task ("Call X, hail hit their
 // area") and stamp the contact's storm properties. Runs from the hourly cron;
@@ -121,7 +122,7 @@ export async function runStormContactTasks(): Promise<{
         }
       }
       if (!hit) continue;
-      const stormDate = hit.valid_at.slice(0, 10);
+      const stormDate = localDay(hit.valid_at);
       if (p.storm_date === stormDate) continue; // already handled this storm
 
       const name = `${p.firstname || ""} ${p.lastname || ""}`.trim() || "contact";

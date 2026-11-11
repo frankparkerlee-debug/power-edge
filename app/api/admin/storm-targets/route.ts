@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listStormTargets } from "@/lib/parcels";
+import { listStormTargets, BIG_HAIL_IN } from "@/lib/parcels";
 import { apiUser } from "@/lib/auth";
 
 const NEAR_RADIUS_MI = 15;
@@ -16,7 +16,7 @@ function haversineMi(lat1: number, lon1: number, lat2: number, lon2: number) {
 }
 
 /** Targets in a bbox around a point, straight from the DB. */
-async function bboxTargets(lat: number, lon: number, halfMi: number, days?: number) {
+async function bboxTargets(lat: number, lon: number, halfMi: number, days?: number, bigHail?: boolean) {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
   const dLat = halfMi / 69;
@@ -28,8 +28,9 @@ async function bboxTargets(lat: number, lon: number, halfMi: number, days?: numb
     const from = new Date(Date.now() - days * 86400 * 1000).toISOString().slice(0, 10);
     q += `&storm_date=gte.${from}`;
   }
+  if (bigHail) q += `&radar_in=gte.${BIG_HAIL_IN}`;
   const res = await fetch(
-    `${url}/rest/v1/storm_targets?select=id,owner_name,address,city,county,zip,hail_size_in,absentee,year_built,value,score,storm_date,lat,lon,phone,phone_dnc,status${q}&limit=3000`,
+    `${url}/rest/v1/storm_targets_radar?select=id,owner_name,address,city,county,zip,hail_size_in,absentee,year_built,value,score,storm_date,lat,lon,phone,phone_dnc,status,radar_in,radar_date${q}&limit=3000`,
     { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
   );
   if (!res.ok) return [];
@@ -51,6 +52,8 @@ async function bboxTargets(lat: number, lon: number, halfMi: number, days?: numb
     phone_dnc: boolean | null;
     status: string;
     county: string | null;
+    radar_in: number | null;
+    radar_date: string | null;
   }>;
 }
 
@@ -63,7 +66,7 @@ async function bboxTargets(lat: number, lon: number, halfMi: number, days?: numb
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const u = await apiUser(req);
-  if (u?.role !== "admin") {
+  if (!u) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   // Near-me mode: ?near=lat,lon → everything within 15mi sorted by distance;
@@ -71,6 +74,8 @@ export async function GET(req: Request) {
   const near = url.searchParams.get("near") || "";
   const daysRawNear = url.searchParams.get("days") || "";
   const nearDays = ["10", "30", "90"].includes(daysRawNear) ? Number(daysRawNear) : undefined;
+  // Same default as the map: 2 in+ radar hail only, unless big=0.
+  const nearBig = url.searchParams.get("big") !== "0";
   const m = near.match(/^(-?\d+\.?\d*),(-?\d+\.?\d*)$/);
   if (m) {
     const lat = parseFloat(m[1]);
@@ -78,7 +83,7 @@ export async function GET(req: Request) {
     if (!(lat > 25 && lat < 37 && lon > -107 && lon < -93)) {
       return NextResponse.json({ ok: false, error: "Bad coordinates" }, { status: 400 });
     }
-    const rows = await bboxTargets(lat, lon, NEAR_RADIUS_MI, nearDays);
+    const rows = await bboxTargets(lat, lon, NEAR_RADIUS_MI, nearDays, nearBig);
     const withMi = rows
       .map((r) => ({ ...r, distance_mi: haversineMi(lat, lon, r.lat, r.lon) }))
       .filter((r) => r.distance_mi <= NEAR_RADIUS_MI)
@@ -86,7 +91,7 @@ export async function GET(req: Request) {
       .slice(0, 150);
     let nearestBeyond: { city: string; mi: number; storm_date: string } | null = null;
     if (withMi.length === 0) {
-      const wide = await bboxTargets(lat, lon, 75, nearDays);
+      const wide = await bboxTargets(lat, lon, 75, nearDays, nearBig);
       let best: (typeof wide)[number] | null = null;
       let bestMi = Infinity;
       for (const r of wide) {
@@ -113,6 +118,12 @@ export async function GET(req: Request) {
     });
   }
 
+  // Everything below is the full homeowner export: office only. "Near me"
+  // above is for every signed-in rep; it used to be admin-only too, so a
+  // setter tapping Near me at the curb got an error.
+  if (u.role !== "admin") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const date = url.searchParams.get("date") || undefined;
   const county = url.searchParams.get("county") || undefined;
   const city = url.searchParams.get("city") || undefined;

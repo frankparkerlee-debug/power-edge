@@ -11,6 +11,8 @@ const DFW = { lat: 32.9, lon: -97.04 };
 const RADIUS_MI = 100;
 const WFOS = "FWD,OUN,SHV";
 
+export { localDay, addDays } from "./day";
+
 export function haversineMi(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 3958.8;
   const toRad = (d: number) => (d * Math.PI) / 180;

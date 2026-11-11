@@ -1,3 +1,4 @@
+import { localDay } from "@/lib/storm";
 // HubSpot CRM pipe, every lead (and later, storm-engine target) flows into
 // HubSpot as a contact + a timeline note with the full context. Env-gated:
 //   HUBSPOT_ACCESS_TOKEN   private-app token (Settings → Integrations →
@@ -77,7 +78,7 @@ export async function stormContextForZip(
       const mi = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       if (mi > 15) continue;
       if (e.magnitude > maxSize) maxSize = e.magnitude;
-      const d = e.valid_at.slice(0, 10);
+      const d = localDay(e.valid_at);
       if (d > latest) latest = d;
     }
     return latest ? { storm_date: latest, hail_size_in: maxSize } : null;

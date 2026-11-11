@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { addLightBasemap } from "@/lib/basemap";
+import { localDay } from "@/lib/day";
 
 // Admin storm-engine dashboard map + timeline. Leaflet is bundled (same reason
 // as HailMap: ad blockers kill CDN loads). Dark-friendly admin styling.
@@ -51,7 +52,7 @@ export function StormDashboard({
   const days = useMemo(() => {
     const m = new Map<string, { hail: number; maxHail: number; wind: number }>();
     for (const e of events) {
-      const d = e.valid_at.slice(0, 10);
+      const d = localDay(e.valid_at);
       const cur = m.get(d) || { hail: 0, maxHail: 0, wind: 0 };
       if (e.type === "hail") {
         cur.hail++;
@@ -65,7 +66,7 @@ export function StormDashboard({
   }, [events]);
 
   const filtered = useMemo(
-    () => (day === "all" ? events : events.filter((e) => e.valid_at.slice(0, 10) === day)),
+    () => (day === "all" ? events : events.filter((e) => localDay(e.valid_at) === day)),
     [events, day],
   );
 
@@ -115,7 +116,7 @@ export function StormDashboard({
             weight: 1,
           })
             .bindPopup(
-              `<b>${s ? `${s}″ hail` : "Hail"}</b><br/>${e.city}<br/>${e.valid_at.slice(0, 10)}`,
+              `<b>${s ? `${s}″ hail` : "Hail"}</b><br/>${e.city}<br/>${localDay(e.valid_at)}`,
             )
             .addTo(layer);
         } else {
@@ -129,7 +130,7 @@ export function StormDashboard({
             .bindPopup(
               `<b>${
                 e.type === "wind_gust" ? `${e.magnitude ?? "?"} mph gust` : "Wind damage"
-              }</b><br/>${e.city}<br/>${e.valid_at.slice(0, 10)}`,
+              }</b><br/>${e.city}<br/>${localDay(e.valid_at)}`,
             )
             .addTo(layer);
         }

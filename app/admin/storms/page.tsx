@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { listStormEvents, type StormEventRow } from "@/lib/storm";
+import { listStormEvents, localDay, type StormEventRow } from "@/lib/storm";
 import { listRoofChecks } from "@/lib/db";
 import { StormDashboard } from "@/components/StormDashboard";
-import { listStormTargets, listTargetDays, listTargetCities, withLastKnock, areasForRep } from "@/lib/parcels";
+import { listStormTargets, listTargetDays, listTargetCities, withLastKnock, areasForRep, BIG_HAIL_IN } from "@/lib/parcels";
 import { TargetCards } from "@/components/TargetCards";
 import { currentUser } from "@/lib/auth";
 
@@ -27,7 +27,7 @@ type StormDay = {
 function clusterByDay(events: StormEventRow[]): StormDay[] {
   const days = new Map<string, StormDay>();
   for (const e of events) {
-    const date = e.valid_at.slice(0, 10);
+    const date = localDay(e.valid_at);
     let d = days.get(date);
     if (!d) {
       d = { date, hail: 0, maxHail: 0, gusts: 0, maxGust: 0, windDmg: 0, cities: [] };
@@ -69,9 +69,11 @@ export default async function AdminStormsPage({
     city?: string;
     days?: string;
     rep?: string;
+    big?: string;
+    zip?: string;
   }>;
 }) {
-  const { key, targets: targetDate, county, city, days: daysParam, rep } = await searchParams;
+  const { key, targets: targetDate, county, city, days: daysParam, rep, big, zip } = await searchParams;
   const user = await currentUser(key);
   const authed = !!user;
 
@@ -99,6 +101,10 @@ export default async function AdminStormsPage({
   const safeCounty = county && /^[a-z]{3,20}$/.test(county) ? county : undefined;
   const safeCity = city && /^[A-Za-z .'-]{2,40}$/.test(city) ? city : undefined;
   const safeDays = ["10", "30", "90"].includes(daysParam || "") ? Number(daysParam) : undefined;
+  // Field default: only doors with 2 in+ radar hail at the house, the level
+  // that showed real re-roofing in the Dallas permit test. big=0 shows all.
+  const bigHail = big !== "0";
+  const safeZip = zip && /^\d{5}$/.test(zip.trim()) ? zip.trim() : undefined;
   // A rep opening their own link lands on their own territory. Without this,
   // every rep opens the same top-of-list and three of them knock one street.
   // Identity comes from the session. ?rep= is still honoured for an admin
@@ -108,14 +114,22 @@ export default async function AdminStormsPage({
   const safeRep = user?.role === "admin" ? (typed ?? user?.name) : (user?.name || typed);
   const myAreas = safeRep ? await areasForRep(safeRep) : [];
   const myCities = myAreas.filter((a) => a.area_kind === "city").map((a) => a.area_value);
-  const effectiveCity = safeCity || (myCities.length > 0 ? myCities[0] : undefined);
+  // A ZIP the rep typed wins over their territory's default city.
+  const effectiveCity = safeZip ? undefined : safeCity || (myCities.length > 0 ? myCities[0] : undefined);
   const [events, checks, targetDays, topTargets, targetCities] = await Promise.all([
     listStormEvents(90),
     listRoofChecks(40),
     listTargetDays(),
     listStormTargets(
-      { date: safeTargetDate, county: safeCounty, city: effectiveCity, days: safeDays },
-      300,
+      {
+        date: safeTargetDate,
+        county: safeCounty,
+        city: effectiveCity,
+        days: safeDays,
+        bigHail,
+        zip: safeZip,
+      },
+      safeZip ? 500 : 300,
     ),
     listTargetCities(),
   ]);
@@ -275,6 +289,8 @@ export default async function AdminStormsPage({
                 county: safeCounty,
                 city: safeCity,
                 days: safeDays ? String(safeDays) : undefined,
+                big: bigHail ? undefined : "0",
+                zip: safeZip,
                 ...over,
               };
               for (const [k, v] of Object.entries(merged)) if (v) p.set(k, v);
@@ -287,8 +303,57 @@ export default async function AdminStormsPage({
             const cities = targetCities.filter((c) => !safeCounty || c.county === safeCounty);
             return (
               <>
-                {/* Recency quick filter, the field-use default */}
-                <div id="targets" className="mt-3 flex flex-wrap gap-2">
+                {/* Which doors: proven big hail (default) or everything, and a ZIP */}
+                <div id="targets" className="mt-3 flex flex-wrap items-center gap-2">
+                  <a href={qs({ big: undefined })} className={`${chip(bigHail)} py-2 font-semibold`}>
+                    {BIG_HAIL_IN} in+ hail at the house
+                  </a>
+                  <a href={qs({ big: "0" })} className={`${chip(!bigHail)} py-2`}>
+                    All hail
+                  </a>
+                  <form method="get" action="/admin/storms#targets" className="flex items-center gap-1.5">
+                    {key && <input type="hidden" name="key" value={key} />}
+                    {!bigHail && <input type="hidden" name="big" value="0" />}
+                    {safeDays && <input type="hidden" name="days" value={String(safeDays)} />}
+                    <input
+                      name="zip"
+                      inputMode="numeric"
+                      pattern="[0-9]{5}"
+                      maxLength={5}
+                      placeholder="ZIP"
+                      defaultValue={safeZip || ""}
+                      aria-label="ZIP code"
+                      className="w-24 rounded-md border border-gray-300 px-2.5 py-2 text-sm"
+                    />
+                    <button type="submit" className="rounded-md border border-gray-300 px-3 py-2 text-sm font-semibold">
+                      Go
+                    </button>
+                    {safeZip && (
+                      <a href={qs({ zip: undefined })} className="text-sm text-gray-500 underline">
+                        clear
+                      </a>
+                    )}
+                  </form>
+                </div>
+                {safeZip && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    ZIP {safeZip}: {topTargets.length} door{topTargets.length === 1 ? "" : "s"}, street by street.
+                  </p>
+                )}
+                {topTargets.length === 0 && (
+                  <div className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm">
+                    <p className="font-bold">
+                      No {bigHail ? `${BIG_HAIL_IN} in+ hail ` : ""}doors{safeZip ? ` in ${safeZip}` : effectiveCity ? ` in ${effectiveCity}` : ""} for these filters.
+                    </p>
+                    {bigHail && (
+                      <a href={qs({ big: "0" })} className="mt-1 inline-block font-semibold text-[#0c7a40] underline">
+                        Show all hail instead
+                      </a>
+                    )}
+                  </div>
+                )}
+                {/* Recency quick filter */}
+                <div className="mt-2 flex flex-wrap gap-2">
                   {[
                     { d: "10", label: "Hit last 10 days" },
                     { d: "30", label: "Last 30 days" },
@@ -399,6 +464,9 @@ export default async function AdminStormsPage({
                 status: t.status,
                 county: t.county ?? null,
                 knock: t.knock,
+                radar_in: t.radar_in ?? null,
+                radar_date: t.radar_date ?? null,
+                storm_date: t.storm_date,
               }))}
             />
             {/* Desktop: full table */}
@@ -411,7 +479,8 @@ export default async function AdminStormsPage({
                     <th className="py-2 pr-4">Address</th>
                     <th className="py-2 pr-4">City</th>
                     <th className="py-2 pr-4">Zip</th>
-                    <th className="py-2 pr-4">Hail</th>
+                    <th className="py-2 pr-4">Radar hail</th>
+                    <th className="py-2 pr-4">Storm</th>
                     <th className="py-2 pr-4">Occupancy</th>
                     <th className="py-2 pr-4">Built</th>
                     <th className="py-2 pr-4">Value</th>
@@ -436,7 +505,8 @@ export default async function AdminStormsPage({
                       </td>
                       <td className="whitespace-nowrap py-2 pr-4">{t.city || ", "}</td>
                       <td className="py-2 pr-4">{t.zip}</td>
-                      <td className="py-2 pr-4">{t.hail_size_in ? `${t.hail_size_in}″` : ", "}</td>
+                      <td className="py-2 pr-4 font-semibold">{t.radar_in ? `${Number(t.radar_in).toFixed(1)}″` : ", "}</td>
+                      <td className="whitespace-nowrap py-2 pr-4">{fmtDate(t.storm_date)}</td>
                       <td className="py-2 pr-4 text-gray-600">
                         {t.absentee ? "Absentee/investor" : "Owner-occupied"}
                       </td>
@@ -449,7 +519,9 @@ export default async function AdminStormsPage({
                 </tbody>
               </table>
               <p className="mt-2 text-xs text-gray-500">
-                Top 100 by score{safeTargetDate ? ` for ${safeTargetDate}` : " across all storm days"}
+                {bigHail ? `${BIG_HAIL_IN} in+ radar hail at the house, biggest first` : "Top by score"}
+                {safeZip ? ` · ZIP ${safeZip}, street by street` : ""}
+                {safeTargetDate ? ` for ${safeTargetDate}` : " across all storm days"}
                 {safeCounty ? ` · ${safeCounty === "dallas" ? "Dallas" : "Tarrant"} County` : ""}
                 {safeCity ? ` · ${safeCity}` : ""}. Full list in the CSV. Phones come from batch
                 skip trace (upload the CSV to BatchData or similar, then DNC-scrub before dialing).

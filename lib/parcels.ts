@@ -13,7 +13,7 @@
 // each (sized by hail) → parcel query → dedupe → score →
 // insert storm_targets (idempotent on storm_date+address).
 
-import { haversineMi } from "@/lib/storm";
+import { haversineMi, localDay, addDays } from "@/lib/storm";
 
 const DCAD_QUERY =
   "https://maps.dcad.org/prdwa/rest/services/Property/ParcelQuery/MapServer/4/query";
@@ -266,6 +266,21 @@ function isAbsentee(address: string, mailing: string) {
   return !m.startsWith(a.split(" ").slice(0, 2).join(" "));
 }
 
+/**
+ * Build the knock list for one storm night.
+ *
+ * `dateISO` is a local storm day, and the run covers 7am that day to 7am the
+ * next (12:00 UTC to 12:00 UTC), the same window the radar hail grid uses.
+ * Each house is dated by the local time of the hail report nearest to it,
+ * because that is its date of loss.
+ *
+ * This used to take the UTC calendar day, so evening storms (most of them
+ * here) landed on the next day, and a storm crossing midnight was dated the
+ * same everywhere. On April 25 2026, Wise and Parker were hit before 11pm,
+ * Tarrant from 10pm to 1am and Dallas after midnight; every house read
+ * "Apr 26". Rows already in the table were re-dated the same way on
+ * 2026-11-11 (old dates kept in storm_targets_date_backup_20261111).
+ */
 export async function generateStormTargets(
   dateISO: string,
 ): Promise<{ date: string; events: number; targets: number; ok: boolean }> {
@@ -274,13 +289,13 @@ export async function generateStormTargets(
     return { date: dateISO, events: 0, targets: 0, ok: false };
   }
   try {
-    // Hail ≥1″ that day.
+    // Hail 1 in+ during the storm night: 7am local to 7am local.
     const res = await fetch(
-      `${url}/rest/v1/storm_events?select=lat,lon,magnitude&type=eq.hail&magnitude=gte.1&valid_at=gte.${dateISO}T00:00:00Z&valid_at=lt.${dateISO}T23:59:59Z&order=magnitude.desc&limit=200`,
+      `${url}/rest/v1/storm_events?select=lat,lon,magnitude,valid_at&type=eq.hail&magnitude=gte.1&valid_at=gte.${dateISO}T12:00:00Z&valid_at=lt.${addDays(dateISO, 1)}T12:00:00Z&order=magnitude.desc&limit=200`,
       { headers: dbHeaders(), cache: "no-store" },
     );
     if (!res.ok) return { date: dateISO, events: 0, targets: 0, ok: false };
-    const all = (await res.json()) as Array<{ lat: number; lon: number; magnitude: number }>;
+    const all = (await res.json()) as Array<{ lat: number; lon: number; magnitude: number; valid_at: string }>;
 
     // Drop reports within 1mi of an already-kept (larger) one, one query per cell.
     const kept: typeof all = [];
@@ -290,7 +305,9 @@ export async function generateStormTargets(
     }
 
     // Parcel queries (throttled, sequential, be polite to the county servers).
-    const byAddr = new Map<string, ParcelHit & { hail: number }>();
+    // hail = the biggest report that reached the house; day = the local date of
+    // the report nearest to it, which is the date of loss.
+    const byAddr = new Map<string, ParcelHit & { hail: number; day: string; nearMi: number }>();
     for (const e of kept) {
       const reach = reachMi(e.magnitude);
       const [dallas, tarrant, dbCounties] = await Promise.all([
@@ -301,7 +318,14 @@ export async function generateStormTargets(
       for (const p of [...dallas, ...tarrant, ...dbCounties]) {
         const k = normAddr(p.address);
         const prev = byAddr.get(k);
-        if (!prev || e.magnitude > prev.hail) byAddr.set(k, { ...p, hail: e.magnitude });
+        const mi = p.lat != null && p.lon != null ? haversineMi(p.lat, p.lon, e.lat, e.lon) : reach;
+        const nearer = !prev || mi < prev.nearMi;
+        byAddr.set(k, {
+          ...(prev ?? p),
+          hail: Math.max(prev?.hail ?? 0, e.magnitude),
+          day: nearer ? localDay(e.valid_at) : prev.day,
+          nearMi: nearer ? mi : prev.nearMi,
+        });
       }
     }
     // Tarrant hits need mailing/city/zip from the loaded TAD roll.
@@ -316,7 +340,7 @@ export async function generateStormTargets(
         ((p.value ?? 0) >= 300000 ? 1 : 0) +
         (p.year_built && p.year_built <= 2012 ? 0.5 : 0);
       return {
-        storm_date: dateISO,
+        storm_date: p.day,
         address: p.address,
         city: p.city,
         county: p.county,
@@ -382,15 +406,48 @@ export type StormTargetRow = {
   lon: number | null;
   phone: string | null;
   phone_dnc: boolean | null;
+  /** Radar hail at the house, biggest in the last 12 months (storm_targets_radar). */
+  radar_in?: number | null;
+  /** The radar storm day (7am to 7am), so an after-midnight hit can read a day early. */
+  radar_date?: string | null;
 };
 
+/** Hail size that showed real re-roofing in the Dallas permit test (2026-11-11). */
+export const BIG_HAIL_IN = 2;
+
+/**
+ * Street by street, house numbers in order, so a rep walks a ZIP instead of
+ * zig-zagging across it by score.
+ */
+export function walkingOrder<T extends { address: string }>(rows: T[]): T[] {
+  const parse = (a: string) => {
+    const m = String(a || "").trim().toUpperCase().match(/^(\d+)\s+(.*)$/);
+    return m ? { n: Number(m[1]), street: m[2] } : { n: 0, street: String(a || "").toUpperCase() };
+  };
+  return [...rows].sort((a, b) => {
+    const x = parse(a.address), y = parse(b.address);
+    return x.street === y.street ? x.n - y.n : x.street < y.street ? -1 : 1;
+  });
+}
+
 export async function listStormTargets(
-  filters: { date?: string; county?: string; city?: string; days?: number } = {},
+  filters: {
+    date?: string;
+    county?: string;
+    city?: string;
+    days?: number;
+    /** Only doors with 2 in+ radar hail at the house. */
+    bigHail?: boolean;
+    /** Five-digit ZIP; results come back in walking order. */
+    zip?: string;
+  } = {},
   limit = 200,
 ): Promise<StormTargetRow[]> {
   const url = process.env.SUPABASE_URL;
   if (!url || !process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
   let q = "";
+  if (filters.bigHail) q += `&radar_in=gte.${BIG_HAIL_IN}`;
+  if (filters.zip && /^\d{5}$/.test(filters.zip)) q += `&zip=like.${filters.zip}*`;
   if (filters.date) q += `&storm_date=eq.${filters.date}`;
   else if (filters.days) {
     const from = new Date(Date.now() - filters.days * 86400 * 1000).toISOString().slice(0, 10);
@@ -399,12 +456,17 @@ export async function listStormTargets(
   if (filters.county) q += `&county=eq.${encodeURIComponent(filters.county)}`;
   if (filters.city) q += `&city=eq.${encodeURIComponent(filters.city)}`;
   try {
+    // Big hail first when filtering on it; otherwise the old score.
+    const order = filters.bigHail
+      ? "radar_in.desc.nullslast,score.desc.nullslast"
+      : "score.desc.nullslast";
     const res = await fetch(
-      `${url}/rest/v1/storm_targets?select=*${q}&order=score.desc.nullslast&limit=${limit}`,
+      `${url}/rest/v1/storm_targets_radar?select=*${q}&order=${order}&limit=${limit}`,
       { headers: dbHeaders(), cache: "no-store" },
     );
     if (!res.ok) return [];
-    return (await res.json()) as StormTargetRow[];
+    const rows = (await res.json()) as StormTargetRow[];
+    return filters.zip ? walkingOrder(rows) : rows;
   } catch {
     return [];
   }

@@ -1,3 +1,4 @@
+import { localDay } from "@/lib/storm";
 import { NextResponse } from "next/server";
 import { apiUser } from "@/lib/auth";
 
@@ -107,7 +108,7 @@ async function stormsNear(lat: number, lon: number) {
   }>;
   return rows
     .map((r) => ({
-      date: r.valid_at.slice(0, 10),
+      date: localDay(r.valid_at),
       type: r.type,
       magnitude: r.magnitude,
       city: r.city,

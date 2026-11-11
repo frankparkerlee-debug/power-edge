@@ -33,7 +33,30 @@ export type TargetCard = {
   status?: string;
   county?: string | null;
   knock?: { outcome: string; rep: string | null; created_at: string };
+  /** Radar hail at the house, biggest in the last 12 months. */
+  radar_in?: number | null;
+  /** Radar storm day (7am to 7am); an after-midnight hit can read a day early. */
+  radar_date?: string | null;
+  /** Date of loss: the local date of the hail report nearest the house. */
+  storm_date?: string | null;
 };
+
+/** "Apr 25" from YYYY-MM-DD, read as a calendar day (no timezone shift). */
+function shortDay(d?: string | null) {
+  if (!d) return "";
+  const [, m, day] = d.split("-").map(Number);
+  return `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][m - 1]} ${day}`;
+}
+
+/** Radar hail line for a card: the size, and its date only when it is a
+ *  different storm from the one this door was listed for. */
+function radarLine(t: Pick<TargetCard, "radar_in" | "radar_date" | "storm_date">) {
+  if (!t.radar_in) return "";
+  const size = `${Number(t.radar_in).toFixed(1)}″ hail at this house (radar)`;
+  if (!t.radar_date || !t.storm_date) return size;
+  const gap = Math.abs(Date.parse(t.radar_date) - Date.parse(t.storm_date)) / 86400000;
+  return gap > 1 ? `${size}, ${shortDay(t.radar_date)}` : size;
+}
 
 type NearTarget = TargetCard & { distance_mi: number };
 
@@ -427,8 +450,10 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
           const params = new URLSearchParams(window.location.search);
           const key = params.get("key") || "";
           const days = params.get("days") || "";
+          // Follow the page's hail filter: 2 in+ unless the rep chose All hail.
+          const big = params.get("big") === "0" ? "0" : "1";
           const res = await fetch(
-            `/api/admin/storm-targets?key=${encodeURIComponent(key)}&near=${pos.coords.latitude.toFixed(5)},${pos.coords.longitude.toFixed(5)}${days ? `&days=${days}` : ""}`,
+            `/api/admin/storm-targets?key=${encodeURIComponent(key)}&near=${pos.coords.latitude.toFixed(5)},${pos.coords.longitude.toFixed(5)}${days ? `&days=${days}` : ""}&big=${big}`,
           );
           if (!res.ok) throw new Error(String(res.status));
           const data = await res.json();
@@ -495,7 +520,7 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
         })
           .bindPopup(
             `<b>${t.owner_name}</b><br/>${t.address}${t.city ? `, ${t.city}` : ""}` +
-              `<br/>${t.hail_size_in ? `${t.hail_size_in}″ hail · ` : ""}score ${t.score}` +
+              `<br/>${t.radar_in ? `${Number(t.radar_in).toFixed(1)}″ radar hail · ` : t.hail_size_in ? `${t.hail_size_in}″ hail nearby · ` : ""}${t.storm_date ? `storm ${shortDay(t.storm_date)}` : `score ${t.score}`}` +
               `${mi != null ? ` · ${fmtMi(mi)} away` : ""}` +
               `<br/><a href="#" data-house-id="${t.id}"><b>🏠 Roof &amp; storm history</b></a>` +
               ` · <a href="${gmapsHref(t)}" target="_blank" rel="noopener">Directions ↗</a>`,
@@ -720,15 +745,25 @@ export function TargetCards({ targets }: { targets: TargetCard[] }) {
                       {fmtMi(mi)}
                     </div>
                   )}
-                  <span className="inline-block rounded-full bg-[#0b0e13] px-2.5 py-1 text-xs font-bold text-white">
-                    {t.score}
-                  </span>
                 </div>
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
-                {t.hail_size_in ? (
+                {t.radar_in ? (
+                  <span
+                    className={`rounded-full px-2 py-0.5 font-semibold ${
+                      Number(t.radar_in) >= 2 ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-900"
+                    }`}
+                  >
+                    {radarLine(t)}
+                  </span>
+                ) : t.hail_size_in ? (
                   <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-900">
-                    {t.hail_size_in}″ hail
+                    {t.hail_size_in}″ hail reported nearby
+                  </span>
+                ) : null}
+                {t.storm_date ? (
+                  <span className="rounded-full bg-gray-100 px-2 py-0.5 font-semibold text-gray-800">
+                    Storm {shortDay(t.storm_date)}
                   </span>
                 ) : null}
                 <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-700">
