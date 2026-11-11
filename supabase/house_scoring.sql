@@ -307,3 +307,34 @@ $$;
 
 comment on function public.doors_near is
   'Ranked doors around a point with plain-language reasons: radar hail at the house, wind or tornado reports nearby, who re-roofed it and when (Dallas permits), an estimated roof age and whether the owner lives there.';
+
+-- Supabase advisor: pin search_path (everything above is public.* or built in).
+alter function public.cell_r(double precision) set search_path = '';
+alter function public.cell_c(double precision) set search_path = '';
+alter function public.norm_street(text) set search_path = '';
+alter function public.doors_near(double precision, double precision, double precision, int) set search_path = '';
+
+-- After every cell_signals load: radar days run 7am to 7am, so hail after
+-- midnight carries the previous day. Re-date hail12_date to the LOCAL date of
+-- the nearest NWS hail report (within 15 mi, same radar day), which is how
+-- storm_targets.storm_date is dated. 2026-11-11: 2,439 cells moved one day.
+with rep as (
+  select lat, lon, (valid_at at time zone 'America/Chicago')::date as local_date,
+         ((valid_at at time zone 'America/Chicago') - interval '7 hours')::date as radar_day
+  from public.storm_events where type = 'hail'
+),
+cells as (
+  select r, c, hail12_date, 33.545 - 0.01 * r as clat, -98.145 + 0.01 * c as clon
+  from public.cell_signals where hail12_date is not null
+),
+nearest as (
+  select distinct on (cl.r, cl.c) cl.r, cl.c, cl.hail12_date, rp.local_date,
+    3958.8 * 2 * asin(sqrt(power(sin(radians(rp.lat - cl.clat) / 2), 2)
+      + cos(radians(cl.clat)) * cos(radians(rp.lat)) * power(sin(radians(rp.lon - cl.clon) / 2), 2))) as mi
+  from cells cl join rep rp on rp.radar_day = cl.hail12_date
+    and rp.lat between cl.clat - 0.25 and cl.clat + 0.25 and rp.lon between cl.clon - 0.3 and cl.clon + 0.3
+  order by cl.r, cl.c, mi
+)
+update public.cell_signals cs set hail12_date = n.local_date
+from nearest n
+where n.r = cs.r and n.c = cs.c and n.mi <= 15 and n.local_date <> cs.hail12_date;

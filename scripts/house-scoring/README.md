@@ -47,3 +47,9 @@ rerun it at least monthly, and after any new hail.
 `dallas_permits.py` documents the steps (Dallas open data, then the Census
 batch geocoder, then a CSV for `reroof_permits`). Load it with `load_rows.py`.
 Rerun when you want newer permits; roofer names stop after Sept 2025.
+
+## After loading cell_signals
+
+Run the re-dating step at the end of `supabase/house_scoring.sql`. Radar days
+run 7am to 7am, so hail that fell after midnight would otherwise show the
+previous day, which is not the homeowner's date of loss.
