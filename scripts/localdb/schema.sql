@@ -943,19 +943,95 @@ limit p_limit;
 $function$
 ;
 
-CREATE OR REPLACE FUNCTION public.field_doors(p_lat double precision, p_lon double precision, p_miles double precision DEFAULT 1, p_min_hail real DEFAULT 2, p_zip text DEFAULT NULL::text, p_order text DEFAULT 'dist'::text, p_limit integer DEFAULT 1000)
- RETURNS TABLE(src text, target_id uuid, county text, address text, city text, zip text, owner_name text, absentee boolean, lat double precision, lon double precision, dist_mi double precision, year_built integer, value bigint, hail_in real, hail_date date, storm_date date, wind_kind text, wind_date date, wind_roof boolean, wind_dist_mi real, roof_year integer, roof_basis text, permit_date date, roofer text, recent_roof boolean, reasons text[], phone text, phone_dnc boolean, last_outcome text, last_knock_at timestamp with time zone, last_rep text, last_note text, follow_up_at timestamp with time zone, job_id uuid, job_stage text, appt_at timestamp with time zone, appt_status text, total bigint)
+CREATE OR REPLACE FUNCTION public.field_doors(p_lat double precision, p_lon double precision, p_miles double precision DEFAULT 1, p_min_hail real DEFAULT 2, p_zip text DEFAULT NULL::text, p_order text DEFAULT 'dist'::text, p_limit integer DEFAULT 1000, p_view text DEFAULT 'hail'::text)
+ RETURNS TABLE(src text, target_id uuid, county text, address text, city text, zip text, owner_name text, absentee boolean, lat double precision, lon double precision, dist_mi double precision, year_built integer, value bigint, hail_in real, hail_date date, storm_date date, wind_kind text, wind_date date, wind_roof boolean, wind_dist_mi real, roof_year integer, roof_basis text, permit_date date, roofer text, recent_roof boolean, reasons text[], score integer, wind_mph real, big_hail_old_date date, storm_days date[], roof_original boolean, no_permit_since date, priority boolean, phone text, phone_dnc boolean, last_outcome text, last_knock_at timestamp with time zone, last_rep text, last_note text, follow_up_at timestamp with time zone, job_id uuid, job_stage text, appt_at timestamp with time zone, appt_status text, total bigint)
  LANGUAGE sql
  STABLE
  SET search_path TO ''
 AS $function$
 with m as (
-  select least(greatest(coalesce(p_miles, 1), 0.1), 3) as mi
+  select least(greatest(coalesce(p_miles, 1), 0.1), 3) as mi,
+         extract(year from current_date)::int as yr
+),
+worked_jobs as (
+  select distinct j.storm_target_id from public.jobs j where j.storm_target_id is not null
+),
+job_keys as (
+  select distinct public.norm_street(split_part(j.address, ',', 1)) as nkey
+  from public.jobs j where j.address is not null
+),
+base as (
+  select d.* from m, public.doors_near(p_lat, p_lon, m.mi, 20000) d
+  where (p_zip is null or left(d.zip, 5) = p_zip)
+),
+cells as (
+  select distinct public.cell_r(b.lat) as r, public.cell_c(b.lon) as c from base b
+),
+cell_storms as (
+  select cl.r, cl.c, array_agg(distinct h.local_date) as days
+  from cells cl
+  join public.hail_days h
+    on h.r between cl.r - 1 and cl.r + 1 and h.c between cl.c - 1 and cl.c + 1
+   and h.mesh_in >= 1.25 and h.local_date >= current_date - 730
+  group by cl.r, cl.c
+),
+sig as (
+  select b.*, s.big_hail_old_date, coalesce(cs.days, '{}'::date[]) as days,
+    upper(trim(b.city)) = 'DALLAS' as dallas_city,
+    case when upper(trim(b.city)) = 'DALLAS' then b.permit_date
+         else greatest(b.permit_date, s.big_hail_old_date) end as roof_since,
+    b.year_built between m.yr - 30 and m.yr - 15
+      and case when upper(trim(b.city)) = 'DALLAS' then b.permit_date is null
+               else b.roof_basis = 'built' end as roof_original,
+    (b.wind_kind in ('tornado', 'wind_damage') or coalesce(b.wind_roof, false)
+      or coalesce(b.wind_mph, 0) >= 70) as wind_dmg
+  from base b
+  cross join m
+  left join public.cell_signals s on s.r = public.cell_r(b.lat) and s.c = public.cell_c(b.lon)
+  left join cell_storms cs on cs.r = public.cell_r(b.lat) and cs.c = public.cell_c(b.lon)
+),
+sig1 as (
+  select g.*,
+    (coalesce(g.hail_in, 0) >= 1.25 or (g.wind_dmg and g.wind_date >= current_date - 365)) as storm12
+  from sig g
+),
+sig2 as (
+  select g.*,
+    array(
+      select distinct case when g.hail_date is not null and abs(x.d - g.hail_date) <= 1
+                           then g.hail_date else x.d end
+      from unnest(g.days) as x(d)
+      where g.roof_since is null or x.d > g.roof_since
+      union
+      select g.wind_date
+      where g.wind_dmg and g.wind_date >= current_date - 730
+        and (g.roof_since is null or g.wind_date > g.roof_since)
+        and not exists (select 1 from unnest(g.days) as y(d) where abs(y.d - g.wind_date) <= 1)
+      order by 1
+    ) as storm_days,
+    case when g.dallas_city then
+      case when coalesce(g.hail_in, 0) >= 1.25 and (g.permit_date is null or g.permit_date < g.hail_date)
+             then g.hail_date
+           when g.big_hail_old_date is not null
+            and (g.permit_date is null or g.permit_date < g.big_hail_old_date)
+             then g.big_hail_old_date
+      end
+    end as no_permit_since
+  from sig1 g
 ),
 near as (
-  select d.* from m, public.doors_near(p_lat, p_lon, m.mi, 20000) d
-  where (p_min_hail is null or d.hail_in >= p_min_hail)
-    and (p_zip is null or left(d.zip, 5) = p_zip)
+  select n.*, (n.storm12 and (n.roof_original or cardinality(n.storm_days) >= 2)) as priority
+  from sig2 n, m
+  where
+    n.last_outcome is not null
+    or (n.target_id is not null
+        and exists (select 1 from worked_jobs w where w.storm_target_id = n.target_id))
+    or public.norm_street(split_part(n.address, ',', 1)) in (select nkey from job_keys)
+    or case coalesce(p_view, 'hail')
+         when 'older' then n.roof_original
+         when 'priority' then n.storm12 and (n.roof_original or cardinality(n.storm_days) >= 2)
+         else (p_min_hail is null or n.hail_in >= p_min_hail)
+       end
 ),
 conv as (
   select t.id as target_id, t.county, upper(trim(t.address)) as address, t.city, t.zip,
@@ -977,12 +1053,14 @@ alld as (
   select n.src, n.target_id, n.county, n.address, n.city, n.zip, n.owner_name, n.absentee,
     n.lat, n.lon, n.dist_mi, n.year_built, n.value, n.hail_in, n.hail_date,
     n.wind_kind, n.wind_date, n.wind_roof, n.wind_dist_mi,
-    n.roof_year, n.roof_basis, n.permit_date, n.roofer, n.recent_roof, n.reasons
+    n.roof_year, n.roof_basis, n.permit_date, n.roofer, n.recent_roof, n.reasons, n.score,
+    n.wind_mph, n.big_hail_old_date, n.storm_days, n.roof_original, n.no_permit_since, n.priority
   from near n
   union all
   select 'target', c.target_id, c.county, c.address, c.city, c.zip, c.owner_name, c.absentee,
     c.lat, c.lon, c.dist_mi, c.year_built, c.value, c.hail_in, c.hail_date,
-    null, null, null, null, null, null, null, null, null, null
+    null, null, null, null, null, null, null, null, null, null, null,
+    null, null, null, null, null, false
   from conv c, m
   where c.dist_mi <= m.mi
 ),
@@ -991,6 +1069,8 @@ picked as (
   from alld a
   order by
     case when p_order = 'hail' then -coalesce(a.hail_in, 0) else 0 end,
+    case when p_order = 'score' and a.priority then 0 when p_order = 'score' then 1 else 0 end,
+    case when p_order = 'score' then -coalesce(a.score, 0) else 0 end,
     a.dist_mi
   limit least(greatest(coalesce(p_limit, 1000), 1), 1000)
 ),
@@ -1006,7 +1086,8 @@ jb_addr as (
 select p.src, p.target_id, p.county, p.address, p.city, p.zip, p.owner_name, p.absentee,
   p.lat, p.lon, p.dist_mi, p.year_built, p.value, p.hail_in, p.hail_date, t.storm_date,
   p.wind_kind, p.wind_date, p.wind_roof, p.wind_dist_mi,
-  p.roof_year, p.roof_basis, p.permit_date, p.roofer, p.recent_roof, p.reasons,
+  p.roof_year, p.roof_basis, p.permit_date, p.roofer, p.recent_roof, p.reasons, p.score,
+  p.wind_mph, p.big_hail_old_date, p.storm_days, p.roof_original, p.no_permit_since, p.priority,
   case when coalesce(t.phone_dnc, false) then null else t.phone end as phone, t.phone_dnc,
   k.outcome, k.created_at, k.rep, k.note,
   cb.follow_up_at,
