@@ -1206,6 +1206,226 @@ export async function sendLoginLink(resendKey: string, to: string, url: string) 
   );
 }
 
+// ---- Rep onboarding sequence (internal) ------------------------------------
+//
+// Sent by lib/onboardingSequence.ts: a welcome when someone is added, a few
+// reminders for whatever step is next, a note when a step that was closed
+// opens, permit renewals, "you're ready", and two notes to the office (your
+// turn; this person has gone quiet). Builders return { subject, html } so the
+// preview page shows exactly what sends.
+
+const escHtml = (t: string) =>
+  t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+export type OnbStep = { label: string; time?: string };
+
+export type OnbCtx = {
+  first: string;
+  name: string;
+  role: string;
+  team?: string | null;
+  /** Primary button: signs a rep in and opens the right step. */
+  url: string;
+  open: OnbStep[];
+  /** Rep steps that can't be done yet, and why. */
+  blocked: Array<{ label: string; why: string }>;
+  done: number;
+  total: number;
+  /** Office-only steps still to do. */
+  officeOpen?: string[];
+  phone?: string | null;
+  since?: string;
+  lastActivity?: string | null;
+  reminders?: number;
+  permit?: { city: string; expires: string; days: number; how: string };
+  resign?: boolean;
+  permitsHeld?: string[];
+};
+
+export type OnbEmail = { subject: string; html: string };
+
+function openList(c: OnbCtx) {
+  return steps(c.open.map((s) => `<strong>${escHtml(s.label)}</strong>${s.time ? `<br><span style="color:${MUTED};font-size:14px;">${escHtml(s.time)}</span>` : ""}`));
+}
+
+function blockedNote(c: OnbCtx) {
+  if (!c.blocked.length) return "";
+  return small(c.blocked.map((b) => `${escHtml(b.label)}: ${escHtml(b.why)}`).join("<br>"));
+}
+
+export function onbWelcome(c: OnbCtx): OnbEmail {
+  const first = escHtml(c.first);
+  const where = c.team ? ` on the ${escHtml(c.team)} team` : "";
+  const needs = [
+    "A well-lit spot for a badge photo",
+    "Someone we can call in an emergency",
+    ...(c.open.some((s) => /W-9/.test(s.label)) ? ["Your Social Security number (or your EIN) for the W-9"] : []),
+    ...(c.open.some((s) => /deposit/i.test(s.label)) ? ["Your bank's routing and account numbers"] : []),
+  ];
+  return {
+    subject: `Welcome to PowerEdge, ${c.first}`,
+    html: shell({
+      preheader: "A few things to finish on your phone before your first door. Most people are done in 30 minutes.",
+      body:
+        h1(`Welcome to PowerEdge, ${first}`) +
+        p(`You're on the team as a ${escHtml(c.role.toLowerCase())}${where}. Before your first door there are a few things to finish, all on your phone. Most people are done in about 30 minutes, and it saves as you go.`) +
+        openList(c) +
+        blockedNote(c) +
+        section("Have these handy") +
+        p(needs.map(escHtml).join("<br>")) +
+        button("Start setting up", c.url) +
+        p(`After that, the office sets up a ride-along with a lead and gets you your badge, shirt and door hangers.`) +
+        small(`The button signs you in. It works once and lasts 3 days; after that, sign in at ${site.domain}/login with this email. Questions? Reply here.`),
+    }),
+  };
+}
+
+export function onbReminder(c: OnbCtx): OnbEmail {
+  const n = c.reminders ?? 1;
+  const left = c.open.length;
+  const next = c.open[0];
+  const started = c.done > 0;
+  const subject =
+    n === 1
+      ? started ? "Pick up where you left off" : "Your PowerEdge setup is waiting"
+      : n === 2
+        ? `${left} step${left === 1 ? "" : "s"} left before your first door`
+        : n === 3
+          ? `Still need ${left === 1 ? "this" : "these"} before you knock`
+          : "Last reminder about your setup";
+  return {
+    subject,
+    html: shell({
+      preheader: next ? `Next up: ${next.label}${next.time ? `, ${next.time}` : ""}.` : "Finish your setup.",
+      body:
+        h1(started ? `${c.done} of ${c.total} done, ${escHtml(c.first)}` : `Let's get you set up, ${escHtml(c.first)}`) +
+        p(
+          started
+            ? `Here's what's left on your side. ${next ? `Next is <strong>${escHtml(next.label)}</strong>${next.time ? ` (${escHtml(next.time)})` : ""}.` : ""}`
+            : `Nothing's done yet. It's about 30 minutes on your phone, and it saves as you go.`,
+        ) +
+        openList(c) +
+        blockedNote(c) +
+        button(started ? "Pick up where you left off" : "Start setting up", c.url) +
+        (n >= 4
+          ? small(`This is our last email about it. After this, the office will check in with you directly.`)
+          : small(`The button signs you in and works once. Questions? Reply here.`)),
+    }),
+  };
+}
+
+export function onbGate(c: OnbCtx, gate: "agreement" | "secure"): OnbEmail {
+  if (gate === "agreement") {
+    return {
+      subject: c.resign ? "Your contractor agreement was updated" : "Your contractor agreement is ready to sign",
+      html: shell({
+        preheader: "About 5 minutes on your phone.",
+        body:
+          h1(c.resign ? "Please sign the new version" : "Your agreement is ready to sign") +
+          p(
+            c.resign
+              ? `${escHtml(c.first)}, we updated the contractor agreement since you signed it. Read the new version and sign it on your phone. It takes about 5 minutes.`
+              : `${escHtml(c.first)}, the contractor agreement is final. Read it and sign it on your phone. It takes about 5 minutes.`,
+          ) +
+          button("Read and sign", c.url) +
+          small(`The button signs you in and works once. Questions about the terms? Reply here before you sign.`),
+      }),
+    };
+  }
+  return {
+    subject: "Your W-9 and direct deposit are open",
+    html: shell({
+      preheader: "About 5 minutes. Your numbers are encrypted.",
+      body:
+        h1("Two steps just opened") +
+        p(`${escHtml(c.first)}, the W-9 and direct deposit weren't ready when you started. They are now. It's about 5 minutes, and your Social Security and account numbers are encrypted; the office sees only the last four.`) +
+        button("Finish them now", c.url) +
+        small(`The button signs you in and works once.`),
+    }),
+  };
+}
+
+export function onbPermit(c: OnbCtx): OnbEmail {
+  const pm = c.permit!;
+  const when = pm.days < 0 ? "has expired" : pm.days === 0 ? "expires today" : `expires in ${pm.days} day${pm.days === 1 ? "" : "s"}`;
+  return {
+    subject: `Your ${pm.city} permit ${when}`,
+    html: shell({
+      preheader: pm.days < 0 ? `Stop knocking in ${pm.city} until it's renewed.` : `Renew it before ${pm.expires}.`,
+      body:
+        h1(`Your ${escHtml(pm.city)} permit ${when}`) +
+        p(
+          pm.days < 0
+            ? `It ran out on ${escHtml(pm.expires)}. Don't knock in ${escHtml(pm.city)} until it's renewed; the fine is yours, not the company's.`
+            : `It runs out on ${escHtml(pm.expires)}. Renew it before then so you don't lose days in ${escHtml(pm.city)}.`,
+        ) +
+        quote(escHtml(pm.how)) +
+        p(`When you have the new one, update the permit number and expiry in your checklist.`) +
+        button("Update my permit", c.url),
+    }),
+  };
+}
+
+export function onbReady(c: OnbCtx): OnbEmail {
+  return {
+    subject: `You're all set, ${c.first}`,
+    html: shell({
+      preheader: "Setup is done. See you in the field.",
+      body:
+        h1(`You're all set, ${escHtml(c.first)}`) +
+        p(`Everything's done: your paperwork, the compliance check, your permits, the ride-along and your gear.${c.permitsHeld?.length ? ` You're permitted in ${escHtml(c.permitsHeld.join(", "))}.` : ""}`) +
+        p(`Carry your permit, honor No Soliciting signs, and never offer to cover a deductible. We'll email you before a permit runs out.`) +
+        button("Open PowerEdge", c.url),
+    }),
+  };
+}
+
+export function onbOfficeTurn(c: OnbCtx): OnbEmail {
+  const who = escHtml(c.first);
+  return {
+    subject: `${c.first} finished their part. ${(c.officeOpen ?? []).length === 1 ? "One step is" : "Two steps are"} yours.`,
+    html: shell({
+      preheader: `Waiting on you: ${(c.officeOpen ?? []).join(", ")}.`,
+      body:
+        eyebrow("Onboarding") +
+        h1(`${who} is waiting on you`) +
+        p(`${escHtml(c.name)} (${escHtml(c.role.toLowerCase())}${c.team ? `, ${escHtml(c.team)}` : ""}) has done everything on their side. What's left is yours:`) +
+        steps((c.officeOpen ?? []).map((s) => `<strong>${escHtml(s)}</strong>`)) +
+        (c.blocked.length
+          ? small(`Still locked on their side: ${escHtml(c.blocked.map((b) => b.label.replace(/^Sign your /, "").replace(/^./, (x) => x.toUpperCase())).join(", "))}. They get an email when it opens.`)
+          : "") +
+        button(`Open ${who}'s checklist`, c.url) +
+        small("Sent to admins only."),
+    }),
+  };
+}
+
+export function onbOfficeStalled(c: OnbCtx): OnbEmail {
+  const who = escHtml(c.first);
+  return {
+    subject: `${c.first} hasn't finished setup`,
+    html: shell({
+      preheader: `${c.open.length} step${c.open.length === 1 ? "" : "s"} still open after ${c.reminders ?? 4} reminders.`,
+      body:
+        eyebrow("Onboarding") +
+        h1(`${who} has gone quiet`) +
+        p(
+          `We emailed ${escHtml(c.name)} a welcome on ${escHtml(c.since ?? "")} and ${c.reminders ?? 4} reminders since. ${
+            c.lastActivity ? `Their last progress was ${escHtml(c.lastActivity)}.` : "They haven't started."
+          } Still open:`,
+        ) +
+        openList(c) +
+        (c.phone ? p(`Worth a call: <strong>${escHtml(c.phone)}</strong>.`) : "") +
+        button(`Open ${who}'s checklist`, c.url) +
+        small("No more automatic reminders go to them. From their checklist you can send the welcome again, which starts the reminders over."),
+    }),
+  };
+}
+
+export async function sendOnboardingEmail(resendKey: string, to: string, e: OnbEmail, kind: string) {
+  return sendEmail(resendKey, to, e.subject, e.html, kind);
+}
+
 // ---- Weekly scorecards (internal) -----------------------------------------
 //
 // One email per person with their own week and their team's, and one company

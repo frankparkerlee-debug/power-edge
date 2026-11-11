@@ -1225,3 +1225,21 @@ left join jb j1 on j1.storm_target_id = p.target_id
 left join jb_addr j2 on j1.id is null and j2.nkey = public.norm_street(split_part(p.address, ',', 1))
 left join public.appointments ap on ap.id = coalesce(j1.appointment_id, j2.appointment_id);
 $function$;
+-- Rep onboarding sequence: when it started for each person, and every email it sent.
+alter table public.team_members add column if not exists onboarding_started_at timestamptz;
+
+create table if not exists public.onboarding_sends (
+  id bigserial primary key,
+  member_id bigint not null references public.team_members(id) on delete cascade,
+  -- welcome | reminder | gate | permit | ready | office_turn | office_stalled
+  kind text not null,
+  -- One row per key per person, so an overlapping run can never send twice.
+  key text not null,
+  to_addr text,
+  ok boolean,
+  detail jsonb,
+  sent_at timestamptz not null default now(),
+  unique (member_id, key)
+);
+create index if not exists onboarding_sends_member_idx on public.onboarding_sends (member_id, sent_at);
+alter table public.onboarding_sends enable row level security;

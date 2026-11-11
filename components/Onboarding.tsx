@@ -33,6 +33,8 @@ export type OnboardingProps = {
   cities: Array<{ city: string; how: string }>;
   officeInfo: { rideAlongBy: string | null; gearBy: string | null; notes: string };
   piiReady: boolean;
+  /** Opened from an email about one step (?step=w9): start there. */
+  initialStep?: string | null;
 };
 
 const input =
@@ -82,8 +84,15 @@ function Saved({ msg, err }: { msg: string; err: string }) {
 export function Onboarding(p: OnboardingProps) {
   const router = useRouter();
   const nextKey = (steps: Step[]) =>
-    steps.find((s) => !s.done && (s.by === "rep" || p.office) && !(s.key === "agreement" && p.agreement.status === "draft"))?.key ?? null;
-  const [open, setOpen] = useState<string | null>(nextKey(p.steps));
+    steps.find(
+      (s) =>
+        !s.done &&
+        (s.by === "rep" || p.office) &&
+        !(s.key === "agreement" && p.agreement.status === "draft") &&
+        !((s.key === "w9" || s.key === "bank") && !p.piiReady),
+    )?.key ?? null;
+  const asked = p.steps.find((s) => s.key === p.initialStep)?.key ?? null;
+  const [open, setOpen] = useState<string | null>(asked ?? nextKey(p.steps));
   // When the step you just finished turns green, open the next one.
   const doneKeys = p.steps.filter((s) => s.done).map((s) => s.key).join(",");
   const lastDone = useRef(doneKeys);

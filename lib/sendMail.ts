@@ -109,6 +109,17 @@ async function logSend(
 export async function sendMail(a: SendArgs): Promise<SendResult> {
   const to = Array.isArray(a.to) ? a.to : [a.to];
   const toLabel = to.join(",");
+  // Local test copy only (scripts/localdb/dev.sh): write the message to a file
+  // instead of sending it, so a whole email sequence can be run end to end
+  // without a single real email leaving the machine.
+  if (process.env.MAIL_SINK && process.env.NODE_ENV !== "production") {
+    const { appendFile } = await import("node:fs/promises");
+    await appendFile(
+      process.env.MAIL_SINK,
+      JSON.stringify({ at: new Date().toISOString(), kind: a.kind, to: toLabel, subject: a.subject, html: a.html }) + "\n",
+    );
+    return { ok: true, status: 200, id: "sink" };
+  }
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

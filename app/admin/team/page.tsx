@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { startOnboarding } from "@/lib/onboardingSequence";
 import { DEFAULT_GOALS } from "@/lib/scoreboard";
 import {
   currentUser,
@@ -18,7 +20,7 @@ import {
   type Role,
 } from "@/lib/auth";
 
-export const metadata: Metadata = { title: "Team | PowerEdge" };
+export const metadata: Metadata = { title: "Team" };
 export const dynamic = "force-dynamic";
 
 function when(iso?: string | null) {
@@ -37,9 +39,9 @@ function when(iso?: string | null) {
 export default async function TeamPage({
   searchParams,
 }: {
-  searchParams: Promise<{ key?: string; added?: string; error?: string }>;
+  searchParams: Promise<{ key?: string; added?: string; sent?: string; error?: string }>;
 }) {
-  const { key, added, error } = await searchParams;
+  const { key, added, sent, error } = await searchParams;
   const user = await currentUser(key);
   const wrap = "min-h-screen bg-white px-5 py-8 text-[#0b0e13] sm:px-6";
 
@@ -72,15 +74,23 @@ export default async function TeamPage({
   const [members, teams] = await Promise.all([listMembers(), listTeams()]);
   const liveTeams = teams.filter((t) => t.active);
 
+  // Add someone and, unless the box is unticked, start their onboarding:
+  // the welcome goes now and the reminders run on their own from there.
   async function add(formData: FormData) {
     "use server";
-    const r = await addMember({
-      email: String(formData.get("email") || ""),
-      name: String(formData.get("name") || ""),
-      role: String(formData.get("role") || "setter") as Role,
-    });
+    const name = String(formData.get("name") || "").trim();
+    const role = String(formData.get("role") || "setter") as Role;
+    const r = await addMember({ email: String(formData.get("email") || ""), name, role });
+    if (!r.ok) redirect(`/admin/team?error=${encodeURIComponent(r.error)}`);
+    const teamId = Number(formData.get("team") || 0);
+    if (r.id && teamId) await setMemberTeam(r.id, teamId);
+    let sentFlag = "";
+    if (r.id && role !== "admin" && formData.get("welcome") === "on") {
+      sentFlag = (await startOnboarding(r.id)).ok ? "1" : "0";
+    }
     revalidatePath("/admin/team");
-    if (!r.ok) throw new Error(r.error);
+    revalidatePath("/admin/onboarding");
+    redirect(`/admin/team?added=${encodeURIComponent(name)}${sentFlag ? `&sent=${sentFlag}` : ""}`);
   }
 
   async function toggle(formData: FormData) {
@@ -164,9 +174,22 @@ export default async function TeamPage({
         </p>
 
         {added ? (
-          <p className="mt-4 rounded-md border border-[#0c7a40] bg-[#f0fbf4] p-3 text-sm font-semibold">
-            Added. They sign in at /login with their work email, no password.
-          </p>
+          sent === "1" ? (
+            <p className="mt-4 rounded-md border border-[#0c7a40] bg-[#f0fbf4] p-3 text-sm">
+              <strong>Added {added}. Their welcome email is on its way.</strong> Reminders run on their own until they finish, and
+              you&apos;ll get an email when the ride-along and gear are yours. Follow along on{" "}
+              <Link href="/admin/onboarding" className="font-semibold text-[#0c7a40] underline">Onboarding</Link>.
+            </p>
+          ) : sent === "0" ? (
+            <p className="mt-4 rounded-md border border-amber-400 bg-amber-50 p-3 text-sm text-amber-900">
+              <strong>Added {added}, but the welcome email didn&apos;t send.</strong> Open them on{" "}
+              <Link href="/admin/onboarding" className="font-semibold underline">Onboarding</Link> to send it again.
+            </p>
+          ) : (
+            <p className="mt-4 rounded-md border border-[#0c7a40] bg-[#f0fbf4] p-3 text-sm font-semibold">
+              Added {added}. They sign in at /login with their work email, no password.
+            </p>
+          )
         ) : null}
         {error ? (
           <p className="mt-4 rounded-md border border-red-500 bg-red-50 p-3 text-sm font-semibold text-red-700">
@@ -401,7 +424,7 @@ export default async function TeamPage({
         <h2 className="mt-10 text-xs font-bold uppercase tracking-widest text-gray-500">
           Add someone
         </h2>
-        <form action={add} className="mt-3 grid gap-3 sm:grid-cols-3">
+        <form action={add} className="mt-3 grid gap-3 sm:grid-cols-4">
           <div>
             <label className={label} htmlFor="t-name">Name</label>
             <input id="t-name" name="name" required className={input} />
@@ -420,7 +443,25 @@ export default async function TeamPage({
               ))}
             </select>
           </div>
-          <div className="sm:col-span-3">
+          <div>
+            <label className={label} htmlFor="t-team">Team</label>
+            <select id="t-team" name="team" defaultValue="" className={input}>
+              <option value="">No team yet</option>
+              {liveTeams.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <label className="flex items-start gap-2 text-sm text-gray-700 sm:col-span-4">
+            <input type="checkbox" name="welcome" defaultChecked className="mt-0.5 h-4 w-4 accent-[#0c7a40]" />
+            <span>
+              <strong className="text-[#0b0e13]">Email them a welcome and start onboarding.</strong> One tap signs them in to their checklist;
+              reminders go out on days 1, 3, 6 and 10 until they finish, then the office takes over.
+            </span>
+          </label>
+          <div className="sm:col-span-4">
             <button className="rounded-md bg-[#0c7a40] px-6 py-3 font-display font-bold text-white">
               Add them
             </button>

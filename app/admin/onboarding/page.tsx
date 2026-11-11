@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { currentUser, listMembers, listTeams } from "@/lib/auth";
 import { piiReady } from "@/lib/pii";
 import { PERMIT_CITIES, expiring, loadAllOnboarding, loadOnboarding, stepsFor } from "@/lib/onboarding";
@@ -7,6 +9,7 @@ import { AGREEMENT_STATUS, AGREEMENT_TITLE, AGREEMENT_VERSION, agreementSections
 import { quizForClient } from "@/lib/onboardingQuiz";
 import { localDay } from "@/lib/day";
 import { Onboarding } from "@/components/Onboarding";
+import { loadSends, sequenceStatus, split, startOnboarding, type SendRow } from "@/lib/onboardingSequence";
 
 /**
  * Onboarding.
@@ -37,8 +40,55 @@ function docsFor(role: string) {
 
 const ROLE: Record<string, string> = { setter: "Knocker", closer: "Closer", rep: "Rep", admin: "Admin" };
 
-export default async function OnboardingPage({ searchParams }: { searchParams: Promise<{ member?: string }> }) {
-  const { member } = await searchParams;
+/** What an onboarding email was, in words. */
+function sendLabel(x: SendRow) {
+  const k = x.key.split(":");
+  switch (x.kind) {
+    case "welcome":
+      return "Welcome";
+    case "reminder":
+      return `Reminder ${k[2] ?? ""}`;
+    case "gate":
+      return k[1] === "agreement" ? "Agreement ready to sign" : "W-9 and direct deposit opened";
+    case "permit":
+      return `${k[1]} permit ${k[3] === "expired" ? "expired" : `expires in ${k[3]} days`}`;
+    case "ready":
+      return "You're all set";
+    case "office_turn":
+      return "To the office: your turn";
+    case "office_stalled":
+      return "To the office: gone quiet";
+    default:
+      return x.kind;
+  }
+}
+
+const stamp = (iso: string) =>
+  new Date(iso).toLocaleString("en-US", { timeZone: "America/Chicago", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+
+const STATUS_TONE: Record<string, string> = {
+  stalled: "text-[#b42318] font-semibold",
+  unsent: "text-[#b42318] font-semibold",
+  waiting: "text-[#7a4b00]",
+  done: "text-[#0c7a40] font-semibold",
+};
+
+async function sendWelcome(formData: FormData) {
+  "use server";
+  const me = await currentUser();
+  if (me?.role !== "admin") return;
+  const id = Number(formData.get("id"));
+  const r = await startOnboarding(id);
+  revalidatePath("/admin/onboarding");
+  redirect(`/admin/onboarding?member=${id}&welcome=${r.ok ? "sent" : "failed"}`);
+}
+
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ member?: string; step?: string; welcome?: string }>;
+}) {
+  const { member, step, welcome } = await searchParams;
   const user = await currentUser();
   if (!user) {
     return (
@@ -58,7 +108,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
 
   /* ------------------------------------------------------- the office board */
   if (isAdmin && !member) {
-    const [members, teams, all] = await Promise.all([listMembers(), listTeams(), loadAllOnboarding()]);
+    const [members, teams, all, sends] = await Promise.all([listMembers(), listTeams(), loadAllOnboarding(), loadSends()]);
     const people = members.filter((m) => m.active && m.role !== "admin");
     const rows = people.map((m) => {
       const steps = stepsFor({
@@ -67,7 +117,12 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
         bank: all.bank.has(m.id) ? { member_id: m.id } : null,
         permits: all.permits.filter((p) => p.member_id === m.id),
       });
-      return { m, steps, next: steps.find((s) => !s.done), done: steps.filter((s) => s.done).length };
+      const seq = sequenceStatus(m, steps, sends.filter((x) => x.member_id === m.id));
+      // Next is the first step someone can act on: a step that hasn't opened
+      // yet (a draft agreement) is skipped in favor of the office's.
+      const sp = split(steps);
+      const next = sp.open[0] ?? sp.office[0] ?? steps.find((s) => !s.done);
+      return { m, steps, seq, next, done: steps.filter((s) => s.done).length };
     });
     rows.sort((a, b) => a.done - b.done || a.m.name.localeCompare(b.m.name));
     const soon = expiring(all.permits, today);
@@ -79,7 +134,9 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
           <h1 className="font-display text-2xl font-extrabold text-[#0b0e13]">Onboarding</h1>
           <p className="mt-1 text-sm text-gray-600">
             Everyone between hired and knocking, and what each person is waiting on. Add people on the{" "}
-            <Link href="/admin/team" className="font-semibold text-[#0c7a40] underline">Team page</Link>; they see their checklist when they sign in.
+            <Link href="/admin/team" className="font-semibold text-[#0c7a40] underline">Team page</Link>; their welcome email goes out
+            then, and reminders run on their own.{" "}
+            <Link href="/admin/onboarding/emails" className="font-semibold text-[#0c7a40] underline">See the emails</Link>
           </p>
 
           {!piiReady() ? (
@@ -118,7 +175,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
               </p>
             ) : (
               <ul className="mt-2 divide-y divide-[#eceef1] rounded-lg border border-[#e3e6ea] bg-white">
-                {rows.map(({ m, steps, next, done }) => (
+                {rows.map(({ m, steps, seq, next, done }) => (
                   <li key={m.id}>
                     <Link href={`/admin/onboarding?member=${m.id}`} className="block px-4 py-3 hover:bg-[#f7f8f9]">
                       <div className="flex flex-wrap items-baseline justify-between gap-x-3">
@@ -138,12 +195,15 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
                           <span key={s.key} title={s.label} className={`h-1.5 flex-1 rounded-full ${s.done ? "bg-[#0c7a40]" : "bg-[#e3e6ea]"}`} />
                         ))}
                       </div>
-                      {next ? (
-                        <p className="mt-1 text-xs text-gray-500">
-                          Next: {next.label}
-                          {next.by === "office" ? " (you)" : ""}
-                        </p>
-                      ) : null}
+                      <div className="mt-1 flex flex-wrap justify-between gap-x-3 text-xs text-gray-500">
+                        <span>
+                          {next ? `Next: ${next.label}${next.by === "office" ? " (you)" : ""}` : ""}
+                        </span>
+                        <span className={STATUS_TONE[seq.state] ?? ""}>
+                          {seq.state === "done" ? "" : seq.label}
+                          {seq.failed.length ? " · an email failed" : ""}
+                        </span>
+                      </div>
                     </Link>
                   </li>
                 ))}
@@ -166,10 +226,12 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
       </div>
     );
   }
-  const d = await loadOnboarding(target.id);
+  const [d, mySends] = await Promise.all([loadOnboarding(target.id), isAdmin ? loadSends(target.id) : Promise.resolve([] as SendRow[])]);
   const steps = stepsFor(d);
   const o = d.onb;
   const self = target.id === user.id;
+  const full = isAdmin ? members.find((m) => m.id === target.id) : null;
+  const seq = full ? sequenceStatus(full, steps, mySends) : null;
 
   return (
     <div className="px-4 py-6 sm:px-6 sm:py-8">
@@ -222,8 +284,45 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
             cities={PERMIT_CITIES}
             officeInfo={{ rideAlongBy: o?.ride_along_by ?? null, gearBy: o?.gear_by ?? null, notes: o?.office_notes ?? "" }}
             piiReady={piiReady()}
+            initialStep={step ?? null}
           />
         </div>
+
+        {isAdmin && !self && full && seq ? (
+          <section className="mt-8 rounded-lg border border-[#e3e6ea] bg-white p-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="font-display text-lg font-bold text-[#0b0e13]">Onboarding emails</h2>
+              <span className={`text-sm ${STATUS_TONE[seq.state] ?? "text-gray-600"}`}>{seq.label}</span>
+            </div>
+            {welcome === "sent" ? (
+              <p className="mt-2 text-sm font-semibold text-[#0c7a40]">Welcome sent. Reminders start over from today.</p>
+            ) : welcome === "failed" ? (
+              <p className="mt-2 text-sm font-semibold text-[#b42318]">The welcome didn&apos;t send. Check Health for mail errors, then try again.</p>
+            ) : null}
+            {mySends.length ? (
+              <ul className="mt-3 divide-y divide-[#eceef1] text-sm">
+                {mySends.map((x) => (
+                  <li key={x.id} className="flex flex-wrap justify-between gap-x-3 py-2">
+                    <span className="text-[#0b0e13]">
+                      {sendLabel(x)}
+                      {x.ok === false ? <span className="ml-2 font-semibold text-[#b42318]">Didn&apos;t send</span> : null}
+                    </span>
+                    <span className="text-gray-500">{stamp(x.sent_at)}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-sm text-gray-600">No onboarding emails yet.</p>
+            )}
+            <form action={sendWelcome} className="mt-3">
+              <input type="hidden" name="id" value={full.id} />
+              <button className="rounded-md border border-[#0c7a40] px-4 py-2 text-sm font-semibold text-[#0c7a40]">
+                {full.onboarding_started_at ? "Send the welcome again" : "Start onboarding emails"}
+              </button>
+              <span className="ml-3 text-xs text-gray-500">Sends a fresh sign-in button and starts the reminders over.</span>
+            </form>
+          </section>
+        ) : null}
       </div>
     </div>
   );

@@ -67,8 +67,14 @@ export async function findMember(email: string): Promise<Member | null> {
   }
 }
 
-/** Create a single-use link token. Returns null when the email is not on the team. */
-export async function issueLoginToken(email: string): Promise<string | null> {
+/**
+ * Create a single-use link token. Returns null when the email is not on the team.
+ *
+ * A link someone asked for lives 20 minutes. Onboarding emails pass a longer
+ * life (3 days) because a new rep may open the welcome the next morning; the
+ * link still works only once.
+ */
+export async function issueLoginToken(email: string, ttlMin = TOKEN_TTL_MIN): Promise<string | null> {
   const member = await findMember(email);
   if (!member) return null;
   const token = randomBytes(24).toString("hex");
@@ -79,7 +85,7 @@ export async function issueLoginToken(email: string): Promise<string | null> {
       body: JSON.stringify({
         token,
         email: member.email,
-        expires_at: new Date(Date.now() + TOKEN_TTL_MIN * 60_000).toISOString(),
+        expires_at: new Date(Date.now() + ttlMin * 60_000).toISOString(),
       }),
     });
     if (!res.ok) return null;
@@ -286,13 +292,14 @@ export async function listMembers(): Promise<
       goal_signed_month: number | null;
       team_id: number | null;
       takes_inspections: boolean;
+      onboarding_started_at: string | null;
     }
   >
 > {
   if (!dbOn()) return [];
   try {
     const res = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/team_members?select=id,email,name,role,active,last_login_at,created_at,goal_knocks_week,goal_sets_week,goal_signed_month,team_id,takes_inspections&order=active.desc,name.asc`,
+      `${process.env.SUPABASE_URL}/rest/v1/team_members?select=id,email,name,role,active,last_login_at,created_at,goal_knocks_week,goal_sets_week,goal_signed_month,team_id,takes_inspections,onboarding_started_at&order=active.desc,name.asc`,
       { headers: headers(), cache: "no-store" },
     );
     if (!res.ok) return [];
@@ -329,18 +336,19 @@ export async function addMember(input: { email: string; name: string; role: Role
       headers: { ...headers(), Prefer: "return=minimal" },
       body: JSON.stringify({ active: true, role: input.role, name, ...(input.role === "closer" ? { takes_inspections: true } : {}) }),
     });
-    return { ok: true as const, reactivated: true };
+    return { ok: true as const, reactivated: true, id: existing.id };
   }
-  const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/team_members`, {
+  const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/team_members?select=id`, {
     method: "POST",
-    headers: { ...headers(), Prefer: "return=minimal" },
+    headers: { ...headers(), Prefer: "return=representation" },
     // A closer drives to inspections from day one. Booking only offers a
     // window when someone who takes inspections is free in it, and nothing
     // set this flag, so a new closer never got a single booking.
     body: JSON.stringify({ email, name, role: input.role, active: true, takes_inspections: input.role === "closer" }),
   });
   if (!res.ok) return { ok: false as const, error: "Could not add them." };
-  return { ok: true as const, reactivated: false };
+  const rows = (await res.json().catch(() => [])) as Array<{ id: number }>;
+  return { ok: true as const, reactivated: false, id: rows[0]?.id ?? null };
 }
 
 /**

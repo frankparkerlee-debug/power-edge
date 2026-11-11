@@ -6,6 +6,7 @@ import { generateStormTargets } from "@/lib/parcels";
 import { runStormJobAlerts } from "@/lib/stormAlerts";
 import { runSkipTrace } from "@/lib/skiptrace";
 import { runAppointmentReminders } from "@/lib/scheduling";
+import { runOnboardingSequence } from "@/lib/onboardingSequence";
 
 /**
  * Drop-off nurture for claim-prep. Run on a schedule (e.g. hourly), a Render
@@ -70,6 +71,9 @@ export async function POST(req: Request) {
   const skiptrace = await runSkipTrace();
   // Day-of reminders for inspections booked through the site.
   const reminders = await runAppointmentReminders(process.env.RESEND_API_KEY);
+  // New reps' onboarding emails (welcome follow-ups, office notes, permit
+  // renewals). Never lets a failure there stop the homeowner nurture below.
+  const onboarding = await runOnboardingSequence().catch((e) => ({ ok: false, error: String(e).slice(0, 200) }));
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
@@ -112,6 +116,7 @@ export async function POST(req: Request) {
     stormAlerts,
     skiptrace,
     reminders,
+    onboarding,
   };
   await recordRun(summary);
 
