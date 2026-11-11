@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 /**
  * The knock map's doors.
  *
- *   GET  /api/field/doors?near=lat,lon[&mi=0.5][&big=0]
- *   GET  /api/field/doors?zip=76135[&big=0]
+ *   GET  /api/field/doors?near=lat,lon[&mi=0.5][&view=hail2|hail1|older]
+ *   GET  /api/field/doors?zip=76135[&view=...]
  *   POST /api/field/doors { lat, lon, address }   puts a door on the knock list
  *
  * Every house Best doors can place (storm targets, county records, Dallas
@@ -19,9 +19,91 @@ export const dynamic = "force-dynamic";
  * public.field_doors; this route checks the caller, shapes the rows, and adds
  * a door to the knock list the first time someone acts on it.
  *
- * big=0 widens to 1 in+ hail. The default is 2 in+, the level that showed
- * real re-roofing in the Dallas permit test (scope doc, 2026-11-11).
+ * view: priority is old roofs or repeat storms with a storm inside the 1-year
+ * claim window (see public.field_doors); hail2 (default) is 2 in+ radar hail, the level that showed real
+ * re-roofing in the Dallas permit test (scope doc, 2026-11-11); hail1 widens
+ * to 1 in+; older is homes built 15 to 30 years ago with no sign of a newer
+ * roof, hail or not. Doors we have worked show in every view. The old big=0
+ * still means hail1.
  */
+
+type View = "priority" | "hail2" | "hail1" | "older";
+
+/** A Dallas re-roof permit this recent marks the door blue on the map. */
+const RECENT_PERMIT_MS = 10 * 365.25 * 86400e3;
+
+/**
+ * Tex. Ins. Code 2301.010(c) lets a homeowner policy require a claim within one
+ * year of the loss (late filing allowed for good cause; some carriers give two).
+ * A storm older than this is treated as a likely cash job, not an insurance one.
+ */
+const CLAIM_WINDOW_DAYS = 365;
+
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const thisYear = new Date().getFullYear();
+/** "2026-05-25" -> "May 25", or "Aug 3 '25" outside this year. */
+function day(iso: string, withYear = false) {
+  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  return `${MON[m - 1]} ${d}${withYear ? `, ${y}` : y !== thisYear ? ` '${String(y).slice(2)}` : ""}`;
+}
+const daysAgo = (iso: string) => (Date.now() - new Date(`${iso.slice(0, 10)}T12:00:00`).getTime()) / 86400e3;
+
+/** Short signals a rep reads at a glance: storms, wind, permits, the claim window. */
+function signals(r: Row) {
+  const tags: string[] = [];
+  const storms = r.storm_days ?? [];
+  if (storms.length >= 2) tags.push(`${storms.length} storms since the roof: ${storms.map((d) => day(d)).join(", ")}`);
+
+  if (r.wind_date && daysAgo(r.wind_date) <= 365 && r.wind_dist_mi != null) {
+    const what =
+      r.wind_kind === "tornado"
+        ? "Tornado"
+        : r.wind_roof
+          ? "Roof damage reported"
+          : r.wind_kind === "wind_damage"
+            ? "Wind damage reported"
+            : r.wind_mph
+              ? `${Math.round(r.wind_mph)} mph gust`
+              : "Wind report";
+    tags.push(`${what} ${r.wind_dist_mi.toFixed(1)} mi away, ${day(r.wind_date)}`);
+  }
+
+  if (r.no_permit_since) tags.push(`No roof permit filed since the ${day(r.no_permit_since)} storm`);
+
+  // The claim window runs from the latest storm the current roof has seen.
+  const roofNewer = (d: string) => !!r.permit_date && r.permit_date >= d.slice(0, 10);
+  const candidates = [...storms];
+  if ((r.hail_in ?? 0) >= 1 && r.hail_date && !roofNewer(r.hail_date)) candidates.push(r.hail_date);
+  const last = candidates.sort().at(-1);
+  let claim: "open" | "cash" | null = null;
+  if (last) {
+    if (daysAgo(last) <= CLAIM_WINDOW_DAYS) {
+      claim = "open";
+      const until = new Date(`${last.slice(0, 10)}T12:00:00`);
+      until.setFullYear(until.getFullYear() + 1);
+      tags.push(`Claim window open to ${day(until.toISOString(), true)}`);
+    } else {
+      claim = "cash";
+      tags.push(`Last storm ${day(last)}: past the 1-year claim window, likely cash`);
+    }
+  }
+  return { tags, claim };
+}
+
+/** Why a door is a priority knock, in a few words. */
+function priorityWhy(r: Row) {
+  if (!r.priority) return null;
+  const storms = r.storm_days ?? [];
+  const latest = [...storms, ...(r.hail_date && (r.hail_in ?? 0) >= 1.25 ? [r.hail_date] : [])].sort().at(-1);
+  const storm =
+    (r.hail_in ?? 0) >= 1.25 && r.hail_date
+      ? `${(Math.round((r.hail_in ?? 0) * 10) / 10).toFixed(1)}″ hail ${day(r.hail_date)}`
+      : latest
+        ? `storm ${day(latest)}`
+        : "a storm this year";
+  if (r.roof_original) return `Roof may be original + ${storm}`;
+  return `${storms.length} storms since the roof, latest ${day(storms.at(-1) ?? latest ?? "")}`;
+}
 
 /** Most doors one load sends: the API's per-call ceiling, and plenty for a day. */
 const MAX_DOORS = 1000;
@@ -62,6 +144,15 @@ type Row = {
   roofer: string | null;
   recent_roof: boolean | null;
   reasons: string[] | null;
+  score: number | null;
+  wind_mph: number | null;
+  big_hail_old_date: string | null;
+  /** Storms since the roof was last replaced (as far as we know), last 24 months. */
+  storm_days: string[] | null;
+  roof_original: boolean | null;
+  /** City of Dallas: the storm date when no re-roof permit has been filed since. */
+  no_permit_since: string | null;
+  priority: boolean | null;
   phone: string | null;
   phone_dnc: boolean | null;
   last_outcome: string | null;
@@ -83,7 +174,8 @@ async function fieldDoors(
   mi: number,
   minHail: number | null,
   zip: string | null,
-  order: "dist" | "hail" = "dist",
+  order: "dist" | "hail" | "score" = "dist",
+  view: "hail" | "older" | "priority" = "hail",
 ) {
   const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/rpc/field_doors`, {
     method: "POST",
@@ -96,6 +188,7 @@ async function fieldDoors(
       p_zip: zip,
       p_order: order,
       p_limit: MAX_DOORS,
+      p_view: view,
     }),
     cache: "no-store",
   });
@@ -115,7 +208,8 @@ function splitAddress(raw: string) {
 /** Where the door stands with us, in the order that decides what a rep does. */
 function stateOf(r: Row) {
   const stage = r.job_stage;
-  if (stage && stage !== "lost") {
+  if (stage === "lost") return { kind: "no", by: r.last_rep, when: r.last_knock_at, note: r.last_note };
+  if (stage) {
     if (r.appt_at && r.appt_status !== "canceled" && new Date(r.appt_at).getTime() > Date.now() - 6 * 3600e3) {
       return { kind: "appointment", at: r.appt_at };
     }
@@ -132,7 +226,7 @@ function stateOf(r: Row) {
     case "appointment_set":
       return { kind: "appointment", at: null };
     default:
-      return { kind: stage === "lost" ? "no" : "new", by: r.last_rep, when: r.last_knock_at };
+      return { kind: "new", by: r.last_rep, when: r.last_knock_at };
   }
 }
 
@@ -163,12 +257,28 @@ function shape(r: Row) {
     // "Built 1999, no big hail here since 2020: roof may be original" read as
     // a contradiction beside this April's 2.5 in; it means no golf-ball hail
     // before this past year. Say only what a rep can use.
+    // A bare "Built 1953" repeats the year-built line; keep only notes that add something.
+    // In the City of Dallas a re-roof needs a permit, so golf-ball hail with no
+    // permit since means the roof was likely NOT replaced.
     roof_note:
-      reasons
-        .find((x) => /^(Re-roofed|Golf-ball|Built )/.test(x))
-        ?.replace(/, no big hail here since 2020/, "") ?? null,
+      r.no_permit_since && r.big_hail_old_date && r.no_permit_since === r.big_hail_old_date
+        ? `Golf-ball+ hail on radar ${day(r.big_hail_old_date)} and no Dallas roof permit since`
+        : (reasons
+            .find((x) => /^(Re-roofed|Golf-ball|Built )/.test(x))
+            ?.replace(/, no big hail here since 2020/, "") ?? "")
+            .replace(/^Built \d{4}$/, "") || null,
     wind_note: reasons.find((x) => /reported/.test(x)) ?? null,
     recent_roof: !!r.recent_roof,
+    // Re-roofed under a Dallas permit in the last 10 years: pitch repairs,
+    // gutters, fence or siding rather than a whole roof.
+    recent_permit: !!r.permit_date && Date.now() - new Date(r.permit_date).getTime() <= RECENT_PERMIT_MS,
+    score: r.score ?? 0,
+    priority: !!r.priority,
+    priority_why: priorityWhy(r),
+    ...(() => {
+      const s = signals(r);
+      return { signals: s.tags, claim: s.claim };
+    })(),
     phone: r.phone,
     phone_dnc: !!r.phone_dnc,
     job_id: r.job_id,
@@ -181,8 +291,14 @@ export async function GET(req: Request) {
   if (!u) return NextResponse.json({ ok: false, error: "Sign in to see doors." }, { status: 401 });
 
   const url = new URL(req.url);
-  const big = url.searchParams.get("big") !== "0";
-  const minHail = big ? 2 : 1;
+  const v = url.searchParams.get("view");
+  const view: View =
+    v === "older" || v === "priority"
+      ? v
+      : v === "hail1" || (!v && url.searchParams.get("big") === "0")
+        ? "hail1"
+        : "hail2";
+  const minHail = view === "hail2" ? 2 : view === "hail1" ? 1 : null;
   const zipRaw = (url.searchParams.get("zip") || "").trim();
   const near = (url.searchParams.get("near") || "").match(/^(-?\d+\.?\d*),(-?\d+\.?\d*)$/);
 
@@ -209,17 +325,19 @@ export async function GET(req: Request) {
   }
 
   try {
-    // The database sorts (nearest, or biggest hail for a ZIP) and caps at
+    // The database sorts (nearest; for a ZIP, biggest hail or, for older roofs,
+    // the best-door score) and caps at
     // 1,000: a phone on cell data should not pull 10,000 doors, and the API
     // would silently stop at 1,000 anyway. total says how many there were.
-    const sent = await fieldDoors(lat, lon, mi, minHail, zip, zip != null ? "hail" : "dist");
+    const order = zip == null ? "dist" : view === "older" || view === "priority" ? "score" : "hail";
+    const sent = await fieldDoors(lat, lon, mi, minHail, zip, order, view === "hail2" || view === "hail1" ? "hail" : view);
     const total = sent.length ? Number(sent[0].total) : 0;
     return NextResponse.json({
       ok: true,
       center: { lat, lon },
       mi,
       zip,
-      big,
+      view,
       total,
       doors: sent.map(shape),
     });

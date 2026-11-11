@@ -20,9 +20,9 @@ export const dynamic = "force-dynamic";
 export default async function KnockMapPage({
   searchParams,
 }: {
-  searchParams: Promise<{ key?: string; zip?: string; big?: string }>;
+  searchParams: Promise<{ key?: string; zip?: string; big?: string; view?: string }>;
 }) {
-  const { key, zip, big } = await searchParams;
+  const { key, zip, big, view } = await searchParams;
   const user = await currentUser(key);
 
   if (!user) {
@@ -45,7 +45,12 @@ export default async function KnockMapPage({
 
   return (
     <div className="min-h-screen bg-[#f4f5f7] text-[#0b0e13]">
-      <FieldMap initialZip={safeZip} initialBig={big !== "0"} />
+      <FieldMap
+        initialZip={safeZip}
+        initialView={
+          view === "older" || view === "priority" ? view : view === "hail1" || (!view && big === "0") ? "hail1" : "hail2"
+        }
+      />
       {user.role === "admin" && (
         <p className="px-5 pb-6 text-xs text-gray-500">
           Storm tables, every filter and the homeowner export are in the{" "}

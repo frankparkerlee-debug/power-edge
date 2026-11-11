@@ -3,10 +3,13 @@
 /**
  * The knock map, built for a rep on a sidewalk.
  *
- * It opens on where the rep is standing (or a ZIP), shows only doors with
- * 2 in+ radar hail at the house unless they widen it, colors every pin by
- * what to do next, and groups the list by street in house-number order so
- * they can walk it. Tap a door and everything they can do there is one tap
+ * It opens on where the rep is standing (or a ZIP), shows doors with 2 in+
+ * radar hail at the house (or 1 in+, or older roofs with or without hail),
+ * colors every pin by where the door stands with us (gray not knocked, blue
+ * a Dallas roof permit in the last 10 years, yellow working, red said no,
+ * green signed or done; a bigger pin with a dark ring is a priority knock),
+ * and groups the list by street in house-number order so they can walk it,
+ * or ranks it priority and best door first. Tap a door and everything they can do there is one tap
  * away: not home, come back, no (with the reason), book the inspection, call,
  * the roof and storm history, storm alerts, the job.
  *
@@ -51,6 +54,14 @@ type Door = {
   roof_note: string | null;
   wind_note: string | null;
   recent_roof: boolean;
+  recent_permit: boolean;
+  score: number;
+  /** Old roof or repeat storms, with a storm inside the 1-year claim window. */
+  priority: boolean;
+  priority_why: string | null;
+  /** Storms, wind reports, permits, the claim window: short lines for the row. */
+  signals: string[];
+  claim: "open" | "cash" | null;
   phone: string | null;
   phone_dnc: boolean;
   job_id: string | null;
@@ -76,12 +87,26 @@ const NO_REASONS = [
   "Just not interested",
 ] as const;
 
-const RED = "#d23a2f";
-const ORANGE = "#e8871e";
-const SLATE = "#8a919c";
-const AMBER = "#c58a00";
-const GREEN = "#0c7a40";
-const GRAY = "#c3c8cf";
+// Pin colors say where a door stands with us (Parker, 2026-11-11).
+const GRAY = "#8a919c"; // not knocked yet
+const BLUE = "#2563eb"; // Dallas roof permit in the last 10 years: repairs, fence, siding
+const YELLOW = "#eab308"; // working: come back, inspection booked, job not signed yet
+const RED = "#d23a2f"; // said no, or the job was lost
+const GREEN = "#0c7a40"; // signed, in production or complete
+const INK = "#0b0e13";
+
+/** Job stages that count as a signed deal. */
+const SIGNED = new Set(["signed", "in_production", "complete"]);
+
+type View = "priority" | "hail2" | "hail1" | "older";
+const VIEWS: Array<[View, string]> = [
+  ["priority", "Priority"],
+  ["hail2", "2 in+ hail"],
+  ["hail1", "1 in+ hail"],
+  ["older", "Older roofs"],
+];
+/** Best first lists this many doors; the map still shows every one. */
+const BEST_ROWS = 150;
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const shortDay = (d?: string | null) => {
@@ -111,15 +136,15 @@ const isDone = (s: DoorState) => s.kind === "no" || s.kind === "appointment" || 
 
 function pinColor(d: Door) {
   switch (d.state.kind) {
-    case "appointment":
     case "job":
-      return GREEN;
+      return SIGNED.has(d.state.stage || "") ? GREEN : YELLOW;
+    case "appointment":
     case "come_back":
-      return AMBER;
+      return YELLOW;
     case "no":
-      return GRAY;
+      return RED;
     default:
-      return (d.hail_in ?? 0) >= 2.5 ? RED : (d.hail_in ?? 0) >= 2 ? ORANGE : SLATE;
+      return d.recent_permit ? BLUE : GRAY;
   }
 }
 
@@ -135,12 +160,15 @@ function stateLine(s: DoorState): { text: string; tone: string } | null {
     case "no":
       return {
         text: `Said no${s.note?.startsWith("Reason: ") ? `: ${s.note.slice(8).toLowerCase()}` : ""}${s.by ? ` · ${s.by}` : ""}`,
-        tone: "text-gray-500",
+        tone: "font-semibold text-[#b42318]",
       };
     case "appointment":
-      return { text: s.at ? `Inspection ${when(s.at)}` : "Inspection booked", tone: "font-semibold text-[#0c7a40]" };
+      return { text: s.at ? `Inspection ${when(s.at)}` : "Inspection booked", tone: "font-semibold text-[#8a5a00]" };
     case "job":
-      return { text: STAGE_LABEL[s.stage || ""] || "In the pipeline", tone: "font-semibold text-[#0c7a40]" };
+      return {
+        text: STAGE_LABEL[s.stage || ""] || "In the pipeline",
+        tone: SIGNED.has(s.stage || "") ? "font-semibold text-[#0c7a40]" : "font-semibold text-[#8a5a00]",
+      };
     default:
       return null;
   }
@@ -157,7 +185,7 @@ function asCard(d: Door, id: string): TargetCard {
     absentee: !!d.absentee,
     year_built: d.year_built,
     value: d.value,
-    score: 0,
+    score: d.score,
     lat: d.lat,
     lon: d.lon,
     phone: d.phone,
@@ -167,10 +195,11 @@ function asCard(d: Door, id: string): TargetCard {
 
 type Mode = { kind: "near"; lat: number; lon: number; mi: number } | { kind: "zip"; zip: string };
 
-export function FieldMap({ initialZip, initialBig }: { initialZip?: string; initialBig: boolean }) {
+export function FieldMap({ initialZip, initialView }: { initialZip?: string; initialView: View }) {
   const [mode, setMode] = useState<Mode | null>(null);
-  const [big, setBig] = useState(initialBig);
-  const [hideDone, setHideDone] = useState(true);
+  const [view, setView] = useState<View>(initialView);
+  const [order, setOrder] = useState<"street" | "best">("street");
+  const [hideDone, setHideDone] = useState(false);
   const [onlyDue, setOnlyDue] = useState(false);
   const [doors, setDoors] = useState<Door[]>([]);
   const [total, setTotal] = useState(0);
@@ -194,7 +223,7 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
   const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // ---- Loading -----------------------------------------------------------
-  const load = useCallback(async (m: Mode, bigHail: boolean) => {
+  const load = useCallback(async (m: Mode, v: View) => {
     setStatus("loading");
     setError("");
     setMode(m);
@@ -204,13 +233,14 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
       qs.set("near", `${m.lat.toFixed(5)},${m.lon.toFixed(5)}`);
       qs.set("mi", String(m.mi));
     }
-    if (!bigHail) qs.set("big", "0");
+    if (v !== "hail2") qs.set("view", v);
     // Keep the URL shareable and reload-proof.
     const page = new URLSearchParams(window.location.search);
     if (m.kind === "zip") page.set("zip", m.zip);
     else page.delete("zip");
-    if (!bigHail) page.set("big", "0");
-    else page.delete("big");
+    page.delete("big");
+    if (v !== "hail2") page.set("view", v);
+    else page.delete("view");
     window.history.replaceState(null, "", `${window.location.pathname}${page.toString() ? `?${page}` : ""}`);
     try {
       const res = await fetch(`/api/field/doors?${qs}`);
@@ -238,24 +268,24 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
         (pos) => {
           const here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
           setMe(here);
-          load({ kind: "near", ...here, mi }, big);
+          load({ kind: "near", ...here, mi }, view);
         },
         () => setStatus("denied"),
         { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
       );
     },
-    [big, load],
+    [view, load],
   );
 
   useEffect(() => {
-    if (initialZip) load({ kind: "zip", zip: initialZip }, initialBig);
+    if (initialZip) load({ kind: "zip", zip: initialZip }, initialView);
     else locate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const reload = (bigHail = big) => {
+  const reload = (v = view) => {
     if (!mode) return locate();
-    load(mode, bigHail);
+    load(mode, v);
   };
 
   // ---- What to show ------------------------------------------------------
@@ -274,6 +304,32 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
   );
 
   const streets = useMemo(() => {
+    if (order === "best") {
+      // One ranked list: open doors by score, then the ones already worked.
+      const ranked = [...visible]
+        .sort(
+          (a, b) =>
+            Number(isDone(a.state)) - Number(isDone(b.state)) ||
+            Number(b.priority) - Number(a.priority) ||
+            b.score - a.score ||
+            a.dist_mi - b.dist_mi,
+        )
+        .slice(0, BEST_ROWS);
+      if (!ranked.length) return [];
+      return [
+        {
+          key: "best",
+          name: visible.length > BEST_ROWS ? `Best ${BEST_ROWS} doors first` : "Best doors first",
+          place: "",
+          doors: ranked,
+          nearest: Math.min(...ranked.map((d) => d.dist_mi)),
+          open: visible.filter((d) => !isDone(d.state)).length,
+          priority: visible.filter((d) => d.priority && !isDone(d.state)).length,
+          maxHail: Math.max(0, ...ranked.map((d) => d.hail_in ?? 0)),
+          ranked: true,
+        },
+      ];
+    }
     const by = new Map<string, Door[]>();
     for (const d of visible) {
       const k = `${d.street}|${d.zip}`;
@@ -286,14 +342,18 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
       doors: list.sort((a, b) => (parseInt(a.num) || 0) - (parseInt(b.num) || 0)),
       nearest: Math.min(...list.map((d) => d.dist_mi)),
       open: list.filter((d) => !isDone(d.state)).length,
-      maxHail: Math.max(...list.map((d) => d.hail_in ?? 0)),
+      priority: list.filter((d) => d.priority && !isDone(d.state)).length,
+      maxHail: Math.max(0, ...list.map((d) => d.hail_in ?? 0)),
+      ranked: false,
     }));
     return mode?.kind === "near"
       ? groups.sort((a, b) => a.nearest - b.nearest)
       : groups.sort((a, b) => b.open - a.open || b.maxHail - a.maxHail);
-  }, [visible, mode]);
+  }, [visible, mode, order]);
 
   const openCount = visible.filter((d) => !isDone(d.state)).length;
+  const priorityCount = visible.filter((d) => d.priority && !isDone(d.state)).length;
+  const streetCount = new Set(visible.map((d) => `${d.street}|${d.zip}`)).size;
 
   // ---- Map ---------------------------------------------------------------
   useEffect(() => {
@@ -321,10 +381,12 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
       const c = pinColor(d);
       const hollow = d.state.kind === "not_home";
       const isSel = d.key === selected;
+      // Priority knocks: bigger, with a dark ring, until someone has worked them.
+      const pri = d.priority && !isDone(d.state);
       L.circleMarker([d.lat, d.lon], {
-        radius: isSel ? 10 : 6.5,
-        color: isSel ? "#0b0e13" : hollow ? c : "#ffffff",
-        weight: isSel ? 3 : hollow ? 2.5 : 1.5,
+        radius: isSel ? 10 : pri ? 8.5 : 6.5,
+        color: isSel || (pri && !hollow) ? INK : hollow ? c : "#ffffff",
+        weight: isSel ? 3 : hollow ? 2.5 : pri ? 2.5 : 1.5,
         fillColor: hollow ? "#ffffff" : c,
         fillOpacity: 1,
       })
@@ -333,7 +395,9 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
       pts.push([d.lat, d.lon]);
     }
     if (me) {
-      L.circleMarker([me.lat, me.lon], { radius: 7, color: "#ffffff", weight: 3, fillColor: "#2b6cdf", fillOpacity: 1 }).addTo(layer);
+      // You: a dark dot with a halo, so it never reads as a blue permit pin.
+      L.circleMarker([me.lat, me.lon], { radius: 15, stroke: false, fillColor: INK, fillOpacity: 0.14 }).addTo(layer);
+      L.circleMarker([me.lat, me.lon], { radius: 6, color: "#ffffff", weight: 3, fillColor: INK, fillOpacity: 1 }).addTo(layer);
     }
     if (!selected && pts.length) {
       map.fitBounds(L.latLngBounds(me ? [...pts, [me.lat, me.lon]] : pts), { padding: [24, 24], maxZoom: 17 });
@@ -441,7 +505,7 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
           onSubmit={(e) => {
             e.preventDefault();
             const z = zipInput.trim();
-            if (/^\d{5}$/.test(z)) load({ kind: "zip", zip: z }, big);
+            if (/^\d{5}$/.test(z)) load({ kind: "zip", zip: z }, view);
           }}
           className="flex items-center gap-1.5"
         >
@@ -462,7 +526,7 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
             {[0.5, 1, 2].map((m) => (
               <button
                 key={m}
-                onClick={() => me && load({ kind: "near", lat: me.lat, lon: me.lon, mi: m }, big)}
+                onClick={() => me && load({ kind: "near", lat: me.lat, lon: me.lon, mi: m }, view)}
                 className={`rounded-full px-2.5 py-1.5 text-xs font-semibold ${mode.mi === m ? "bg-gray-200 text-gray-900" : "text-gray-500"}`}
               >
                 {m === 0.5 ? "½" : m} mi
@@ -474,18 +538,25 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
 
       {/* Which doors */}
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <button
-          onClick={() => {
-            const next = !big;
-            setBig(next);
-            reload(next);
-          }}
-          className={chip(big)}
-        >
-          {big ? "2 in+ hail" : "All hail 1 in+"}
+        {VIEWS.map(([v, label]) => (
+          <button
+            key={v}
+            onClick={() => {
+              if (v === view) return;
+              setView(v);
+              reload(v);
+            }}
+            className={chip(view === v)}
+          >
+            {label}
+          </button>
+        ))}
+        <span className="mx-0.5 h-5 w-px bg-gray-300" aria-hidden />
+        <button onClick={() => setOrder((o) => (o === "best" ? "street" : "best"))} className={chip(order === "best")}>
+          Best first
         </button>
-        <button onClick={() => setHideDone((v) => !v)} className={chip(!hideDone)}>
-          {hideDone ? "Show finished" : "Hide finished"}
+        <button onClick={() => setHideDone((v) => !v)} className={chip(hideDone)}>
+          Hide worked
         </button>
         {dueCount > 0 && (
           <button onClick={() => setOnlyDue((v) => !v)} className={`${chip(onlyDue)} ${onlyDue ? "" : "border-[#c58a00] text-[#8a5a00]"}`}>
@@ -505,7 +576,7 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
               : status === "error"
                 ? error
                 : status === "ready"
-                  ? `${openCount.toLocaleString()} door${openCount === 1 ? "" : "s"} to knock on ${streets.length} street${streets.length === 1 ? "" : "s"}${
+                  ? `${openCount.toLocaleString()} door${openCount === 1 ? "" : "s"} to knock${priorityCount ? ` (${priorityCount} priority)` : ""} on ${streetCount} street${streetCount === 1 ? "" : "s"}${
                       mode?.kind === "zip" ? ` in ${mode.zip}` : mode?.kind === "near" ? `, within ${mode.mi === 0.5 ? "½" : mode.mi} mi` : ""
                     }${total > doors.length ? `. Showing the ${mode?.kind === "zip" ? "biggest-hail" : "nearest"} ${doors.length.toLocaleString()} of ${total.toLocaleString()}.` : ""}`
                   : ""}
@@ -517,11 +588,11 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
           <div ref={mapDiv} className="h-[42vh] w-full overflow-hidden rounded-xl border border-gray-200 lg:h-[calc(100vh-11rem)]" aria-label="Knock map" />
           <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-600">
             {[
-              [RED, "2.5 in+ hail"],
-              [ORANGE, "2 to 2.5 in"],
-              [AMBER, "Come back"],
-              [GREEN, "Booked or in the pipeline"],
-              [GRAY, "Said no"],
+              [GRAY, "Not knocked"],
+              [BLUE, "Roof permit, last 10 yrs (Dallas)"],
+              [YELLOW, "Working"],
+              [RED, "Said no"],
+              [GREEN, "Signed or done"],
             ].map(([c, l]) => (
               <span key={l} className="flex items-center gap-1">
                 <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: c }} />
@@ -529,8 +600,12 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
               </span>
             ))}
             <span className="flex items-center gap-1">
-              <span className="inline-block h-2.5 w-2.5 rounded-full border-2" style={{ borderColor: RED }} />
+              <span className="inline-block h-2.5 w-2.5 rounded-full border-2" style={{ borderColor: GRAY }} />
               Not home
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block h-3.5 w-3.5 rounded-full border-[2.5px]" style={{ borderColor: INK, background: GRAY }} />
+              Priority knock
             </span>
           </div>
         </div>
@@ -539,9 +614,19 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
         <div className="mt-3 lg:mt-0">
           {status === "ready" && streets.length === 0 && (
             <div className="rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-700">
-              <p className="font-semibold">No {big ? "2 in+ hail " : ""}doors to knock here.</p>
+              <p className="font-semibold">
+                No{" "}
+                {view === "priority" ? "priority " : view === "hail2" ? "2 in+ hail " : view === "hail1" ? "1 in+ hail " : "older-roof "}
+                doors here.
+              </p>
               <p className="mt-1">
-                {big ? "Try All hail, " : ""}
+                {view === "priority"
+                  ? "Priority needs an old roof or repeat storms, and a storm in the last year. Try 1 in+ hail, "
+                  : view === "hail2"
+                    ? "Try 1 in+ hail or Older roofs, "
+                    : view === "hail1"
+                      ? "Try Older roofs, "
+                      : "Try 1 in+ hail, "}
                 {mode?.kind === "near" ? "widen to 2 mi, " : ""}or type another ZIP.
               </p>
             </div>
@@ -559,11 +644,12 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
                     <span className="min-w-0">
                       <span className="block truncate font-display text-[15px] font-bold text-[#0b0e13]">{g.name}</span>
                       <span className="block text-xs text-gray-500">
-                        {g.open} to knock{g.place ? ` · ${g.place}` : ""} · up to {g.maxHail.toFixed(1)}″ hail
+                        {g.open} to knock{g.priority ? ` · ${g.priority} priority` : ""}{g.place ? ` · ${g.place}` : ""}
+                        {g.maxHail >= 0.75 ? ` · up to ${g.maxHail.toFixed(1)}″ hail` : ""}
                       </span>
                     </span>
                     <span className="flex shrink-0 items-center gap-2 text-xs text-gray-500">
-                      {mode?.kind === "near" ? fmtMi(g.nearest) : null}
+                      {mode?.kind === "near" && !g.ranked ? fmtMi(g.nearest) : null}
                       <svg viewBox="0 0 20 20" className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden>
                         <path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
@@ -594,11 +680,16 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
                               <span className="min-w-0 flex-1">
                                 <span className="flex items-baseline justify-between gap-2">
                                   <span className="truncate text-[15px] text-[#0b0e13]">
-                                    <span className="font-bold">{d.num}</span>
+                                    {d.priority && !isDone(d.state) && (
+                                      <span className="mr-1.5 inline-block rounded bg-[#0b0e13] px-1.5 py-0.5 align-[1px] text-[10px] font-bold uppercase tracking-wide text-white">
+                                        Priority
+                                      </span>
+                                    )}
+                                    <span className="font-bold">{g.ranked ? d.address : d.num}</span>
                                     {d.owner_name ? <span className="text-gray-600"> · {d.owner_name}</span> : null}
                                   </span>
-                                  {d.hail_in != null && (
-                                    <span className="shrink-0 text-sm font-bold" style={{ color: d.hail_in >= 2.5 ? RED : d.hail_in >= 2 ? "#b8650f" : SLATE }}>
+                                  {d.hail_in != null && d.hail_in >= 0.75 && (
+                                    <span className="shrink-0 text-sm font-bold" style={{ color: d.hail_in >= 2 ? INK : "#6b7280" }}>
                                       {d.hail_in.toFixed(1)}″
                                     </span>
                                   )}
@@ -608,22 +699,42 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
                                     d.storm_date ? `Storm ${shortDay(d.storm_date)}` : null,
                                     d.absentee == null ? null : d.absentee ? "Owner lives elsewhere" : "Owner lives here",
                                     d.year_built ? `Built ${d.year_built}` : null,
+                                    g.ranked && mode?.kind === "near" ? fmtMi(d.dist_mi) : null,
                                   ]
                                     .filter(Boolean)
                                     .join(" · ")}
                                 </span>
                                 {st && <span className={`mt-0.5 block text-xs ${st.tone}`}>{st.text}</span>}
+                                {d.roof_note && !(d.priority_why?.startsWith("Roof may be original") && !isDone(d.state)) && (
+                                  <span className={`mt-0.5 block text-xs ${d.recent_permit ? "font-semibold text-[#1d4ed8]" : "text-gray-600"}`}>
+                                    {d.roof_note}
+                                  </span>
+                                )}
+                                {d.recent_permit && d.state.kind === "new" && (
+                                  <span className="mt-0.5 block text-xs text-[#1d4ed8]">New roof: pitch repairs, gutters, fence or siding</span>
+                                )}
+                                {d.priority_why && !isDone(d.state) && (
+                                  <span className="mt-0.5 block text-xs font-semibold text-[#0b0e13]">{d.priority_why}</span>
+                                )}
+                                {d.signals.length > 0 && d.state.kind !== "no" && (
+                                  <span className="mt-1 flex flex-wrap gap-1">
+                                    {d.signals.map((t) => (
+                                      <span
+                                        key={t}
+                                        className={`rounded px-1.5 py-0.5 text-[11px] leading-tight ${
+                                          /likely cash/.test(t) ? "bg-[#fdf2e9] text-[#8a4b12]" : "bg-[#eef0f3] text-gray-700"
+                                        }`}
+                                      >
+                                        {t}
+                                      </span>
+                                    ))}
+                                  </span>
+                                )}
                               </span>
                             </button>
 
                             {sel && (
                               <div className="px-4 pb-4">
-                                {(d.roof_note || d.wind_note) && (
-                                  <ul className="mb-3 space-y-0.5 text-xs text-gray-600">
-                                    {d.roof_note && <li>{d.roof_note}</li>}
-                                    {d.wind_note && <li>{d.wind_note}</li>}
-                                  </ul>
-                                )}
                                 {d.state.kind === "appointment" || d.state.kind === "job" ? (
                                   d.job_id ? (
                                     <a href={`/admin/jobs/${d.job_id}`} className="block rounded-lg bg-[#0c7a40] py-3 text-center text-sm font-bold text-white">
