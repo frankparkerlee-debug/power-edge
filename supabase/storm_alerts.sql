@@ -75,13 +75,12 @@ create table if not exists public.storm_warning_hits (
 create index if not exists storm_warning_hits_created_idx on public.storm_warning_hits (created_at desc);
 alter table public.storm_warning_hits enable row level security;
 
--- After /api/cron/storm-warnings is deployed, schedule the check every 2
--- minutes with the same pattern as the existing 'poweredge-hourly' job
--- (pg_cron + pg_net, x-admin-token header = the Render ADMIN_TOKEN):
+-- Scheduled 2026-11-10 as pg_cron job 'poweredge-storm-warnings', every 5
+-- minutes (warnings last 30 to 60 minutes; 5 still catches one cancelled
+-- early). It was created by copying the 'poweredge-hourly' job's call and
+-- swapping the URL, so the admin token is never written in a file:
 --
---   select cron.schedule(
---     'poweredge-storm-warnings', '*/2 * * * *',
---     $$ select net.http_post(
---          url := 'https://poweredgetx.com/api/cron/storm-warnings',
---          headers := jsonb_build_object('x-admin-token', '<ADMIN_TOKEN>', 'Content-Type', 'application/json'),
---          body := '{}'::jsonb) $$);
+--   select cron.schedule('poweredge-storm-warnings', '*/5 * * * *',
+--     replace(replace(command, '/api/cron/claim-nurture', '/api/cron/storm-warnings'),
+--             'timeout_milliseconds := 300000', 'timeout_milliseconds := 60000'))
+--   from cron.job where jobname = 'poweredge-hourly';
