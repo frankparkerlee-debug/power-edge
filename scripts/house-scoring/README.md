@@ -53,3 +53,23 @@ Rerun when you want newer permits; roofer names stop after Sept 2025.
 Run the re-dating step at the end of `supabase/house_scoring.sql`. Radar days
 run 7am to 7am, so hail that fell after midnight would otherwise show the
 previous day, which is not the homeowner's date of loss.
+
+## Daily refresh (automated since 2026-11-11)
+
+The scripts above were the one-time load. The same data now stays current on
+its own (supabase/radar_refresh.sql has the details):
+
+- 13:20 and 17:20 UTC: `POST /api/cron/radar-refresh` loads each new day of
+  MRMS MESH radar hail into `hail_days` (decoded in Node by `lib/grib2.ts`, no
+  eccodes) and the last 3 days of NWS wind/tornado reports into
+  `wind_reports`. Re-read a range with `?from=YYYY-MM-DD&days=N`; backfill
+  wind with `?wind_days=760`.
+- 13:50 and 17:50 UTC: `select public.refresh_cell_signals()` rebuilds
+  `cell_signals` from those tables (same rules as cell_signals.py; ties in
+  hail size now go to the latest storm) and re-dates hail12_date.
+  `select public.refresh_cell_signals(current_date, false)` is a dry run that
+  compares against the current table.
+- Mondays 15:30 UTC: `POST /api/cron/permits-refresh` adds new City of Dallas
+  re-roof permits (geocoded with the Census geocoder).
+- `radar_days` lists every radar day loaded (cells = -1: NOAA never published
+  the file).
