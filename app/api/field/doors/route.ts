@@ -23,6 +23,9 @@ export const dynamic = "force-dynamic";
  * real re-roofing in the Dallas permit test (scope doc, 2026-11-11).
  */
 
+/** Most doors one load sends: the API's per-call ceiling, and plenty for a day. */
+const MAX_DOORS = 1000;
+
 const DFW = { south: 31.9, north: 33.6, west: -98.2, east: -95.7 };
 const inDfw = (lat: number, lon: number) =>
   lat >= DFW.south && lat <= DFW.north && lon >= DFW.west && lon <= DFW.east;
@@ -70,13 +73,30 @@ type Row = {
   job_stage: string | null;
   appt_at: string | null;
   appt_status: string | null;
+  /** Doors matching before the 1,000-row cap. */
+  total: number;
 };
 
-async function fieldDoors(lat: number, lon: number, mi: number, minHail: number | null, zip: string | null) {
+async function fieldDoors(
+  lat: number,
+  lon: number,
+  mi: number,
+  minHail: number | null,
+  zip: string | null,
+  order: "dist" | "hail" = "dist",
+) {
   const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/rpc/field_doors`, {
     method: "POST",
     headers: db(),
-    body: JSON.stringify({ p_lat: lat, p_lon: lon, p_miles: mi, p_min_hail: minHail, p_zip: zip }),
+    body: JSON.stringify({
+      p_lat: lat,
+      p_lon: lon,
+      p_miles: mi,
+      p_min_hail: minHail,
+      p_zip: zip,
+      p_order: order,
+      p_limit: MAX_DOORS,
+    }),
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`field_doors ${res.status}: ${(await res.text()).slice(0, 200)}`);
@@ -140,7 +160,13 @@ function shape(r: Row) {
     // Date of loss: the knock list's date when the door is on it, else the
     // radar day (aligned to the nearest storm report).
     storm_date: r.storm_date ?? r.hail_date,
-    roof_note: reasons.find((x) => /^(Re-roofed|Golf-ball|Built )/.test(x)) ?? null,
+    // "Built 1999, no big hail here since 2020: roof may be original" read as
+    // a contradiction beside this April's 2.5 in; it means no golf-ball hail
+    // before this past year. Say only what a rep can use.
+    roof_note:
+      reasons
+        .find((x) => /^(Re-roofed|Golf-ball|Built )/.test(x))
+        ?.replace(/, no big hail here since 2020/, "") ?? null,
     wind_note: reasons.find((x) => /reported/.test(x)) ?? null,
     recent_roof: !!r.recent_roof,
     phone: r.phone,
@@ -183,14 +209,19 @@ export async function GET(req: Request) {
   }
 
   try {
-    const rows = await fieldDoors(lat, lon, mi, minHail, zip);
+    // The database sorts (nearest, or biggest hail for a ZIP) and caps at
+    // 1,000: a phone on cell data should not pull 10,000 doors, and the API
+    // would silently stop at 1,000 anyway. total says how many there were.
+    const sent = await fieldDoors(lat, lon, mi, minHail, zip, zip != null ? "hail" : "dist");
+    const total = sent.length ? Number(sent[0].total) : 0;
     return NextResponse.json({
       ok: true,
       center: { lat, lon },
       mi,
       zip,
       big,
-      doors: rows.map(shape),
+      total,
+      doors: sent.map(shape),
     });
   } catch (err) {
     console.error("[field/doors]", err);

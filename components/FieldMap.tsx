@@ -173,6 +173,7 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
   const [hideDone, setHideDone] = useState(true);
   const [onlyDue, setOnlyDue] = useState(false);
   const [doors, setDoors] = useState<Door[]>([]);
+  const [total, setTotal] = useState(0);
   const [status, setStatus] = useState<"idle" | "locating" | "loading" | "ready" | "denied" | "error">("idle");
   const [error, setError] = useState("");
   const [zipInput, setZipInput] = useState(initialZip || "");
@@ -216,6 +217,7 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
       const d = await res.json();
       if (!res.ok || !d.ok) throw new Error(d.error || "Couldn't load doors.");
       setDoors(d.doors ?? []);
+      setTotal(d.total ?? (d.doors ?? []).length);
       setSelected(null);
       setOpenStreets({});
       setStatus("ready");
@@ -505,7 +507,7 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
                 : status === "ready"
                   ? `${openCount} door${openCount === 1 ? "" : "s"} to knock on ${streets.length} street${streets.length === 1 ? "" : "s"}${
                       mode?.kind === "zip" ? ` in ${mode.zip}` : mode?.kind === "near" ? `, within ${mode.mi === 0.5 ? "½" : mode.mi} mi` : ""
-                    }`
+                    }${total > doors.length ? `. Showing the ${mode?.kind === "zip" ? "biggest-hail" : "nearest"} ${doors.length.toLocaleString()} of ${total.toLocaleString()}.` : ""}`
                   : ""}
       </p>
 
@@ -560,8 +562,11 @@ export function FieldMap({ initialZip, initialBig }: { initialZip?: string; init
                         {g.open} to knock{g.place ? ` · ${g.place}` : ""} · up to {g.maxHail.toFixed(1)}″ hail
                       </span>
                     </span>
-                    <span className="shrink-0 text-xs text-gray-500">
-                      {mode?.kind === "near" ? fmtMi(g.nearest) : ""} <span aria-hidden>{open ? "▾" : "▸"}</span>
+                    <span className="flex shrink-0 items-center gap-2 text-xs text-gray-500">
+                      {mode?.kind === "near" ? fmtMi(g.nearest) : null}
+                      <svg viewBox="0 0 20 20" className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden>
+                        <path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
                     </span>
                   </button>
                   {open && (
