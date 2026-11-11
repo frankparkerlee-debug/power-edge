@@ -19,7 +19,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
-import { addLightBasemap } from "@/lib/basemap";
+import { TILES } from "@/lib/basemap";
 import { BookAtDoor } from "./BookAtDoor";
 import { ComeBackSheet } from "./ComeBackSheet";
 import { HouseSheet, type HouseData, type TargetCard } from "./TargetCards";
@@ -94,6 +94,12 @@ const YELLOW = "#eab308"; // working: come back, inspection booked, job not sign
 const RED = "#d23a2f"; // said no, or the job was lost
 const GREEN = "#0c7a40"; // signed, in production or complete
 const INK = "#0b0e13";
+
+/** A Leaflet tile layer, as far as the Map / Aerial switch needs one. */
+type Tile = { addTo: (map: unknown) => unknown };
+
+/** Road lines and street names drawn over the aerial (Esri reference layer, no key). */
+const AERIAL_ROADS = "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}";
 
 /** Job stages that count as a signed deal. */
 const SIGNED = new Set(["signed", "in_production", "complete"]);
@@ -220,6 +226,9 @@ export function FieldMap({ initialZip, initialView }: { initialZip?: string; ini
   const mapRef = useRef<any>(null);
   const layerRef = useRef<any>(null);
   const LRef = useRef<any>(null);
+  /** Street map and aerial tile layers, swapped by the Map / Aerial switch. */
+  const baseRef = useRef<{ street: Tile[]; aerial: Tile[] } | null>(null);
+  const [aerial, setAerial] = useState(false);
   const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // ---- Loading -----------------------------------------------------------
@@ -363,7 +372,20 @@ export function FieldMap({ initialZip, initialView }: { initialZip?: string; ini
       if (cancelled || !mapDiv.current || mapRef.current) return;
       LRef.current = L;
       const map = L.map(mapDiv.current, { zoomControl: true, attributionControl: true }).setView([32.78, -97.0], 10);
-      addLightBasemap(L, map);
+      // Street names sit between the tiles and the pins, and never catch a tap.
+      const labels = map.createPane("labels");
+      labels.style.zIndex = "350";
+      labels.style.pointerEvents = "none";
+      const street = [
+        L.tileLayer(TILES.light, { maxZoom: 19, maxNativeZoom: 16, attribution: TILES.attribution }),
+        L.tileLayer(TILES.lightLabels, { maxZoom: 19, maxNativeZoom: 16, pane: "labels" }),
+      ];
+      const aerialLayers = [
+        L.tileLayer(TILES.satellite, { maxZoom: 19, attribution: TILES.attribution }),
+        L.tileLayer(AERIAL_ROADS, { maxZoom: 19, pane: "labels" }),
+      ];
+      street.forEach((t) => t.addTo(map));
+      baseRef.current = { street, aerial: aerialLayers };
       layerRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
     });
@@ -404,6 +426,14 @@ export function FieldMap({ initialZip, initialView }: { initialZip?: string; ini
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, selected, me]);
+
+  useEffect(() => {
+    const map = mapRef.current, b = baseRef.current;
+    if (!map || !b) return;
+    const [show, hide] = aerial ? [b.aerial, b.street] : [b.street, b.aerial];
+    hide.forEach((t) => map.hasLayer(t) && map.removeLayer(t));
+    show.forEach((t) => !map.hasLayer(t) && t.addTo(map));
+  }, [aerial]);
 
   function selectDoor(d: Door, fromList: boolean) {
     setSelected(d.key);
@@ -585,7 +615,21 @@ export function FieldMap({ initialZip, initialView }: { initialZip?: string; ini
       <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-4">
         {/* Map */}
         <div className="lg:sticky lg:top-[4.5rem] lg:self-start">
-          <div ref={mapDiv} className="h-[42vh] w-full overflow-hidden rounded-xl border border-gray-200 lg:h-[calc(100vh-11rem)]" aria-label="Knock map" />
+          <div className="relative">
+            <div ref={mapDiv} className="h-[42vh] w-full overflow-hidden rounded-xl border border-gray-200 lg:h-[calc(100vh-11rem)]" aria-label="Knock map" />
+            <div className="absolute right-2 top-2 z-[1000] flex overflow-hidden rounded-lg border border-gray-300 bg-white text-xs font-semibold shadow-sm">
+              {([["Map", false], ["Aerial", true]] as const).map(([label, on]) => (
+                <button
+                  key={label}
+                  onClick={() => setAerial(on)}
+                  aria-pressed={aerial === on}
+                  className={`px-3 py-1.5 ${aerial === on ? "bg-[#0b0e13] text-white" : "text-gray-700"}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-600">
             {[
               [GRAY, "Not knocked"],
