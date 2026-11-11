@@ -120,7 +120,7 @@ function gmapsHref(t: TargetCard) {
   )}`;
 }
 
-type HouseData = {
+export type HouseData = {
   loading: boolean;
   roof: { roofSqft: number; squares: number; pitchDeg: number | null } | null;
   roofError?: { reason: string; detail?: string } | null;
@@ -129,7 +129,7 @@ type HouseData = {
 
 /** Full-screen house dossier: satellite view of THEIR roof + measured squares
  *  + every storm near the address. The at-the-door show piece. */
-function HouseSheet({
+export function HouseSheet({
   target,
   data,
   onClose,

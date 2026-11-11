@@ -45,19 +45,16 @@ const SELLS = ["closer", "rep", "admin"] as const;
 const NAV: NavItem[] = [
   { href: "/admin", label: "Today", icon: "sun" },
   { href: "/admin/storms", label: "Map", icon: "map" },
-  // The ranked door list is a setter's working tool, so it takes the tab slot
-  // a setter does not have (Agreement). Everyone else finds it under the menu,
-  // which keeps every role at four tabs.
-  { href: "/admin/doors", label: "Best doors", icon: "target", roles: ["setter"] },
+  // Best doors now lives inside the Map (its ranking and coverage drive the
+  // knock map), so the setter's fourth tab is their inspections board.
+  { href: "/admin/appointments", label: "Inspections", icon: "calendar", roles: ["setter"] },
   { href: "/admin/jobs", label: "Jobs", icon: "folder" },
   // Setters book the inspection; the closer prices it and writes the paper.
   { href: "/admin/contract", label: "Agreement", icon: "pen", roles: [...SELLS] },
 ];
 
 const MORE: NavItem[] = [
-  // A setter's whole job is what is on the board, so they get this one.
-  { href: "/admin/appointments", label: "Inspections", icon: "calendar" },
-  { href: "/admin/doors", label: "Best doors", icon: "target", roles: [...SELLS] },
+  { href: "/admin/appointments", label: "Inspections", icon: "calendar", roles: [...SELLS] },
   { href: "/admin/alerts", label: "Storm alerts", icon: "bell" },
   { href: "/sales", label: "Playbook", icon: "book" },
   { href: "/admin/leads", label: "Leads", icon: "inbox", roles: ["admin"] },
@@ -103,6 +100,7 @@ function titleFor(path: string): { title: string; parent?: string } {
     "/admin/contract": { title: "New agreement", parent: "/admin/jobs" },
     "/admin/appointments": { title: "Inspections" },
     "/admin/doors": { title: "Best doors" },
+    "/admin/storms/office": { title: "Storm office view", parent: "/admin/storms" },
     "/admin/alerts": { title: "Storm alerts" },
     "/admin/leads": { title: "Leads" },
     "/admin/territories": { title: "Territories" },
