@@ -13,6 +13,7 @@ import {
   createTeam,
   updateTeam,
   setMemberTeam,
+  setMemberInspections,
   ASSIGNABLE_ROLES,
   type Role,
 } from "@/lib/auth";
@@ -110,6 +111,14 @@ export default async function TeamPage({
     revalidatePath("/admin/scoreboard");
   }
 
+  async function toggleInspections(formData: FormData) {
+    "use server";
+    const me = await currentUser();
+    if (me?.role !== "admin") return;
+    await setMemberInspections(Number(formData.get("id")), String(formData.get("to")) === "on");
+    revalidatePath("/admin/team");
+  }
+
   async function moveToTeam(formData: FormData) {
     "use server";
     const me = await currentUser();
@@ -173,6 +182,7 @@ export default async function TeamPage({
                 <th className="py-2 pr-4">Email</th>
                 <th className="py-2 pr-4">Role</th>
                 <th className="py-2 pr-4">Team</th>
+                <th className="py-2 pr-4" title="Booking offers a window when one of these people is free">Inspections</th>
                 <th className="py-2 pr-4">Last sign-in</th>
                 <th className="py-2"></th>
               </tr>
@@ -186,7 +196,9 @@ export default async function TeamPage({
                   <td className="py-2.5 pr-4 font-semibold">{m.name}</td>
                   <td className="py-2.5 pr-4 text-gray-600">{m.email}</td>
                   <td className="py-2.5 pr-4">
-                    <form action={changeRole} className="flex items-center gap-2">
+                    {/* Keyed on the saved value: React resets a form after its action,
+                        and without a fresh key the menu snapped back to the old choice. */}
+                    <form key={`role-${m.id}-${m.role}`} action={changeRole} className="flex items-center gap-2">
                       <input type="hidden" name="id" value={m.id} />
                       <select
                         name="role"
@@ -207,7 +219,7 @@ export default async function TeamPage({
                   </td>
                   <td className="py-2.5 pr-4">
                     {m.active ? (
-                      <form action={moveToTeam} className="flex items-center gap-2">
+                      <form key={`team-${m.id}-${m.team_id ?? "none"}`} action={moveToTeam} className="flex items-center gap-2">
                         <input type="hidden" name="id" value={m.id} />
                         <select
                           name="team"
@@ -223,6 +235,20 @@ export default async function TeamPage({
                           ))}
                         </select>
                         <button className="text-xs font-semibold text-[#0c7a40] underline">Save</button>
+                      </form>
+                    ) : null}
+                  </td>
+                  <td className="py-2.5 pr-4">
+                    {m.active && m.role !== "setter" ? (
+                      <form action={toggleInspections} className="flex items-center gap-2">
+                        <input type="hidden" name="id" value={m.id} />
+                        <input type="hidden" name="to" value={m.takes_inspections ? "off" : "on"} />
+                        <span className={m.takes_inspections ? "font-semibold text-[#0c7a40]" : "text-gray-500"}>
+                          {m.takes_inspections ? "Takes them" : "No"}
+                        </span>
+                        <button className="text-xs font-semibold text-gray-500 underline">
+                          {m.takes_inspections ? "Stop" : "Start"}
+                        </button>
                       </form>
                     ) : null}
                   </td>
@@ -348,11 +374,11 @@ export default async function TeamPage({
                       <td className="py-2.5 pr-3">
                         {sells ? (
                           <input form={form} name="signed" inputMode="numeric" defaultValue={m.goal_signed_month ?? ""}
-                            placeholder={DEFAULT_GOALS.signedMonth.toLocaleString("en-US")} className={box} aria-label={`Signed a month for ${m.name}`} />
+                            placeholder={DEFAULT_GOALS.signedMonth.toLocaleString("en-US")} className={box} aria-label={`Revenue a month for ${m.name}`} />
                         ) : <span className="text-gray-400">Setter</span>}
                       </td>
                       <td className="py-2.5 text-right">
-                        <form id={form} action={saveGoals}>
+                        <form key={`goals-${m.id}-${m.goal_knocks_week}-${m.goal_sets_week}-${m.goal_signed_month}`} id={form} action={saveGoals}>
                           <input type="hidden" name="id" value={m.id} />
                           <button className="text-xs font-semibold text-[#0c7a40] underline">Save</button>
                         </form>

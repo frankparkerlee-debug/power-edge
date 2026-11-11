@@ -59,7 +59,12 @@ export default function StormAlertSignup({
 
   if (state === "done") {
     return (
-      <div className="rounded-card border border-bolt/40 bg-bolt/10 p-6">
+      // On a phone the form is longer than the confirmation that replaces it,
+      // which left the homeowner looking at the footer. Bring it into view.
+      <div
+        ref={(el) => el?.scrollIntoView({ behavior: "smooth", block: "center" })}
+        className="rounded-card border border-bolt/40 bg-bolt/10 p-6"
+      >
         <p className="font-display text-xl font-bold text-fg-inv">You&apos;re signed up.</p>
         <p className="mt-2 text-fg-inv-dim">
           We&apos;ll text you only when a hail or tornado warning covers {address}. Reply STOP to any

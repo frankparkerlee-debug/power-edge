@@ -41,3 +41,7 @@ yarn-error.log*
 next-env.d.ts
 PowerEdge Ad Creatives/
 .playwright-mcp/
+
+# Local test database (copy of production structure + a slice of data)
+.localdb/
+scripts/localdb/data/

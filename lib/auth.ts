@@ -285,13 +285,14 @@ export async function listMembers(): Promise<
       goal_sets_week: number | null;
       goal_signed_month: number | null;
       team_id: number | null;
+      takes_inspections: boolean;
     }
   >
 > {
   if (!dbOn()) return [];
   try {
     const res = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/team_members?select=id,email,name,role,active,last_login_at,created_at,goal_knocks_week,goal_sets_week,goal_signed_month,team_id&order=active.desc,name.asc`,
+      `${process.env.SUPABASE_URL}/rest/v1/team_members?select=id,email,name,role,active,last_login_at,created_at,goal_knocks_week,goal_sets_week,goal_signed_month,team_id,takes_inspections&order=active.desc,name.asc`,
       { headers: headers(), cache: "no-store" },
     );
     if (!res.ok) return [];
@@ -326,14 +327,17 @@ export async function addMember(input: { email: string; name: string; role: Role
     await fetch(`${process.env.SUPABASE_URL}/rest/v1/team_members?email=eq.${encodeURIComponent(email)}`, {
       method: "PATCH",
       headers: { ...headers(), Prefer: "return=minimal" },
-      body: JSON.stringify({ active: true, role: input.role, name }),
+      body: JSON.stringify({ active: true, role: input.role, name, ...(input.role === "closer" ? { takes_inspections: true } : {}) }),
     });
     return { ok: true as const, reactivated: true };
   }
   const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/team_members`, {
     method: "POST",
     headers: { ...headers(), Prefer: "return=minimal" },
-    body: JSON.stringify({ email, name, role: input.role, active: true }),
+    // A closer drives to inspections from day one. Booking only offers a
+    // window when someone who takes inspections is free in it, and nothing
+    // set this flag, so a new closer never got a single booking.
+    body: JSON.stringify({ email, name, role: input.role, active: true, takes_inspections: input.role === "closer" }),
   });
   if (!res.ok) return { ok: false as const, error: "Could not add them." };
   return { ok: true as const, reactivated: false };
@@ -346,6 +350,17 @@ export async function addMember(input: { email: string; name: string; role: Role
  * orphan that history, and a signed contract needs to keep saying who wrote
  * it. Deactivating stops them signing in and leaves the record intact.
  */
+/** Whether booking may put this person on inspections. */
+export async function setMemberInspections(id: number, takes: boolean) {
+  if (!dbOn()) return false;
+  const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/team_members?id=eq.${id}`, {
+    method: "PATCH",
+    headers: { ...headers(), Prefer: "return=minimal" },
+    body: JSON.stringify({ takes_inspections: takes }),
+  });
+  return res.ok;
+}
+
 export async function setMemberActive(id: number, active: boolean) {
   if (!dbOn()) return false;
   const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/team_members?id=eq.${id}`, {

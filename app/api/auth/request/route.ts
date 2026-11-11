@@ -7,7 +7,11 @@ import { site } from "@/lib/site";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const wait = burst(`login:${clientIp(req)}`, 6, 15 * 60_000);
+  // Per connection, generous: a whole crew signs in from the office Wi-Fi on
+  // day one, and six per 15 minutes locked out the seventh rep. The tight
+  // limit is per email address, which is what stops someone hammering one
+  // inbox with links.
+  const wait = burst(`login:${clientIp(req)}`, 30, 15 * 60_000);
   if (wait) return tooMany(wait, "Too many sign-in attempts. Try again shortly.");
 
   let body: { email?: string };
@@ -18,6 +22,8 @@ export async function POST(req: Request) {
   }
 
   const email = String(body.email || "").trim();
+  const perEmail = burst(`login-email:${email.toLowerCase()}`, 5, 15 * 60_000);
+  if (perEmail) return tooMany(perEmail, "Too many sign-in links for that email. Use the newest one, or try again shortly.");
   const token = await issueLoginToken(email);
 
   // Always report success. Saying "that email is not on the team" would let

@@ -108,7 +108,7 @@ export async function buildScorecards(period: Period): Promise<{ ok: boolean; ca
           ["Profit per roof", money.profitPerRoof != null ? usd(money.profitPerRoof) : "Costs not in yet", true],
           ["Margin", money.margin != null ? `${Math.round(money.margin * 100)}%` : "None yet"],
           ["Doors", n(b.team.knocks)],
-          ["Talked", `${n(b.team.talked)} (${pctOf(b.team.talked, b.team.knocks)})`],
+          ["Talked", b.team.knocks >= 20 ? `${n(b.team.talked)} (${pctOf(b.team.talked, b.team.knocks)})` : n(b.team.talked)],
           ["Inspections set", `${b.team.sets}`],
           ["Inspected", `${b.team.held}, damage on ${b.team.damage}`],
         ],
@@ -162,11 +162,13 @@ export async function buildScorecards(period: Period): Promise<{ ok: boolean; ca
       key = {
         label: "Inspections set",
         value: `${me.sets}`,
-        sub: `Goal ${g.sets} · ${n(me.knocks)} doors · ${pctOf(me.talked, me.knocks)} talked`,
+        sub: [`Goal ${g.sets}`, `${n(me.knocks)} door${me.knocks === 1 ? "" : "s"}`, me.knocks >= 20 ? `${pctOf(me.talked, me.knocks)} talked` : null]
+          .filter(Boolean)
+          .join(" · "),
       };
       mine = [
         ["Doors", `${n(me.knocks)} of ${n(g.knocks)}`, true],
-        ["Talked", `${n(me.talked)} (${pctOf(me.talked, me.knocks)})`],
+        ["Talked", me.knocks >= 20 ? `${n(me.talked)} (${pctOf(me.talked, me.knocks)})` : n(me.talked)],
         ["Inspections set", `${me.sets} of ${g.sets}`, true],
         ["Sets per 100 doors", me.knocks >= 20 ? ((me.sets / me.knocks) * 100).toFixed(1) : "too few to rate"],
         ["Roofs from your doors", `${setM.roofs}`],

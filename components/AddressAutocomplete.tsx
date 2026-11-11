@@ -47,12 +47,17 @@ export function AddressAutocomplete({
   const [active, setActive] = useState(-1);
   const boxRef = useRef<HTMLDivElement>(null);
   const skip = useRef(false);
+  // Suggest only once the person types. A value filled in for them (an
+  // agreement started from a job) used to open a list of other streets over
+  // the right address, one tap from replacing it.
+  const typed = useRef(false);
 
   useEffect(() => {
     if (skip.current) {
       skip.current = false;
       return;
     }
+    if (!typed.current) return;
     const q = value.trim();
     if (q.length < 4) {
       setItems([]);
@@ -120,7 +125,10 @@ export function AddressAutocomplete({
         id={id}
         autoFocus={autoFocus}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          typed.current = true;
+          onChange(e.target.value);
+        }}
         onFocus={() => items.length && setOpen(true)}
         onKeyDown={(e) => {
           if (!open) return;

@@ -258,8 +258,12 @@ export async function bookSlot(input: BookingInput): Promise<BookingResult> {
     return { ok: false, error: "That window just filled up. Pick another.", code: "taken" };
   }
   if (!pooled && candidates.length > 1) {
-    const load = await dayLoad(slot.date);
-    candidates = [...candidates].sort((a, b) => (load.get(a) ?? 0) - (load.get(b) ?? 0));
+    // A knocker's own team closer first (a team is a closer and the knockers
+    // who feed them), then whoever has the lightest day.
+    const [load, teams] = await Promise.all([dayLoad(slot.date), teamsByName()]);
+    const mine = input.setter ? teams.get(input.setter) ?? null : null;
+    const away = (who: string) => (mine != null && teams.get(who) === mine ? 0 : 1);
+    candidates = [...candidates].sort((a, b) => away(a) - away(b) || (load.get(a) ?? 0) - (load.get(b) ?? 0));
   }
 
   for (const who of candidates) {
@@ -292,6 +296,23 @@ export async function bookSlot(input: BookingInput): Promise<BookingResult> {
     }
   }
   return { ok: false, error: "That window just filled up. Pick another.", code: "taken" };
+}
+
+/** Each active person's team, by name. */
+async function teamsByName(): Promise<Map<string, number | null>> {
+  const out = new Map<string, number | null>();
+  if (!dbOn()) return out;
+  try {
+    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/team_members?select=name,team_id&active=is.true`, {
+      headers: authHeaders(),
+      cache: "no-store",
+    });
+    if (!res.ok) return out;
+    for (const r of (await res.json()) as Array<{ name: string; team_id: number | null }>) out.set(r.name, r.team_id);
+  } catch {
+    /* fall back to load order */
+  }
+  return out;
 }
 
 /** How many inspections each closer already has on a given day. */

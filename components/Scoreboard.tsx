@@ -452,7 +452,9 @@ function Leaderboard({
                           .slice(0, 3)
                           .map((m) => {
                             const v = value(r, m);
-                            return v ? `${v} ${m.short.toLowerCase()}` : null;
+                            // "1 roofs" read wrong; a count of one takes the singular.
+                            const label = v === "1" && m.kind === "count" ? m.short.toLowerCase().replace(/s$/, "") : m.short.toLowerCase();
+                            return v ? `${v} ${label}` : null;
                           })
                           .filter(Boolean)
                           .join(" · ")}
@@ -649,7 +651,7 @@ export function Scoreboard(props: ScoreboardProps) {
           </div>
           <div className="mt-10 grid gap-10 lg:grid-cols-2">
             {[
-              { title: "Knockers", rows: topSetters, m: metricsFor("setters", showProfit)[0], sub: (r: RankedRow) => `${n(r.knocks)} doors` },
+              { title: "Knockers", rows: topSetters, m: metricsFor("setters", showProfit)[0], sub: (r: RankedRow) => `${n(r.knocks)} door${r.knocks === 1 ? "" : "s"}` },
               { title: "Closers", rows: topClosers, m: metricsFor("closers", showProfit)[0], sub: (r: RankedRow) => `${r.money.roofs} roof${r.money.roofs === 1 ? "" : "s"}` },
             ].map((col) => (
               <section key={col.title}>
@@ -937,7 +939,7 @@ export function Scoreboard(props: ScoreboardProps) {
             <div>
               <h3 className="font-semibold text-[#0b0e13]">Why they said no</h3>
               <p className="text-xs text-gray-500">
-                {reasonTotal ? `${n(reasonTotal)} no's, from the reason tapped at the door.` : "From the reason tapped at the door."}
+                {reasonTotal ? `${n(reasonTotal)} ${reasonTotal === 1 ? "no" : "no's"}, from the reason tapped at the door.` : "From the reason tapped at the door."}
               </p>
               {reasons.length === 0 ? (
                 <p className="mt-3 text-sm text-gray-400">No no&apos;s recorded yet.</p>
