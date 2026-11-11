@@ -18,6 +18,9 @@ type Doc = {
   what: string;
 };
 
+/** Unreviewed legal paper: the office only, until counsel clears it. */
+const DRAFT_ONLY = new Set(["08-repair-agreement.pdf"]);
+
 const DOCS: Doc[] = [
   {
     file: "01-setter-script.pdf", name: "Setter call script", who: "Setter",
@@ -73,7 +76,11 @@ export default async function SalesRepoPage({
 }) {
   const { key } = await searchParams;
   const user = await currentUser(key);
-  const authed = user?.role === "admin";
+  // Every signed-in team member: this is their playbook. It was admin-only
+  // after sign-in replaced the shared key, so reps tapping Playbook were told
+  // to sign in while signed in.
+  const authed = !!user;
+  const isAdmin = user?.role === "admin";
 
   if (!authed) {
     return (
@@ -110,7 +117,7 @@ export default async function SalesRepoPage({
           Documents
         </h2>
         <div className="mt-4 space-y-3">
-          {DOCS.map((d) => (
+          {DOCS.filter((d) => isAdmin || !DRAFT_ONLY.has(d.file)).map((d) => (
             <a
               key={d.file}
               href={`/sales/doc/${d.file}`}

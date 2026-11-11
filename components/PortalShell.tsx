@@ -58,6 +58,9 @@ const MORE: NavItem[] = [
   // Everyone's numbers, open to everyone. Today links to it with your rank,
   // so it does not need one of the four phone tabs.
   { href: "/admin/scoreboard", label: "Scoreboard", icon: "chart" },
+  // New reps: their checklist. The office: everyone's.
+  { href: "/admin/onboarding", label: "Getting started", icon: "check", roles: ["setter", "closer", "rep"] },
+  { href: "/admin/onboarding", label: "Onboarding", icon: "check", roles: ["admin"] },
   { href: "/admin/appointments", label: "Inspections", icon: "calendar", roles: [...SELLS] },
   { href: "/admin/alerts", label: "Storm alerts", icon: "bell" },
   { href: "/sales", label: "Playbook", icon: "book" },
@@ -87,6 +90,7 @@ function Icon({ name, className = "h-5 w-5" }: { name: string; className?: strin
     bell: "M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0",
     back: "M19 12H5M12 19l-7-7 7-7",
     chart: "M3 21h18M6 17v-5M11 17V7M16 17v-8M21 17V4",
+    check: "M9 11l3 3 8-8M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2h9",
   };
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"
@@ -112,6 +116,7 @@ function titleFor(path: string): { title: string; parent?: string } {
     "/admin/team": { title: "Team" },
     "/admin/health": { title: "Health" },
     "/admin/scoreboard": { title: "Scoreboard" },
+    "/admin/onboarding": { title: "Getting started" },
     "/admin/scoreboard/preview": { title: "Scoreboard preview", parent: "/admin/scoreboard" },
     "/admin/scoreboard/send": { title: "Scorecards", parent: "/admin/scoreboard" },
     "/sales": { title: "Playbook" },
@@ -141,7 +146,9 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
     return () => { live = false; };
   }, []);
 
-  const { title, parent } = titleFor(pathname);
+  const t0 = titleFor(pathname);
+  // Reps call it Getting started; for the office it is everyone's onboarding.
+  const { title, parent } = pathname === "/admin/onboarding" && me?.role === "admin" ? { ...t0, title: "Onboarding" } : t0;
   const isHome = pathname === "/admin";
   const nav = NAV.filter((n) => allowed(n, me?.role));
   const more = MORE.filter((n) => allowed(n, me?.role));

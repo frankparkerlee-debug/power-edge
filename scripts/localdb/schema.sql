@@ -293,12 +293,102 @@ create table public.parcels_metro (
   lon double precision not null
 );
 
+create table public.pii_access_log (
+  id bigint generated always as identity not null,
+  at timestamp with time zone default now() not null,
+  viewer text not null,
+  member_id bigint,
+  field text not null
+);
+
+create table public.radar_days (
+  local_date date not null,
+  file_key text,
+  cells integer not null,
+  max_in real,
+  fetched_at timestamp with time zone default now() not null
+);
+
 create table public.rep_areas (
   id bigint default nextval('rep_areas_id_seq'::regclass) not null,
   created_at timestamp with time zone default now() not null,
   rep text not null,
   area_kind text not null,
   area_value text not null
+);
+
+create table public.rep_bank (
+  member_id bigint not null,
+  holder_name text not null,
+  routing text not null,
+  account_enc text not null,
+  account_last4 text not null,
+  account_type text not null,
+  authorized_at timestamp with time zone not null,
+  ip text,
+  updated_at timestamp with time zone default now() not null
+);
+
+create table public.rep_onboarding (
+  member_id bigint not null,
+  created_at timestamp with time zone default now() not null,
+  updated_at timestamp with time zone default now() not null,
+  legal_name text,
+  phone text,
+  address text,
+  city text,
+  state text,
+  zip text,
+  emergency_name text,
+  emergency_phone text,
+  shirt_size text,
+  photo_jpeg text,
+  agreement_version text,
+  agreement_text text,
+  agreement_typed_name text,
+  agreement_signature_png text,
+  agreement_signed_at timestamp with time zone,
+  agreement_ip text,
+  playbook_read_at timestamp with time zone,
+  quiz_passed_at timestamp with time zone,
+  quiz_best integer,
+  quiz_attempts integer default 0 not null,
+  ride_along_at timestamp with time zone,
+  ride_along_by text,
+  gear_issued_at timestamp with time zone,
+  gear_by text,
+  office_notes text,
+  has_photo boolean generated always as (((photo_jpeg IS NOT NULL) AND (photo_jpeg <> ''::text))) stored
+);
+
+create table public.rep_permits (
+  id bigint generated always as identity not null,
+  member_id bigint not null,
+  city text not null,
+  status text default 'needed'::text not null,
+  permit_number text,
+  expires_on date,
+  photo_jpeg text,
+  updated_at timestamp with time zone default now() not null,
+  updated_by text
+);
+
+create table public.rep_tax (
+  member_id bigint not null,
+  legal_name text not null,
+  business_name text,
+  tax_class text not null,
+  address text not null,
+  city text not null,
+  state text not null,
+  zip text not null,
+  tin_type text not null,
+  tin_enc text not null,
+  tin_last4 text not null,
+  certified_name text not null,
+  certified_at timestamp with time zone not null,
+  ip text,
+  updated_at timestamp with time zone default now() not null
 );
 
 create table public.reroof_permits (
@@ -486,6 +576,19 @@ create table public.teams (
   created_at timestamp with time zone default now() not null
 );
 
+create table public.wind_reports (
+  id text not null,
+  valid_at timestamp with time zone not null,
+  local_date date not null,
+  type text not null,
+  mph real,
+  lat double precision not null,
+  lon double precision not null,
+  city text,
+  remark text,
+  fetched_at timestamp with time zone default now() not null
+);
+
 create table public.zip_city (
   zip text,
   city text,
@@ -511,8 +614,18 @@ alter table public.login_tokens add constraint login_tokens_pkey PRIMARY KEY (to
 alter table public.parcels add constraint parcels_county_prop_id_key UNIQUE (county, prop_id);
 alter table public.parcels add constraint parcels_pkey PRIMARY KEY (id);
 alter table public.parcels_metro add constraint parcels_metro_pkey PRIMARY KEY (county, prop_id);
+alter table public.pii_access_log add constraint pii_access_log_pkey PRIMARY KEY (id);
+alter table public.radar_days add constraint radar_days_pkey PRIMARY KEY (local_date);
 alter table public.rep_areas add constraint rep_areas_pkey PRIMARY KEY (id);
 alter table public.rep_areas add constraint rep_areas_area_kind_check CHECK ((area_kind = ANY (ARRAY['city'::text, 'county'::text])));
+alter table public.rep_bank add constraint rep_bank_pkey PRIMARY KEY (member_id);
+alter table public.rep_bank add constraint rep_bank_account_type_check CHECK ((account_type = ANY (ARRAY['checking'::text, 'savings'::text])));
+alter table public.rep_onboarding add constraint rep_onboarding_pkey PRIMARY KEY (member_id);
+alter table public.rep_permits add constraint rep_permits_member_id_city_key UNIQUE (member_id, city);
+alter table public.rep_permits add constraint rep_permits_pkey PRIMARY KEY (id);
+alter table public.rep_permits add constraint rep_permits_status_check CHECK ((status = ANY (ARRAY['needed'::text, 'applied'::text, 'approved'::text, 'not_required'::text])));
+alter table public.rep_tax add constraint rep_tax_pkey PRIMARY KEY (member_id);
+alter table public.rep_tax add constraint rep_tax_tin_type_check CHECK ((tin_type = ANY (ARRAY['ssn'::text, 'ein'::text])));
 alter table public.reroof_permits add constraint reroof_permits_pkey PRIMARY KEY (permit_number);
 alter table public.roof_checks add constraint roof_checks_pkey PRIMARY KEY (id);
 alter table public.scoreboard_settings add constraint scoreboard_settings_pkey PRIMARY KEY (id);
@@ -530,10 +643,15 @@ alter table public.tarrant_roll add constraint tarrant_roll_pkey PRIMARY KEY (ac
 alter table public.team_members add constraint team_members_pkey PRIMARY KEY (id);
 alter table public.team_members add constraint team_members_role_check CHECK ((role = ANY (ARRAY['setter'::text, 'closer'::text, 'rep'::text, 'admin'::text])));
 alter table public.teams add constraint teams_pkey PRIMARY KEY (id);
+alter table public.wind_reports add constraint wind_reports_pkey PRIMARY KEY (id);
 
 alter table public.storm_warning_hits add constraint storm_warning_hits_warning_id_fkey FOREIGN KEY (warning_id) REFERENCES storm_warnings(id) ON DELETE CASCADE;
 alter table public.team_members add constraint team_members_team_id_fkey FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE SET NULL;
 alter table public.scorecard_sends add constraint scorecard_sends_member_id_fkey FOREIGN KEY (member_id) REFERENCES team_members(id);
+alter table public.rep_onboarding add constraint rep_onboarding_member_id_fkey FOREIGN KEY (member_id) REFERENCES team_members(id) ON DELETE CASCADE;
+alter table public.rep_tax add constraint rep_tax_member_id_fkey FOREIGN KEY (member_id) REFERENCES team_members(id) ON DELETE CASCADE;
+alter table public.rep_bank add constraint rep_bank_member_id_fkey FOREIGN KEY (member_id) REFERENCES team_members(id) ON DELETE CASCADE;
+alter table public.rep_permits add constraint rep_permits_member_id_fkey FOREIGN KEY (member_id) REFERENCES team_members(id) ON DELETE CASCADE;
 
 CREATE INDEX contracts_created_idx ON public.contracts USING btree (created_at DESC);
 CREATE INDEX solar_permits_orphaned_idx ON public.solar_permits USING btree (orphaned) WHERE (orphaned = true);
@@ -572,6 +690,7 @@ CREATE INDEX parcels_county_idx ON public.parcels USING btree (county);
 CREATE INDEX login_tokens_email_idx ON public.login_tokens USING btree (email, created_at DESC);
 CREATE INDEX appointments_reminder_idx ON public.appointments USING btree (slot_start) WHERE ((status = 'booked'::text) AND (reminded_at IS NULL));
 CREATE INDEX jobs_setter_idx ON public.jobs USING btree (setter);
+CREATE INDEX wind_reports_local_date_idx ON public.wind_reports USING btree (local_date);
 CREATE INDEX cron_runs_job_ran_at_idx ON public.cron_runs USING btree (job, ran_at DESC);
 CREATE INDEX job_events_job_idx ON public.job_events USING btree (job_id, created_at DESC);
 CREATE INDEX leads_spam_score_idx ON public.leads USING btree (spam_score, created_at DESC);

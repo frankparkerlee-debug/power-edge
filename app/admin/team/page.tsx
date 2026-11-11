@@ -193,7 +193,11 @@ export default async function TeamPage({
                   key={m.id}
                   className={`border-b border-gray-100 ${m.active ? "" : "opacity-50"}`}
                 >
-                  <td className="py-2.5 pr-4 font-semibold">{m.name}</td>
+                  <td className="py-2.5 pr-4 font-semibold">
+                    <Link href={`/admin/onboarding?member=${m.id}`} className="hover:underline" title="Onboarding">
+                      {m.name}
+                    </Link>
+                  </td>
                   <td className="py-2.5 pr-4 text-gray-600">{m.email}</td>
                   <td className="py-2.5 pr-4">
                     {/* Keyed on the saved value: React resets a form after its action,
@@ -358,7 +362,11 @@ export default async function TeamPage({
                   const knocks = m.role !== "closer";
                   return (
                     <tr key={m.id} className="border-b border-gray-100">
-                      <td className="py-2.5 pr-4 font-semibold">{m.name}</td>
+                      <td className="py-2.5 pr-4 font-semibold">
+                    <Link href={`/admin/onboarding?member=${m.id}`} className="hover:underline" title="Onboarding">
+                      {m.name}
+                    </Link>
+                  </td>
                       <td className="py-2.5 pr-3">
                         {knocks ? (
                           <input form={form} name="knocks" inputMode="numeric" defaultValue={m.goal_knocks_week ?? ""}

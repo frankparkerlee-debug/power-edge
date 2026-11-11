@@ -9,6 +9,7 @@ import { listLeads } from "@/lib/db";
 import { recentEmailFailures } from "@/lib/sendMail";
 import { listContracts } from "@/lib/contracts";
 import { loadBoard, metricsFor, moneyOf, periodFor, rankBy, restrict, seesProfit, type Scope } from "@/lib/scoreboard";
+import { loadAllOnboarding, loadOnboarding, stepsFor } from "@/lib/onboarding";
 
 /**
  * Today.
@@ -112,6 +113,18 @@ export default async function TodayPage({
   // "rep" predates the split and does both halves.
   const sets = user.role === "setter" || user.role === "rep" || isAdmin;
   const me = user.name;
+
+  // A new rep's checklist, until it is done; the office, who is waiting on it.
+  let setup: { done: number; of: number; next: string } | null = null;
+  let officeWaiting = 0;
+  if (!isAdmin) {
+    const steps = stepsFor(await loadOnboarding(user.id));
+    const done = steps.filter((s) => s.done).length;
+    if (done < steps.length) setup = { done, of: steps.length, next: steps.find((s) => !s.done && s.by === "rep")?.label ?? "" };
+  } else {
+    const all = await loadAllOnboarding();
+    officeWaiting = [...all.onb.values()].filter((o) => o.legal_name && (!o.ride_along_at || !o.gear_issued_at)).length;
+  }
 
   const week = periodFor("week");
   const [allJobs, appts, leads, failures, contracts, comeBacks, board] = await Promise.all([
@@ -299,6 +312,26 @@ export default async function TodayPage({
               ? "Your doors and your sets."
               : "Your inspections and your deals."}
         </p>
+
+        {setup ? (
+          <Link
+            href="/admin/onboarding"
+            className="mt-4 block rounded-lg border-2 border-[#0c7a40] bg-[#f0fbf4] px-4 py-3"
+          >
+            <span className="block font-semibold text-[#0b0e13]">
+              Finish getting set up: {setup.done} of {setup.of} done
+            </span>
+            <span className="block text-sm text-gray-600">{setup.next ? `Next: ${setup.next}.` : "The office has the rest."}</span>
+          </Link>
+        ) : null}
+        {isAdmin && officeWaiting > 0 ? (
+          <Link href="/admin/onboarding" className="mt-4 block rounded-lg border border-[#e3e6ea] bg-white px-4 py-3 text-sm">
+            <span className="font-semibold text-[#0b0e13]">
+              {officeWaiting} new {officeWaiting === 1 ? "rep needs" : "reps need"} a ride-along or gear from you.
+            </span>{" "}
+            <span className="font-semibold text-[#0c7a40]">Onboarding</span>
+          </Link>
+        ) : null}
 
         {standing ? (
           <Link

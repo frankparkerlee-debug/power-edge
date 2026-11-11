@@ -27,6 +27,8 @@ node -e '
 const c=require("crypto"),s=process.argv[1],b=o=>Buffer.from(JSON.stringify(o)).toString("base64url");
 const now=Math.floor(Date.now()/1000),h=b({alg:"HS256",typ:"JWT"}),p=b({role:"service_role",iss:"poweredge-local",iat:now,exp:now+3600*24*365*5});
 console.log(h+"."+p+"."+c.createHmac("sha256",s).update(h+"."+p).digest("base64url"));' "$SECRET" > "$DB/service_key"
+# A local-only key for the encrypted W-9 and bank fields (never production's).
+[ -f "$DB/pii_key" ] || openssl rand -base64 32 > "$DB/pii_key"
 [ -f "$DB/admin_token" ] || node -e 'console.log(require("crypto").randomBytes(24).toString("hex"))' > "$DB/admin_token"
 sleep 1
 echo "local stack up. Key in $DB/service_key"
