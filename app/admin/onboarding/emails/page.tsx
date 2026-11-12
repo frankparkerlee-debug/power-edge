@@ -15,7 +15,7 @@ import {
   type OnbEmail,
 } from "@/lib/emails";
 import { REMINDER_DAYS } from "@/lib/onboardingSequence";
-import { AGREEMENT_VERSION, agreementPlainText } from "@/lib/repAgreement";
+import { AGREEMENT_STATUS, AGREEMENT_VERSION, agreementPlainText } from "@/lib/repAgreement";
 
 /**
  * Every email in the onboarding sequence, as it sends, with a made-up rep.
@@ -32,18 +32,19 @@ const base: OnbCtx = {
   url: "#",
   open: [
     { label: "Your details and badge photo", time: "About 5 minutes" },
+    ...(AGREEMENT_STATUS === "final" ? [{ label: "Sign your contractor agreement", time: "About 5 minutes" }] : []),
     { label: "Tax form (W-9)", time: "About 3 minutes" },
     { label: "Direct deposit", time: "About 2 minutes" },
     { label: "Playbook and compliance check", time: "About 20 minutes" },
     { label: "City permits", time: "Depends on the city; the checklist says how" },
   ],
-  blocked: [{ label: "Sign your contractor agreement", why: "opens once the office finalizes it; we'll email you" }],
+  blocked: AGREEMENT_STATUS === "final" ? [] : [{ label: "Sign your contractor agreement", why: "opens once the office finalizes it; we'll email you" }],
   done: 0,
   total: 8,
   officeOpen: ["Ride-along with a lead", "Badge, shirt and print kit"],
 };
 
-const later: OnbCtx = { ...base, done: 3, open: base.open.slice(3) };
+const later: OnbCtx = { ...base, done: 3, open: base.open.slice(-3) };
 
 const signed = {
   first: "Jordan",

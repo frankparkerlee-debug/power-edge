@@ -1,8 +1,12 @@
 /**
  * The independent contractor agreement a rep signs in onboarding.
  *
- * DRAFT for attorney review. One agreement with a pay schedule for each
- * role. It merges the 2026-08-07 Commission & Advance Addendum (fixed $275
+ * APPROVED by PowerEdge's attorney 2026-11-12 (version "2026-11-12"), word
+ * for word as print/CONTRACTOR-AGREEMENT-DRAFT-FOR-COUNSEL.docx (draft 2).
+ * Any change to the text or the numbers below goes back to counsel and ships
+ * as a new AGREEMENT_VERSION, which every rep signs again in the app.
+ *
+ * One agreement with a pay schedule for each role. It merges the 2026-08-07 Commission & Advance Addendum (fixed $275
  * per square, approved-roof and chargeback rules, non-recourse advance) into
  * the onboarding agreement, and adds knocker pay (Parker, 2026-11-11):
  *
@@ -20,8 +24,8 @@
  * is asked to sign the new one.
  */
 
-export const AGREEMENT_STATUS: "draft" | "final" = "draft";
-export const AGREEMENT_VERSION = "2026-11-11 draft 2";
+export const AGREEMENT_STATUS: "draft" | "final" = "final";
+export const AGREEMENT_VERSION = "2026-11-12";
 
 export type Section = { h: string; p: string[] };
 
