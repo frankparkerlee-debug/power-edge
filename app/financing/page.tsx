@@ -29,7 +29,7 @@ const faqs = [
   },
   {
     q: "Do I need money down?",
-    a: "Often little or nothing down, depending on the plan and your credit approval. You spread your deductible (or the full project, if you're paying out of pocket) into monthly payments and we schedule the work now.",
+    a: "As little as $250 down, subject to approval. You spread the rest of your deductible (or the full project, if you're paying out of pocket) over 4 or 12 monthly payments at 0%, and we schedule the work now.",
   },
   {
     q: "Can you finance the whole roof, not just the deductible?",

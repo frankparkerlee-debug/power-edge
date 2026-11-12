@@ -10,9 +10,9 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: `${site.url}/roof-claim-check` },
-  title: "Do You Have a Roof Claim? Free DFW Check",
+  title: "Did Hail Hit Near Your Home? Free DFW Roof Check",
   description:
-    "Enter your address and see in seconds whether your roof likely qualifies for a hail claim. Free, no obligation, from the NWS storm record.",
+    "Enter your address and see the hail the National Weather Service reported near your home, in seconds. Free, no obligation.",
 };
 
 const faqs = [
@@ -22,11 +22,11 @@ const faqs = [
   },
   {
     q: "Does reported hail mean I automatically have a claim?",
-    a: "No, it means it's worth a closer look. Whether you have a claim depends on the actual damage and your policy. A free inspection documents it and confirms; we never pretend to be your adjuster.",
+    a: "No. It means it's worth a closer look. Whether there's damage depends on your roof, and whether it's covered depends on your policy. A free inspection tells you what's actually up there, and you decide whether to file. We never act as your adjuster.",
   },
   {
     q: "What does the inspection cost?",
-    a: "Nothing. One of our pros photographs and measures your roof and gives you an honest read. If there's damage worth claiming, we document it for your adjuster. If not, we tell you straight.",
+    a: "Nothing. One of our pros photographs and measures your roof and gives you an honest read. If there's storm damage, we document it so you can show your adjuster. If not, we tell you straight.",
   },
   {
     q: "What if I can't cover my deductible?",
@@ -44,8 +44,8 @@ const steps = [
     p: "One of our pros documents your roof, photos, measurements, an honest read.",
   },
   {
-    h: "We handle the rest",
-    p: "If it's a claim, you pay just your deductible (financing from $250 down). If not, an honest price.",
+    h: "You decide what's next",
+    p: "The verdict comes in writing. If you file, the claim is yours and we document the damage. On a covered claim you pay your deductible (financing from $250 down). If not, an honest price.",
   },
 ];
 
@@ -75,17 +75,16 @@ export default function RoofClaimCheckPage() {
               <span className="bolt-underline">the record.</span>
             </h1>
             <p className="mt-6 max-w-md text-lg leading-relaxed text-fg-inv-dim">
-              So do we. The checker above reads the same National Weather
-              Service hail reports your adjuster will, for your exact address,
-              and tells you on the spot whether it&apos;s likely worth filing.
-              Hail damage is nearly invisible from the ground, and once your
-              policy&apos;s filing window closes the whole roof comes out of
-              your pocket instead of your deductible.
+              So do we. The checker reads the National Weather Service hail
+              reports for your exact address and shows you, on the spot, what
+              was reported near your home. Hail damage is nearly invisible from
+              the ground, and many policies set a deadline for reporting it,
+              counted from the date of the storm.
             </p>
 
             <ul className="mt-8 space-y-3 text-fg-inv-dim">
               {[
-                "A straight read on whether it's worth filing",
+                "What's on record near your home, in seconds",
                 "On a covered claim, you typically pay only your deductible",
                 "Can't cover it up front? Start for as little as $250 down",
                 "Free inspection, documented honestly and by the book",
@@ -152,18 +151,18 @@ export default function RoofClaimCheckPage() {
       <section className="bg-ink py-16 sm:py-20">
         <Container className="text-center">
           <h2 className="font-display text-3xl font-bold text-fg-inv sm:text-4xl">
-            Start your claim now. We&apos;ll do the heavy lifting.
+            Have your policy handy? Add it now.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-fg-inv-dim">
-            Add a few details and we arrive ready to inspect, document, and get
-            you moving, not do paperwork on your doorstep. Takes about two
-            minutes; your deductible can be financed from $250 down.
+            Add your carrier and deductible and we arrive ready to inspect and
+            document, not do paperwork on your doorstep. About two minutes.
+            Your deductible can be financed from $250 down.
           </p>
           <a
             href="/claim-prep"
             className="mt-7 inline-block rounded-md bg-bolt px-7 py-4 font-display text-base font-extrabold text-ink transition-colors hover:bg-bolt-hi"
           >
-            Start my claim →
+            Add my policy details →
           </a>
           <p className="mt-3 text-xs text-fg-inv-dim">
             Insured contractor, not a public adjuster. We document &amp;
@@ -174,7 +173,7 @@ export default function RoofClaimCheckPage() {
 
       <CtaBand
         heading="Don't wait for the leak to prove the damage."
-        sub="Free inspection, documented for your claim, deductible financing from $250 down, and we move before your filing window closes. On a covered claim you pay just your deductible."
+        sub="Free inspection, the verdict in writing, and deductible financing from $250 down. On a covered claim you pay your deductible, and the decision to file is always yours."
       />
     </>
   );

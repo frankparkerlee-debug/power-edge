@@ -3,6 +3,8 @@
 import { AddressAutocomplete } from "./AddressAutocomplete";
 
 import { useEffect, useState } from "react";
+import { leadContext } from "@/lib/leadContext";
+import { track } from "@/lib/analytics";
 
 /**
  * Real inspection booking. Replaces "type when you're free and wait for a
@@ -65,7 +67,13 @@ export function BookInspection({
       const res = await fetch("/api/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, slot_start: slot.start, source, claim_intake_id: claimIntakeId }),
+        body: JSON.stringify({
+          ...form,
+          slot_start: slot.start,
+          source,
+          claim_intake_id: claimIntakeId,
+          attribution: leadContext({ tool: source }),
+        }),
       });
       const d = await res.json();
       if (!res.ok || !d.ok) {
@@ -78,6 +86,11 @@ export function BookInspection({
         return;
       }
       setDone(d.slot);
+      // Meta "Schedule" for every booking. On the schedule page the booking is
+      // the first thing the homeowner gave us, so it's also the Lead; on the
+      // claim check and claim prep the Lead already fired when they submitted.
+      track("inspection_booked", { source });
+      if (source === "schedule-page") track("lead_submit", { source: "schedule-page" });
       onBooked?.();
     } catch {
       setError("Network hiccup. Call us and we'll book it by hand.");

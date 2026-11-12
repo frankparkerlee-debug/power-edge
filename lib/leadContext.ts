@@ -12,7 +12,9 @@ export function leadContext(
     utm_source: get("utm_source"),
     utm_medium: get("utm_medium"),
     utm_campaign: get("utm_campaign"),
+    utm_content: get("utm_content"),
     gclid: get("gclid"),
+    fbclid: get("fbclid"),
     ...extra,
   };
 }

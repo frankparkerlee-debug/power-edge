@@ -784,7 +784,7 @@ export async function sendAppointmentConfirmation(
           steps([
             "We photograph and measure the roof, top to bottom.",
             "You get a written assessment, including &ldquo;your roof is fine&rdquo; if that&rsquo;s the answer.",
-            "If it&rsquo;s worth filing, we document the damage so your claim stands on evidence.",
+            "If there&rsquo;s storm damage, we document it, so if you decide to file, your claim stands on evidence.",
           ]) +
           p(
             `You don&rsquo;t need to be home for the roof itself, but it helps to be there for the walkthrough.`,

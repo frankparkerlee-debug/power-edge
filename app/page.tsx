@@ -402,13 +402,13 @@ function ClaimCheckBand() {
             <div className="p-9 sm:p-12">
               <Kicker className="mb-5">Free 60-second claim check</Kicker>
               <h2 className="font-display text-3xl font-bold leading-tight text-fg-inv sm:text-4xl">
-                Do you have a roof claim? Find out before you call anyone.
+                Did hail hit near your home? Find out before you call anyone.
               </h2>
               <p className="mt-4 text-fg-inv-dim">
                 Enter your address and answer three quick questions. We check
-                reported hail near your home and give you a straight read on
-                whether it&apos;s likely worth filing, no salesperson, no
-                obligation.
+                the hail reported near your home and give you a straight read,
+                no salesperson, no obligation. Whether to file is always your
+                call.
               </p>
               <ClaimCheckInline />
             </div>

@@ -23,6 +23,18 @@ export async function GET(req: Request) {
 /** One source may hold this many live windows in a 24h period. */
 const MAX_BOOKINGS_PER_IP_PER_DAY = 3;
 
+/** Only the attribution keys we expect, as short strings. */
+function cleanAttribution(raw: unknown): Record<string, string> | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const keys = ["page_path", "referrer", "utm_source", "utm_medium", "utm_campaign", "utm_content", "gclid", "fbclid", "tool"];
+  const out: Record<string, string> = {};
+  for (const k of keys) {
+    const v = (raw as Record<string, unknown>)[k];
+    if (typeof v === "string" && v.trim()) out[k] = v.trim().slice(0, 300);
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
 export async function POST(req: Request) {
   const ip = clientIp(req);
   // Burst gate first: cheap, and it absorbs a script before it touches the DB.
@@ -65,6 +77,7 @@ export async function POST(req: Request) {
     source: String(body.source || "web"),
     claim_intake_id: String(body.claim_intake_id || "") || undefined,
     ip,
+    attribution: cleanAttribution(body.attribution),
   });
 
   if (!result.ok) {

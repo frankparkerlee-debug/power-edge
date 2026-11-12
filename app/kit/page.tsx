@@ -20,7 +20,7 @@ type Card = {
 const CARDS: Card[] = [
   {
     label: "Free Roof Claim Check",
-    pitch: "“Scan to see if YOUR roof likely qualifies for a claim: free, 60 seconds.”",
+    pitch: "“Scan to see the hail reported near YOUR home: free, 60 seconds.”",
     path: "/roof-claim-check",
     campaign: "claim",
   },

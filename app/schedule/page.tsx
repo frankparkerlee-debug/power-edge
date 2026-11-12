@@ -35,7 +35,7 @@ export default async function SchedulePage() {
             {[
               "Photos, measurements, and a written assessment, free",
               "An honest verdict, including “your roof is fine”",
-              "Documented properly if it is worth filing a claim",
+              "Documented properly, so you can decide whether to file",
               "No high-pressure pitch at your door",
             ].map((b) => (
               <li key={b} className="flex gap-3">

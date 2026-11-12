@@ -17,6 +17,21 @@ const EXPERIENCE = [
   "3–5 years",
   "5+ years / team lead",
 ];
+const ROLES = ["Knocker", "Closer", "Team lead", "Regional leader"] as const;
+type Role = (typeof ROLES)[number];
+
+/** Recruiting ads link with utm_campaign recruit-knocker / -closer / -leader, or ?role=. */
+function roleFromUrl(): Role | "" {
+  if (typeof window === "undefined") return "";
+  const q = new URLSearchParams(window.location.search);
+  const hint = `${q.get("role") || ""} ${q.get("utm_campaign") || ""}`.toLowerCase();
+  if (/knock/.test(hint)) return "Knocker";
+  if (/region/.test(hint)) return "Regional leader";
+  if (/lead|team/.test(hint)) return "Team lead";
+  if (/clos/.test(hint)) return "Closer";
+  return "";
+}
+
 type Sub = "idle" | "submitting" | "done" | "error";
 
 const inputBase =
@@ -24,11 +39,14 @@ const inputBase =
 
 export function RepApply() {
   const [exp, setExp] = useState("");
+  const [role, setRole] = useState<Role | "">("");
   const [sub, setSub] = useState<Sub>("idle");
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSub("submitting");
+    // Not picked? Take it from the ad they came from (utm_campaign or ?role=).
+    const picked = role || roleFromUrl();
     const form = e.currentTarget;
     const fd = Object.fromEntries(new FormData(form).entries()) as Record<
       string,
@@ -42,16 +60,16 @@ export function RepApply() {
           name: fd.name,
           phone: fd.phone,
           email: fd.email,
-          service: "Sales rep application",
-          message: `[REP APPLICATION] experience: ${exp || ", "}; city: ${
-            fd.city || ", "
+          service: picked ? `Sales rep application: ${picked}` : "Sales rep application",
+          message: `[REP APPLICATION] role: ${picked || "not picked"}; experience: ${exp || "not picked"}; city: ${
+            fd.city || "not given"
           }${fd.note ? `; note: ${fd.note}` : ""}`,
           company_website: fd.company_website,
           ...leadContext({ tool: "careers" }),
         }),
       });
       if (!res.ok) throw new Error();
-      track("lead_submit", { form: "rep_application", experience: exp || "na" });
+      track("lead_submit", { form: "rep_application", role: picked || "na", experience: exp || "na" });
       setSub("done");
       form.reset();
     } catch {
@@ -95,6 +113,26 @@ export function RepApply() {
         <div className="grid gap-3 sm:grid-cols-2">
           <input name="email" type="email" placeholder="Email" className={inputBase} autoComplete="email" />
           <input name="city" placeholder="City (DFW area)" className={inputBase} autoComplete="address-level2" />
+        </div>
+        <div>
+          <div className="text-sm text-fg-inv-dim">The role you want</div>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {ROLES.map((x) => (
+              <button
+                key={x}
+                type="button"
+                onClick={() => setRole(x)}
+                aria-pressed={role === x}
+                className={`rounded-md border px-3 py-2.5 text-sm font-semibold transition-colors ${
+                  role === x
+                    ? "border-bolt bg-bolt/10 text-bolt"
+                    : "border-line text-fg-inv-dim hover:border-bolt"
+                }`}
+              >
+                {x}
+              </button>
+            ))}
+          </div>
         </div>
         <div>
           <div className="text-sm text-fg-inv-dim">Roofing sales experience</div>

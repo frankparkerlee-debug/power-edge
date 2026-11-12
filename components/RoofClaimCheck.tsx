@@ -17,7 +17,8 @@ import type { StormData } from "./StormReport";
  * stakes + evidence + financing detail live BELOW the form as reinforcement.
  * Urgency is imminent-threat ("before the next storm makes it worse"), not a
  * reassuring deadline countdown. Honest framing: never "your roof is damaged" /
- * "you have a claim", only "you likely qualify… an inspection confirms."
+ * "you have a claim": only what was reported, how far away, and when, and
+ * that an inspection tells them either way. Whether to file is theirs.
  */
 
 type Result = StormData & { ok?: boolean; found?: boolean; soft?: boolean };
@@ -93,6 +94,11 @@ export function RoofClaimCheck() {
   const largestDate = fmtDate(result?.largest?.date);
   const recentDate = fmtDate(result?.mostRecent?.date);
   const sameEvent = !!largestDate && largestDate === recentDate;
+  // Say how far away the biggest report was. A report 12 miles off is not a
+  // hit on this roof, and we are the company that says so.
+  const miles = result?.largest?.miles ?? null;
+  const largestMiles =
+    miles == null ? "near your home" : miles < 1 ? "within a mile of your address" : `${miles} mile${miles === 1 ? "" : "s"} from your address`;
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -141,11 +147,11 @@ export function RoofClaimCheck() {
     return (
       <div className="rounded-card border border-line bg-ink-2 p-6 shadow-2xl sm:p-8">
         <h2 className="font-display text-2xl font-bold text-fg-inv">
-          Do you have a roof claim? Find out free.
+          Did hail hit near your home? Find out free.
         </h2>
         <p className="mt-2 text-sm text-fg-inv-dim">
-          Enter your address, we check reported hail near your home and tell you
-          on the spot if it&apos;s likely worth filing. Takes seconds, no
+          Enter your address. We check the hail the National Weather Service
+          reported near your home and show you on the spot. Takes seconds, no
           obligation.
         </p>
         <form
@@ -177,13 +183,13 @@ export function RoofClaimCheck() {
         </p>
         <div className="mt-4">
           <p className="text-center text-xs text-fg-inv-dim">
-            Already know you&apos;re filing?
+            Already decided to file?
           </p>
           <a
             href="/claim-prep"
             className="mt-2 block w-full rounded-md border-2 border-bolt px-6 py-3.5 text-center font-display text-base font-bold text-bolt transition-colors hover:bg-bolt/10"
           >
-            Start my claim →
+            Add my policy details →
           </a>
         </div>
       </div>
@@ -257,17 +263,18 @@ export function RoofClaimCheck() {
       {qualifies ? (
         <div className="rounded-card border-2 border-bolt bg-bolt/10 p-4 sm:p-5">
           <div className="text-xs font-bold uppercase tracking-wider text-bolt">
-            On the record · you likely qualify
+            On the record near you
           </div>
           <p className="mt-1 font-display text-2xl font-bold leading-tight text-fg-inv">
-            {largest ? `${largest}″ hail is on record near you.` : "Hail is on record near you."}
+            {largest
+              ? `${largest}″ hail was reported ${largestMiles}${largestDate ? ` on ${largestDate}` : ""}.`
+              : "Hail was reported near your home."}
           </p>
           <p className="mt-1.5 text-sm text-fg-inv-dim">
             National Weather Service reports show {hailSummary}
-            {largestDate ? `, which fell ${largestDate}` : ""}
             {!sameEvent && recentDate ? `. The most recent report near you was ${recentDate}` : ""}
-            . These are the same records adjusters use, and enough to be worth
-            filing. A free inspection confirms what&apos;s actually on your roof.
+            . A report nearby doesn&apos;t mean your roof was hit. A free
+            inspection tells you either way, in writing.
           </p>
         </div>
       ) : (
@@ -293,8 +300,8 @@ export function RoofClaimCheck() {
           <span aria-hidden>⚡</span>
           <span>
             {largestDate
-              ? `${largest ? `That ${largest}\u2033 hail` : "That hail"} has been sitting on your roof since ${largestDate}. Every rain since works it deeper, and the next storm makes it harder to prove which one did it.`
-              : "Hail damage sits invisible until it leaks, and every storm on top makes it harder to prove which one did it."}
+              ? `Hail damage is hard to see from the ground and often doesn\u2019t leak right away. Every storm since ${largestDate} makes it harder to tell which one did it.`
+              : "Hail damage is hard to see from the ground and often doesn\u2019t leak right away. Every storm on top makes it harder to tell which one did it."}
           </span>
         </div>
       )}
@@ -371,9 +378,9 @@ export function RoofClaimCheck() {
           <li className="flex gap-2.5">
             <span className="text-ember" aria-hidden>→</span>
             <span>
-              <strong className="text-fg-inv">The window won&apos;t stay open.</strong>{" "}
-              Let the filing deadline pass and the whole roof is on you, not just
-              your deductible.
+              <strong className="text-fg-inv">Your policy sets the clock.</strong>{" "}
+              Many policies set a deadline for reporting storm damage, counted
+              from the date of the storm. Check yours.
             </span>
           </li>
         </ul>

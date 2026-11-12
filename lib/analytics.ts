@@ -4,6 +4,9 @@
 // Lead-submit events also fire the Meta standard `Lead` conversion (what the ad
 // campaigns optimize toward); other tracked interactions fire as custom events.
 
+/** Bookings fire Meta's standard Schedule event. */
+const SCHEDULE_EVENTS = ["inspection_booked"];
+
 const LEAD_EVENTS = [
   "lead_submit",
   "roof_claim_check",
@@ -25,6 +28,8 @@ export function track(event: string, params: Record<string, unknown> = {}) {
   if (typeof w.fbq === "function") {
     if (LEAD_EVENTS.includes(event)) {
       w.fbq("track", "Lead", params);
+    } else if (SCHEDULE_EVENTS.includes(event)) {
+      w.fbq("track", "Schedule", params);
     } else {
       w.fbq("trackCustom", event, params);
     }

@@ -1253,3 +1253,5 @@ create table if not exists public.regions (
 );
 alter table public.regions enable row level security;
 alter table public.teams add column if not exists region_id bigint references public.regions(id) on delete set null;
+-- Which page and ad brought a booking (utm_*, page, referrer).
+alter table public.appointments add column if not exists attribution jsonb;

@@ -213,6 +213,8 @@ export type BookingInput = {
   setter?: string;
   /** The job this inspection belongs to, when we already know it. */
   job_id?: string;
+  /** Which page and ad brought the homeowner (utm_*, page, referrer). */
+  attribution?: Record<string, string>;
 };
 
 export type BookingResult =
@@ -285,6 +287,7 @@ export async function bookSlot(input: BookingInput): Promise<BookingResult> {
           closer: pooled ? null : who,
           setter: input.setter || null,
           job_id: input.job_id || null,
+          attribution: input.attribution && Object.values(input.attribution).some(Boolean) ? input.attribution : null,
         }),
       });
       if (res.status === 409) continue; // that closer was just taken; try the next
