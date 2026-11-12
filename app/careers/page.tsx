@@ -52,8 +52,8 @@ const perks = [
     p: "Your commission comes from gross profit, and the cost side is fixed per square in your agreement. It doesn't change after a roof is sold, and supplements raise your share with it.",
   },
   {
-    h: "You knock the houses that got hit",
-    p: "Other knockers work the whole street and say \"storms in the area.\" Our map shows every house in the path of reported hail, the date and stone size for each one, and in Dallas, which roofs were already replaced.",
+    h: "You start where the hail was reported",
+    p: "Other knockers work the whole neighborhood and say \"storms in the area.\" Our map shows every house in the path of reported hail, the date and stone size reported on each street, and in Dallas, which homes have a recent roof permit.",
   },
   {
     h: "Booked before you're off the porch",
@@ -96,7 +96,7 @@ const faqs = [
   },
   {
     q: "Do I have to knock doors?",
-    a: "Knockers do: storm-hit streets, with the hail date and stone size for every address in the app, and the city's solicitor permit before the first door. Closers run the inspections knockers book, and can find their own roofs at 50%.",
+    a: "Knockers do: streets in the path of reported hail, with the date and stone size reported on each street in the app, and the city's solicitor permit before the first door. Closers run the inspections knockers book, and can find their own roofs at 50%.",
   },
   {
     q: "Do I need experience?",
@@ -126,13 +126,13 @@ export default function CareersPage() {
               You get paid from gross profit, and the cost side is fixed in your
               agreement, so nobody can move it after the sale. Half your commission
               lands at the first insurance check, not the last. And before you ring
-              a doorbell, the app tells you the date and the size of the hail that
-              hit that house.
+              a doorbell, the app tells you the date and the size of the hail
+              reported on that street.
             </p>
 
             <ul className="mt-8 space-y-3 text-fg-inv-dim">
               {[
-                "Knockers: 15% of gross profit on roofs you book, plus $50 per held inspection paid weekly toward it",
+                "Knockers: 15% of gross profit on roofs you book, with $50 of it paid weekly for each held inspection",
                 "Closers: 50% on roofs you find, 35% on your team's, 30% on company leads",
                 "New closers: $600 a week for 6 weeks, an advance against commission",
                 "A knock map of every house in the path of reported hail, with the date and stone size for each",
