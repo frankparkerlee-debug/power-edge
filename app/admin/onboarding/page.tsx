@@ -23,7 +23,11 @@ export const metadata: Metadata = { title: "Getting started", robots: { index: f
 export const dynamic = "force-dynamic";
 
 const DOCS = {
-  setter: { file: "01-setter-script.pdf", name: "Setter script", why: "What to say at the door, and what never to say." },
+  door: { file: "09-knocker-door-script.pdf", name: "Knocker door script", why: "The open, the answers, and booking at the door." },
+  app: { file: "10-using-the-app.pdf", name: "Using the app", why: "The knock map and the four taps at every door." },
+  pay: { file: "11-how-you-get-paid.pdf", name: "How you get paid", why: "Your share, the $50 held inspection, when money lands." },
+  field: { file: "12-closer-field-guide.pdf", name: "Closer field guide", why: "How the claim pays, and the adjuster line." },
+  setter: { file: "01-setter-script.pdf", name: "Phone setter script", why: "Calling storm-hit homes that aren't on Do Not Call." },
   closer: { file: "02-closer-script.pdf", name: "Closer script", why: "Running the inspection and the honest verdict." },
   card: { file: "03-texas-compliance-card.pdf", name: "Texas compliance card", why: "The rules the check is built on. Keep it on you." },
   board: { file: "04-territory-board.pdf", name: "Storm territory board", why: "Where the storms hit and when." },
@@ -33,9 +37,9 @@ const DOCS = {
 };
 
 function docsFor(role: string) {
-  if (role === "setter") return [DOCS.setter, DOCS.card, DOCS.board, DOCS.leave];
-  if (role === "closer") return [DOCS.closer, DOCS.card, DOCS.intake, DOCS.report, DOCS.leave];
-  return [DOCS.setter, DOCS.closer, DOCS.card, DOCS.board, DOCS.intake, DOCS.report, DOCS.leave];
+  if (role === "setter") return [DOCS.door, DOCS.card, DOCS.app, DOCS.pay, DOCS.leave];
+  if (role === "closer") return [DOCS.closer, DOCS.field, DOCS.card, DOCS.app, DOCS.pay, DOCS.report, DOCS.intake];
+  return [DOCS.door, DOCS.closer, DOCS.field, DOCS.card, DOCS.app, DOCS.pay, DOCS.report, DOCS.intake, DOCS.leave];
 }
 
 const ROLE: Record<string, string> = { setter: "Knocker", closer: "Closer", rep: "Rep", admin: "Admin" };

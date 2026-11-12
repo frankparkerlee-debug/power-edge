@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 type Doc = {
   file: string;
   name: string;
-  who: "Setter" | "Closer" | "Both" | "Homeowner";
+  who: "Knocker" | "Phone" | "Setter" | "Closer" | "Both" | "Homeowner";
   what: string;
 };
 
@@ -23,7 +23,23 @@ const DRAFT_ONLY = new Set(["08-repair-agreement.pdf"]);
 
 const DOCS: Doc[] = [
   {
-    file: "01-setter-script.pdf", name: "Setter call script", who: "Setter",
+    file: "09-knocker-door-script.pdf", name: "Knocker door script", who: "Knocker",
+    what: "The ten-second open with that street's hail date, the answers to eight door questions, booking the inspection in the app, and logging every door.",
+  },
+  {
+    file: "10-using-the-app.pdf", name: "Using the app", who: "Both",
+    what: "Sign in, the tabs, the knock map's pin colors, the four taps at every door, and where your numbers are.",
+  },
+  {
+    file: "11-how-you-get-paid.pdf", name: "How you get paid", who: "Both",
+    what: "Gross profit on a fixed $275 a square, every share worked through on a $16,800 roof, the $50 held inspection, when money lands, chargebacks.",
+  },
+  {
+    file: "12-closer-field-guide.pdf", name: "Closer field guide", who: "Closer",
+    what: "How an insurance roof pays (RCV, ACV, depreciation), the adjuster line, the photos that hold up, and presenting the agreement.",
+  },
+  {
+    file: "01-setter-script.pdf", name: "Phone setter script", who: "Phone",
     what: "The open, the branches, seven objections, and what good numbers look like. Built around leading with the real storm date and hail size for that address.",
   },
   {
@@ -98,7 +114,7 @@ export default async function SalesRepoPage({
   }
 
   const badge = (who: Doc["who"]) =>
-    who === "Setter" ? "bg-bolt/15 text-bolt"
+    who === "Knocker" || who === "Setter" || who === "Phone" ? "bg-bolt/15 text-bolt"
     : who === "Closer" ? "bg-sky-400/15 text-sky-300"
     : who === "Homeowner" ? "bg-amber-400/15 text-amber-300"
     : "bg-white/10 text-fg-inv-dim";
@@ -110,7 +126,7 @@ export default async function SalesRepoPage({
           Sales repo
         </h1>
         <p className="mt-2 text-fg-inv-dim">
-          Everything a setter or closer needs. Read it here on your phone, or print the PDF.
+          Everything a knocker or closer needs. Read it here on your phone, or print the PDF.
         </p>
 
         <h2 className="mt-10 text-xs font-bold uppercase tracking-widest text-fg-inv-dim">
