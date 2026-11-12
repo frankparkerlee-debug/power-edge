@@ -19,7 +19,7 @@ const roles = [
   {
     h: "Knocker",
     p: "Knock storm-hit streets and book free roof inspections in the app. No pricing, no contracts: a closer does that.",
-    pay: "15% of gross profit on every approved roof you book, at least $500 per installed roof. $50 for each inspection you book that's held, paid weekly and counted toward your 15%.",
+    pay: "15% of gross profit on every approved roof you book, at least $500 per installed roof. $50 for every appointment you book that the homeowner keeps, paid weekly and counted toward your 15%.",
     who: "Self-starters. No roofing experience needed.",
   },
   {
@@ -88,7 +88,7 @@ const faqs = [
   },
   {
     q: "When do I get paid?",
-    a: "Half your commission when PowerEdge receives the first insurance check on the roof (or the first payment on a cash job), the other half when the roof is complete and paid for. Knockers get $50 for each held inspection on the weekly run.",
+    a: "Half your commission when PowerEdge receives the first insurance check on the roof (or the first payment on a cash job), the other half when the roof is complete and paid for. Knockers get $50 for every kept appointment on the weekly run.",
   },
   {
     q: "What is gross profit?",
@@ -132,7 +132,7 @@ export default function CareersPage() {
 
             <ul className="mt-8 space-y-3 text-fg-inv-dim">
               {[
-                "Knockers: 15% of gross profit on roofs you book, with $50 of it paid weekly for each held inspection",
+                "Knockers: $50 for every appointment the homeowner keeps, paid weekly, toward 15% of gross profit on roofs you book",
                 "Closers: 50% on roofs you find, 35% on your team's, 30% on company leads",
                 "New closers: $600 a week for 6 weeks, an advance against commission",
                 "A knock map of every house in the path of reported hail, with the date and stone size for each",
