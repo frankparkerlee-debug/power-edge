@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiUser } from "@/lib/auth";
+import { fieldReady, notReadyMessage } from "@/lib/fieldReady";
 import { settleComeBacks } from "@/lib/knocks";
 
 /**
@@ -28,6 +29,8 @@ export async function POST(req: Request) {
   if (!u) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const fr = await fieldReady(u);
+  if (!fr.ready) return NextResponse.json({ error: notReadyMessage(fr.missing) }, { status: 403 });
 
   let body: Record<string, unknown>;
   try {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiUser } from "@/lib/auth";
+import { fieldReady, notReadyMessage } from "@/lib/fieldReady";
 import { geocode } from "@/lib/geocode";
 import { localDay } from "@/lib/day";
 
@@ -361,6 +362,8 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const u = await apiUser(req);
   if (!u) return NextResponse.json({ ok: false, error: "Sign in first." }, { status: 401 });
+  const fr = await fieldReady(u);
+  if (!fr.ready) return NextResponse.json({ ok: false, error: notReadyMessage(fr.missing) }, { status: 403 });
 
   let body: { lat?: number; lon?: number; address?: string };
   try {

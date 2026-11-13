@@ -311,7 +311,7 @@ export async function listMembers(): Promise<
 
 /** Roles a person can be given. "rep" is legacy and not offered for new people. */
 export const ASSIGNABLE_ROLES: Array<{ role: Role; label: string; what: string }> = [
-  { role: "setter", label: "Setter", what: "Knocks doors and books inspections." },
+  { role: "setter", label: "Knocker", what: "Knocks doors and books inspections." },
   { role: "closer", label: "Closer", what: "Runs inspections, prices work, writes agreements." },
   { role: "admin", label: "Admin", what: "Everything, including leads, territories and health." },
 ];

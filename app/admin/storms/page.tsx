@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { currentUser } from "@/lib/auth";
+import { fieldReady } from "@/lib/fieldReady";
 import { FieldMap } from "@/components/FieldMap";
 
 /**
@@ -42,9 +43,19 @@ export default async function KnockMapPage({
   }
 
   const safeZip = zip && /^\d{5}$/.test(zip.trim()) ? zip.trim() : undefined;
+  const fr = await fieldReady(user);
 
   return (
     <div className="min-h-screen bg-[#f4f5f7] text-[#0b0e13]">
+      {!fr.ready ? (
+        <div className="border-b border-amber-300 bg-amber-50 px-5 py-3 text-sm">
+          <strong>Finish Getting started before you knock.</strong> Left: {fr.missing.join(", ").toLowerCase()}.
+          City permits don&apos;t hold you up.{" "}
+          <Link href="/admin/onboarding" className="font-semibold text-[#0c7a40] underline">
+            Open Getting started
+          </Link>
+        </div>
+      ) : null}
       <FieldMap
         initialZip={safeZip}
         initialView={

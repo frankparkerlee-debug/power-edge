@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiUser } from "@/lib/auth";
+import { fieldReady, notReadyMessage } from "@/lib/fieldReady";
 import { geocode } from "@/lib/geocode";
 
 export const dynamic = "force-dynamic";
@@ -120,6 +121,8 @@ function centralToday() {
 export async function POST(req: Request) {
   const u = await apiUser(req);
   if (!u) return NextResponse.json({ error: "Sign in to add doors." }, { status: 401 });
+  const fr = await fieldReady(u);
+  if (!fr.ready) return NextResponse.json({ error: notReadyMessage(fr.missing) }, { status: 403 });
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return NextResponse.json({ error: "Database is not connected." }, { status: 503 });
   }

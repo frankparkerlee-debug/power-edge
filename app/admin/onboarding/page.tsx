@@ -10,6 +10,7 @@ import { quizForClient } from "@/lib/onboardingQuiz";
 import { localDay } from "@/lib/day";
 import { Onboarding } from "@/components/Onboarding";
 import { loadSends, sequenceStatus, split, startOnboarding, type SendRow } from "@/lib/onboardingSequence";
+import { canKnock } from "@/lib/fieldReady";
 
 /**
  * Onboarding.
@@ -25,7 +26,7 @@ export const dynamic = "force-dynamic";
 const DOCS = {
   door: { file: "09-knocker-door-script.pdf", name: "Knocker door script", why: "The open, the answers, and booking at the door." },
   app: { file: "10-using-the-app.pdf", name: "Using the app", why: "The knock map and the four taps at every door." },
-  pay: { file: "11-how-you-get-paid.pdf", name: "How you get paid", why: "Your share, the $50 held inspection, when money lands." },
+  pay: { file: "11-how-you-get-paid.pdf", name: "How you get paid", why: "Your share, the $50 held inspection (homeowner there), when money lands." },
   field: { file: "12-closer-field-guide.pdf", name: "Closer field guide", why: "How the claim pays, and the adjuster line." },
   setter: { file: "01-setter-script.pdf", name: "Phone setter script", why: "Calling storm-hit homes that aren't on Do Not Call." },
   closer: { file: "02-closer-script.pdf", name: "Closer script", why: "Running the inspection and the honest verdict." },
@@ -34,12 +35,13 @@ const DOCS = {
   intake: { file: "05-claim-intake-form.pdf", name: "Claim intake form", why: "What the homeowner needs to file their claim." },
   report: { file: "06-inspection-report.pdf", name: "Inspection report", why: "What you hand over after every inspection." },
   leave: { file: "07-homeowner-leave-behind.pdf", name: "How a roof claim works", why: "What the homeowner keeps after you leave." },
+  repair: { file: "08-repair-agreement.pdf", name: "Repair agreement (paper)", why: "For no signal. The digital one in the Agreement tab comes first." },
 };
 
 function docsFor(role: string) {
   if (role === "setter") return [DOCS.door, DOCS.card, DOCS.app, DOCS.pay, DOCS.leave];
-  if (role === "closer") return [DOCS.closer, DOCS.field, DOCS.card, DOCS.app, DOCS.pay, DOCS.report, DOCS.intake];
-  return [DOCS.door, DOCS.closer, DOCS.field, DOCS.card, DOCS.app, DOCS.pay, DOCS.report, DOCS.intake, DOCS.leave];
+  if (role === "closer") return [DOCS.closer, DOCS.field, DOCS.card, DOCS.app, DOCS.pay, DOCS.report, DOCS.intake, DOCS.repair];
+  return [DOCS.door, DOCS.closer, DOCS.field, DOCS.card, DOCS.app, DOCS.pay, DOCS.report, DOCS.intake, DOCS.leave, DOCS.repair];
 }
 
 const ROLE: Record<string, string> = { setter: "Knocker", closer: "Closer", rep: "Rep", admin: "Admin" };
@@ -191,6 +193,11 @@ export default async function OnboardingPage({
                           </span>
                         </span>
                         <span className={`text-sm ${done === steps.length ? "font-semibold text-[#0c7a40]" : "text-gray-500"}`}>
+                          {done < steps.length && canKnock(steps) ? (
+                            <span className="mr-2 rounded-full bg-[#f0fbf4] px-2 py-0.5 text-xs font-semibold text-[#0c7a40]">
+                              Can knock
+                            </span>
+                          ) : null}
                           {done === steps.length ? "Ready" : `${done} of ${steps.length}`}
                         </span>
                       </div>
@@ -248,7 +255,7 @@ export default async function OnboardingPage({
         </h1>
         <p className="mt-1 text-sm text-gray-600">
           {self
-            ? "Everything between today and your first door. Do it on your phone; it saves as you go."
+            ? "Steps 1 to 5 open the knock map. City permits don't hold up your first door. Do it on your phone; it saves as you go."
             : `${ROLE[target.role] ?? target.role}. What they've done, and the steps that are yours.`}
         </p>
         <div className="mt-5">

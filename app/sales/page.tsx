@@ -18,9 +18,6 @@ type Doc = {
   what: string;
 };
 
-/** Unreviewed legal paper: the office only, until counsel clears it. */
-const DRAFT_ONLY = new Set(["08-repair-agreement.pdf"]);
-
 const DOCS: Doc[] = [
   {
     file: "09-knocker-door-script.pdf", name: "Knocker door script", who: "Knocker",
@@ -96,7 +93,6 @@ export default async function SalesRepoPage({
   // after sign-in replaced the shared key, so reps tapping Playbook were told
   // to sign in while signed in.
   const authed = !!user;
-  const isAdmin = user?.role === "admin";
 
   if (!authed) {
     return (
@@ -133,7 +129,7 @@ export default async function SalesRepoPage({
           Documents
         </h2>
         <div className="mt-4 space-y-3">
-          {DOCS.filter((d) => isAdmin || !DRAFT_ONLY.has(d.file)).map((d) => (
+          {DOCS.map((d) => (
             <a
               key={d.file}
               href={`/sales/doc/${d.file}`}

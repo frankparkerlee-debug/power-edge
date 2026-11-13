@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiUser } from "@/lib/auth";
+import { fieldReady, notReadyMessage } from "@/lib/fieldReady";
 import { availableSlots, bookSlot, upsertJobForBooking, notifyCloser } from "@/lib/scheduling";
 import { sendAppointmentConfirmation } from "@/lib/emails";
 
@@ -40,6 +41,8 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const u = await apiUser(req);
   if (!u) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  const fr = await fieldReady(u);
+  if (!fr.ready) return NextResponse.json({ ok: false, error: notReadyMessage(fr.missing) }, { status: 403 });
 
   let body: Record<string, unknown>;
   try {

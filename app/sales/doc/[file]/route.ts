@@ -20,17 +20,14 @@ export async function GET(
   req: Request,
   ctx: { params: Promise<{ file: string }> },
 ) {
-  // Any signed-in team member (it is their playbook); the draft repair
-  // agreement stays with the office until counsel clears it.
+  // Any signed-in team member: it is their playbook. The repair agreement was
+  // office-only until counsel cleared it (11/12); now every closer carries it.
   const u = await apiUser(req);
   if (!u) {
     return new NextResponse("Not found", { status: 404 });
   }
 
   const { file } = await ctx.params;
-  if (file === "08-repair-agreement.pdf" && u.role !== "admin") {
-    return new NextResponse("Not found", { status: 404 });
-  }
   // Whitelist the shape rather than trying to sanitise a path.
   if (!/^[0-9]{2}-[a-z0-9-]+\.pdf$/.test(file)) {
     return new NextResponse("Not found", { status: 404 });

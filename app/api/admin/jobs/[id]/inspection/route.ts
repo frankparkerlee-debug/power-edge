@@ -16,7 +16,11 @@ import { sendInspectionAssessment } from "@/lib/emails";
  *                                         the good news in writing
  *   no_show    nobody home / postponed -> back to contacted, to rebook
  *
- *   POST /api/admin/jobs/:id/inspection { verdict, findings?, squares? }
+ *   POST /api/admin/jobs/:id/inspection { verdict, findings?, squares?, homeownerPresent }
+ *
+ * homeownerPresent is required for qualifies and fine: whether the homeowner
+ * was there is part of what makes it a held inspection, which pays the
+ * knocker's $50 (lib/held.ts). It is stored on the appointment.
  */
 export const dynamic = "force-dynamic";
 
@@ -50,7 +54,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   const job = await getJob(id);
   if (!job) return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
 
-  let body: { verdict?: string; findings?: string; squares?: string | number };
+  let body: { verdict?: string; findings?: string; squares?: string | number; homeownerPresent?: boolean };
   try {
     body = await req.json();
   } catch {
@@ -63,6 +67,10 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   }
   const findings = String(body.findings || "").trim().slice(0, 1200);
   const sq = Number(String(body.squares ?? "").replace(/[^0-9.]/g, ""));
+  const present = typeof body.homeownerPresent === "boolean" ? body.homeownerPresent : null;
+  if (verdict !== "no_show" && present === null) {
+    return NextResponse.json({ ok: false, error: "Say whether the homeowner was there." }, { status: 400 });
+  }
 
   if (verdict === "no_show") {
     await updateJob(id, { stage: "contacted", appointment_id: null }, u.name);
@@ -85,10 +93,10 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   await logEvent(
     id,
     "inspection",
-    `${verdict === "qualifies" ? "Damage found" : "Roof is fine"}${findings ? `: ${findings}` : ""}`,
+    `${verdict === "qualifies" ? "Damage found" : "Roof is fine"}${findings ? `: ${findings}` : ""}. Homeowner ${present ? "was" : "was not"} there.`,
     u.name,
   );
-  await closeAppointment(job.appointment_id, "completed");
+  await closeAppointment(job.appointment_id, "completed", present);
 
   // The written assessment. Promised on every booking, sent for both answers.
   let emailed = false;
@@ -123,13 +131,15 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   return NextResponse.json({ ok: true, stage, emailed });
 }
 
-async function closeAppointment(apptId: string | null, status: string) {
+async function closeAppointment(apptId: string | null, status: string, homeownerPresent?: boolean | null) {
   if (!apptId || !process.env.SUPABASE_URL) return;
   try {
     await fetch(`${process.env.SUPABASE_URL}/rest/v1/appointments?id=eq.${apptId}`, {
       method: "PATCH",
       headers: { ...db(), Prefer: "return=minimal" },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(
+        typeof homeownerPresent === "boolean" ? { status, homeowner_present: homeownerPresent } : { status },
+      ),
     });
   } catch {
     /* the job carries the truth */

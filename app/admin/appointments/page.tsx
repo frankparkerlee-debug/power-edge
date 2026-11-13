@@ -3,6 +3,7 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { listAppointments, inspectors } from "@/lib/scheduling";
 import { currentUser, canSell } from "@/lib/auth";
+import { heldInspections, payWeekStart, type HeldRow } from "@/lib/held";
 
 /**
  * The inspection board.
@@ -69,10 +70,23 @@ export default async function AdminAppointmentsPage({
 
   const isAdmin = user.role === "admin";
   const me = user.name;
-  const [rows, people] = await Promise.all([
+  const [rows, people, pastAll] = await Promise.all([
     listAppointments(200),
     isAdmin ? inspectors() : Promise.resolve([] as string[]),
+    heldInspections({ setter: user.role === "setter" ? me : undefined, days: 60 }),
   ]);
+  const past: HeldRow[] = isAdmin
+    ? pastAll
+    : pastAll.filter((r) => r.setter === me || r.closer === me);
+  // The office's pay list: held inspections in this pay week (Mon to Sun, Central).
+  const weekFrom = payWeekStart();
+  const payWeek = new Map<string, number>();
+  for (const r of pastAll) {
+    if (r.held === true && r.setter && r.slot_start >= weekFrom) {
+      payWeek.set(r.setter, (payWeek.get(r.setter) ?? 0) + 1);
+    }
+  }
+  const myHeld = past.filter((r) => r.held === true && r.setter === me);
   const upcoming = rows.filter(
     (r) => new Date(r.slot_start).getTime() > Date.now() - 2 * 3600 * 1000,
   );
@@ -247,6 +261,67 @@ export default async function AdminAppointmentsPage({
             })}
           </div>
         )}
+
+        {/* Held inspections: the knocker's $50, judged by lib/held.ts. */}
+        {isAdmin && payWeek.size > 0 ? (
+          <div className="mt-10 rounded-lg border border-[#0c7a40] bg-[#f0fbf4] p-4">
+            <div className="text-xs font-bold uppercase tracking-wider text-gray-600">Held this pay week ($50 each)</div>
+            <ul className="mt-2 space-y-1 text-sm">
+              {[...payWeek.entries()].sort((a, b) => b[1] - a[1]).map(([who, n]) => (
+                <li key={who} className="flex justify-between">
+                  <span className="font-semibold">{who}</span>
+                  <span>{n} · ${(n * 50).toLocaleString()}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {past.length ? (
+          <>
+            <h2 className="mt-10 font-display text-lg font-bold">
+              {user.role === "setter" ? "Inspections you booked" : "Past inspections"}
+            </h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Last 60 days. Held means the homeowner was there, the closer&apos;s photos are in the app,
+              and it was PowerEdge&apos;s first inspection at that address.
+              {user.role === "setter" ? ` ${myHeld.length} held, $${(myHeld.length * 50).toLocaleString()}.` : ""}
+            </p>
+            <div className="mt-4 divide-y divide-gray-100 rounded-lg border border-[#e3e6ea] bg-white">
+              {past.map((r) => (
+                <div key={r.id} className="flex items-start justify-between gap-3 p-3">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold">{r.address || r.name}</div>
+                    <div className="text-xs text-gray-500">
+                      {when(r.slot_start)}
+                      {r.closer ? ` · ${r.closer}` : ""}
+                      {isAdmin && r.setter ? ` · set by ${r.setter}` : ""}
+                    </div>
+                    <div className="mt-0.5 text-xs text-gray-600">{r.why}</div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                        r.held === true
+                          ? "bg-[#0c7a40] text-white"
+                          : r.held === false
+                            ? "bg-gray-100 text-gray-600"
+                            : "bg-amber-100 text-[#0b0e13]"
+                      }`}
+                    >
+                      {r.held === true ? "Held · $50" : r.held === false ? "Not held" : "Waiting"}
+                    </span>
+                    {r.job_id ? (
+                      <Link href={`/admin/jobs/${r.job_id}`} className="text-xs font-semibold text-[#0c7a40] underline">
+                        Open
+                      </Link>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : null}
       </div>
     </div>
   );

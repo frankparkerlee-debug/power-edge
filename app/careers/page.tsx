@@ -19,7 +19,7 @@ const roles = [
   {
     h: "Knocker",
     p: "Knock storm-hit streets and book free roof inspections in the app. No pricing, no contracts: a closer does that.",
-    pay: "15% of gross profit on every approved roof you book, at least $500 per installed roof. $50 for every appointment you book that the homeowner keeps, paid weekly and counted toward your 15%.",
+    pay: "15% of gross profit on every approved roof you book, at least $500 per installed roof. $50 every time the homeowner is there for an inspection you booked, paid weekly and counted toward your 15%.",
     who: "Self-starters. No roofing experience needed.",
   },
   {
@@ -88,7 +88,7 @@ const faqs = [
   },
   {
     q: "When do I get paid?",
-    a: "Half your commission when PowerEdge receives the first insurance check on the roof (or the first payment on a cash job), the other half when the roof is complete and paid for. Knockers get $50 for every kept appointment on the weekly run.",
+    a: "Half your commission when PowerEdge receives the first insurance check on the roof (or the first payment on a cash job), the other half when the roof is complete and paid for. Knockers get $50 on the weekly run for each held inspection they booked: the homeowner is there, the closer finishes it with photos in our app, and it's the first PowerEdge inspection at that address.",
   },
   {
     q: "What is gross profit?",
@@ -96,11 +96,11 @@ const faqs = [
   },
   {
     q: "Do I have to knock doors?",
-    a: "Knockers do: streets in the path of reported hail, with the date and stone size reported on each street in the app, and the city's solicitor permit before the first door. Closers run the inspections knockers book, and can find their own roofs at 50%.",
+    a: "Knockers do: streets in the path of reported hail, with the date and stone size reported on each street in the app. We help you get each city's solicitor permit. Closers run the inspections knockers book, and can find their own roofs at 50%.",
   },
   {
     q: "Do I need experience?",
-    a: "Not to knock. We train you on the door, the app and the Texas rules, and you pass a short compliance check before your first door. Closers should have storm or in-home sales behind them.",
+    a: "Not to knock. We train you on the door, the app and the Texas rules. Before your first door you finish getting started in the app: sign the agreement, add your W-9 and direct deposit, and pass a short compliance check. Closers should have storm or in-home sales behind them.",
   },
   {
     q: "Is there a non-compete?",
@@ -132,7 +132,7 @@ export default function CareersPage() {
 
             <ul className="mt-8 space-y-3 text-fg-inv-dim">
               {[
-                "Knockers: $50 for every appointment the homeowner keeps, paid weekly, toward 15% of gross profit on roofs you book",
+                "Knockers: $50 every time the homeowner is there for an inspection you booked, paid weekly, toward 15% of gross profit on roofs you book",
                 "Closers: 50% on roofs you find, 35% on your team's, 30% on company leads",
                 "New closers: $600 a week for 6 weeks, an advance against commission",
                 "A knock map of every house in the path of reported hail, with the date and stone size for each",

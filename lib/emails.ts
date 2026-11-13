@@ -1248,6 +1248,14 @@ function openList(c: OnbCtx) {
   return steps(c.open.map((s) => `<strong>${escHtml(s.label)}</strong>${s.time ? `<br><span style="color:${MUTED};font-size:14px;">${escHtml(s.time)}</span>` : ""}`));
 }
 
+/** City permits don't hold up the first door (Parker 11/12); everything else on the rep's side does. */
+const isPermit = (s: { label: string }) => /permit/i.test(s.label);
+function permitsNote(c: OnbCtx) {
+  return c.open.some(isPermit)
+    ? small("City permits don't hold up your first door. The checklist shows how to apply in each city you'll work.")
+    : "";
+}
+
 function blockedNote(c: OnbCtx) {
   if (!c.blocked.length) return "";
   return small(c.blocked.map((b) => `${escHtml(b.label)}: ${escHtml(b.why)}`).join("<br>"));
@@ -1270,6 +1278,7 @@ export function onbWelcome(c: OnbCtx): OnbEmail {
         h1(`Welcome to PowerEdge, ${first}`) +
         p(`You're on the team as a ${escHtml(c.role.toLowerCase())}${where}. Before your first door there are a few things to finish, all on your phone. Most people are done in about 30 minutes, and it saves as you go.`) +
         openList(c) +
+        permitsNote(c) +
         blockedNote(c) +
         section("Have these handy") +
         p(needs.map(escHtml).join("<br>")) +
@@ -1282,16 +1291,17 @@ export function onbWelcome(c: OnbCtx): OnbEmail {
 
 export function onbReminder(c: OnbCtx): OnbEmail {
   const n = c.reminders ?? 1;
-  const left = c.open.length;
+  const left = c.open.filter((s) => !isPermit(s)).length;
+  const onlyPermits = left === 0 && c.open.length > 0;
   const next = c.open[0];
   const started = c.done > 0;
   const subject =
     n === 1
       ? started ? "Pick up where you left off" : "Your PowerEdge setup is waiting"
       : n === 2
-        ? `${left} step${left === 1 ? "" : "s"} left before your first door`
+        ? onlyPermits ? "Your city permits" : `${left} step${left === 1 ? "" : "s"} left before your first door`
         : n === 3
-          ? `Still need ${left === 1 ? "this" : "these"} before you knock`
+          ? onlyPermits ? "Still need your city permits" : `Still need ${left === 1 ? "this" : "these"} before you knock`
           : "Last reminder about your setup";
   return {
     subject,
@@ -1305,6 +1315,7 @@ export function onbReminder(c: OnbCtx): OnbEmail {
             : `Nothing's done yet. It's about 30 minutes on your phone, and it saves as you go.`,
         ) +
         openList(c) +
+        permitsNote(c) +
         blockedNote(c) +
         button(started ? "Pick up where you left off" : "Start setting up", c.url) +
         (n >= 4
@@ -1383,13 +1394,19 @@ export function onbReady(c: OnbCtx): OnbEmail {
 export function onbOfficeTurn(c: OnbCtx): OnbEmail {
   const who = escHtml(c.first);
   return {
-    subject: `${c.first} finished their part. ${(c.officeOpen ?? []).length === 1 ? "One step is" : "Two steps are"} yours.`,
+    subject: `${c.first} ${c.open.some(isPermit) ? "is cleared to knock" : "finished their part"}. ${(c.officeOpen ?? []).length === 1 ? "One step is" : "Two steps are"} yours.`,
     html: shell({
       preheader: `Waiting on you: ${(c.officeOpen ?? []).join(", ")}.`,
       body:
         eyebrow("Onboarding") +
         h1(`${who} is waiting on you`) +
-        p(`${escHtml(c.name)} (${escHtml(c.role.toLowerCase())}${c.team ? `, ${escHtml(c.team)}` : ""}) has done everything on their side. What's left is yours:`) +
+        p(
+          `${escHtml(c.name)} (${escHtml(c.role.toLowerCase())}${c.team ? `, ${escHtml(c.team)}` : ""}) ${
+            c.open.some(isPermit)
+              ? "has finished everything that opens the knock map. Their city permits are still in progress."
+              : "has done everything on their side."
+          } What's left is yours:`,
+        ) +
         steps((c.officeOpen ?? []).map((s) => `<strong>${escHtml(s)}</strong>`)) +
         (c.blocked.length
           ? small(`Still locked on their side: ${escHtml(c.blocked.map((b) => b.label.replace(/^Sign your /, "").replace(/^./, (x) => x.toUpperCase())).join(", "))}. They get an email when it opens.`)

@@ -324,14 +324,15 @@ export async function runOnboardingSequence(opts: { now?: number; anyHour?: bool
       if (await deliver(m.id, "gate", "gate:secure", [m.email], onbGate(ctx, "secure"))) tally.gate++;
     }
 
-    // Their side is done and the office's isn't: tell the office, once.
-    if (s.open.length === 0) {
-      if (s.office.length && !has(m.id, `office_turn:${welcome.id}`)) {
-        const ctx = ctxFor(m, steps, team, `${base()}/admin/onboarding?member=${m.id}`);
-        if (await deliver(m.id, "office_turn", `office_turn:${welcome.id}`, admins, onbOfficeTurn(ctx))) tally.office_turn++;
-      }
-      continue;
+    // Cleared to knock (everything on their side but city permits, which
+    // don't hold up the first door) and the office's steps aren't done:
+    // tell the office, once, so the ride-along gets set up.
+    const fieldOpen = s.open.filter((x) => x.key !== "permits");
+    if (fieldOpen.length === 0 && s.office.length && !has(m.id, `office_turn:${welcome.id}`)) {
+      const ctx = ctxFor(m, steps, team, `${base()}/admin/onboarding?member=${m.id}`);
+      if (await deliver(m.id, "office_turn", `office_turn:${welcome.id}`, admins, onbOfficeTurn(ctx))) tally.office_turn++;
     }
+    if (s.open.length === 0) continue;
 
     // Reminders, while something is left and they've been quiet a while.
     const sent = mine.filter((x) => x.kind === "reminder" && x.key.startsWith(`reminder:${welcome.id}:`)).length;

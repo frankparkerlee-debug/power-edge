@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookAtDoor } from "./BookAtDoor";
 
@@ -16,7 +16,34 @@ import { BookAtDoor } from "./BookAtDoor";
  * Now the page shows the inspection with directions, and the closer records
  * the outcome in one step. Recording it moves the job and sends the homeowner
  * their assessment, either way.
+ *
+ * Photos and "was the homeowner there?" are recorded here too: together with
+ * being the first inspection at the address, they decide whether it's a held
+ * inspection, which pays the knocker's $50 (lib/held.ts).
  */
+
+/** Shrink a phone photo to a JPEG about 1600px on the long side. */
+async function toJpeg(file: File): Promise<Blob> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((ok, bad) => {
+      const i = new Image();
+      i.onload = () => ok(i);
+      i.onerror = bad;
+      i.src = url;
+    });
+    const scale = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement("canvas");
+    c.width = Math.round(img.naturalWidth * scale);
+    c.height = Math.round(img.naturalHeight * scale);
+    c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
+    return await new Promise<Blob>((ok, bad) =>
+      c.toBlob((b) => (b ? ok(b) : bad(new Error("encode"))), "image/jpeg", 0.8),
+    );
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
 
 export type Inspection = {
   when: string;
@@ -51,6 +78,52 @@ export function JobActions({
   const [squares, setSquares] = useState(job.squares ? String(job.squares) : "");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [present, setPresent] = useState<boolean | null>(null);
+  const [photos, setPhotos] = useState<{ id: string }[]>([]);
+  const [uploading, setUploading] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let live = true;
+    fetch(`/api/admin/jobs/${job.id}/photos`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (live && d.ok) setPhotos(d.photos);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [job.id]);
+
+  async function addPhotos(files: FileList | null) {
+    if (!files?.length) return;
+    const list = Array.from(files);
+    let done = 0;
+    for (const f of list) {
+      setUploading(`Adding photo ${done + 1} of ${list.length}...`);
+      try {
+        const jpeg = await toJpeg(f);
+        const res = await fetch(`/api/admin/jobs/${job.id}/photos`, {
+          method: "POST",
+          headers: { "Content-Type": "image/jpeg" },
+          body: jpeg,
+        });
+        const d = await res.json();
+        if (!res.ok || !d.ok) {
+          setUploading(d.error || "A photo didn't upload. Try again.");
+          return;
+        }
+        setPhotos((p) => [...p, { id: d.id }]);
+        done++;
+      } catch {
+        setUploading("No signal, or the phone couldn't read that photo. Try again.");
+        return;
+      }
+    }
+    setUploading("");
+    if (fileRef.current) fileRef.current.value = "";
+  }
 
   const map = `https://maps.google.com/?q=${encodeURIComponent(job.address)}`;
   const awaitingInspection =
@@ -59,13 +132,17 @@ export function JobActions({
 
   async function record() {
     if (!verdict) return;
+    if (verdict !== "no_show" && present === null) {
+      setMsg("Say whether the homeowner was there.");
+      return;
+    }
     setBusy(true);
     setMsg("");
     try {
       const res = await fetch(`/api/admin/jobs/${job.id}/inspection`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ verdict, findings, squares }),
+        body: JSON.stringify({ verdict, findings, squares, homeownerPresent: present }),
       });
       const d = await res.json();
       if (!res.ok || !d.ok) {
@@ -94,7 +171,10 @@ export function JobActions({
   const btn = (v: typeof verdict, label: string, sub: string) => (
     <button
       type="button"
-      onClick={() => setVerdict(v)}
+      onClick={() => {
+        setVerdict(v);
+        setMsg("");
+      }}
       className={`rounded-lg border p-3 text-left ${
         verdict === v ? "border-[#0c7a40] bg-[#f0fbf4]" : "border-[#d7dbe0] bg-white"
       }`}
@@ -203,11 +283,45 @@ export function JobActions({
             </div>
           ) : null}
 
+          {verdict && verdict !== "no_show" ? (
+            <div className="mt-4">
+              <div className="text-sm font-bold text-[#0b0e13]">Was the homeowner there?</div>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {[
+                  { v: true, label: "Yes", sub: "An owner was at the house" },
+                  { v: false, label: "No", sub: "I inspected without them" },
+                ].map((o) => (
+                  <button
+                    key={String(o.v)}
+                    type="button"
+                    onClick={() => setPresent(o.v)}
+                    className={`rounded-lg border p-3 text-left ${
+                      present === o.v ? "border-[#0c7a40] bg-[#f0fbf4]" : "border-[#d7dbe0] bg-white"
+                    }`}
+                  >
+                    <span className="block font-display font-bold text-[#0b0e13]">{o.label}</span>
+                    <span className="block text-xs text-gray-600">{o.sub}</span>
+                  </button>
+                ))}
+              </div>
+              {inspection?.setter ? (
+                <p className="mt-2 text-xs text-gray-600">
+                  {`${inspection.setter} is paid $50 only when the homeowner was there, your photos are in, and it's PowerEdge's first inspection at this address.`}
+                </p>
+              ) : null}
+              {photos.length === 0 ? (
+                <p className="mt-2 rounded-md bg-amber-50 p-2 text-xs font-semibold text-[#0b0e13]">
+                  No photos yet. Add them below. An inspection without photos isn&apos;t held.
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
           {verdict ? (
             <button
               type="button"
               onClick={record}
-              disabled={busy}
+              disabled={busy || (verdict !== "no_show" && present === null)}
               className="mt-3 w-full rounded-lg bg-[#0c7a40] py-3 font-display font-bold text-white disabled:opacity-40"
             >
               {busy
@@ -223,6 +337,52 @@ export function JobActions({
       ) : null}
 
       {msg ? <p className="text-sm font-semibold text-[#0b0e13]">{msg}</p> : null}
+
+      {/* Inspection photos. The agreement's "held" needs them in the app. */}
+      {canSell && (inspection || !preInspection) ? (
+        <div className="rounded-lg border border-[#e3e6ea] bg-white p-4">
+          <div className="flex items-baseline justify-between gap-2">
+            <div className="font-display text-base font-bold text-[#0b0e13]">Inspection photos</div>
+            <div className="text-xs text-gray-500">{photos.length} in</div>
+          </div>
+          {photos.length ? (
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              {photos.map((p) => (
+                <a key={p.id} href={`/api/admin/jobs/${job.id}/photos/${p.id}`} target="_blank" rel="noreferrer">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/api/admin/jobs/${job.id}/photos/${p.id}`}
+                    alt="Inspection photo"
+                    className="aspect-square w-full rounded-md object-cover"
+                  />
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-1 text-xs text-gray-600">
+              Address in frame, each slope wide, a test square per slope, soft metals, collateral.
+            </p>
+          )}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            multiple
+            className="hidden"
+            onChange={(e) => addPhotos(e.target.files)}
+          />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={!!uploading && uploading.startsWith("Adding")}
+            className="mt-3 w-full rounded-lg border border-[#0c7a40] py-2.5 font-bold text-[#0c7a40] disabled:opacity-40"
+          >
+            {photos.length ? "Add more photos" : "Add photos"}
+          </button>
+          {uploading ? <p className="mt-2 text-xs font-semibold text-[#0b0e13]">{uploading}</p> : null}
+        </div>
+      ) : null}
 
       {booking ? (
         <BookAtDoor

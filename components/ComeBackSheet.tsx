@@ -90,11 +90,14 @@ export function ComeBackSheet({
           follow_up_at: chosen.when.toISOString(),
         }),
       });
-      if (!res.ok) throw new Error(String(res.status));
+      if (!res.ok) {
+        const r = await res.json().catch(() => ({}));
+        throw new Error(r.error || "");
+      }
       onSaved();
       onClose();
-    } catch {
-      setError("Did not save. No signal? Try again.");
+    } catch (e) {
+      setError((e instanceof Error && e.message) || "Did not save. No signal? Try again.");
     } finally {
       setBusy(false);
     }

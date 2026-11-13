@@ -213,7 +213,7 @@ export default async function TeamPage({
         {added ? (
           sent === "1" ? (
             <p className="mt-4 rounded-md border border-[#0c7a40] bg-[#f0fbf4] p-3 text-sm">
-              <strong>Added {added}. Their welcome email is on its way.</strong> Reminders run on their own until they finish, and
+              <strong>Added {added}. Their welcome email is on its way.</strong>{" "}Reminders run on their own until they finish, and
               you&apos;ll get an email when the ride-along and gear are yours. Follow along on{" "}
               <Link href="/admin/onboarding" className="font-semibold text-[#0c7a40] underline">Onboarding</Link>.
             </p>
@@ -523,7 +523,7 @@ export default async function TeamPage({
                         {sells ? (
                           <input form={form} name="signed" inputMode="numeric" defaultValue={m.goal_signed_month ?? ""}
                             placeholder={DEFAULT_GOALS.signedMonth.toLocaleString("en-US")} className={box} aria-label={`Revenue a month for ${m.name}`} />
-                        ) : <span className="text-gray-400">Setter</span>}
+                        ) : <span className="text-gray-400">Knocker</span>}
                       </td>
                       <td className="py-2.5 text-right">
                         <form key={`goals-${m.id}-${m.goal_knocks_week}-${m.goal_sets_week}-${m.goal_signed_month}`} id={form} action={saveGoals}>
