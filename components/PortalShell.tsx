@@ -63,6 +63,8 @@ const MORE: NavItem[] = [
   { href: "/admin/onboarding", label: "Onboarding", icon: "check", roles: ["admin"] },
   { href: "/admin/appointments", label: "Inspections", icon: "calendar", roles: [...SELLS] },
   { href: "/admin/alerts", label: "Storm alerts", icon: "bell" },
+  // Practice doors out loud, ask the playbook, find streets. Everyone, from day one.
+  { href: "/admin/coach", label: "Coach", icon: "mic" },
   { href: "/sales", label: "Playbook", icon: "book" },
   { href: "/admin/leads", label: "Leads", icon: "inbox", roles: ["admin"] },
   { href: "/admin/territories", label: "Territories", icon: "flag", roles: ["admin"] },
@@ -91,6 +93,7 @@ function Icon({ name, className = "h-5 w-5" }: { name: string; className?: strin
     back: "M19 12H5M12 19l-7-7 7-7",
     chart: "M3 21h18M6 17v-5M11 17V7M16 17v-8M21 17V4",
     check: "M9 11l3 3 8-8M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2h9",
+    mic: "M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3zM19 11a7 7 0 01-14 0M12 18v3",
   };
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"
@@ -121,6 +124,7 @@ function titleFor(path: string): { title: string; parent?: string } {
     "/admin/onboarding/agreement": { title: "Signed agreement", parent: "/admin/onboarding" },
     "/admin/scoreboard/preview": { title: "Scoreboard preview", parent: "/admin/scoreboard" },
     "/admin/scoreboard/send": { title: "Scorecards", parent: "/admin/scoreboard" },
+    "/admin/coach": { title: "Coach" },
     "/sales": { title: "Playbook" },
   };
   if (map[path]) return map[path];

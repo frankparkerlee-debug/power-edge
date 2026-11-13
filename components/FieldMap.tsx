@@ -476,7 +476,10 @@ export function FieldMap({ initialZip, initialView }: { initialZip?: string; ini
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ target_id: id, outcome, note }),
       });
-      if (!res.ok) throw new Error("Not saved. Tap again.");
+      if (!res.ok) {
+        const r = await res.json().catch(() => ({}));
+        throw new Error(r.error || "Not saved. Tap again.");
+      }
     } catch (e) {
       update(d.key, { state: before });
       setActionError(e instanceof Error ? e.message : "Not saved. Tap again.");
@@ -827,6 +830,12 @@ export function FieldMap({ initialZip, initialView }: { initialZip?: string; ini
                                   <button onClick={() => openHouse(d)} className="font-semibold text-[#0b0e13] underline">
                                     Roof and storms
                                   </button>
+                                  <a
+                                    href={`/admin/coach?lat=${d.lat}&lon=${d.lon}&a=${encodeURIComponent(d.address)}`}
+                                    className="font-semibold text-[#0c7a40] underline"
+                                  >
+                                    Practice this door
+                                  </a>
                                   <a
                                     href={`https://maps.google.com/?q=${encodeURIComponent(`${d.address}, ${d.city || ""} TX ${d.zip}`)}`}
                                     target="_blank"
