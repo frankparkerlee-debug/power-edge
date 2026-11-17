@@ -20,7 +20,7 @@ export default function TermsPage() {
         <div className="mt-10 space-y-8 text-fg-dim [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-fg [&_h2]:scroll-mt-24 [&_p]:mt-3 [&_p]:leading-relaxed">
           <div>
             <p>
-              These Terms &amp; Conditions govern your use of {site.domain} and
+              These Terms &amp; Conditions govern your use of {site.domain}{" "}and
               the services of Power Edge, LLC (&ldquo;{site.name},&rdquo;
               &ldquo;we,&rdquo; &ldquo;us&rdquo;). By using this site or
               contacting us, you agree to these terms.

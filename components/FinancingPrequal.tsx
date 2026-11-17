@@ -255,7 +255,7 @@ export function FinancingPrequal() {
           <span>
             I authorize PowerEdge to contact me and to securely verify my bank
             and balances to pre-qualify me. This is{" "}
-            <strong className="text-fg-inv">not a credit check</strong> and
+            <strong className="text-fg-inv">not a credit check</strong>{" "}and
             won&apos;t affect my score. Final terms are provided in writing
             before I sign; I always pay my full deductible.
           </span>

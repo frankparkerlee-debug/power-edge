@@ -67,6 +67,8 @@ const MORE: NavItem[] = [
   { href: "/admin/coach", label: "Coach", icon: "mic" },
   { href: "/sales", label: "Playbook", icon: "book" },
   { href: "/admin/leads", label: "Leads", icon: "inbox", roles: ["admin"] },
+  // Ready-to-paste Google and Nextdoor posts for each recent storm day.
+  { href: "/admin/storm-posts", label: "Storm posts", icon: "bell", roles: ["admin"] },
   { href: "/admin/territories", label: "Territories", icon: "flag", roles: ["admin"] },
   { href: "/admin/team", label: "Team", icon: "folder", roles: ["admin"] },
   { href: "/admin/health", label: "Health", icon: "pulse", roles: ["admin"] },
@@ -114,6 +116,7 @@ function titleFor(path: string): { title: string; parent?: string } {
     "/admin/doors": { title: "Best doors" },
     "/admin/storms/office": { title: "Storm office view", parent: "/admin/storms" },
     "/admin/alerts": { title: "Storm alerts" },
+    "/admin/storm-posts": { title: "Storm posts" },
     "/admin/leads": { title: "Leads" },
     "/admin/territories": { title: "Territories" },
     "/admin/team": { title: "Team" },

@@ -73,18 +73,27 @@ export function Schema() {
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "Roofing & home repair services",
-      itemListElement: services.map((s) => ({
+      itemListElement: [
+        ...services.map((s) => s.title),
+        // Roof systems we install (Parker 11/17): named so an engine can match
+        // "who installs Class 4 shingles in Plano" to us.
+        "GAF and Owens Corning asphalt shingle roof replacement",
+        "Class 4 impact-resistant shingle roofs",
+        "Commercial standing seam metal roofing",
+        "Commercial TPO flat roofing",
+      ].map((name) => ({
         "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
-          name: s.title,
-          areaServed: site.serviceArea,
-        },
+        itemOffered: { "@type": "Service", name, areaServed: site.serviceArea },
       })),
     },
     knowsAbout: [
       "Roof replacement",
       "Roof repair",
+      "Class 4 impact-resistant shingles",
+      "Hail-resistant roofing materials",
+      "Roof systems: underlayment, ventilation and flashing",
+      "Standing seam metal roofing",
+      "TPO flat roofing",
       "Hail damage roof insurance claims",
       "Storm damage restoration",
       "In-house roof deductible financing",

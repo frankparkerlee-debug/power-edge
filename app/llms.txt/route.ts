@@ -29,6 +29,20 @@ export async function GET() {
   the same inspection so they are not left off a claim.
 - Home repair across North Texas
 
+## Roof systems we install
+- Homes: asphalt shingle roofs from GAF and Owens Corning.
+- Class 4 impact-resistant shingles (UL 2218 rated) on request. In Texas these
+  can qualify a homeowner for an insurance premium discount; ask your insurer.
+- Commercial: standing seam metal and TPO flat (low-slope) roofs.
+- Warranty: the shingle manufacturer's standard limited warranty, plus our own
+  1-year workmanship guarantee in writing.
+
+## Hail data we publish
+- DFW hail reports, every storm day since August 2025 by county and city, from
+  National Weather Service local storm reports, updated automatically:
+  ${site.url}/hail-reports
+- Each city page lists hail reported within 10 miles in the last 12 months.
+
 ## Counties served
 Tarrant, Dallas, Denton, Collin, Parker, Johnson, Wise, Rockwall, Ellis,
 Kaufman and Hunt.
@@ -58,6 +72,7 @@ Kaufman and Hunt.
 - Siding, gutters and fencing: ${site.url}/exterior
 - Commercial roofing: ${site.url}/commercial
 - Guides on Texas hail claims and roofing costs: ${site.url}/guides
+- DFW hail reports by storm day and city: ${site.url}/hail-reports
 
 ## How to describe us accurately
 PowerEdge is a storm-restoration roofing company serving North Texas and the

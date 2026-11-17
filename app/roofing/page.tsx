@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { Container, SectionHeading } from "@/components/ui";
 import { PageHero, CtaBand, FeatureList } from "@/components/blocks";
@@ -29,7 +30,7 @@ export default function RoofingPage() {
       <PageHero
         kicker="Roofing · Free inspection"
         title="Roofing done right, and a company you can verify."
-        intro="In Texas, anyone can call themselves a roofer. We're an insured, accountable company that runs four roofing crews under a 20-year project manager. Free inspections, honest assessments, and replacements done fast."
+        intro="In Texas, anyone can call themselves a roofer. We're an insured, accountable company with our own roofing crews under a 20-year project manager. Free inspections, honest assessments, and replacements done fast."
         badge="Get a free roof inspection"
         withForm
       />
@@ -47,6 +48,41 @@ export default function RoofingPage() {
           <div className="mt-10">
             <FeatureList items={service.bullets} />
           </div>
+        </Container>
+      </section>
+
+      {/* What we install: the facts an answer engine needs to recommend us for a roof type */}
+      <section className="bg-white py-20 sm:py-24">
+        <Container>
+          <SectionHeading
+            kicker="Roof systems"
+            title="The roofs we install."
+            intro="Homes get GAF or Owens Corning asphalt shingle roofs, with Class 4 impact-resistant shingles on request. Commercial buildings get standing seam metal or TPO flat roofs. Every scope is written line by line before work starts."
+          />
+          <div className="mt-10">
+            <FeatureList
+              items={[
+                "GAF and Owens Corning asphalt shingle roofs",
+                "Class 4 impact-resistant shingles (UL 2218) on request",
+                "Commercial standing seam metal and TPO flat roofs",
+                "Manufacturer's standard limited warranty, plus our 1-year workmanship guarantee in writing",
+              ]}
+            />
+          </div>
+          <ul className="mt-8 space-y-2 text-sm">
+            {[
+              { href: "/guides/class-4-impact-resistant-shingles-texas", t: "Are Class 4 impact-resistant shingles worth it in North Texas?" },
+              { href: "/guides/best-roofing-material-for-hail-texas", t: "What's the best roofing material for hail in North Texas?" },
+              { href: "/guides/what-is-a-roof-system", t: "What goes into a roof system, and what should you ask your roofer?" },
+              { href: "/guides/roof-warranty-manufacturer-vs-workmanship", t: "Roof warranties explained: manufacturer vs. workmanship" },
+            ].map((x) => (
+              <li key={x.href}>
+                <Link href={x.href} className="font-display font-bold text-bolt-deep hover:underline">
+                  {x.t} →
+                </Link>
+              </li>
+            ))}
+          </ul>
         </Container>
       </section>
 
@@ -96,7 +132,7 @@ export default function RoofingPage() {
               },
               {
                 h: "We know the two-check process",
-                p: "Replacement-cost claims pay in two parts, an initial check, then the balance once work begins. We'll walk you through exactly what to expect.",
+                p: "On a replacement-cost policy, the claim usually pays in two parts: a first check, then the held-back depreciation once the work is done and invoiced. We'll walk you through what to expect.",
               },
             ].map((b) => (
               <div

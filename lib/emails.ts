@@ -1160,6 +1160,12 @@ export async function sendInspectionAssessment(
       ) +
       small(
         `If a storm comes through and you want a second look, call or text ${phone(MUTED)}. It is free again.`,
+      ) +
+      // Asked of everyone who gets this email, never filtered by how it went
+      // (FTC rules on review solicitation). The fine-roof verdict is the moment
+      // a homeowner is most likely to tell a neighbor.
+      p(
+        `If you have a minute, a Google review helps your neighbors find an inspection that tells them the truth: <a href="${site.url}/review" style="color:${INK};font-weight:700;">leave a review</a>.`,
       )
     : eyebrow("Your inspection") +
       h1(`Here is what we found, ${first}.`) +

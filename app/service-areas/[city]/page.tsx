@@ -7,6 +7,19 @@ import { FaqSection } from "@/components/service-blocks";
 import { cities, getCity, type City } from "@/lib/cities";
 import { services } from "@/lib/services";
 import { site } from "@/lib/site";
+import {
+  NEAR_MI,
+  PAGE_MIN_IN,
+  hailNear,
+  niceDay,
+  serviceAreaHail,
+  stoneSize,
+  twelveMonthsAgo,
+  type CityHail,
+} from "@/lib/hailHistory";
+
+// The hail history below refreshes every 6 hours; the rest of the page is static.
+export const revalidate = 21600;
 
 export function generateStaticParams() {
   return cities.map((c) => ({ city: c.slug }));
@@ -29,15 +42,27 @@ export async function generateMetadata({
 
 // City-templated FAQs, real answers (FAQPage schema via FaqSection) that
 // match what homeowners and AI search actually ask about roofing in a city.
-function cityFaqs(c: City) {
+function lastHailAnswer(c: City, h: CityHail) {
+  if (!h.last) {
+    return `The National Weather Service hasn't logged a hail report within ${NEAR_MI} miles of ${c.name} in the last 12 months. Hail can still damage roofs between reports, so if you saw it, a free inspection will tell you.`;
+  }
+  const big = h.biggest && h.biggest.date !== h.last.date ? ` The largest in that time was ${stoneSize(h.biggest.maxIn)} on ${niceDay(h.biggest.date)}.` : "";
+  return `The most recent National Weather Service hail report within ${NEAR_MI} miles of ${c.name} was on ${niceDay(h.last.date)}, up to ${stoneSize(h.last.maxIn)}${h.last.biggestTown ? ` near ${h.last.biggestTown}` : ""}. There have been ${h.days.length} hail day${h.days.length === 1 ? "" : "s"} near ${c.name} in the last 12 months.${big}`;
+}
+
+function cityFaqs(c: City, h: CityHail) {
   return [
+    {
+      q: `When was hail last reported in ${c.name}?`,
+      a: lastHailAnswer(c, h),
+    },
     {
       q: `How much does a roof replacement cost in ${c.name}?`,
       a: `Most ${c.name} asphalt roofs start around $400–$450 per square (100 sq ft) installed, with premium materials and add-ons running higher. On a covered storm claim you typically pay only your deductible, and you can finance that from $250 down. A free inspection gets you exact numbers in writing.`,
     },
     {
-      q: `Hail hit ${c.name}, do I have an insurance claim?`,
-      a: `Maybe, reported hail near your address plus actual roof damage is what makes a claim. We check your address against National Weather Service storm records free at our roof claim check, then a free inspection documents whether the damage is worth filing. If your roof is fine, we tell you that in writing.`,
+      q: `Hail was reported near my ${c.name} home. Do I have an insurance claim?`,
+      a: `Maybe. Reported hail near your address plus actual damage to your roof is what a claim rests on. Our free roof claim check shows every National Weather Service hail report near your address, and a free inspection documents what's on your roof, in writing, so you can decide whether to file. If your roof is fine, we tell you that in writing.`,
     },
     {
       q: `How fast can you get to my roof in ${c.name}?`,
@@ -58,6 +83,7 @@ export default async function CityPage({
   const { city } = await params;
   const c = getCity(city);
   if (!c) notFound();
+  const hail = hailNear(c, await serviceAreaHail(twelveMonthsAgo()));
 
   return (
     <>
@@ -155,8 +181,51 @@ export default async function CityPage({
         </Container>
       </section>
 
+      {/* Hail reported near this city: NWS data, refreshed every 6 hours. */}
+      <section className="bg-white py-16 sm:py-20">
+        <Container className="max-w-4xl">
+          <SectionHeading
+            kicker="Hail reports"
+            title={`Hail reported near ${c.name} in the last 12 months`}
+            intro={lastHailAnswer(c, hail)}
+          />
+          {hail.days.length ? (
+            <ul className="mt-8 divide-y divide-paper-2 rounded-card border border-paper-2 bg-white">
+              {hail.days.slice(0, 8).map((d) => (
+                <li key={d.date} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-5 py-3 text-sm">
+                  <span className="font-semibold text-fg">
+                    {d.maxIn >= PAGE_MIN_IN ? (
+                      <Link href={`/hail-reports/${d.date}`} className="text-bolt-deep hover:underline">
+                        {niceDay(d.date)}
+                      </Link>
+                    ) : (
+                      niceDay(d.date)
+                    )}
+                  </span>
+                  <span className="text-fg-dim">
+                    Up to {stoneSize(d.maxIn)}
+                    {d.towns.length ? ` · near ${d.towns.slice(0, 3).join(", ")}` : ""}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <p className="mt-5 text-sm text-fg-dim">
+            Reports within {NEAR_MI} miles of {c.name}’s center, from the National Weather Service. A report marks where hail
+            was seen, not every street it fell on.{" "}
+            <Link href="/hail-reports" className="font-semibold text-bolt-deep underline">
+              All DFW hail reports
+            </Link>{" "}
+            ·{" "}
+            <Link href="/roof-claim-check" className="font-semibold text-bolt-deep underline">
+              Check your address
+            </Link>
+          </p>
+        </Container>
+      </section>
+
       <FaqSection
-        faqs={cityFaqs(c)}
+        faqs={cityFaqs(c, hail)}
         title={`${c.name} roofing questions, answered straight.`}
       />
 

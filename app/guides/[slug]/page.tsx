@@ -41,7 +41,9 @@ export default async function GuidePage({
     headline: g.h1,
     description: g.description,
     datePublished: g.datePublished,
-    author: { "@type": "Organization", name: site.legalName },
+    dateModified: g.dateModified ?? g.datePublished,
+    author: { "@type": "Organization", name: site.legalName, url: site.url },
+    ...(g.sources?.length ? { citation: g.sources.map((x) => x.url) } : {}),
     publisher: {
       "@type": "Organization",
       name: site.legalName,
@@ -68,7 +70,12 @@ export default async function GuidePage({
           <div className="absolute inset-0 grid-texture opacity-60" />
           <Container className="relative py-14 sm:py-16">
             <Kicker className="mb-4">
-              {g.category} · {g.readMins} min read
+              {g.category} · {g.readMins} min read · Updated{" "}
+              {new Date(`${g.dateModified ?? g.datePublished}T12:00:00`).toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
             </Kicker>
             <h1 className="max-w-3xl font-display text-3xl leading-[1.02] text-fg-inv sm:text-4xl md:text-5xl">
               {g.h1}
@@ -109,6 +116,21 @@ export default async function GuidePage({
                 </div>
               ))}
             </div>
+
+            {g.sources?.length ? (
+              <div className="mt-14 border-t border-paper-2 pt-8">
+                <h2 className="font-display text-lg font-bold text-fg">Sources</h2>
+                <ul className="mt-3 space-y-1.5 text-sm">
+                  {g.sources.map((x) => (
+                    <li key={x.url}>
+                      <a href={x.url} target="_blank" rel="noopener" className="text-fg-dim underline hover:text-bolt-deep">
+                        {x.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
 
             {/* Related guides */}
             <div className="mt-14 border-t border-paper-2 pt-8">
