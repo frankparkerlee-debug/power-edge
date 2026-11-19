@@ -8,6 +8,8 @@ import { Gallery } from "@/components/Gallery";
 import { CountUp } from "@/components/CountUp";
 import { ClaimCheckInline } from "@/components/ClaimCheckInline";
 import { DfwHailActivity } from "@/components/DfwHailActivity";
+import { InspectionCapture } from "@/components/InspectionCapture";
+import { availableSlots } from "@/lib/scheduling";
 import { site } from "@/lib/site";
 import { services } from "@/lib/services";
 import { cities } from "@/lib/cities";
@@ -18,10 +20,13 @@ export const metadata: Metadata = {
     "Storm and hail roof restoration across North Texas. Free documented inspection, 0% in-house deductible financing, and an honest verdict in writing.",
 };
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const days = await availableSlots();
   return (
     <>
-      <Hero />
+      <Hero initialDays={days} />
       <TrustBar />
       <StormRestoration />
       <Wedge />
@@ -103,7 +108,11 @@ function FinancingBand() {
 }
 
 /* ----------------------------------------------------------------- HERO */
-function Hero() {
+function Hero({
+  initialDays,
+}: {
+  initialDays?: { date: string; dayLabel: string; slots: { start: string; timeLabel: string }[] }[];
+}) {
   return (
     <section className="relative overflow-hidden bg-ink">
       <Image
@@ -206,18 +215,20 @@ function Hero() {
           </div>
         </div>
 
-        {/* Lead capture card, right in the hero */}
+        {/* Booking card, right in the hero. Self-serve by default: it books
+            straight onto the schedule and doesn't depend on anyone checking
+            the inbox. "Just call me" is still there for people who want it. */}
         <div id="quote" className="scroll-mt-24">
           <div className="rounded-card border border-line bg-ink-2 p-7 shadow-2xl">
             <h2 className="font-display text-2xl font-bold text-fg-inv">
               Book your free roof inspection
             </h2>
             <p className="mt-1.5 text-sm text-fg-inv-dim">
-              Just your name and number, a real pro calls you back fast,
-              usually within the hour.
+              Pick a two-hour arrival window and it&apos;s on our board right
+              away, no waiting on a callback.
             </p>
             <div className="mt-6">
-              <LeadForm compact lean defaultService="Storm / insurance claim" />
+              <InspectionCapture source="homepage" initialDays={initialDays} />
             </div>
           </div>
         </div>

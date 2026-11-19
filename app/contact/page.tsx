@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Container, Kicker, Stars } from "@/components/ui";
-import { LeadForm } from "@/components/LeadForm";
+import { InspectionCapture } from "@/components/InspectionCapture";
+import { availableSlots } from "@/lib/scheduling";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -12,7 +13,10 @@ export const metadata: Metadata = {
     " or book a free storm roof inspection online. Serving Dallas–Fort Worth.",
 };
 
-export default function ContactPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ContactPage() {
+  const days = await availableSlots();
   return (
     <section className="relative overflow-hidden bg-ink py-16 sm:py-20">
       <div className="absolute inset-0 grid-texture opacity-60" />
@@ -20,11 +24,11 @@ export default function ContactPage() {
         <div>
           <Kicker className="mb-5">Get in touch</Kicker>
           <h1 className="font-display text-4xl leading-[0.98] text-fg-inv sm:text-5xl">
-            Free inspections. Fast callbacks.
+            Free inspections. No phone tag.
           </h1>
           <p className="mt-6 max-w-md text-lg text-fg-inv-dim">
-            Tell us what&apos;s going on and a real person from our team will
-            call you back, usually within the hour during business hours.
+            Pick a two-hour arrival window and it&apos;s on our board right
+            away. Prefer to talk first? Call or text us directly.
           </p>
 
           <div className="mt-10 space-y-6">
@@ -90,14 +94,15 @@ export default function ContactPage() {
 
         <div className="rounded-card border border-line bg-ink-2 p-7 shadow-2xl">
           <h2 className="font-display text-2xl font-bold text-fg-inv">
-            Request a free quote
+            Book your free roof inspection
           </h2>
           <p className="mt-1.5 text-sm text-fg-inv-dim">
-            Roofing, home repair, or storm claim: we&apos;ll point you to
-            the right crew.
+            Roofing, home repair, or storm claim: pick a time and we&apos;ll
+            point you to the right crew, or have a real person call you
+            instead.
           </p>
           <div className="mt-6">
-            <LeadForm />
+            <InspectionCapture source="contact" initialDays={days} />
           </div>
         </div>
       </Container>
